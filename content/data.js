@@ -63,7 +63,7 @@ export const portfolio = {
       category: "Projet réalisé",
       status: "completed",
       tags: [],
-      image: "",
+      image: "assets/scrabble.png",
       github: "https://github.com/Vanitas-B-MC/PRJ_Scrabble2J"
     },
     {
@@ -71,7 +71,7 @@ export const portfolio = {
       description: "Projet réalisé dans le cadre de ma formation.",
       category: "Projet de formation",
       tags: [],
-      image: "assets/scrabble.png",
+      image: "",
       github: "https://github.com/Vanitas-B-MC/MULTIBURO"
     }
   ]
