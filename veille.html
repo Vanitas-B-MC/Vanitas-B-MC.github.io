@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#06050d">
+  <title>Veille informatique — Mathieu Contamin</title>
+  <meta name="description" content="Veille informatique de Mathieu Contamin : actualités tech, développement, cybersécurité et infrastructure, relevées automatiquement depuis des flux RSS.">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Veille informatique — Mathieu Contamin">
+  <meta property="og:description" content="Le flux de données : l'actualité informatique relevée automatiquement.">
+  <meta name="twitter:card" content="summary">
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <!-- Polices (Google Fonts). Sans réseau, le site utilise les polices de secours. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap">
+
+  <link rel="stylesheet" href="css/veille.css">
+  <script type="module" src="js/veille.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#flux">Aller au flux d'articles</a>
+
+  <header class="site-header">
+    <div class="header">
+      <a class="back-link" href="index.html"><span aria-hidden="true">←</span> Portfolio</a>
+
+      <a class="brand" href="#accueil" aria-label="Veille informatique — haut de page">
+        <img src="assets/favicon.svg" width="36" height="36" alt="">
+        <span class="brand-text">NET<span>//</span>VEILLE</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Sections de la page">
+        <a href="#flux">Flux</a>
+        <a href="#sources">Sources</a>
+        <a href="#methode">Méthode</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ BANNIÈRE ============ -->
+    <section class="banner" id="accueil" aria-labelledby="banner-title">
+      <canvas class="rain" id="rain" aria-hidden="true"></canvas>
+
+      <div class="banner-inner">
+        <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span>NET_FEED // 04 // synchronisé</p>
+
+        <h1 id="banner-title">
+          <span class="vtitle glitch" data-text="Veille">Veille</span>
+          <span class="vsub">informatique</span>
+        </h1>
+
+        <p class="banner-lead">
+          Le flux de données : l'actualité de l'informatique, relevée automatiquement
+          depuis des flux RSS et mise à jour toute seule.
+        </p>
+
+        <div class="banner-actions">
+          <a class="button button-primary" href="#flux">Accéder au flux</a>
+          <a class="button button-secondary" href="#methode">Comment ça marche</a>
+        </div>
+
+        <dl class="hud" aria-label="Statistiques de la veille">
+          <div><dt>Sources</dt><dd id="stat-sources">—</dd></div>
+          <div><dt>Articles</dt><dd id="stat-items">—</dd></div>
+          <div><dt>Dernière synchro</dt><dd id="stat-sync">—</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ============ FLUX ============ -->
+    <section class="section board" id="flux" aria-labelledby="board-title">
+      <div class="section-heading">
+        <span class="section-number">01</span>
+        <h2 id="board-title">Flux de données</h2>
+        <span class="section-tag" id="status" aria-live="polite">// chargement…</span>
+      </div>
+
+      <div class="console chamfer" role="search" aria-label="Filtrer les articles">
+        <div class="chips" id="category-chips" role="group" aria-label="Catégorie"></div>
+
+        <div class="console-fields">
+          <label class="field">
+            <span>Source</span>
+            <select id="source-select"><option value="all">Toutes</option></select>
+          </label>
+          <label class="field field-search">
+            <span>Recherche</span>
+            <input id="search-input" type="search" placeholder="Mot-clé…" autocomplete="off">
+          </label>
+        </div>
+      </div>
+
+      <p class="result-count" id="result-count" aria-live="polite"></p>
+
+      <ul class="shards" id="quests"></ul>
+
+      <div class="more">
+        <button class="button button-secondary" id="more-button" type="button" hidden>Charger d'autres articles</button>
+      </div>
+    </section>
+
+    <!-- ============ SOURCES ============ -->
+    <section class="section sources" id="sources" aria-labelledby="sources-title">
+      <div class="section-heading">
+        <span class="section-number">02</span>
+        <h2 id="sources-title">Sources</h2>
+        <span class="section-tag">// flux rss</span>
+      </div>
+      <p class="section-intro">Les sites dont les flux RSS sont relevés.</p>
+      <ul class="source-list" id="source-list"></ul>
+    </section>
+
+    <!-- ============ MÉTHODE ============ -->
+    <section class="section method" id="methode" aria-labelledby="method-title">
+      <div class="section-heading">
+        <span class="section-number">03</span>
+        <h2 id="method-title">Méthode de veille</h2>
+        <span class="section-tag">// protocole</span>
+      </div>
+
+      <ol class="steps">
+        <li class="step chamfer">
+          <span class="step-num" aria-hidden="true">01</span>
+          <h3>Choisir les sources</h3>
+          <p>Des flux RSS de sites généralistes, de développement, d'infrastructure et de
+            cybersécurité, en français et en anglais. La liste se trouve dans un simple fichier modifiable.</p>
+        </li>
+        <li class="step chamfer">
+          <span class="step-num" aria-hidden="true">02</span>
+          <h3>Relever automatiquement</h3>
+          <p>Toutes les 3 heures, un script Python lancé par GitHub Actions lit les flux,
+            enlève les doublons et garde les articles récents.</p>
+        </li>
+        <li class="step chamfer">
+          <span class="step-num" aria-hidden="true">03</span>
+          <h3>Résumer et trier</h3>
+          <p>Chaque article est accompagné de l'extrait fourni par son site (nettoyé et raccourci),
+            puis classé par date et par catégorie.</p>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="back-link" href="index.html"><span aria-hidden="true">←</span> Retour au portfolio</a>
+    <p>© <span id="year">2026</span> Mathieu Contamin — Veille informatique</p>
+    <p class="footer-end" aria-hidden="true">// fin de transmission</p>
+  </footer>
+
+  <noscript>
+    <p class="noscript">Cette page nécessite JavaScript pour afficher les articles.</p>
+  </noscript>
+</body>
+</html>

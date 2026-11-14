@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#07070b">
+  <title>Mathieu Contamin — Développeur, étudiant BTS SIO SLAM</title>
+  <meta name="description" content="Portfolio de Mathieu Contamin, étudiant en BTS SIO option SLAM : projets de développement, parcours et contact.">
+
+  <!-- Aperçu lors du partage du lien (réseaux sociaux, messageries) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Mathieu Contamin — Portfolio">
+  <meta property="og:description" content="Étudiant en BTS SIO option SLAM. Découvrez mes projets de développement.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:url" content="https://vanitas-b-mc.github.io/">
+  <meta property="og:image" content="https://vanitas-b-mc.github.io/assets/apercu.png"> -->
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <!-- Polices (Google Fonts). Si il n'y a pas de réseau, le site utilise les polices de secours. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap">
+
+  <link rel="stylesheet" href="css/style.css">
+  <script>document.documentElement.classList.add("js");</script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="header">
+      <a class="logo" href="#accueil" aria-label="Mathieu Contamin — retour à l'accueil">
+        <img src="assets/favicon.svg" width="40" height="40" alt="">
+        <span class="logo-text">MC<span>//</span>PORTFOLIO</span>
+      </a>
+
+      <nav id="main-nav" class="main-nav" aria-label="Navigation principale">
+        <a href="#apropos"><span>01</span>À propos</a>
+        <a href="#projets"><span>02</span>Projets</a>
+        <a href="#contact"><span>03</span>Contact</a>
+        <a class="nav-veille" href="veille.html"><span>04</span>Veille</a>
+        <a class="nav-github" data-github href="https://github.com/Vanitas-B-MC"
+           target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+      </nav>
+
+      <a class="github-link" data-github href="https://github.com/Vanitas-B-MC"
+         target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Ouvrir le menu">
+        <span class="menu-bars" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="contenu">
+    <!-- ============ ACCUEIL ============ -->
+    <section class="hero section" id="accueil" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span>Portfolio // en ligne</p>
+
+        <h1 id="hero-title">
+          <span class="hello">Salut, moi c'est</span>
+          <span class="hero-name glitch" id="hero-name" data-text="Mathieu">Mathieu</span>
+        </h1>
+
+        <p class="hero-tagline" id="hero-tagline">Développeur · Étudiant en BTS SIO option SLAM</p>
+        <p class="hero-description" id="hero-description"></p>
+
+        <div class="hero-actions">
+          <a href="#projets" class="button button-primary">Découvrir mes projets</a>
+          <a href="#apropos" class="button button-secondary">En savoir plus</a>
+        </div>
+      </div>
+
+      <aside class="profile-card chamfer" aria-label="Fiche de profil">
+        <div class="card-bar"><span>ID_CARD // 001</span><span class="card-bar-dot" aria-hidden="true"></span></div>
+        <div class="card-body">
+          <div class="card-head">
+            <img src="assets/favicon.svg" width="84" height="84" alt="Logo MC">
+            <p class="card-handle"><span>@</span><span id="profile-handle">Vanitas-B-MC</span></p>
+          </div>
+          <dl class="profile-list" id="profile-list"></dl>
+          <div class="barcode" aria-hidden="true"></div>
+        </div>
+      </aside>
+
+      <div class="scroll-indicator" aria-hidden="true">Scroll <span>↓</span></div>
+    </section>
+
+    <!-- ============ À PROPOS ============ -->
+    <section class="section about" id="apropos" aria-labelledby="about-title">
+      <div class="section-heading reveal">
+        <span class="section-number">01</span>
+        <h2 id="about-title">À propos de moi</h2>
+        <span class="section-tag">// profil</span>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-text reveal" id="about-text"></div>
+
+        <div class="about-side reveal">
+          <h3 class="subhead">Parcours</h3>
+          <ol class="timeline" id="timeline"></ol>
+        </div>
+      </div>
+
+      <div class="skills reveal">
+        <h3 class="subhead">Technologies</h3>
+        <ul id="skills-list" class="skills-list"></ul>
+      </div>
+    </section>
+
+    <!-- ============ PROJETS ============ -->
+    <section class="section projects" id="projets" aria-labelledby="projects-title">
+      <div class="section-heading reveal">
+        <span class="section-number">02</span>
+        <h2 id="projects-title">Mes projets</h2>
+        <span class="section-tag">// dépôts</span>
+      </div>
+      <p class="section-intro reveal">Quelques projets sur lesquels j'ai travaillé.</p>
+
+      <ul id="projects-list" class="projects-grid">
+        <li class="fallback">
+          <a href="https://github.com/Vanitas-B-MC" target="_blank" rel="noopener noreferrer">Retrouver mes projets sur GitHub ↗</a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section class="section contact" id="contact" aria-labelledby="contact-title">
+      <div class="section-heading reveal">
+        <span class="section-number">03</span>
+        <h2 id="contact-title">Me contacter</h2>
+        <span class="section-tag">// transmission</span>
+      </div>
+
+      <div class="terminal chamfer reveal">
+        <div class="terminal-bar" aria-hidden="true">
+          <span class="terminal-dots"><i></i><i></i><i></i></span>
+          <span>transmission.sh</span>
+        </div>
+        <div class="terminal-body">
+          <p class="prompt" aria-hidden="true">&gt; contact --direct</p>
+          <h3>Une idée ou un projet ?</h3>
+          <p class="contact-text">N'hésitez pas à m'écrire ou à venir voir mon code sur GitHub.</p>
+
+          <ul class="contact-list">
+            <li><span class="contact-key">mail</span>
+              <a id="contact-email" href="mailto:mathieu.contamin@ellabts.com">mathieu.contamin@ellabts.com</a></li>
+            <li><span class="contact-key">github</span>
+              <a id="contact-github-link" data-github href="https://github.com/Vanitas-B-MC"
+                 target="_blank" rel="noopener noreferrer">github.com/Vanitas-B-MC</a></li>
+          </ul>
+
+          <div class="contact-actions">
+            <a id="contact-mail-button" class="button button-primary"
+               href="mailto:mathieu.contamin@ellabts.com">M'écrire</a>
+            <a id="contact-github" class="button button-secondary" data-github
+               href="https://github.com/Vanitas-B-MC" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+            <a id="contact-cv" class="button button-secondary" href="#" download hidden>Télécharger mon CV</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="logo" href="#accueil" aria-label="Retour en haut">
+      <img src="assets/favicon.svg" width="32" height="32" alt="">
+    </a>
+    <p>© <span id="year">2026</span> <span id="footer-name">Mathieu Contamin</span> — Tous droits réservés.</p>
+    <p class="footer-end" aria-hidden="true">// fin de transmission</p>
+  </footer>
+
+  <noscript>
+    <p class="noscript">Le contenu de ce portfolio nécessite JavaScript.
+      Tu peux retrouver mes projets sur <a href="https://github.com/Vanitas-B-MC">GitHub</a>.</p>
+  </noscript>
+</body>
+</html>
