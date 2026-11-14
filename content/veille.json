@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-14T10:40:03Z",
+ "updated": "2026-11-14T18:14:48Z",
  "status": {
   "Korben": {
    "ok": true,
@@ -53,6 +53,186 @@
  },
  "items": [
   {
+   "id": "https://www.numerama.com/vroom/2374153-une-scenic-qui-depanne-des-nouveautes-eco-scorees-trop-de-commandes-de-cybertruck-le-recap-vroom-de-la-semaine.html",
+   "title": "Une scénic qui dépanne, des nouveautés eco-scorées, trop de commandes de Cybertruck : le récap Vroom de la semaine",
+   "link": "https://www.numerama.com/vroom/2374153-une-scenic-qui-depanne-des-nouveautes-eco-scorees-trop-de-commandes-de-cybertruck-le-recap-vroom-de-la-semaine.html",
+   "summary": "À la une sur Vroom cette semaine : un Scénic comme générateur pendant une panne de 30 h, les derniers modèles éco-scorés, et la production du Cybertruck qui doit augmenter avant son arrêt définitif.",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T17:42:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/cursor-confirms-security-breach-led-to-malicious-claude-code-extension/",
+   "title": "Cursor confirms security breach led to malicious Claude Code extension",
+   "link": "https://www.bleepingcomputer.com/news/security/cursor-confirms-security-breach-led-to-malicious-claude-code-extension/",
+   "summary": "Cursor confirmed it suffered a security breach that let hackers distribute a malicious Claude Code extension through its marketplace after stealing credentials from AI infrastructure provider Fireworks AI.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-14T17:27:25Z"
+  },
+  {
+   "id": "https://www.numerama.com/pop-culture/2372829-saison-3-des-anneaux-de-pouvoir-quest-ce-que-gundabad-la-forteresse-au-coeur-de-lepisode-4.html",
+   "title": "Saison 3 des Anneaux de pouvoir : qu’est-ce que Gundabad, la forteresse au cœur de l’épisode 4 ?",
+   "link": "https://www.numerama.com/pop-culture/2372829-saison-3-des-anneaux-de-pouvoir-quest-ce-que-gundabad-la-forteresse-au-coeur-de-lepisode-4.html",
+   "summary": "Dans les quatre premiers épisodes de la saison 3 des Anneaux de pouvoir, mis en ligne ce mercredi 11 novembre sur Prime Video, Galadriel s'introduit dans Gundabad, une forteresse orque du nord de la Terre du Milieu. Le quatrième épisode…",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T17:01:00Z"
+  },
+  {
+   "id": "https://www.numerama.com/pop-culture/2373149-disney-les-10-meilleures-comedies-sur-la-plateforme-de-mickey.html",
+   "title": "Disney+ : les 10 meilleures comédies sur la plateforme de Mickey",
+   "link": "https://www.numerama.com/pop-culture/2373149-disney-les-10-meilleures-comedies-sur-la-plateforme-de-mickey.html",
+   "summary": "On a trop souvent tendance à résumer Disney+ aux dessins animés de notre enfance et aux blockbusters Marvel. Pourtant, depuis que Disney a racheté la 21st Century Fox en 2019, et au fil des films qu'elle accueille sous licence, la…",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T16:15:00Z"
+  },
+  {
+   "id": "https://www.numerama.com/sciences/2373263-vous-vous-demandez-quelle-temperature-fait-il-dans-lespace-la-question-nest-pas-si-vite-repondue.html",
+   "title": "Vous vous demandez quelle température fait-il dans l’espace ? La question n’est pas si vite répondue",
+   "link": "https://www.numerama.com/sciences/2373263-vous-vous-demandez-quelle-temperature-fait-il-dans-lespace-la-question-nest-pas-si-vite-repondue.html",
+   "summary": "Un satellite possède une face éclairée et une face à l’ombre dont les températures peuvent différer de plusieurs centaines de degrés. Dans le milieu spatial, les instruments mesurent plusieurs températures en même temps qui coexistent au…",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T15:31:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/us-disrupts-north-korean-campaign-behind-400-million-crypto-theft/",
+   "title": "US disrupts North Korean campaign behind $400 million crypto theft",
+   "link": "https://www.bleepingcomputer.com/news/security/us-disrupts-north-korean-campaign-behind-400-million-crypto-theft/",
+   "summary": "The U.S. government has disrupted a North Korean social engineering campaign called 'FaceStealer', responsible for stealing more than $400 million in cryptocurrency.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-14T15:15:49Z"
+  },
+  {
+   "id": "https://www.numerama.com/tech/2374239-tres-mauvaise-nouvelle-pour-gta-6-retour-de-johnny-depp-au-cinema-le-recap-pop-culture-de-la-semaine.html",
+   "title": "Très mauvaise nouvelle pour GTA 6, retour de Johnny Depp au cinéma, le recap Pop Culture de la semaine",
+   "link": "https://www.numerama.com/tech/2374239-tres-mauvaise-nouvelle-pour-gta-6-retour-de-johnny-depp-au-cinema-le-recap-pop-culture-de-la-semaine.html",
+   "summary": "Cette semaine fut forte en actualité pop culture, entre la mauvaise nouvelle technique pour GTA 6 et ses 30 FPS, le retour de Johnny Depp au cinéma dans le film Scrooge et la révélation du magicien ténébreux dans Les Anneaux de Pouvoir…",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T15:00:00Z"
+  },
+  {
+   "id": "https://www.numerama.com/tech/2374209-pour-le-black-friday-darty-fait-chuter-le-galaxy-s25-edge-de-700-e-avec-un-casque-a-reduction-de-bruit-en-prime.html",
+   "title": "Pour le Black Friday, Darty fait chuter le Galaxy S25 Edge de 700 €, avec un casque à réduction de bruit en prime",
+   "link": "https://www.numerama.com/tech/2374209-pour-le-black-friday-darty-fait-chuter-le-galaxy-s25-edge-de-700-e-avec-un-casque-a-reduction-de-bruit-en-prime.html",
+   "summary": "[Deal du jour] Le Black Friday chez Darty permet de mettre la main sur le Galaxy S25 Edge de Samsung, le plus fin des Galaxy S25 à 599 € au lieu de 1 299 €. Il vient en prime avec un casque Bluetooth à réduction de bruit active.",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T14:30:00Z"
+  },
+  {
+   "id": "https://www.numerama.com/pop-culture/2370715-test-de-phantom-blade-zero-sur-ps5-pro.html",
+   "title": "J’ai appris à aimer Phantom Blade Zero",
+   "link": "https://www.numerama.com/pop-culture/2370715-test-de-phantom-blade-zero-sur-ps5-pro.html",
+   "summary": "J'ai une relation que l'on pourra qualifier de toxique avec Phantom Blade Zero. Je l'ai tant aimé. Je l'ai tant détesté aussi. J'aurais aimé en faire mon jeu de l'année 2026, mais certains de ses défauts m'en empêchent. Il n'en demeure pas…",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T14:00:00Z"
+  },
+  {
+   "id": "https://www.numerama.com/tech/2372409-jai-laisse-gemini-me-coacher-pour-mon-premier-marathon-il-ma-menti-avec-aplomb.html",
+   "title": "J’ai laissé Gemini me coacher pour mon premier marathon : il m’a menti avec aplomb",
+   "link": "https://www.numerama.com/tech/2372409-jai-laisse-gemini-me-coacher-pour-mon-premier-marathon-il-ma-menti-avec-aplomb.html",
+   "summary": "Cinq mois de préparation, des dizaines de fichiers CSV commentés, un plan pyramidal impeccable sur le papier… et une explosion au 22e kilomètre que Gemini n'avait pas vue venir. Claude lui, avait tout anticipé. Retour d'expérience sur mon…",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T13:03:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/attackers-exploit-unrealircd-flaw-that.html",
+   "title": "Attackers Exploit UnrealIRCd Flaw That Enables Server-Level Command Injection",
+   "link": "https://thehackernews.com/2026/11/attackers-exploit-unrealircd-flaw-that.html",
+   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) on Friday added a high-severity security flaw impacting UnrealIRCd, an open-source Internet Relay Chat (IRC) server, to its Known Exploited Vulnerabilities (KEV) catalog…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-14T12:38:35Z"
+  },
+  {
+   "id": "https://next.ink/?p=267610",
+   "title": "Flock : bons baisers de Chine",
+   "link": "https://next.ink/267610/flock-bons-baisers-de-chine/",
+   "summary": "Amour, trahison, espionnage… dans quel drôle de film Jensen a-t-il décroché le premier rôle ? Va-t-on entendre le vacarme du silencieux ? Quelle pilule va-t-il être obligé de gober après ça ? Nul ne le sait pour le moment, mais continuez à…",
+   "source": "Next",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T12:37:00Z"
+  },
+  {
+   "id": "https://visualstudio.developpez.com/actu/389096/Microsoft-annonce-que-le-debogage-dynamique-en-Cplusplus-est-desormais-disponible-pour-tous-les-canaux-de-Visual-Studio-2026-et-dans-la-version-14-52-des-outils-de-generation-Microsoft-Cplusplus-MSVC/",
+   "title": "Microsoft annonce que le débogage dynamique en C++ est désormais disponible pour tous les canaux de Visual Studio 2026 et dans la version 14.52 des outils de génération Microsoft C++ (MSVC)",
+   "link": "https://visualstudio.developpez.com/actu/389096/Microsoft-annonce-que-le-debogage-dynamique-en-Cplusplus-est-desormais-disponible-pour-tous-les-canaux-de-Visual-Studio-2026-et-dans-la-version-14-52-des-outils-de-generation-Microsoft-Cplusplus-MSVC/",
+   "summary": "Microsoft annonce que le débogage dynamique en C++ est désormais disponible pour tous les canaux de Visual Studio 2026 et dans la version 14.52 des outils de génération Microsoft C++ (MSVC) Le débogage dynamique en C++ est désormais…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-14T12:33:00Z"
+  },
+  {
+   "id": "https://visualstudio.developpez.com/actu/389097/Microsoft-apporte-une-mise-a-jour-majeure-de-Copilot-Chat-dans-Visual-Studio-2026-en-dotant-l-assistant-IA-d-un-nouveau-moteur-alimente-par-le-SDK-Microsoft-Copilot-developpe-par-GitHub/",
+   "title": "Microsoft apporte une mise à jour majeure de Copilot Chat dans Visual Studio 2026, en dotant l'assistant IA d'un nouveau moteur alimenté par le SDK Microsoft Copilot, développé par GitHub",
+   "link": "https://visualstudio.developpez.com/actu/389097/Microsoft-apporte-une-mise-a-jour-majeure-de-Copilot-Chat-dans-Visual-Studio-2026-en-dotant-l-assistant-IA-d-un-nouveau-moteur-alimente-par-le-SDK-Microsoft-Copilot-developpe-par-GitHub/",
+   "summary": "Microsoft apporte une mise à jour majeure de Copilot Chat dans Visual Studio 2026, en dotant l'assistant IA d'un nouveau moteur alimenté par le SDK Microsoft Copilot, développé par GitHub Microsoft a apporté une mise à jour majeure de…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-14T12:32:00Z"
+  },
+  {
+   "id": "https://arstechnica.com/science/2026/11/james-webb-telescope-finds-ice-older-than-the-star-it-orbits/",
+   "title": "James Webb telescope finds ice older than the star it orbits",
+   "link": "https://arstechnica.com/science/2026/11/james-webb-telescope-finds-ice-older-than-the-star-it-orbits/",
+   "summary": "Radiation and collisions reshape the planetary building materials.",
+   "source": "Ars Technica",
+   "category": "Actualités",
+   "lang": "en",
+   "published": "2026-11-14T12:15:48Z"
+  },
+  {
+   "id": "https://arstechnica.com/science/2026/11/winemakers-are-learning-that-conservation-can-be-good-for-business/",
+   "title": "Winemakers are learning that conservation can be good for business",
+   "link": "https://arstechnica.com/science/2026/11/winemakers-are-learning-that-conservation-can-be-good-for-business/",
+   "summary": "Healthy soils, native plants, and fewer chemicals are helping vineyards adapt.",
+   "source": "Ars Technica",
+   "category": "Actualités",
+   "lang": "en",
+   "published": "2026-11-14T12:05:51Z"
+  },
+  {
+   "id": "https://www.numerama.com/cyberguerre/2374317-black-friday-2026-voici-la-technique-la-plus-rapide-pour-verifier-si-un-message-provient-vraiment-damazon.html",
+   "title": "Black Friday 2026 : voici la technique la plus rapide pour vérifier si un message provient vraiment d’Amazon",
+   "link": "https://www.numerama.com/cyberguerre/2374317-black-friday-2026-voici-la-technique-la-plus-rapide-pour-verifier-si-un-message-provient-vraiment-damazon.html",
+   "summary": "Avant le Black Friday, les faux messages qui se font passer pour Amazon se multiplient. La plateforme propose une adresse mail pour vérifier en quelques instants si un mail, un SMS ou un appel vient bien d’elle.",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T12:05:00Z"
+  },
+  {
+   "id": "https://www.numerama.com/pop-culture/1107026-numenor-dans-les-anneaux-de-pouvoir-ce-quil-est-advenu-de-lile-de-tolkien-dans-le-seigneur-des-anneaux.html",
+   "title": "Númenor dans Les Anneaux de pouvoir : ce qu’il est advenu de l’île de Tolkien dans Le Seigneur des anneaux",
+   "link": "https://www.numerama.com/pop-culture/1107026-numenor-dans-les-anneaux-de-pouvoir-ce-quil-est-advenu-de-lile-de-tolkien-dans-le-seigneur-des-anneaux.html",
+   "summary": "Númenor est apparue dès l'épisode 3 de la saison 1 des Anneaux de pouvoir, en 2022. Dans la saison 3, lancée ce mercredi 11 novembre 2026 sur Prime Video, l'île est au bord de la guerre civile. Ce royaume, à peine cité dans Le Seigneur des…",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-14T11:38:54Z"
+  },
+  {
    "id": "https://www.theregister.com/a/5309296",
    "title": "Microsoft's school email bill gives rivals something to smile about",
    "link": "https://www.theregister.com/saas/2026/11/14/microsofts-school-email-bill-gives-rivals-something-to-smile-about/5309296",
@@ -61,46 +241,6 @@
    "category": "Infrastructure",
    "lang": "en",
    "published": "2026-11-14T10:27:00Z"
-  },
-  {
-   "id": "https://www.numerama.com/sciences/2374607-aucune-sonde-na-jamais-ete-aussi-loin-dans-le-cosmos-voyager-1-arrive-a-un-jour-lumiere-de-la-terre-et-la-nasa-lance-un-jeu.html",
-   "title": "Aucune sonde n’a jamais été aussi loin dans le cosmos : Voyager 1 arrive à un jour lumière de la Terre, et la NASA lance un jeu",
-   "link": "https://www.numerama.com/sciences/2374607-aucune-sonde-na-jamais-ete-aussi-loin-dans-le-cosmos-voyager-1-arrive-a-un-jour-lumiere-de-la-terre-et-la-nasa-lance-un-jeu.html",
-   "summary": "La sonde Voyager 1 sera à un jour-lumière de la Terre le mercredi 18 novembre 2026, soit 25,9 milliards de kilomètres. La veille au soir, la NASA propose à tout le monde de lui faire signe en morse avec son smartphone.",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T10:11:21Z"
-  },
-  {
-   "id": "https://www.numerama.com/vroom/2374207-xiaomi-electric-scooter-4-ultra-la-trottinette-aux-70-km-dautonomie-perd-un-tiers-de-son-prix.html",
-   "title": "Xiaomi Electric Scooter 4 Ultra : la trottinette aux 70 km d’autonomie perd un tiers de son prix",
-   "link": "https://www.numerama.com/vroom/2374207-xiaomi-electric-scooter-4-ultra-la-trottinette-aux-70-km-dautonomie-perd-un-tiers-de-son-prix.html",
-   "summary": "[Deal du jour] La trottinette la plus haut placée de la gamme 4 de Xiaomi baisse son prix pendant le Black Friday. Sur la boutique de Xiaomi, l'Electric Scooter 4 Ultra perd 200 € de son prix.",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T09:30:00Z"
-  },
-  {
-   "id": "https://www.numerama.com/sciences/2374555-on-en-sait-plus-sur-le-rate-de-la-capture-du-booster-de-la-fusee-geante-starship-par-la-tour.html",
-   "title": "On en sait plus sur le raté de la capture du booster de la fusée géante Starship par la tour",
-   "link": "https://www.numerama.com/sciences/2374555-on-en-sait-plus-sur-le-rate-de-la-capture-du-booster-de-la-fusee-geante-starship-par-la-tour.html",
-   "summary": "Le propulseur Super Heavy de Starship a annulé tout seul sa capture par la tour de Starbase ce vendredi 13 novembre, après avoir détecté une anomalie dans son système de guidage, et a terminé sa course en explosant dans le golfe du Mexique.",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T09:21:07Z"
-  },
-  {
-   "id": "https://www.numerama.com/tech/2374527-panne-geante-doutlook-et-de-microsoft-365-la-theorie-dun-agent-ia-qui-aurait-derape-est-balayee-mais-les-causes-restent-vagues.html",
-   "title": "Panne géante d’Outlook et de Microsoft 365 : la théorie d’un agent IA qui aurait dérapé est balayée, mais les causes restent vagues",
-   "link": "https://www.numerama.com/tech/2374527-panne-geante-doutlook-et-de-microsoft-365-la-theorie-dun-agent-ia-qui-aurait-derape-est-balayee-mais-les-causes-restent-vagues.html",
-   "summary": "Dans un message publié sur X, Microsoft présente ses excuses pour la panne mondiale de Microsoft 365. Selon l'entreprise, il s'agit d'un « problème technique » sans lien avec une cyberattaque ni avec l'IA ou ses agents.",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T08:42:53Z"
   },
   {
    "id": "https://www.theregister.com/a/5309302",
@@ -114,23 +254,13 @@
   },
   {
    "id": "https://next.ink/?p=267641",
-   "title": "Une alerte rarissime cloue tous les avions au sol aux États-Unis",
+   "title": "[MàJ] Une alerte rarissime a cloué tous les avions au sol aux États-Unis",
    "link": "https://next.ink/267641/une-alerte-rarissime-cloue-tous-les-avions-au-sol-aux-etats-unis/",
    "summary": "Un problème de communication touchant le contrôle aérien a entraîné la suspension des décollages dans tous les aéroports américains ce vendredi pendant plus de quatre heures. Une mesure exceptionnelle qui aurait été décidée par la FAA en…",
    "source": "Next",
    "category": "Actualités",
    "lang": "fr",
    "published": "2026-11-14T07:17:14Z"
-  },
-  {
-   "id": "https://www.numerama.com/sciences/2344351-choisir-une-offre-delectricite-ou-de-gaz-tout-ce-quil-faut-savoir-avant-de-signer.html",
-   "title": "Choisir une offre d’électricité ou de gaz : tout ce qu’il faut savoir avant de signer [Sponso]",
-   "link": "https://www.numerama.com/sciences/2344351-choisir-une-offre-delectricite-ou-de-gaz-tout-ce-quil-faut-savoir-avant-de-signer.html",
-   "summary": "Cet article a été réalisé en collaboration avec EDF Prix du kWh, puissance en kVA, heures creuses, offre de marché, tarif réglementé, PDL, PCE… Choisir une offre d’électricité ou de gaz suppose aujourd’hui de jongler avec un vocabulaire…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T06:47:00Z"
   },
   {
    "id": "https://intelligence-artificielle.developpez.com/actu/389094/L-agent-de-codage-Grok-Build-divulgue-une-multitude-d-informations-confidentielles-dont-certaines-appartiennent-a-SpaceX-Un-chercheur-decouvre-35-000-applications-Grok-Build-accessibles-a-tous/",
@@ -181,16 +311,6 @@
    "category": "Actualités",
    "lang": "en",
    "published": "2026-11-13T23:17:38Z"
-  },
-  {
-   "id": "https://www.numerama.com/sciences/2374491-starship-spacex-reussit-le-decollage-de-sa-fusee-geante-mais-bute-encore-sur-le-retour-du-booster-qui-est-tombe-a-leau.html",
-   "title": "Starship : SpaceX réussit le décollage de sa fusée géante, mais bute encore sur le retour du booster, qui est tombé à l’eau",
-   "link": "https://www.numerama.com/sciences/2374491-starship-spacex-reussit-le-decollage-de-sa-fusee-geante-mais-bute-encore-sur-le-retour-du-booster-qui-est-tombe-a-leau.html",
-   "summary": "Le Starship de SpaceX a décollé du Texas ce vendredi 13 novembre 2026 pour son 15e vol d'essai, mais son propulseur Super Heavy a fini dans le golfe du Mexique au lieu d'être rattrapé par la tour. C'était la première fois que SpaceX…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T23:06:33Z"
   },
   {
    "id": "https://www.theregister.com/a/5309912",
@@ -253,16 +373,6 @@
    "published": "2026-11-13T20:27:31Z"
   },
   {
-   "id": "https://www.numerama.com/sciences/2374195-nouveau-vol-orbital-en-europe-ce-que-dit-la-justice-si-vous-refusez-un-compteur-linky-15e-vol-du-starship-le-recap-sciences-de-la-semaine.html",
-   "title": "Nouveau vol orbital en Europe, ce que dit la justice si vous refusez un compteur Linky, 15e vol du Starship – le récap’ sciences de la semaine",
-   "link": "https://www.numerama.com/sciences/2374195-nouveau-vol-orbital-en-europe-ce-que-dit-la-justice-si-vous-refusez-un-compteur-linky-15e-vol-du-starship-le-recap-sciences-de-la-semaine.html",
-   "summary": "Peut-on refuser d'installer chez soi un compteur comme Linky ? La justice européenne a tranché. C'est l'une des actualités de la semaine dans la rubrique Sciences de Numerama, aux côtés de décollages imminents de fusées Starship et…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T20:10:00Z"
-  },
-  {
    "id": "https://arstechnica.com/science/2026/11/in-elephants-the-resilience-of-communities-has-its-limits/",
    "title": "In elephants, the resilience of communities has its limits",
    "link": "https://arstechnica.com/science/2026/11/in-elephants-the-resilience-of-communities-has-its-limits/",
@@ -303,16 +413,6 @@
    "published": "2026-11-13T19:35:00Z"
   },
   {
-   "id": "https://www.numerama.com/sciences/2373405-starship-spacex-vise-un-vol-de-22-heures-et-un-double-rattrapage-par-la-tour.html",
-   "title": "Starship : suivez en direct la tentative inédite de la double capture de la fusée géante en plein vol",
-   "link": "https://www.numerama.com/sciences/2373405-starship-spacex-vise-un-vol-de-22-heures-et-un-double-rattrapage-par-la-tour.html",
-   "summary": "SpaceX a prévu le 15e vol d'essai de Starship ce vendredi 13 novembre, à 23 h 45 heure de Paris. Au programme : plus de 22 heures en orbite et une première tentative de rattrapage des deux étages par la tour de lancement. L'évènement…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T19:13:33Z"
-  },
-  {
    "id": "https://next.ink/?post_type=brief_article&p=267309",
    "title": "☕️ [MàJ] Outlook, Teams : les services Microsoft reviennent au bout de 20 heures",
    "link": "https://next.ink/brief-article/outlook-teams-plusieurs-services-de-microsoft-sont-en-panne/",
@@ -341,16 +441,6 @@
    "category": "Actualités",
    "lang": "en",
    "published": "2026-11-13T17:25:45Z"
-  },
-  {
-   "id": "https://www.numerama.com/sciences/2373725-decouvrez-napowawa%ca%bbenakaulua-un-couple-de-quasars-datant-des-debuts-de-lunivers.html",
-   "title": "Découvrez Nāpōwawāʻenakaulua, un couple de quasars datant des débuts de l’Univers",
-   "link": "https://www.numerama.com/sciences/2373725-decouvrez-napowawa%ca%bbenakaulua-un-couple-de-quasars-datant-des-debuts-de-lunivers.html",
-   "summary": "Née à peine 900 millions d'années après le Big Bang, la paire de quasars Nāpōwawāʻenakaulua est la plus ancienne paire compacte connue. Elle a été repérée grâce au télescope spatial James Webb et au télescope Gemini North, et les…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T17:10:00Z"
   },
   {
    "id": "https://www.theregister.com/a/5309632",
@@ -453,16 +543,6 @@
    "published": "2026-11-13T15:52:26Z"
   },
   {
-   "id": "https://www.numerama.com/tech/2355819-1-220-e-decart-avec-liphone-duo-le-galaxy-z-fold8-tombe-a-moitie-prix-sur-amazon-pour-le-black-friday.html",
-   "title": "1 220 € d’écart avec l’iPhone Duo : le Galaxy Z Fold 8 tombe à moitié prix sur Amazon pour le Black Friday",
-   "link": "https://www.numerama.com/tech/2355819-1-220-e-decart-avec-liphone-duo-le-galaxy-z-fold8-tombe-a-moitie-prix-sur-amazon-pour-le-black-friday.html",
-   "summary": "[Deal du jour] L’iPhone Duo coûte 2 339 € en 256 Go. À capacité égale, le Galaxy Z Fold8 de Samsung revient à 1 119 € sur Amazon grâce à une nouvelle offre de remboursement de 300 €, contre 1 999 € à sa sortie. Il coûte ainsi moins de la…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T15:44:36Z"
-  },
-  {
    "id": "https://next.ink/?p=266410",
    "title": "Phishing : quand un vrai faux email et un lien légitime cachent une arnaque",
    "link": "https://next.ink/266410/phishing-quand-un-vrai-faux-email-et-un-lien-legitime-cachent-une-arnaque/",
@@ -481,26 +561,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-13T15:27:05Z"
-  },
-  {
-   "id": "https://arstechnica.com/tech-policy/2026/11/microsoft-blames-failed-server-health-checks-not-hackers-for-global-outage/",
-   "title": "Microsoft’s global outage may be worse than Amazon's or CrowdStrike's, expert says",
-   "link": "https://arstechnica.com/tech-policy/2026/11/microsoft-blames-failed-server-health-checks-not-hackers-for-global-outage/",
-   "summary": "Governments, hospitals, courts scrambled by global Microsoft outage.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-13T15:26:53Z"
-  },
-  {
-   "id": "https://arstechnica.com/science/2026/11/its-the-end-of-the-world-as-we-know-it-per-a-physicists-1960-prediction/",
-   "title": "It's the end of the world as we know it, per a physicist's 1960 prediction",
-   "link": "https://arstechnica.com/science/2026/11/its-the-end-of-the-world-as-we-know-it-per-a-physicists-1960-prediction/",
-   "summary": "Heinz von Foerster thought population would grow exponentially and \"squeeze\" us all to death.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-13T15:09:39Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/how-one-ai-agent-exposed-five-critical-enterprise-security-gaps/",
@@ -593,26 +653,6 @@
    "published": "2026-11-13T13:10:00Z"
   },
   {
-   "id": "https://hardware.developpez.com/actu/389065/-C-est-une-erreur-des-employes-de-Nvidia-se-mobilisent-pour-exiger-le-retour-de-Jensen-Huang-tandis-que-les-patrons-de-la-tech-qualifient-sa-demission-de-gachis-et-de-triste-jour-pour-l-humanite/",
-   "title": "« C'est une erreur » : des employés de Nvidia se mobilisent pour exiger le retour de Jensen Huang, tandis que les patrons de la tech qualifient sa démission de « gâchis » et de « triste jour pour l'humanité »",
-   "link": "https://hardware.developpez.com/actu/389065/-C-est-une-erreur-des-employes-de-Nvidia-se-mobilisent-pour-exiger-le-retour-de-Jensen-Huang-tandis-que-les-patrons-de-la-tech-qualifient-sa-demission-de-gachis-et-de-triste-jour-pour-l-humanite/",
-   "summary": "« C'est une erreur » : des employés de Nvidia se mobilisent pour exiger le retour de Jensen Huang, tandis que les patrons de la tech qualifient sa démission de « gâchis » et de « triste jour pour l'humanité » Le départ soudain de Jensen…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-13T13:09:00Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389056/Google-lance-un-nouveau-modele-d-IA-multimodal-specialise-Gemini-Decisions-API-1-capable-d-evaluer-jusqu-a-1-000-questions-a-partir-d-une-meme-entree-et-de-renvoyer-des-probabilites-calibrees/",
-   "title": "Google lance un nouveau modèle d'IA multimodal spécialisé, Gemini Decisions API 1, capable d'évaluer jusqu'à 1 000 questions à partir d'une même entrée, et de renvoyer des probabilités calibrées",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389056/Google-lance-un-nouveau-modele-d-IA-multimodal-specialise-Gemini-Decisions-API-1-capable-d-evaluer-jusqu-a-1-000-questions-a-partir-d-une-meme-entree-et-de-renvoyer-des-probabilites-calibrees/",
-   "summary": "Google lance un nouveau modèle d'IA multimodal spécialisé, Gemini Decisions API 1, capable d'évaluer jusqu'à 1 000 questions à partir d'une même entrée et de renvoyer des probabilités calibrées Google a lancé l'API Gemini Decisions, un…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-13T13:08:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-says-november-security-updates-cause-printing-issues/",
    "title": "Microsoft says November security updates cause printing issues",
    "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-says-november-security-updates-cause-printing-issues/",
@@ -701,16 +741,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-13T09:36:18Z"
-  },
-  {
-   "id": "https://next.ink/?post_type=brief_article&p=267355",
-   "title": "☕️ Vivaldi a sa version pour les entreprises, mais avec des limites",
-   "link": "https://next.ink/brief-article/vivaldi-a-sa-version-pour-les-entreprises-mais-avec-des-limites/",
-   "summary": "Vivaldi fournit désormais une version spécifique de son navigateur à destination du monde professionnel. Le navigateur est en réalité le même que celui destiné au grand public, mais avec la possibilité de l’administrer via des politiques…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T09:03:22Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/43304",
@@ -871,36 +901,6 @@
    "category": "Développement",
    "lang": "en",
    "published": "2026-11-12T22:54:52Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/new-worm-like-sckit-malware-targets-msps-in-screenconnect-attacks/",
-   "title": "New worm-like 'SCKit' malware targets MSPs in ScreenConnect attacks",
-   "link": "https://www.bleepingcomputer.com/news/security/new-worm-like-sckit-malware-targets-msps-in-screenconnect-attacks/",
-   "summary": "A new worm-like malware toolkit named SCKit was deployed in the recent ScreenConnect attacks targeting managed service providers (MSPs), designed to spread from infected customer devices to MSP technicians' computers and compromise…",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-12T22:53:10Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/hackers-compromise-4-800-github-accounts-to-steal-cloud-credentials/",
-   "title": "Hackers compromise 4,800 GitHub accounts to steal cloud credentials",
-   "link": "https://www.bleepingcomputer.com/news/security/hackers-compromise-4-800-github-accounts-to-steal-cloud-credentials/",
-   "summary": "A new campaign dubbed 'wfx-loot' has unfolded on GitHub where threat actors used 4,837 compromised accounts to probe 61,764 repositories, open pull requests, and push secrets-stealing malware.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-12T22:25:30Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/your-soc-sees-alert-but-does-it-know.html",
-   "title": "Webinar: See How Identity Blind Spots Put Your SOC at Risk and How to Close Them",
-   "link": "https://thehackernews.com/2026/11/your-soc-sees-alert-but-does-it-know.html",
-   "summary": "Security teams have more alerts, logs, and monitoring tools than ever. Yet when an attack happens, one simple question can still take too long to answer: Who or what is behind this activity, and what can they access? A suspicious login…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-12T18:07:15Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/43299",
