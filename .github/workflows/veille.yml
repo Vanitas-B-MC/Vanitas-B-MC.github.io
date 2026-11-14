@@ -1,0 +1,47 @@
+name: Mise à jour de la veille
+
+# Relève les flux RSS toutes les 3 heures et enregistre le résultat
+# dans content/veille.json. Tu peux aussi la lancer à la main :
+# onglet « Actions » > « Mise à jour de la veille » > « Run workflow ».
+on:
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/fetch_veille.py"
+      - "content/veille-sources.json"
+      - ".github/workflows/veille.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: veille
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Relever les flux RSS
+        run: python scripts/fetch_veille.py
+
+      - name: Enregistrer les changements
+        run: |
+          git config user.name "veille-bot"
+          git config user.email "veille-bot@users.noreply.github.com"
+          git add content/veille.json
+          if git diff --cached --quiet; then
+            echo "Aucun changement."
+          else
+            git commit -m "chore(veille): mise à jour automatique"
+            git pull --rebase --autostash
+            git push
+          fi
