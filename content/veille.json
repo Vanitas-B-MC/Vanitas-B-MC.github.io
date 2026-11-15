@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-15T16:26:48Z",
+ "updated": "2026-11-15T22:56:21Z",
  "status": {
   "Korben": {
    "ok": true,
@@ -52,6 +52,56 @@
   }
  },
  "items": [
+  {
+   "id": "https://www.numerama.com/pop-culture/2373859-avant-la-sortie-de-gta-6-les-joueurs-de-gta-5-organisent-une-derniere-balade-a-los-santos.html",
+   "title": "Avant la sortie de GTA 6, les joueurs de GTA 5 organisent une dernière balade à Los Santos",
+   "link": "https://www.numerama.com/pop-culture/2373859-avant-la-sortie-de-gta-6-les-joueurs-de-gta-5-organisent-une-derniere-balade-a-los-santos.html",
+   "summary": "À moins d'une semaine de la sortie de GTA 6, les fans de GTA 5 ont prévu de se retrouver une dernière fois dans les rues de Los Santos. Baptisé « The Last Ride », cet événement communautaire invite tout le monde à ranger les armes et à…",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-15T19:50:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/fbi-warns-artex-ai-hacking-tool-is-powering-global-cyberattacks/",
+   "title": "FBI warns ARTEX AI hacking tool is powering global cyberattacks",
+   "link": "https://www.bleepingcomputer.com/news/security/fbi-warns-artex-ai-hacking-tool-is-powering-global-cyberattacks/",
+   "summary": "The FBI is warning that hackers are using an AI-powered penetration testing framework called ARTEX to automate cyberattacks against organizations worldwide, including a recent ConnectWise supply-chain breach that compromised Microsoft 365…",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-15T18:29:53Z"
+  },
+  {
+   "id": "tag:linuxfr.org,2005:News/43315",
+   "title": "Agenda du Libre pour la semaine 47 de l’année 2026",
+   "link": "https://linuxfr.org/news/agenda-du-libre-pour-la-semaine-47-de-l-annee-2026",
+   "summary": "Calendrier Web, regroupant des événements liés au Libre (logiciel, salon, atelier, install party , conférence), annoncés par leurs organisateurs. Voici un récapitulatif de la semaine à venir. Le détail de chacun de ces 77 événements…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-15T17:44:37Z"
+  },
+  {
+   "id": "https://www.numerama.com/pop-culture/2369627-prime-video-livraison-de-fous-rires-garantie-avec-les-10-meilleures-comedies.html",
+   "title": "Prime Video : livraison de fous rires garantie avec les 10 meilleures comédies",
+   "link": "https://www.numerama.com/pop-culture/2369627-prime-video-livraison-de-fous-rires-garantie-avec-les-10-meilleures-comedies.html",
+   "summary": "De la satire d'espionnage tricolore aux comédies britanniques, sans oublier la nostalgie des années 90 et l'humour noir vintage, Prime Video a de quoi faire rire dans tous les registres. Voici notre sélection des 10 meilleurs films que…",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-15T17:30:00Z"
+  },
+  {
+   "id": "https://www.numerama.com/tech/2374157-microsoft-bloque-des-mails-sans-prevenir-google-fait-prouver-la-securite-de-signal-par-80-agents-openai-installe-un-bouton-stop-sur-ses-ia-on-vous-raconte-la-semaine-cyberguerre.html",
+   "title": "Microsoft bloque des mails sans prévenir, Google fait prouver la sécurité de Signal par 80 agents, OpenAI installe un bouton stop sur ses IA : on vous raconte la semaine Cyberguerre",
+   "link": "https://www.numerama.com/tech/2374157-microsoft-bloque-des-mails-sans-prevenir-google-fait-prouver-la-securite-de-signal-par-80-agents-openai-installe-un-bouton-stop-sur-ses-ia-on-vous-raconte-la-semaine-cyberguerre.html",
+   "summary": "Trois actualités à retenir cette semaine dans le cyberespace, un durcissement discret de Microsoft qui fait rejeter les mails de petites structures vers Hotmail et Outlook, Google qui démontre mathématiquement, avec des agents IA, que le…",
+   "source": "Numerama",
+   "category": "Actualités",
+   "lang": "fr",
+   "published": "2026-11-15T17:10:00Z"
+  },
   {
    "id": "https://www.numerama.com/pop-culture/2373649-france-turquie-ou-voir-le-match-de-foot-en-direct-et-en-streaming.html",
    "title": "France-Turquie : où voir le match de foot en direct et en streaming ?",
@@ -203,26 +253,6 @@
    "published": "2026-11-15T00:40:59Z"
   },
   {
-   "id": "https://www.numerama.com/sciences/2374713-mechazilla-a-attrape-le-starship-spacex-reussit-lexploit-inedit-de-capturer-le-vaisseau-en-plein-vol-avec-la-tour.html",
-   "title": "« Mechazilla a attrapé le Starship ! » : SpaceX réussit l’exploit inédit de capturer le vaisseau en plein vol avec la tour",
-   "link": "https://www.numerama.com/sciences/2374713-mechazilla-a-attrape-le-starship-spacex-reussit-lexploit-inedit-de-capturer-le-vaisseau-en-plein-vol-avec-la-tour.html",
-   "summary": "Le vaisseau Starship de SpaceX a été rattrapé par les bras de sa tour de lancement au Texas ce samedi 14 novembre 2026, après environ 22 heures et demie de vol et 14 tours de la Terre. Aucun étage supérieur de fusée orbitale n'avait encore…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T21:51:11Z"
-  },
-  {
-   "id": "https://www.numerama.com/pop-culture/2374705-gta-6-na-pas-casse-le-record-du-trafic-internet-en-france-mais-les-chiffres-sont-quand-meme-impressonnants.html",
-   "title": "GTA 6 n’a pas cassé le record du trafic Internet en France, mais les chiffres sont quand même impressonnants",
-   "link": "https://www.numerama.com/pop-culture/2374705-gta-6-na-pas-casse-le-record-du-trafic-internet-en-france-mais-les-chiffres-sont-quand-meme-impressonnants.html",
-   "summary": "Contacté par Numerama, Orange, premier opérateur fixe de France, indique que son réseau n'a pas enregistré de pic de trafic anormal lors de l'ouverture des téléchargements de GTA 6. L'opérateur salue la décision de Rockstar d'étaler les…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T20:00:32Z"
-  },
-  {
    "id": "tag:linuxfr.org,2005:News/43310",
    "title": "Un guide libre de souveraineté numérique en 89 fiches pratiques, et des ateliers dans les Bauges en Savoie",
    "link": "https://linuxfr.org/news/un-guide-libre-de-souverainete-numerique-en-89-fiches-pratiques-et-des-ateliers-dans-les-bauges-en-savoie",
@@ -231,16 +261,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-14T19:55:06Z"
-  },
-  {
-   "id": "https://www.numerama.com/vroom/2374153-une-scenic-qui-depanne-des-nouveautes-eco-scorees-trop-de-commandes-de-cybertruck-le-recap-vroom-de-la-semaine.html",
-   "title": "Un Scénic qui dépanne, des nouveautés eco-scorées, trop de commandes de Cybertruck : le récap Vroom de la semaine",
-   "link": "https://www.numerama.com/vroom/2374153-une-scenic-qui-depanne-des-nouveautes-eco-scorees-trop-de-commandes-de-cybertruck-le-recap-vroom-de-la-semaine.html",
-   "summary": "À la une sur Vroom cette semaine : un Scénic comme générateur pendant une panne de 30 h, les derniers modèles éco-scorés, et la production du Cybertruck qui doit augmenter avant son arrêt définitif.",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T17:42:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/cursor-confirms-security-breach-led-to-malicious-claude-code-extension/",
@@ -793,16 +813,6 @@
    "published": "2026-11-13T10:44:22Z"
   },
   {
-   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-confirms-windows-activation-failures-after-november-updates/",
-   "title": "Microsoft confirms Windows activation failures after November updates",
-   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-confirms-windows-activation-failures-after-november-updates/",
-   "summary": "Microsoft has confirmed that this month's Patch Tuesday security updates are causing Windows activation and licensing failures with 0x80041008 error codes.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-13T09:36:18Z"
-  },
-  {
    "id": "tag:linuxfr.org,2005:News/43304",
    "title": "Haro sur les sections de commune françaises",
    "link": "https://linuxfr.org/news/haro-sur-les-sections-de-commune-francaises",
@@ -941,16 +951,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-12T14:32:23Z"
-  },
-  {
-   "id": "https://korben.info/modern-web-guidance-agents-web.html",
-   "title": "Modern Web Guidance - Votre agent IA va enfin goûter au code web moderne",
-   "link": "https://korben.info/modern-web-guidance-agents-web.html?utm_source=rss&utm_medium=feed&utm_campaign=flux-principal",
-   "summary": "Modern Web Guidance glisse dans votre agent de code des guides sur les fonctionnalités natives du navigateur. Installation, scan, télémétrie et limites.",
-   "source": "Korben",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-12T08:00:00Z"
   }
  ]
 }
