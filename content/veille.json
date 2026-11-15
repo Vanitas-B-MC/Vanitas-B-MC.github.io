@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-14T22:35:30Z",
+ "updated": "2026-11-15T06:45:09Z",
  "status": {
   "Korben": {
    "ok": true,
@@ -52,6 +52,16 @@
   }
  },
  "items": [
+  {
+   "id": "https://arstechnica.com/space/2026/11/with-starship-catch-spacex-still-shows-it-can-dazzle-the-world/",
+   "title": "SpaceX returned its Starship rocket on Saturday—but there's a catch",
+   "link": "https://arstechnica.com/space/2026/11/with-starship-catch-spacex-still-shows-it-can-dazzle-the-world/",
+   "summary": "It felt like stepping into the future.",
+   "source": "Ars Technica",
+   "category": "Actualités",
+   "lang": "en",
+   "published": "2026-11-15T00:40:59Z"
+  },
   {
    "id": "https://www.numerama.com/sciences/2374713-mechazilla-a-attrape-le-starship-spacex-reussit-lexploit-inedit-de-capturer-le-vaisseau-en-plein-vol-avec-la-tour.html",
    "title": "« Mechazilla a attrapé le Starship ! » : SpaceX réussit l’exploit inédit de capturer le vaisseau en plein vol avec la tour",
@@ -324,8 +334,8 @@
   },
   {
    "id": "https://www.theregister.com/a/5309912",
-   "title": "FAA lifts ground stop after hours-long delays snag travelers",
-   "link": "https://www.theregister.com/offbeat/2026/11/13/faa-lifts-ground-stop-after-hours-long-delays-snag-travelers/5309912",
+   "title": "FAA blames ground stop on faulty copper wiring",
+   "link": "https://www.theregister.com/offbeat/2026/11/13/faa-blames-ground-stop-on-faulty-copper-wiring/5309912",
    "summary": "Safety reasons and unspecified communications issue cited",
    "source": "The Register",
    "category": "Infrastructure",
@@ -501,16 +511,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-13T16:32:00Z"
-  },
-  {
-   "id": "https://arstechnica.com/security/2026/11/windows-0-day-dropped-by-disgruntled-researcher-hands-hackers-system-rights/",
-   "title": "Windows 0-day dropped by disgruntled researcher hands hackers System rights",
-   "link": "https://arstechnica.com/security/2026/11/windows-0-day-dropped-by-disgruntled-researcher-hands-hackers-system-rights/",
-   "summary": "\"SignDrop\" exploit lets local users gain all-powerful System rights.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-13T16:26:32Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/check-point-gateways-hacked-via-php2shell-to-deploy-vmware-esxi-wiper/",
