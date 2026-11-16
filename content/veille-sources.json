@@ -1,27 +1,6 @@
 {
   "_aide": "Liste des flux RSS/Atom suivis. Ajoute ou retire des sources ici : la mise à jour automatique les prendra en compte. Champs : name (nom affiché), url (adresse du flux), site (page d'accueil du site), category (Actualités, Cybersécurité, Développement, Infrastructure…), lang (fr ou en).",
   "sources": [
-    /*{
-      "name": "Korben",
-      "url": "https://korben.info/feed",
-      "site": "https://korben.info",
-      "category": "Actualités",
-      "lang": "fr"
-    },*/
-    /*{
-      "name": "Next",
-      "url": "https://next.ink/feed/",
-      "site": "https://next.ink",
-      "category": "Actualités",
-      "lang": "fr"
-    },*/
-    /*{
-      "name": "Numerama",
-      "url": "https://www.numerama.com/feed/",
-      "site": "https://www.numerama.com",
-      "category": "Actualités",
-      "lang": "fr"
-    },*/
     {
       "name": "LinuxFr.org",
       "url": "https://linuxfr.org/news.atom",
@@ -50,13 +29,6 @@
       "category": "Cybersécurité",
       "lang": "fr"
     },
-    /*{
-      "name": "Ars Technica",
-      "url": "https://feeds.arstechnica.com/arstechnica/index",
-      "site": "https://arstechnica.com",
-      "category": "Actualités",
-      "lang": "en"
-    },*/
     {
       "name": "The Register",
       "url": "https://www.theregister.com/headlines.atom",
