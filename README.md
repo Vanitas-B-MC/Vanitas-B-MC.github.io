@@ -23,9 +23,3 @@ assets/                     favicon, images
 2. Il lance `scripts/fetch_veille.py`, qui lit les flux de `content/veille-sources.json`,
    nettoie les extraits (résumés) et écrit `content/veille.json`.
 3. Si le fichier a changé, le workflow le commit : GitHub Pages republie le site.
-
-Pour lancer une relève tout de suite : onglet **Actions** → **Mise à jour de la veille** → **Run workflow**.
-Pour ajouter une source : ajoute un bloc dans `content/veille-sources.json`.
-
-Test en local : `python scripts/fetch_veille.py`, puis ouvre le site avec un serveur local
-(extension « Live Server » de VS Code, ou `python -m http.server`).
