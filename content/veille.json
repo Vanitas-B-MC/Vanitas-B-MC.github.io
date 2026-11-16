@@ -1,18 +1,6 @@
 {
- "updated": "2026-11-16T06:44:16Z",
+ "updated": "2026-11-16T09:42:55Z",
  "status": {
-  "Korben": {
-   "ok": true,
-   "count": 10
-  },
-  "Next": {
-   "ok": true,
-   "count": 10
-  },
-  "Numerama": {
-   "ok": true,
-   "count": 10
-  },
   "LinuxFr.org": {
    "ok": true,
    "count": 10
@@ -27,10 +15,6 @@
    "error": "HTTP Error 404: Not Found"
   },
   "CERT-FR": {
-   "ok": true,
-   "count": 10
-  },
-  "Ars Technica": {
    "ok": true,
    "count": 10
   },
@@ -52,6 +36,76 @@
   }
  },
  "items": [
+  {
+   "id": "tag:linuxfr.org,2005:News/43289",
+   "title": "📰 Revue de presse — novembre 2026",
+   "link": "https://linuxfr.org/news/revue-de-presse-novembre-2026",
+   "summary": "La fin de l’année pointe le bout de son nez et voici donc la dernière édition 2026 de notre petit panorama, forcément subjectif et parti{e,a}l, de la presse papier (et en ligne) disponible en cette fin d’automne. Voici donc les nouveautés…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-16T09:35:56Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5309271",
+   "title": "We don't need no education platform evolution. Hey, Redmond, leave those kids alone",
+   "link": "https://www.theregister.com/columnists/2026/11/16/we-dont-need-no-education-platform-evolution-hey-redmond-leave-those-kids-alone/5309271",
+   "summary": "Microsoft pulls the plug on free student email, but people are learning fast",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-16T09:31:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/linux/new-noisytcp-linux-kernel-flaw-lets-attackers-crash-servers/",
+   "title": "New NoisyTCP vulnerability lets attackers crash Linux servers",
+   "link": "https://www.bleepingcomputer.com/news/linux/new-noisytcp-linux-kernel-flaw-lets-attackers-crash-servers/",
+   "summary": "An 11-year-old Linux kernel vulnerability, dubbed NoisyTCP, affects almost all Linux distributions and lets attackers crash systems running Nginx, Apache, and SSH servers with default configurations.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-16T09:30:04Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-new-windows-emergency-updates-fix-activation-licensing-failures/",
+   "title": "Microsoft pushes Windows emergency updates to fix activation failures",
+   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-new-windows-emergency-updates-fix-activation-licensing-failures/",
+   "summary": "Microsoft has released emergency out-of-band updates to fix Windows activation and licensing failures caused by this month's security updates.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-16T08:26:52Z"
+  },
+  {
+   "id": "tag:linuxfr.org,2005:News/43288",
+   "title": "🏆 Meilleures contributions LinuxFr.org : les primées d’octobre 2026",
+   "link": "https://linuxfr.org/news/meilleures-contributions-linuxfr-org-les-primees-d-octobre-2026",
+   "summary": "Nous continuons sur notre lancée de récompenser celles et ceux qui chaque mois contribuent au site LinuxFr.org (dépêches, commentaires, logo, journaux, correctifs, etc.). Vous n’êtes pas sans risquer de gagner un livre des éditions…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-16T08:15:59Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/amazon-uncovers-ai-agent-campaign.html",
+   "title": "Amazon Uncovers AI Agent Campaign Targeting LiteLLM, Dify, and Other Apps for API Keys",
+   "link": "https://thehackernews.com/2026/11/amazon-uncovers-ai-agent-campaign.html",
+   "summary": "Attackers' AI agents have been hunting for weak spots in internet-exposed AI apps such as LiteLLM, One API, and Dify to steal the AI provider keys stored inside, according to the agents' own records. The records, which Amazon's threat…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-16T07:34:21Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/bo-team-exploits-log4shell-in-vmware.html",
+   "title": "BO Team Exploits Log4Shell in VMware vCenter, Compromises Russian Firm's Code-Signing Server",
+   "link": "https://thehackernews.com/2026/11/bo-team-exploits-log4shell-in-vmware.html",
+   "summary": "An investigation into suspicious activity within a Russian software developer's network has uncovered a months-long compromise of its development infrastructure and a software code-signing server. The activity, documented by Kaspersky's…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-16T06:53:34Z"
+  },
   {
    "id": "https://www.theregister.com/a/5309601",
    "title": "Techie rigged off-spec fan near flammable liquid and an exposed motherboard, then left it to run for days",
@@ -113,26 +167,6 @@
    "published": "2026-11-15T23:46:01Z"
   },
   {
-   "id": "https://arstechnica.com/space/2026/11/vulcan-rocket-fails-during-launch-dealing-major-blow-to-spacex-competitors/",
-   "title": "Vulcan rocket fails during launch, dealing major blow to SpaceX competitors",
-   "link": "https://arstechnica.com/space/2026/11/vulcan-rocket-fails-during-launch-dealing-major-blow-to-spacex-competitors/",
-   "summary": "This was the first total mission failure in United Launch Alliance's 20-year history.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-15T23:11:54Z"
-  },
-  {
-   "id": "https://www.numerama.com/pop-culture/2373859-avant-la-sortie-de-gta-6-les-joueurs-de-gta-5-organisent-une-derniere-balade-a-los-santos.html",
-   "title": "Avant la sortie de GTA 6, les joueurs de GTA 5 organisent une dernière balade à Los Santos",
-   "link": "https://www.numerama.com/pop-culture/2373859-avant-la-sortie-de-gta-6-les-joueurs-de-gta-5-organisent-une-derniere-balade-a-los-santos.html",
-   "summary": "À moins d'une semaine de la sortie de GTA 6, les fans de GTA 5 ont prévu de se retrouver une dernière fois dans les rues de Los Santos. Baptisé « The Last Ride », cet événement communautaire invite tout le monde à ranger les armes et à…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T19:50:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/fbi-warns-artex-ai-hacking-tool-is-powering-global-cyberattacks/",
    "title": "FBI warns ARTEX AI hacking tool is powering global cyberattacks",
    "link": "https://www.bleepingcomputer.com/news/security/fbi-warns-artex-ai-hacking-tool-is-powering-global-cyberattacks/",
@@ -153,36 +187,6 @@
    "published": "2026-11-15T17:44:37Z"
   },
   {
-   "id": "https://www.numerama.com/pop-culture/2369627-prime-video-livraison-de-fous-rires-garantie-avec-les-10-meilleures-comedies.html",
-   "title": "Prime Video : livraison de fous rires garantie avec les 10 meilleures comédies",
-   "link": "https://www.numerama.com/pop-culture/2369627-prime-video-livraison-de-fous-rires-garantie-avec-les-10-meilleures-comedies.html",
-   "summary": "De la satire d'espionnage tricolore aux comédies britanniques, sans oublier la nostalgie des années 90 et l'humour noir vintage, Prime Video a de quoi faire rire dans tous les registres. Voici notre sélection des 10 meilleurs films que…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T17:30:00Z"
-  },
-  {
-   "id": "https://www.numerama.com/tech/2374157-microsoft-bloque-des-mails-sans-prevenir-google-fait-prouver-la-securite-de-signal-par-80-agents-openai-installe-un-bouton-stop-sur-ses-ia-on-vous-raconte-la-semaine-cyberguerre.html",
-   "title": "Microsoft bloque des mails sans prévenir, Google fait prouver la sécurité de Signal par 80 agents, OpenAI installe un bouton stop sur ses IA : on vous raconte la semaine Cyberguerre",
-   "link": "https://www.numerama.com/tech/2374157-microsoft-bloque-des-mails-sans-prevenir-google-fait-prouver-la-securite-de-signal-par-80-agents-openai-installe-un-bouton-stop-sur-ses-ia-on-vous-raconte-la-semaine-cyberguerre.html",
-   "summary": "Trois actualités à retenir cette semaine dans le cyberespace, un durcissement discret de Microsoft qui fait rejeter les mails de petites structures vers Hotmail et Outlook, Google qui démontre mathématiquement, avec des agents IA, que le…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T17:10:00Z"
-  },
-  {
-   "id": "https://www.numerama.com/pop-culture/2373649-france-turquie-ou-voir-le-match-de-foot-en-direct-et-en-streaming.html",
-   "title": "France-Turquie : où voir le match de foot en direct et en streaming ?",
-   "link": "https://www.numerama.com/pop-culture/2373649-france-turquie-ou-voir-le-match-de-foot-en-direct-et-en-streaming.html",
-   "summary": "L'Équipe de France n'est pas encore qualifiée pour les quarts de finale de la Ligue des nations, en raison de sa défaite face à l'Italie. Mais les Bleus reçoivent la Turquie, 0 point au compteur, pour la dernière journée. Le match est…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T16:02:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/tsmc-employee-data-breach-linked-to-cloud-provider/",
    "title": "TSMC employee data breach linked to cloud provider",
    "link": "https://www.bleepingcomputer.com/news/security/tsmc-employee-data-breach-linked-to-cloud-provider/",
@@ -193,36 +197,6 @@
    "published": "2026-11-15T15:23:48Z"
   },
   {
-   "id": "https://www.numerama.com/sciences/2372635-cette-etoile-brillait-fort-tous-les-113-jours-et-on-sait-enfin-pourquoi.html",
-   "title": "Cette étoile brillait fort tous les 113 jours et on sait enfin pourquoi",
-   "link": "https://www.numerama.com/sciences/2372635-cette-etoile-brillait-fort-tous-les-113-jours-et-on-sait-enfin-pourquoi.html",
-   "summary": "Une étoile particulièrement instable interrogeait les scientifiques depuis près de quinze ans. Une étude publiée ce lundi 9 novembre, appuyée sur le télescope Chandra, trouve enfin une explication à son étrange comportement : un compagnon…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T14:31:00Z"
-  },
-  {
-   "id": "https://www.numerama.com/sciences/2371751-ils-vont-monter-a-bord-mais-les-astronautes-nont-pas-le-droit-de-la-voir-le-rituel-le-plus-paradoxal-des-lancements-soyouz.html",
-   "title": "Ils vont monter à bord, mais les astronautes n’ont pas le droit de voir la fusée : le rituel le plus paradoxal des lancements Soyouz",
-   "link": "https://www.numerama.com/sciences/2371751-ils-vont-monter-a-bord-mais-les-astronautes-nont-pas-le-droit-de-la-voir-le-rituel-le-plus-paradoxal-des-lancements-soyouz.html",
-   "summary": "Quelques jours avant chaque décollage d'un Soyouz depuis Baïkonour, l'équipage n'a pas le droit de voir sa fusée partir vers le pas de tir.",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T13:01:00Z"
-  },
-  {
-   "id": "https://arstechnica.com/science/2026/11/how-the-worlds-fires-changed-while-humanity-hit-pause/",
-   "title": "How the world’s fires changed while humanity hit pause",
-   "link": "https://arstechnica.com/science/2026/11/how-the-worlds-fires-changed-while-humanity-hit-pause/",
-   "summary": "COVID-19 lockdowns cut global fire activity by 12.3 percent.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-15T12:07:34Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/italy-fines-meta-805-million-over.html",
    "title": "Italy Fines Meta €805 Million Over Facebook's Android Gallery Access Without Explicit Consent",
    "link": "https://thehackernews.com/2026/11/italy-fines-meta-805-million-over.html",
@@ -231,46 +205,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-15T11:27:31Z"
-  },
-  {
-   "id": "https://www.numerama.com/pop-culture/2371755-meilleurs-mangas-shojo-voici-notre-top-10-des-oeuvres-incontournables-a-lire-absolument.html",
-   "title": "Meilleurs mangas shôjo : voici notre top 10 des œuvres incontournables à lire absolument",
-   "link": "https://www.numerama.com/pop-culture/2371755-meilleurs-mangas-shojo-voici-notre-top-10-des-oeuvres-incontournables-a-lire-absolument.html",
-   "summary": "Longtemps résumé aux histoires d'amour et aux romances lycéennes, le shôjo est pourtant bien plus riche qu'il n'y paraît. Du drame familial à la fantasy, en passant par les récits initiatiques et les histoires fantastiques, cette catégorie…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T11:15:00Z"
-  },
-  {
-   "id": "https://www.numerama.com/pop-culture/2240235-vous-avez-manque-la-derniere-promo-disney-elle-est-deja-de-retour.html",
-   "title": "Disney+ propose ses abonnements à 30 % de réduction, mais ça ne durera pas",
-   "link": "https://www.numerama.com/pop-culture/2240235-vous-avez-manque-la-derniere-promo-disney-elle-est-deja-de-retour.html",
-   "summary": "[Deal du jour] Disney+ remet ses trois abonnements mensuels en promotion. Les prix baissent pendant deux mois, à condition de s’abonner avant la date limite.",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T10:00:00Z"
-  },
-  {
-   "id": "https://korben.info/openai-lance-daybreak-des-agents-ia-qui-piratent-vos-applis-pour-les-securiser.html",
-   "title": "OpenAI lance Daybreak, des agents IA qui piratent vos applis pour les sécuriser",
-   "link": "https://korben.info/openai-lance-daybreak-des-agents-ia-qui-piratent-vos-applis-pour-les-securiser.html?utm_source=rss&utm_medium=feed&utm_campaign=flux-principal",
-   "summary": "Lors de l'événement Cyber at the Frontier, OpenAI a présenté Daybreak Red Team, des agents IA qui testent l'intrusion sur vos applis web, et Daybreak Defense Factory, qui propose des correctifs en pull request. Le tout repose sur GPT-6…",
-   "source": "Korben",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T09:26:21Z"
-  },
-  {
-   "id": "https://www.numerama.com/tech/2373571-cette-app-francaise-connait-mieux-votre-tesla-que-lapp-tesla.html",
-   "title": "Cette app française connaît mieux votre Tesla que l’app Tesla",
-   "link": "https://www.numerama.com/tech/2373571-cette-app-francaise-connait-mieux-votre-tesla-que-lapp-tesla.html",
-   "summary": "Vous trouvez votre app Tesla trop limitée ? Un Français lance Copeel, une application iPhone destinée aux propriétaires de Tesla et nous avons eu la chance de la bêta-tester. Elle enregistre trajets, recharges, stationnement et santé de la…",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T09:03:00Z"
   },
   {
    "id": "https://www.theregister.com/a/5308806",
@@ -291,36 +225,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-15T08:22:04Z"
-  },
-  {
-   "id": "https://www.numerama.com/vroom/2374243-apres-40-ans-de-regne-volkswagen-doit-tout-reapprendre-en-chine.html",
-   "title": "Après 40 ans de règne, Volkswagen doit tout réapprendre en Chine",
-   "link": "https://www.numerama.com/vroom/2374243-apres-40-ans-de-regne-volkswagen-doit-tout-reapprendre-en-chine.html",
-   "summary": "40 ans au sommet, et voilà Volkswagen obligée de réapprendre son métier. En Chine, le réveil est brutal. Un édito Watt Else publié le 12 novembre 2026 au retour d'un séjour en Chine.",
-   "source": "Numerama",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T07:48:00Z"
-  },
-  {
-   "id": "https://korben.info/vectors-jeu-controle-aerien-navigateur.html",
-   "title": "Vectors - Aiguilleur du ciel ze game !",
-   "link": "https://korben.info/vectors-jeu-controle-aerien-navigateur.html?utm_source=rss&utm_medium=feed&utm_campaign=flux-principal",
-   "summary": "Vectors est un jeu de contrôle aérien gratuit qui tourne dans le navigateur, sans compte. Joli mais un peu austère et tout en anglais : voici les gestes du premier service, les deux pièges de la fin du tuto, l'ATC School et les Scénarios.",
-   "source": "Korben",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-15T06:54:41Z"
-  },
-  {
-   "id": "https://arstechnica.com/space/2026/11/with-starship-catch-spacex-still-shows-it-can-dazzle-the-world/",
-   "title": "SpaceX returned its Starship rocket on Saturday—but there's a catch",
-   "link": "https://arstechnica.com/space/2026/11/with-starship-catch-spacex-still-shows-it-can-dazzle-the-world/",
-   "summary": "It felt like stepping into the future.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-15T00:40:59Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/43310",
@@ -363,16 +267,6 @@
    "published": "2026-11-14T12:38:35Z"
   },
   {
-   "id": "https://next.ink/?p=267610",
-   "title": "Flock : bons baisers de Chine",
-   "link": "https://next.ink/267610/flock-bons-baisers-de-chine/",
-   "summary": "Amour, trahison, espionnage… dans quel drôle de film Jensen a-t-il décroché le premier rôle ? Va-t-on entendre le vacarme du silencieux ? Quelle pilule va-t-il être obligé de gober après ça ? Nul ne le sait pour le moment, mais continuez à…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T12:37:00Z"
-  },
-  {
    "id": "https://visualstudio.developpez.com/actu/389096/Microsoft-annonce-que-le-debogage-dynamique-en-Cplusplus-est-desormais-disponible-pour-tous-les-canaux-de-Visual-Studio-2026-et-dans-la-version-14-52-des-outils-de-generation-Microsoft-Cplusplus-MSVC/",
    "title": "Microsoft annonce que le débogage dynamique en C++ est désormais disponible pour tous les canaux de Visual Studio 2026 et dans la version 14.52 des outils de génération Microsoft C++ (MSVC)",
    "link": "https://visualstudio.developpez.com/actu/389096/Microsoft-annonce-que-le-debogage-dynamique-en-Cplusplus-est-desormais-disponible-pour-tous-les-canaux-de-Visual-Studio-2026-et-dans-la-version-14-52-des-outils-de-generation-Microsoft-Cplusplus-MSVC/",
@@ -391,26 +285,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-14T12:32:00Z"
-  },
-  {
-   "id": "https://arstechnica.com/science/2026/11/james-webb-telescope-finds-ice-older-than-the-star-it-orbits/",
-   "title": "James Webb telescope finds ice older than the star it orbits",
-   "link": "https://arstechnica.com/science/2026/11/james-webb-telescope-finds-ice-older-than-the-star-it-orbits/",
-   "summary": "Radiation and collisions reshape the planetary building materials.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-14T12:15:48Z"
-  },
-  {
-   "id": "https://arstechnica.com/science/2026/11/winemakers-are-learning-that-conservation-can-be-good-for-business/",
-   "title": "Winemakers are learning that conservation can be good for business",
-   "link": "https://arstechnica.com/science/2026/11/winemakers-are-learning-that-conservation-can-be-good-for-business/",
-   "summary": "Healthy soils, native plants, and fewer chemicals are helping vineyards adapt.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-14T12:05:51Z"
   },
   {
    "id": "https://www.theregister.com/a/5309296",
@@ -433,16 +307,6 @@
    "published": "2026-11-14T08:18:00Z"
   },
   {
-   "id": "https://next.ink/?p=267641",
-   "title": "[MàJ] Une alerte rarissime a cloué tous les avions au sol aux États-Unis",
-   "link": "https://next.ink/267641/une-alerte-rarissime-cloue-tous-les-avions-au-sol-aux-etats-unis/",
-   "summary": "Un problème de communication touchant le contrôle aérien a entraîné la suspension des décollages dans tous les aéroports américains ce vendredi pendant plus de quatre heures. Une mesure exceptionnelle qui aurait été décidée par la FAA en…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T07:17:14Z"
-  },
-  {
    "id": "https://intelligence-artificielle.developpez.com/actu/389094/L-agent-de-codage-Grok-Build-divulgue-une-multitude-d-informations-confidentielles-dont-certaines-appartiennent-a-SpaceX-Un-chercheur-decouvre-35-000-applications-Grok-Build-accessibles-a-tous/",
    "title": "L'agent de codage Grok Build divulgue une multitude d'informations confidentielles dont certaines appartiennent à SpaceX. Un chercheur découvre 35 000 applications Grok Build accessibles à tous",
    "link": "https://intelligence-artificielle.developpez.com/actu/389094/L-agent-de-codage-Grok-Build-divulgue-une-multitude-d-informations-confidentielles-dont-certaines-appartiennent-a-SpaceX-Un-chercheur-decouvre-35-000-applications-Grok-Build-accessibles-a-tous/",
@@ -463,36 +327,6 @@
    "published": "2026-11-14T05:19:00Z"
   },
   {
-   "id": "https://korben.info/stela-macos-pc-x86-hackintosh.html",
-   "title": "Stela - Le retour du Hackintosh ?",
-   "link": "https://korben.info/stela-macos-pc-x86-hackintosh.html?utm_source=rss&utm_medium=feed&utm_campaign=flux-principal",
-   "summary": "Stela démarre macOS 27 pour Apple Silicon, sans le modifier, sur un PC x86 équipé d'une carte NVIDIA, en lui faisant croire qu'il tourne sur un Mac mini M2. Ce qu'il faut comme matériel, comment fabriquer la clé, et pourquoi le garder pour…",
-   "source": "Korben",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-14T01:03:37Z"
-  },
-  {
-   "id": "https://arstechnica.com/space/2026/11/starship-flight-15-powers-to-orbit-setting-up-a-possible-catch-on-saturday/",
-   "title": "Starship flight 15 powers to orbit—setting up a possible catch on Saturday",
-   "link": "https://arstechnica.com/space/2026/11/starship-flight-15-powers-to-orbit-setting-up-a-possible-catch-on-saturday/",
-   "summary": "One way or another, the company will get some more data on Saturday.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-14T00:49:13Z"
-  },
-  {
-   "id": "https://arstechnica.com/tech-policy/2026/11/faa-orders-third-nationwide-ground-stop-in-its-history/",
-   "title": "FAA has lifted its third-ever nationwide ground stop",
-   "link": "https://arstechnica.com/tech-policy/2026/11/faa-orders-third-nationwide-ground-stop-in-its-history/",
-   "summary": "Secretary of Transportation Sean Duffy blamed obsolete equipment for the outage.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-13T23:17:38Z"
-  },
-  {
    "id": "https://www.theregister.com/a/5309912",
    "title": "FAA blames ground stop on faulty copper wiring",
    "link": "https://www.theregister.com/offbeat/2026/11/13/faa-blames-ground-stop-on-faulty-copper-wiring/5309912",
@@ -503,26 +337,6 @@
    "published": "2026-11-13T22:42:28Z"
   },
   {
-   "id": "https://arstechnica.com/health/2026/11/millions-in-us-use-unapproved-glp-1s-and-use-them-in-unapproved-ways/",
-   "title": "Millions of Americans are not taking their GLP-1 drugs as prescribed",
-   "link": "https://arstechnica.com/health/2026/11/millions-in-us-use-unapproved-glp-1s-and-use-them-in-unapproved-ways/",
-   "summary": "Cost and access barriers are pushing people to modified use and unapproved versions.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-13T21:59:01Z"
-  },
-  {
-   "id": "https://arstechnica.com/features/2026/11/faa-expands-ai-advice-to-manage-air-traffic-congestion-across-entire-us-airspace/",
-   "title": "FAA expands AI advice to manage air traffic congestion across entire US airspace",
-   "link": "https://arstechnica.com/features/2026/11/faa-expands-ai-advice-to-manage-air-traffic-congestion-across-entire-us-airspace/",
-   "summary": "Airlines praised the AI tool, but the air traffic controllers’ union wasn’t involved.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-13T21:20:47Z"
-  },
-  {
    "id": "https://www.theregister.com/a/5309891",
    "title": "Chinese AI labs are training models on Nvidia's Blackwell despite export controls, says ex-OpenAI engineer",
    "link": "https://www.theregister.com/ai-and-ml/2026/11/13/chinese-ai-labs-are-training-models-on-nvidias-blackwell-despite-export-controls-says-ex-openai-engineer/5309891",
@@ -531,26 +345,6 @@
    "category": "Infrastructure",
    "lang": "en",
    "published": "2026-11-13T21:16:22Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5309882",
-   "title": "This year’s bug count just passed 100K",
-   "link": "https://www.theregister.com/security/2026/11/13/this-years-bug-count-just-passed-100k/5309882",
-   "summary": "‘We don’t have a security problem anymore. We have a data problem now’",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-13T20:52:17Z"
-  },
-  {
-   "id": "https://arstechnica.com/science/2026/11/in-elephants-the-resilience-of-communities-has-its-limits/",
-   "title": "In elephants, the resilience of communities has its limits",
-   "link": "https://arstechnica.com/science/2026/11/in-elephants-the-resilience-of-communities-has-its-limits/",
-   "summary": "In Sri Lanka, ecological change is shrinking a park's elephant population.",
-   "source": "Ars Technica",
-   "category": "Actualités",
-   "lang": "en",
-   "published": "2026-11-13T20:03:13Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/cryptocurrency/trezor-confirms-crypto-stealing-implants-in-three-wallets-releases-fix/",
@@ -573,16 +367,6 @@
    "published": "2026-11-13T19:35:00Z"
   },
   {
-   "id": "https://next.ink/?post_type=brief_article&p=267309",
-   "title": "☕️ [MàJ] Outlook, Teams : les services Microsoft reviennent au bout de 20 heures",
-   "link": "https://next.ink/brief-article/outlook-teams-plusieurs-services-de-microsoft-sont-en-panne/",
-   "summary": "Mise à jour, 13 novembre, 18h20 : Microsoft présente de profondes excuses pour les perturbations de deux derniers jours. Fort heureusement, l’entreprise constate un « rétablissement généralisé et une stabilisation » de ses services. La…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T17:35:35Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/german-military-drone-operations-disrupted-by-cyberattack/",
    "title": "German military drone operations disrupted by cyberattack",
    "link": "https://www.bleepingcomputer.com/news/security/german-military-drone-operations-disrupted-by-cyberattack/",
@@ -601,16 +385,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-13T16:53:08Z"
-  },
-  {
-   "id": "https://next.ink/?p=267583",
-   "title": "Xbox, 25 ans et une crise d’identité",
-   "link": "https://next.ink/267583/xbox-25-ans-et-une-crise-didentite/",
-   "summary": "25 ans plus tard, Xbox est devenu un empire du divertissement, mais les consoles sont à la peine. Entre des rachats à coups de milliards, des paris contrariés et la promesse ou le mirage de l’IA, la marque fête cet anniversaire en pleine…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T16:35:54Z"
   },
   {
    "id": "https://visualstudio.developpez.com/actu/389084/Microsot-annonce-que-la-fonctionnalite-Bring-Your-Own-Model-BYOM-est-disponible-pour-tous-dans-Visual-Studio-permettant-aux-developpeurs-d-utiliser-leurs-propres-modeles-d-IA-sans-quitter-l-EDI/",
@@ -633,26 +407,6 @@
    "published": "2026-11-13T16:21:43Z"
   },
   {
-   "id": "https://next.ink/?p=267303",
-   "title": "Les lunettes connectées d’Amazon ne rassurent pas tous les livreurs",
-   "link": "https://next.ink/267303/les-lunettes-connectees-damazon-ne-rassurent-pas-tous-les-livreurs/",
-   "summary": "Après une phase de test, Amazon va distribuer plus largement des lunettes connectées pour les chauffeurs-livreurs de ses colis. Ce qui n’est pas sans inquiéter certains d’entre eux. Depuis l’an dernier, plus de 300 entreprises de livraison…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T15:52:26Z"
-  },
-  {
-   "id": "https://next.ink/?p=266410",
-   "title": "Phishing : quand un vrai faux email et un lien légitime cachent une arnaque",
-   "link": "https://next.ink/266410/phishing-quand-un-vrai-faux-email-et-un-lien-legitime-cachent-une-arnaque/",
-   "summary": "Dans notre boîte, nous avons reçu un email qui semble tout à fait légitime. Il est d’ailleurs arrivé directement dans la boîte principale de notre Gmail. Problème, il contenait un lien, qui semblait lui aussi légitime, mais qui ne l’était…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T15:32:00Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/new-mior-and-skyfall-attacks-let-rogue.html",
    "title": "New Mior and Skyfall Attacks Let Rogue Cloud Hosts Steal Secrets From AMD SEV-SNP VMs",
    "link": "https://thehackernews.com/2026/11/new-mior-and-skyfall-attacks-let-rogue.html",
@@ -671,26 +425,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-13T15:01:11Z"
-  },
-  {
-   "id": "https://next.ink/?p=266404",
-   "title": "[Édito] Des plaques d’immatriculation en vente, que nous reste-t-il de privé ?",
-   "link": "https://next.ink/266404/edito-des-plaques-dimmatriculation-en-vente-que-nous-reste-t-il-de-prive/",
-   "summary": "Toutes les fuites de données sont importantes et renforcent les pirates. Dernier exemple en date, des plaques d’immatriculation, avec le risque de cibler toujours plus de potentielles victimes. Au-delà de prendre au sérieux la…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T15:01:00Z"
-  },
-  {
-   "id": "https://next.ink/?p=267461",
-   "title": "Windows 11 : que donne la réinstallation par le cloud ?",
-   "link": "https://next.ink/267461/windows-11-que-donne-la-reinstallation-par-le-cloud/",
-   "summary": "Un mécanisme de réinstallation par le cloud est disponible dans Windows 11 depuis peu. Il semble pensé pour la transmission du PC à un tiers, avec la possibilité de lancer un effacement sécurisé des données. Depuis la mise à jour…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T14:37:27Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/fbi-says-north-korean-hackers-stole.html",
@@ -733,16 +467,6 @@
    "published": "2026-11-13T13:13:00Z"
   },
   {
-   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-says-november-security-updates-cause-printing-issues/",
-   "title": "Microsoft says November security updates cause printing issues",
-   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-says-november-security-updates-cause-printing-issues/",
-   "summary": "Microsoft warned customers earlier this week that the November 2026 security updates may break printing for documents with complex formatting.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-13T12:27:40Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/when-ai-agent-goes-wrong-can-you-stop-it.html",
    "title": "When an AI Agent Goes Wrong, Can You Stop It?",
    "link": "https://thehackernews.com/2026/11/when-ai-agent-goes-wrong-can-you-stop-it.html",
@@ -751,66 +475,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-13T11:52:31Z"
-  },
-  {
-   "id": "https://next.ink/?p=267269",
-   "title": "Présidentielle 2027 : LFI détaille son programme pour « démocratiser la révolution numérique »",
-   "link": "https://next.ink/267269/presidentielle-2027-lfi-detaille-son-programme-pour-democratiser-la-revolution-numerique/",
-   "summary": "Un chapitre du programme de La France Insoumise pour l’élection présidentielle de 2027 est consacré aux enjeux numériques, avec trois volets de propositions censées faire du numérique un bien commun, garantir la souveraineté française en…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T11:37:00Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/silentair-hijacks-asian-telecom.html",
-   "title": "SilentAir Hijacks Asian Telecom Networks to Intercept SMS 2FA Codes and Spy on Taiwanese Users",
-   "link": "https://thehackernews.com/2026/11/silentair-hijacks-asian-telecom.html",
-   "summary": "A newly identified spying group used hacked equipment inside Asian mobile operators to intercept the calls and texts of selected people, mostly in Taiwan. Enea, a telecom and cybersecurity software company based in Stockholm, found the…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-13T11:10:40Z"
-  },
-  {
-   "id": "https://next.ink/?p=260033",
-   "title": "[Tuto] Agents IA : installer le harnais Pi.dev ou sa version dopée aux hormones Oh My Pi",
-   "link": "https://next.ink/260033/tuto-agents-ia-installer-le-harnais-pi-dev-ou-sa-version-dopee-aux-hormones-oh-my-pi/",
-   "summary": "Installer un agent IA sur son ordinateur est simple comme une ligne de commande, aussi bien sous Windows, macOS que Linux. Next vous explique le fonctionnement avec Pi.dev, un agent qui se veut minimaliste. On vous parle aussi de Oh My Pi…",
-   "source": "Next",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T11:09:08Z"
-  },
-  {
-   "id": "https://korben.info/agent-desktop.html",
-   "title": "Agent-desktop pilote vos applis sans regarder l'écran",
-   "link": "https://korben.info/agent-desktop.html?utm_source=rss&utm_medium=feed&utm_campaign=flux-principal",
-   "summary": "agent-desktop, de Vercel Labs, fait piloter vos applications de bureau par un agent IA en lisant l'arbre d'accessibilité plutôt que des captures d'écran. Essai sur Mac, avec TextEdit et une appli Electron, et la limite qui compte.",
-   "source": "Korben",
-   "category": "Actualités",
-   "lang": "fr",
-   "published": "2026-11-13T10:57:03Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/operation-endgame-takes-down-gootloader.html",
-   "title": "Operation Endgame Takes Down Gootloader, CastleRAT and StealC Servers, Seizes 6.4M Stolen Logins",
-   "link": "https://thehackernews.com/2026/11/operation-endgame-takes-down-gootloader.html",
-   "summary": "An international police operation took down servers behind Gootloader, CastleRAT and StealC this week. Criminals used the three malware tools to gain access to computers, steal passwords, and launch ransomware attacks. Police also seized…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-13T10:55:03Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/check-point-patches-zero-day-that-lets-hackers-get-root-access/",
-   "title": "Check Point warns of zero-day flaw exploited for root access",
-   "link": "https://www.bleepingcomputer.com/news/security/check-point-patches-zero-day-that-lets-hackers-get-root-access/",
-   "summary": "Check Point Software has released emergency hotfixes to address a high-severity flaw that hackers have been exploiting to gain root privileges and establish persistence on vulnerable devices since late October.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-13T10:44:22Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/43304",
@@ -951,6 +615,126 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-12T14:32:23Z"
+  },
+  {
+   "id": "https://github.blog/?p=100077",
+   "title": "Git security vulnerabilities announced",
+   "link": "https://github.blog/open-source/git/git-security-vulnerabilities-announced-7/",
+   "summary": "Git is releasing updates addressing six security vulnerabilities affecting recursive clones, reference handling, merges, binary patches, and imports. Here is what users need to know.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-11-10T18:00:00Z"
+  },
+  {
+   "id": "tag:linuxfr.org,2005:News/43302",
+   "title": "Revue de presse de l’April pour la semaine 45 de l’année 2026",
+   "link": "https://linuxfr.org/news/revue-de-presse-de-l-april-pour-la-semaine-45-de-l-annee-2026",
+   "summary": "Cette revue de presse sur Internet fait partie du travail de veille mené par l’April dans le cadre de son action de défense et de promotion du logiciel libre. Les positions exposées dans les articles sont celles de leurs auteurs et ne…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-09T15:00:41Z"
+  },
+  {
+   "id": "tag:linuxfr.org,2005:News/43287",
+   "title": "🪶 Les journaux LinuxFr.org les mieux notés d’octobre 2026",
+   "link": "https://linuxfr.org/news/les-journaux-linuxfr-org-les-mieux-notes-d-octobre-2026",
+   "summary": "LinuxFr.org propose des dépêches et articles, soumis par tout un chacun, puis revus et corrigés par l’équipe de modération avant publication. C’est la partie la plus visible de LinuxFr.org, ce sont les dépêches qui sont le plus lues et…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-09T09:27:13Z"
+  },
+  {
+   "id": "tag:linuxfr.org,2005:News/43297",
+   "title": "Daylight GNU/Linux 5 : un bureau Fluxbox ajouté à Raspberry Pi OS",
+   "link": "https://linuxfr.org/news/daylight-gnu-linux-5-un-bureau-fluxbox-ajoute-a-raspberry-pi-os",
+   "summary": "Daylight GNU/Linux prépare sa version 5, actuellement disponible en version candidate 5.0.0-rc.2. Ce projet libre, développé par Hamdy Abou El Anein en Suisse, propose un environnement Fluxbox et des outils en Rust à installer sur…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-09T08:21:15Z"
+  },
+  {
+   "id": "https://github.blog/?p=100047",
+   "title": "Beyond code generation: A developer’s guide to agentic engineering",
+   "link": "https://github.blog/ai-and-ml/github-copilot/beyond-code-generation-a-developers-guide-to-agentic-engineering/",
+   "summary": "Writing code got faster. The work around it didn't. See how you can plan, write code, review changes, and investigate production issues with GitHub Copilot, and what work still needs your judgment.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-11-06T22:15:59Z"
+  },
+  {
+   "id": "https://github.blog/?p=100002",
+   "title": "Inside GitHub’s new Git storage architecture",
+   "link": "https://github.blog/engineering/architecture-optimization/inside-githubs-new-git-storage-architecture/",
+   "summary": "GitHub's new Git storage architecture is built so thousands of agents can push to a single repository at once. Here's how it works.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-11-05T20:23:21Z"
+  },
+  {
+   "id": "https://github.blog/?p=99949",
+   "title": "Accessibility statements now have a home on GitHub",
+   "link": "https://github.blog/open-source/maintainers/accessibility-statements-now-have-a-home-on-github/",
+   "summary": "GitHub now highlights ACCESSIBILITY.md files and helps maintainers document accessibility goals, known barriers, supported environments, contributor expectations, and reporting processes.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-11-05T16:00:00Z"
+  },
+  {
+   "id": "tag:linuxfr.org,2005:News/43292",
+   "title": "Fedora Linux 45 est enfin disponible !",
+   "link": "https://linuxfr.org/news/fedora-linux-45-est-enfin-disponible",
+   "summary": "En ce mardi 3 novembre, les utilisateurs du Projet Fedora seront ravis d’apprendre la disponibilité de la version Fedora Linux 45. Fedora Linux est une distribution communautaire développée par le projet Fedora et sponsorisée par Red Hat…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-05T09:00:49Z"
+  },
+  {
+   "id": "https://github.blog/?p=99955",
+   "title": "Arnis turns any place on Earth into a Minecraft world",
+   "link": "https://github.blog/open-source/maintainers/arnis-turns-any-place-on-earth-into-a-minecraft-world/",
+   "summary": "Louis Erbkamm built the first prototype in his free time. Now GitHub Copilot helps him maintain it alone.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-11-03T16:00:00Z"
+  },
+  {
+   "id": "https://github.blog/?p=99918",
+   "title": "Game Off 2026: The theme is SHIFT",
+   "link": "https://github.blog/open-source/gaming/game-off-2026-the-theme-is-shift/",
+   "summary": "GitHub’s annual month-long game jam is back for its 14th year! This November, make a game inspired by the theme SHIFT. Change gears, swap perspectives, bend reality, or just press a certain key.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-11-01T21:36:00Z"
+  },
+  {
+   "id": "https://github.blog/?p=99788",
+   "title": "GitHub Universe 2026: Evolving every layer of the stack",
+   "link": "https://github.blog/news-insights/company-news/github-universe-2026-evolving-every-layer-of-the-stack/",
+   "summary": "Today, we laid out our vision for GitHub as the most comprehensive, end-to-end software delivery system in the world.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-10-28T16:09:28Z"
+  },
+  {
+   "id": "https://github.blog/?p=99742",
+   "title": "Octoverse: Commits, pushes, reach new highs in 2026 as developers build with agents",
+   "link": "https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/",
+   "summary": "See how a record year of growth reached every industry, every field, and every kind of builder in the 2026 Octoverse report.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-10-28T16:07:40Z"
   }
  ]
 }
