@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-16T19:40:55Z",
+ "updated": "2026-11-17T03:58:51Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,136 @@
   }
  },
  "items": [
+  {
+   "id": "https://jetbrains.developpez.com/actu/389140/JetBrains-ReSharper-2026-3-l-extension-Visual-Studio-destinee-aux-developpeurs-NET-est-disponible-avec-les-agents-IA-Claude-et-Codex-ainsi-que-la-prise-en-charge-de-NET-11-et-C-15/",
+   "title": "JetBrains ReSharper 2026.3, l'extension Visual Studio destinée aux développeurs .NET, est disponible, avec les agents IA Claude et Codex, ainsi que la prise en charge de .NET 11 et C# 15",
+   "link": "https://jetbrains.developpez.com/actu/389140/JetBrains-ReSharper-2026-3-l-extension-Visual-Studio-destinee-aux-developpeurs-NET-est-disponible-avec-les-agents-IA-Claude-et-Codex-ainsi-que-la-prise-en-charge-de-NET-11-et-C-15/",
+   "summary": "JetBrains ReSharper 2026.3, l'extension Visual Studio destinée aux développeurs .NET, est disponible, avec les agents IA Claude et Codex, ainsi que la prise en charge de .NET 11 et C# 15 ReSharper est une extension de Visual Studio…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-17T02:58:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/optimizely-supply-chain-attack-infects-major-brands-sites-with-malware/",
+   "title": "Optimizely supply chain attack infects major brands' sites with malware",
+   "link": "https://www.bleepingcomputer.com/news/security/optimizely-supply-chain-attack-infects-major-brands-sites-with-malware/",
+   "summary": "A suspected supply chain attack targeting Optimizely has led to malicious JavaScript being loaded on numerous popular websites, including Zoom, CNN, Fox News, BBC, Salesforce, and GitLab, exposing visitors to scripts designed to steal…",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-17T02:12:17Z"
+  },
+  {
+   "id": "https://microsoft.developpez.com/actu/389145/Microsoft-revele-comment-un-bug-cache-de-Windows-a-provoque-la-panne-des-services-Microsoft-365-dans-le-monde-entier-ce-bug-ayant-entraine-une-autre-serie-de-desastres/",
+   "title": "Microsoft révèle comment un bug caché de Windows a provoqué la panne des services Microsoft 365 dans le monde entier, ce bug ayant entrainé une autre série de désastres",
+   "link": "https://microsoft.developpez.com/actu/389145/Microsoft-revele-comment-un-bug-cache-de-Windows-a-provoque-la-panne-des-services-Microsoft-365-dans-le-monde-entier-ce-bug-ayant-entraine-une-autre-serie-de-desastres/",
+   "summary": "Microsoft révèle comment un bug caché de Windows a provoqué la panne des services Microsoft 365 dans le monde entier, ce bug ayant entrainé une autre série de désastres Microsoft a apporté des explications concernant la panne récente de…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-17T01:59:00Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389146/Alibaba-lance-Qwen4-Max-son-nouveau-modele-d-IA-de-base-avec-une-reduction-de-50-pourcent-de-l-utilisation-des-jetons-et-un-score-superieur-de-28-pourcent-sur-Terminal-Bench4-0/",
+   "title": "Alibaba lance Qwen4-Max, son nouveau modèle d'IA de base, avec une réduction de 50 % de l'utilisation des jetons et un score supérieur de 28 % sur Terminal-Bench4.0",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389146/Alibaba-lance-Qwen4-Max-son-nouveau-modele-d-IA-de-base-avec-une-reduction-de-50-pourcent-de-l-utilisation-des-jetons-et-un-score-superieur-de-28-pourcent-sur-Terminal-Bench4-0/",
+   "summary": "Alibaba lance Qwen4-Max, son nouveau modèle d'IA de base, avec une réduction de 50 % de l'utilisation des jetons et un score supérieur de 28 % sur Terminal-Bench4.0 Alibaba a annoncé Qwen4-Max désormais disponible sur la plateforme Qwen…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-17T01:57:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310307",
+   "title": "US extends chip sale restrictions to more Asian countries to reduce risk of ‘diversion’ to China",
+   "link": "https://www.theregister.com/off-prem/2026/11/17/us-extends-chip-sale-restrictions-to-more-asian-countries-to-reduce-risk-of-diversion-to-china/5310307",
+   "summary": "'Know Your Customer's Workload' requirements imposed on cloud operators across Asia, Brazil",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T00:55:39Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310297",
+   "title": "California sues OpenAI for misleading public about AI safety",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/16/california-sues-openai-for-misleading-public-about-ai-safety/5310297",
+   "summary": "A-G cites Hugging Face incident as example of why industry must be accountable",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-16T23:43:17Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/gemini-ai-agents-repeatedly-bypassed-safeguards-to-attack-real-website/",
+   "title": "Gemini AI agents repeatedly bypassed safeguards to attack real website",
+   "link": "https://www.bleepingcomputer.com/news/security/gemini-ai-agents-repeatedly-bypassed-safeguards-to-attack-real-website/",
+   "summary": "Google's Gemini AI agents repeatedly attempted to hack a real organization's website during AI model safety testing, finding ways to circumvent increasingly restrictive security controls designed to prevent them from accessing live systems.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-16T22:54:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310280",
+   "title": "Infoblox customer and staff data exposed in Sharepoint breach",
+   "link": "https://www.theregister.com/security/2026/11/16/infoblox-customer-and-staff-data-exposed-in-sharepoint-breach/5310280",
+   "summary": "The company is investigating",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-16T21:53:28Z"
+  },
+  {
+   "id": "https://programmation.developpez.com/actu/389147/Indice-TIOBE-de-novembre-2026-Rust-quitte-le-top-10-laissant-la-place-a-Go-Dart-integre-le-top-20-pour-la-premiere-fois-de-son-histoire-grace-au-succes-fulgurant-du-framework-mobile-Flutter/",
+   "title": "Indice TIOBE de novembre 2026 : Rust quitte le top 10, laissant la place à Go. Dart intègre le top 20 pour la première fois de son histoire grâce au succès fulgurant du framework mobile Flutter",
+   "link": "https://programmation.developpez.com/actu/389147/Indice-TIOBE-de-novembre-2026-Rust-quitte-le-top-10-laissant-la-place-a-Go-Dart-integre-le-top-20-pour-la-premiere-fois-de-son-histoire-grace-au-succes-fulgurant-du-framework-mobile-Flutter/",
+   "summary": "Indice TIOBE de novembre 2026 : Rust quitte le top 10, laissant la place à Go. Dart intègre le top 20 pour la première fois de son histoire grâce au succès fulgurant du framework mobile Flutter L'indice TIOBE de novembre 2026 révèle des…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-16T21:42:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/google-project-zero-cuts-bug-disclosure-deadline-to-30-days-amid-ai-threats/",
+   "title": "Google Project Zero cuts bug disclosures to 30 days amid AI threats",
+   "link": "https://www.bleepingcomputer.com/news/security/google-project-zero-cuts-bug-disclosure-deadline-to-30-days-amid-ai-threats/",
+   "summary": "Google Project Zero will replace its \"90+30\" disclosure policy with shorter, fixed deadlines in response to AI-accelerated vulnerability discovery and exploitation.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-16T21:31:44Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/california-sues-openai-over-ai-agents-escaping-sandboxes-hacking-firms/",
+   "title": "California sues OpenAI over AI agents escaping sandboxes, hacking firms",
+   "link": "https://www.bleepingcomputer.com/news/security/california-sues-openai-over-ai-agents-escaping-sandboxes-hacking-firms/",
+   "summary": "California Attorney General Rob Bonta sued OpenAI on Monday, alleging the company knowingly continued testing advanced artificial intelligence models despite repeated security failures that allowed autonomous AI agents to escape isolated…",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-16T20:59:44Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/barracuda-links-cloud-breach-to-artex-ai-powered-cyberattack/",
+   "title": "Barracuda links cloud breach to ARTEX AI-powered cyberattack",
+   "link": "https://www.bleepingcomputer.com/news/security/barracuda-links-cloud-breach-to-artex-ai-powered-cyberattack/",
+   "summary": "Hackers who breached the cloud environment of network and email security company Barracuda earlier this month used a stolen cloud access key and the ARTEX AI penetration testing framework.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-16T19:57:13Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310223",
+   "title": "Attackers are using AI agents to automate cybercrime at 'industrial scale,' FBI and AWS warn",
+   "link": "https://www.theregister.com/cyber-crime/2026/11/16/attackers-are-using-ai-agents-to-automate-cybercrime-at-industrial-scale-fbi-and-aws-warn/5310223",
+   "summary": "Critical orgs around the globe under seige",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-16T19:52:00Z"
+  },
   {
    "id": "https://www.theregister.com/a/5310135",
    "title": "HTML-in-Canvas ships and could make the web a lot more creative...and a lot stupider",
@@ -97,16 +227,6 @@
    "published": "2026-11-16T17:27:00Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310122",
-   "title": "Crook turns free trials into phishing factory, as LearnWorlds sends 13,000 fake YouTube copyright notices",
-   "link": "https://www.theregister.com/security/2026/11/16/crook-turns-free-trials-into-phishing-factory-as-learnworlds-sends-13000-fake-youtube-copyright-notices/5310122",
-   "summary": "570 bogus accounts, one rewritten welcome email, and a fake YouTube page, but CEO says no breach",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-16T17:03:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-says-months-old-bug-caused-global-microsoft-365-outage/",
    "title": "Microsoft says months-old bug caused global Microsoft 365 outage",
    "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-says-months-old-bug-caused-global-microsoft-365-outage/",
@@ -117,26 +237,6 @@
    "published": "2026-11-16T16:43:24Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310094",
-   "title": "US allies deepen deal to guard AI supply chains against 'hostile actors' (cough, China, cough)",
-   "link": "https://www.theregister.com/systems/2026/11/16/us-allies-deepen-deal-to-guard-ai-supply-chains-against-hostile-actors-cough-china-cough/5310094",
-   "summary": "Securing supply chains or coercing other nations to help Washington sideline Beijing and its AI ambitions?",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-16T16:15:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5309775",
-   "title": "Has AI’s ‘Black October’ changed the way you secure your code?",
-   "link": "https://www.theregister.com/security/2026/11/16/partner-content-has-ais-black-october-changed-the-way-you-secure-your-code/5309775",
-   "summary": "PARTNER CONTENT: AI agents are making security vulnerabilities easier to find and exploit in your code. Software engineering and application security teams need new ways to find and fix them",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-16T16:00:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/fandango-says-hackers-stole-payment-card-details-from-checkout-pages/",
    "title": "Fandango says hackers stole payment card details from checkout pages",
    "link": "https://www.bleepingcomputer.com/news/security/fandango-says-hackers-stole-payment-card-details-from-checkout-pages/",
@@ -145,16 +245,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-16T15:44:21Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310070",
-   "title": "Criminals attack French postal operator subsidiary, grab contact details of 22M people",
-   "link": "https://www.theregister.com/cyber-crime/2026/11/16/criminals-attack-french-postal-operator-subsidiary-grab-contact-details-of-22m-people/5310070",
-   "summary": "France's data protection authority is looking into the intrusion after the postal service reported itself",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-16T15:28:00Z"
   },
   {
    "id": "https://intelligence-artificielle.developpez.com/actu/389141/Nvidia-aurait-deliberement-maintenu-les-prix-de-ses-GPU-a-un-niveau-eleve-grace-a-des-accords-de-financement-circulaire-dans-le-secteur-de-l-IA-rappelant-les-pratiques-qui-ont-precede-la-chute-d-Enron/",
@@ -257,16 +347,6 @@
    "published": "2026-11-16T13:04:00Z"
   },
   {
-   "id": "https://reseau.developpez.com/actu/389113/La-fusee-Vulcan-echoue-detruisant-40-satellites-du-projet-Leo-d-Amazon-rendant-encore-plus-difficile-l-atteinte-du-nombre-de-satellites-necessaire-pour-concurrencer-Starlink/",
-   "title": "La fusée Vulcan échoue détruisant 40 satellites du projet Leo d'Amazon, rendant encore plus difficile l'atteinte du nombre de satellites nécessaire pour concurrencer Starlink",
-   "link": "https://reseau.developpez.com/actu/389113/La-fusee-Vulcan-echoue-detruisant-40-satellites-du-projet-Leo-d-Amazon-rendant-encore-plus-difficile-l-atteinte-du-nombre-de-satellites-necessaire-pour-concurrencer-Starlink/",
-   "summary": "La fusée Vulcan échoue et détruit 40 satellites du projet Leo d'Amazon, rendant encore plus difficile l'atteinte du nombre de satellites nécessaire pour concurrencer Starlink de SpaceX en orbite Une fusée Vulcan appartenant à United Launch…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-16T13:01:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-windows-server-2016-reaches-end-of-support-in-60-days/",
    "title": "Microsoft: Windows Server 2016 reaches end of support in 60 days",
    "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-windows-server-2016-reaches-end-of-support-in-60-days/",
@@ -297,36 +377,6 @@
    "published": "2026-11-16T12:33:18Z"
   },
   {
-   "id": "https://www.bleepingcomputer.com/news/security/australian-retail-giant-coles-investigates-cybersecurity-incident/",
-   "title": "Australian retail giant Coles investigates cybersecurity incident",
-   "link": "https://www.bleepingcomputer.com/news/security/australian-retail-giant-coles-investigates-cybersecurity-incident/",
-   "summary": "Coles Group Limited, Australia's second-largest retailer, is investigating what it described as a \"cyber security incident\" that has not impacted the company's stores.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-16T11:18:09Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/artificial-intelligence/anthropics-claude-fable-52-blocks-fewer-security-tasks-while-mythos-gets-better-at-finding-bugs/",
-   "title": "Anthropic’s Claude Fable 5.2 blocks fewer security tasks, while Mythos gets better at finding bugs",
-   "link": "https://www.bleepingcomputer.com/news/artificial-intelligence/anthropics-claude-fable-52-blocks-fewer-security-tasks-while-mythos-gets-better-at-finding-bugs/",
-   "summary": "Anthropic recently rolled out Claude Mythos 5.2 to selected partners and Fable 5.2 to regular users, with improvements to coding and reasoning. But we also noticed some interesting cybersecurity changes.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-16T11:00:00Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389117/Comment-Jensen-Huang-a-ouvert-la-porte-derobee-qui-maintient-Pekin-dans-la-course-a-l-IA-les-puces-Nvidia-interdites-d-exportation-seraient-a-l-origine-des-modeles-chinois-les-plus-puissants/",
-   "title": "Comment Jensen Huang a ouvert la « porte dérobée » qui maintient Pékin dans la course à l'IA : les puces Nvidia interdites d'exportation seraient à l'origine des modèles chinois les plus puissants",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389117/Comment-Jensen-Huang-a-ouvert-la-porte-derobee-qui-maintient-Pekin-dans-la-course-a-l-IA-les-puces-Nvidia-interdites-d-exportation-seraient-a-l-origine-des-modeles-chinois-les-plus-puissants/",
-   "summary": "Comment Jensen Huang a ouvert la « porte dérobée » qui maintient Pékin dans la course à l'IA : les puces Nvidia interdites d'exportation seraient à l'origine des modèles chinois les plus puissants Les modèles d'IA les plus puissants de…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-16T09:58:00Z"
-  },
-  {
    "id": "tag:linuxfr.org,2005:News/43289",
    "title": "📰 Revue de presse — novembre 2026",
    "link": "https://linuxfr.org/news/revue-de-presse-novembre-2026",
@@ -345,26 +395,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-16T09:32:57Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/linux/new-noisytcp-linux-kernel-flaw-lets-attackers-crash-servers/",
-   "title": "New NoisyTCP vulnerability lets attackers crash Linux servers",
-   "link": "https://www.bleepingcomputer.com/news/linux/new-noisytcp-linux-kernel-flaw-lets-attackers-crash-servers/",
-   "summary": "An 11-year-old Linux kernel vulnerability, dubbed NoisyTCP, affects almost all Linux distributions and lets attackers crash systems running Nginx, Apache, and SSH servers with default configurations.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-16T09:30:04Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-new-windows-emergency-updates-fix-activation-licensing-failures/",
-   "title": "Microsoft pushes Windows emergency updates to fix activation failures",
-   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-new-windows-emergency-updates-fix-activation-licensing-failures/",
-   "summary": "Microsoft has released emergency out-of-band updates to fix Windows activation and licensing failures caused by this month's security updates.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-16T08:26:52Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/43288",
@@ -395,26 +425,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-16T06:53:34Z"
-  },
-  {
-   "id": "https://cloud-computing.developpez.com/actu/389106/SpaceX-l-entreprise-d-Elon-Musk-specialisee-dans-les-fusees-et-l-IA-prevoit-d-investir-74-milliards-dans-des-centres-de-donnees-au-Texas-et-en-Arizona-parmi-les-plus-vastes-du-genre-aux-USA/",
-   "title": "SpaceX, l'entreprise d'Elon Musk spécialisée dans les fusées et l'IA, prévoit d'investir 74 milliards $ dans des centres de données au Texas et en Arizona, parmi les plus vastes du genre aux USA",
-   "link": "https://cloud-computing.developpez.com/actu/389106/SpaceX-l-entreprise-d-Elon-Musk-specialisee-dans-les-fusees-et-l-IA-prevoit-d-investir-74-milliards-dans-des-centres-de-donnees-au-Texas-et-en-Arizona-parmi-les-plus-vastes-du-genre-aux-USA/",
-   "summary": "SpaceX, l'entreprise d'Elon Musk spécialisée dans les fusées et l'IA, prévoit d'investir 74 milliards $ dans des centres de données au Texas et en Arizona, parmi les plus vastes du genre aux USA SpaceX a annoncé son intention d'investir 74…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-16T02:17:00Z"
-  },
-  {
-   "id": "https://droit.developpez.com/actu/389107/Les-autorites-de-regulation-italiennes-infligent-une-amende-de-805-millions-a-Meta-pour-avoir-accede-aux-photos-d-utilisateurs-d-Android-sans-leur-consentement-explicite/",
-   "title": "Les autorités de régulation italiennes infligent une amende de 805 millions Euro à Meta pour avoir accédé aux photos d'utilisateurs d'Android sans leur consentement explicite",
-   "link": "https://droit.developpez.com/actu/389107/Les-autorites-de-regulation-italiennes-infligent-une-amende-de-805-millions-a-Meta-pour-avoir-accede-aux-photos-d-utilisateurs-d-Android-sans-leur-consentement-explicite/",
-   "summary": "Les autorités de régulation italiennes infligent une amende de 805 millions € à Meta pour avoir accédé aux photos d'utilisateurs d'Android sans leur consentement explicite Les autorités de régulation italiennes ont infligé une amende de…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-16T01:43:00Z"
   },
   {
    "id": "https://www.cert.cyber.gouv.fr/actualite/CERTFR-2026-ACT-048/",
@@ -495,16 +505,6 @@
    "category": "Cybersécurité",
    "lang": "fr",
    "published": "2026-11-16T00:00:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/fbi-warns-artex-ai-hacking-tool-is-powering-global-cyberattacks/",
-   "title": "FBI warns ARTEX AI hacking tool is powering global cyberattacks",
-   "link": "https://www.bleepingcomputer.com/news/security/fbi-warns-artex-ai-hacking-tool-is-powering-global-cyberattacks/",
-   "summary": "The FBI is warning that hackers are using an AI-powered penetration testing framework called ARTEX to automate cyberattacks against organizations worldwide, including a recent ConnectWise supply-chain breach that compromised Microsoft 365…",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-15T18:29:53Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/43315",
