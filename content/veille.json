@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-18T01:00:16Z",
+ "updated": "2026-11-18T11:53:57Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -37,6 +37,236 @@
  },
  "items": [
   {
+   "id": "https://www.bleepingcomputer.com/news/security/dizigom-illegal-streaming-service-with-21m-monthly-visits-shuts-down/",
+   "title": "Dizigom illegal streaming service with 21M monthly visits shuts down",
+   "link": "https://www.bleepingcomputer.com/news/security/dizigom-illegal-streaming-service-with-21m-monthly-visits-shuts-down/",
+   "summary": "The Alliance for Creativity and Entertainment (ACE) has announced the shutdown of Dizigom, one of Turkey's largest piracy sites, after a settlement agreement with the site's operators.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T11:50:25Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310712",
+   "title": "ULA says Vulcan lacked the oomph to get Amazon satellites to orbit",
+   "link": "https://www.theregister.com/science/2026/11/18/ula-says-vulcan-lacked-the-oomph-to-get-amazon-satellites-to-orbit/5310712",
+   "summary": "Early findings point to core-stage underperformance, while solid boosters and Centaur appear to have worked as intended",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T11:46:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310433",
+   "title": "UK.gov JV gets £178M Home Office hosting deal. Without competition",
+   "link": "https://www.theregister.com/public-sector/2026/11/18/ukgov-jv-gets-178m-home-office-hosting-deal-without-competition/5310433",
+   "summary": "Crown Hosting gets seven-year job to keep the critical national infrastructure tech lights on",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T11:01:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/apache-warns-of-roller-rce-vulnerability-exploited-in-attacks/",
+   "title": "Apache warns of Roller RCE vulnerability exploited in attacks",
+   "link": "https://www.bleepingcomputer.com/news/security/apache-warns-of-roller-rce-vulnerability-exploited-in-attacks/",
+   "summary": "Apache has released security updates to address a critical Roller flaw that threat actors are exploiting to gain code execution on vulnerable servers.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T10:35:05Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310056",
+   "title": "SAP opens AI to on-prem customers, but cloud commitments could shut smaller firms out",
+   "link": "https://www.theregister.com/applications/2026/11/18/sap-opens-ai-to-on-prem-customers-but-cloud-commitments-could-shut-smaller-firms-out/5310056",
+   "summary": "User group says access terms favor enterprises that can migrate one ERP system at a time",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T10:14:00Z"
+  },
+  {
+   "id": "https://hardware.developpez.com/actu/389215/Tim-Sweeney-Pavel-Durov-et-d-autres-dirigeants-de-la-tech-sont-convaincus-que-le-depart-de-Jensen-Huang-etait-le-fruit-d-un-complot-ourdi-contre-lui-ils-deplorent-la-perte-d-un-leader-visionnaire/",
+   "title": "Tim Sweeney, Pavel Durov et d'autres dirigeants de la tech sont convaincus que le départ de Jensen Huang était le fruit d'un complot ourdi contre lui, ils déplorent la perte d'un « leader visionnaire »",
+   "link": "https://hardware.developpez.com/actu/389215/Tim-Sweeney-Pavel-Durov-et-d-autres-dirigeants-de-la-tech-sont-convaincus-que-le-depart-de-Jensen-Huang-etait-le-fruit-d-un-complot-ourdi-contre-lui-ils-deplorent-la-perte-d-un-leader-visionnaire/",
+   "summary": "Tim Sweeney, Pavel Durov et d'autres dirigeants de la tech sont convaincus que le départ de Jensen Huang était le fruit d'un complot ourdi contre lui ils déplorent la perte d'un « leader visionnaire » Plusieurs figures éminentes du secteur…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-18T09:59:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310567",
+   "title": "UK MPs want AI watchdog with power to pull the plug on dangerous models",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/18/uk-mps-want-ai-watchdog-with-power-to-pull-the-plug-on-dangerous-models/5310567",
+   "summary": "Parliamentary committee says tech giants can't be left to mark their own homework when it comes to AI safety",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T09:30:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-announces-windows-server-2028-with-hardened-security/",
+   "title": "Microsoft announces Windows Server 2028 with hardened security",
+   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-announces-windows-server-2028-with-hardened-security/",
+   "summary": "Microsoft has announced Windows Server 2028, the next major release of its server operating system, at the Ignite 2026 conference on Tuesday.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T09:24:31Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310343",
+   "title": "Time for frustrated M365 customers to stage a 'distributed denial of satisfaction' action",
+   "link": "https://www.theregister.com/off-prem/2026/11/18/time-for-frustrated-m365-customers-to-stage-a-distributed-denial-of-satisfaction-action/5310343",
+   "summary": "Microsoft is asking customers to apply for reimbursement. They should protest",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T08:45:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/hackers-exploiting-critical-puppet-rce.html",
+   "title": "Hackers Exploiting Critical Puppet RCE Flaw Affecting Enterprise Management Servers",
+   "link": "https://thehackernews.com/2026/11/hackers-exploiting-critical-puppet-rce.html",
+   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) on Tuesday added a critical security flaw impacting Perforce Puppet, an enterprise infrastructure-as-code (IaC) and configuration management platform, to its Known Exploited…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T08:24:31Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/cisa-urges-immediate-patching-of.html",
+   "title": "CISA Urges Immediate Patching of Java4Shell Flaw That Could Allow Remote Code Execution",
+   "link": "https://thehackernews.com/2026/11/cisa-urges-immediate-patching-of.html",
+   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) has urged organizations to immediately patch a newly disclosed critical security flaw impacting Oracle Java. The flaw, tracked as CVE-2026-114938 (CVSS score: 8.1), refers to…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T08:24:23Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/british-scattered-spider-hacker-sentenced-to-6-years-in-prison/",
+   "title": "British Scattered Spider hacker sentenced to 6 years in prison",
+   "link": "https://www.bleepingcomputer.com/news/security/british-scattered-spider-hacker-sentenced-to-6-years-in-prison/",
+   "summary": "A leader of the Scattered Spider cybercrime collective has been sentenced to six years in prison in the United States for stealing millions in cryptocurrency and conspiring to hack a dozen companies.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T08:24:18Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/attackers-compromise-microsofts-agent.html",
+   "title": "Attackers Compromise Microsoft's Agent Framework PyPI Package to Steal Cloud Credentials",
+   "link": "https://thehackernews.com/2026/11/attackers-compromise-microsofts-agent.html",
+   "summary": "Threat actors have compromised Microsoft's agent-framework package to push a credential stealer, according to reports from Aikido, Chainguard, Endor Labs, OX Security, SafeDep, Socket, StepSecurity, and Google-owned Wiz. The malicious…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T06:45:26Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310651",
+   "title": "A Chinese bottle-cap manufacturer brilliantly deflated AI hype",
+   "link": "https://www.theregister.com/columnists/2026/11/18/a-chinese-bottle-cap-manufacturer-brilliantly-deflated-ai-hype/5310651",
+   "summary": "Pre-digital tech can't be transformed and automated",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T06:32:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310684",
+   "title": "Temu's compliance regime is low-quality, fits badly, and full of holes, says Europe",
+   "link": "https://www.theregister.com/legal/2026/11/18/temus-compliance-regime-is-low-quality-fits-badly-and-full-of-holes-says-europe/5310684",
+   "summary": "Prepares to unleash full wrath of Digital Services Act over Chinese e-tailer's alleged sales of illegal products",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T06:16:12Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/russian-cold-relic-hackers-use-stolen.html",
+   "title": "Russian COLD RELIC Hackers Use Stolen Google Workspace Data to Breach Second U.S. Organization",
+   "link": "https://thehackernews.com/2026/11/russian-cold-relic-hackers-use-stolen.html",
+   "summary": "The Russia-linked cyber espionage group known as Cold Relic (formerly COLDRIVER and UNC4057) has been observed weaponizing a single cloud compromise into a launchpad for a series of linked intrusions resulting in third-party compromise…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T05:58:04Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310661",
+   "title": "Oracle reveals fix-this-ASAP-grade Java4Shell bug that allows attacks on many third-party apps",
+   "link": "https://www.theregister.com/security/2026/11/18/oracle-reveals-fix-this-asap-grade-java4shell-bug-that-allows-attacks-on-many-third-party-apps/5310661",
+   "summary": "Attackers can crash the JVM or achieve unauthenticated RCE",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T04:33:05Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/java4shell-cve-2026-114938-enables-pre.html",
+   "title": "Java4Shell Flaw (CVE-2026-114938) Enables Pre-Auth RCE in Jira, Jenkins, Keycloak and More",
+   "link": "https://thehackernews.com/2026/11/java4shell-cve-2026-114938-enables-pre.html",
+   "summary": "A Java flaw called Java4Shell can let attackers without an account run their own code on Jira, Jenkins, Keycloak, and three other widely used applications, says Calif, the security research firm that disclosed it this week. The flaw is…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T04:27:41Z"
+  },
+  {
+   "id": "https://jetbrains.developpez.com/actu/389205/JetBrains-ReSharper-Cplusplus-2026-3-l-extension-Visual-Studio-pour-le-developpement-Cplusplus-est-disponible-avec-une-nouvelle-fenetre-d-outils-Class-Layout-et-des-ameliorations-a-l-analyse-des-chaines-de-format/",
+   "title": "JetBrains ReSharper C++ 2026.3, l'extension Visual Studio pour le développement C++, est disponible, avec une nouvelle fenêtre d'outils « Class Layout » et des améliorations à l'analyse des chaînes de format",
+   "link": "https://jetbrains.developpez.com/actu/389205/JetBrains-ReSharper-Cplusplus-2026-3-l-extension-Visual-Studio-pour-le-developpement-Cplusplus-est-disponible-avec-une-nouvelle-fenetre-d-outils-Class-Layout-et-des-ameliorations-a-l-analyse-des-chaines-de-format/",
+   "summary": "JetBrains ReSharper C++ 2026.3, l'extension Visual Studio pour le développement C++, est disponible, avec une nouvelle fenêtre d'outils « Class Layout » et des améliorations à l'analyse des chaînes de format ReSharper est une extension de…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-18T01:51:00Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389202/OpenAI-lance-ChatGPT-Wallet-une-solution-permettant-aux-agents-IA-de-regler-des-achats-offrant-ainsi-a-ses-agents-IA-d-achat-un-moyen-de-payer-via-les-systemes-de-paiement-des-commercants/",
+   "title": "OpenAI lance ChatGPT Wallet, une solution permettant aux agents IA de régler des achats, offrant ainsi à ses agents IA d'achat un moyen de payer via les systèmes de paiement des commerçants",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389202/OpenAI-lance-ChatGPT-Wallet-une-solution-permettant-aux-agents-IA-de-regler-des-achats-offrant-ainsi-a-ses-agents-IA-d-achat-un-moyen-de-payer-via-les-systemes-de-paiement-des-commercants/",
+   "summary": "OpenAI lance ChatGPT Wallet, une solution permettant aux agents IA de régler des achats, offrant ainsi à ses agents IA d'achat un moyen de payer via les systèmes de paiement des commerçants OpenAI a lancé « ChatGPT Wallet », une solution…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-18T01:50:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310634",
+   "title": "Daily disruptive outages that ground planes and halt work – welcome to the new normal",
+   "link": "https://www.theregister.com/security/2026/11/17/daily-disruptive-outages-that-ground-planes-and-halt-work-welcome-to-the-new-normal/5310634",
+   "summary": "NSA, Apple add to a week of high-profile network outages, largely attributed to 'routine maintenance'",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T23:41:31Z"
+  },
+  {
+   "id": "https://hardware.developpez.com/actu/389196/Quelques-mois-avant-sa-chute-Jensen-Huang-a-cede-a-ses-heritiers-des-actions-Nvidia-d-une-valeur-estimee-a-10-milliards-de-dollars-a-l-abri-de-toute-imposition-un-transfert-de-fortune-d-une-ampleur-inedite/",
+   "title": "Quelques mois avant sa chute, Jensen Huang a cédé à ses héritiers des actions Nvidia d'une valeur estimée à 10 milliards de dollars à l'abri de toute imposition, un transfert de fortune d'une ampleur inédite",
+   "link": "https://hardware.developpez.com/actu/389196/Quelques-mois-avant-sa-chute-Jensen-Huang-a-cede-a-ses-heritiers-des-actions-Nvidia-d-une-valeur-estimee-a-10-milliards-de-dollars-a-l-abri-de-toute-imposition-un-transfert-de-fortune-d-une-ampleur-inedite/",
+   "summary": "Quelques mois avant sa chute, Jensen Huang a cédé à ses héritiers des actions Nvidia d'une valeur estimée à 10 milliards de dollars à l'abri de toute imposition un transfert de fortune d'une ampleur inédite Jensen Huang et son épouse…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-17T23:34:00Z"
+  },
+  {
+   "id": "https://microsoft.developpez.com/actu/389186/La-panne-mondiale-de-Microsoft-pourrait-etre-plus-grave-que-celles-d-Amazon-ou-de-CrowdStrike-selon-un-expert-les-gouvernements-les-hopitaux-et-les-tribunaux-ont-ete-paralyses-par-la-panne-de-Microsoft/",
+   "title": "La panne mondiale de Microsoft pourrait être plus grave que celles d'Amazon ou de CrowdStrike, selon un expert, les gouvernements, les hôpitaux et les tribunaux ont été paralysés par la panne de Microsoft",
+   "link": "https://microsoft.developpez.com/actu/389186/La-panne-mondiale-de-Microsoft-pourrait-etre-plus-grave-que-celles-d-Amazon-ou-de-CrowdStrike-selon-un-expert-les-gouvernements-les-hopitaux-et-les-tribunaux-ont-ete-paralyses-par-la-panne-de-Microsoft/",
+   "summary": "La panne mondiale de Microsoft pourrait être plus grave que celles d'Amazon ou de CrowdStrike, selon un expert, les gouvernements, les hôpitaux et les tribunaux ont été paralysés par la panne de Microsoft Récemment, une panne massive de…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-17T23:22:00Z"
+  },
+  {
    "id": "https://www.bleepingcomputer.com/news/security/critical-java4shell-flaw-allows-rce-attacks-on-major-java-applications/",
    "title": "Critical Java4Shell flaw allows RCE attacks on major Java applications",
    "link": "https://www.bleepingcomputer.com/news/security/critical-java4shell-flaw-allows-rce-attacks-on-major-java-applications/",
@@ -47,14 +277,14 @@
    "published": "2026-11-17T23:04:21Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310594",
-   "title": "Satya sorry for SaaS-y SNAFU - look over there, more AI!",
-   "link": "https://www.theregister.com/ai-and-ml/2026/11/17/satya-sorry-for-saas-y-snafu-look-over-there-more-ai/5310594",
-   "summary": "At Ignite, the Windows-Azure giant is all about Copilot",
+   "id": "https://www.theregister.com/a/5310611",
+   "title": "GPU giants throw HPC users some tasty crumbs",
+   "link": "https://www.theregister.com/hpc/2026/11/17/gpu-giants-throw-hpc-users-some-tasty-crumbs/5310611",
+   "summary": "Nvidia unveils an HPC-optimized Rubin GPU to challenge AMD's 288 teraFLOPS MI430X",
    "source": "The Register",
    "category": "Infrastructure",
    "lang": "en",
-   "published": "2026-11-17T21:44:58Z"
+   "published": "2026-11-17T22:37:46Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/cloud-keys-leaked-in-docker-hub-images-are-stolen-within-seconds/",
@@ -67,16 +297,6 @@
    "published": "2026-11-17T21:27:17Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310585",
-   "title": "Jensen Huang thrilled to be spending time with family, but will retake leadership burden if Nvidia asks",
-   "link": "https://www.theregister.com/systems/2026/11/17/jensen-huang-thrilled-to-be-spending-time-with-family-but-will-retake-leadership-burden-if-nvidia-asks/5310585",
-   "summary": "But the new chairman shot that idea down on the company's earnings call",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T21:15:42Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/japan-takes-fugaku-supercomputer-offlline-after-cyberattack/",
    "title": "Japan takes Fugaku supercomputer offlline after cyberattack",
    "link": "https://www.bleepingcomputer.com/news/security/japan-takes-fugaku-supercomputer-offlline-after-cyberattack/",
@@ -85,26 +305,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-17T20:51:21Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310564",
-   "title": "Python parallel debugging comes to HPC thanks to TotalView upgrade",
-   "link": "https://www.theregister.com/devops/2026/11/17/python-parallel-debugging-comes-to-hpc-thanks-to-totalview-upgrade/5310564",
-   "summary": "TotalView has supported C/C++ and Fortran. With the latest quarterly release, it supports Python as well",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T20:14:31Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310574",
-   "title": "Gemini test proves once again that amoral AI agents will do almost anything if told ‘NEVER give up’",
-   "link": "https://www.theregister.com/security/2026/11/17/gemini-test-proves-once-again-that-amoral-ai-agents-will-do-almost-anything-if-told-never-give-up/5310574",
-   "summary": "If you design a test to find misalignment, you will find misalignment",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T19:52:57Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/researchers-claim-two-rce-exploits-that.html",
@@ -135,16 +335,6 @@
    "category": "Développement",
    "lang": "en",
    "published": "2026-11-17T18:29:29Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310471",
-   "title": "America's hyperscale bit barns draw as much power as entire states",
-   "link": "https://www.theregister.com/off-prem/2026/11/17/americas-hyperscale-bit-barns-draw-as-much-power-as-entire-states/5310471",
-   "summary": "Harvard study claims emissions attributable to datacenters are two to three times higher than in 2018",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T18:29:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/researchers-hijack-hugging-face-account-for-popular-kokoro-ai-model/",
@@ -197,56 +387,6 @@
    "published": "2026-11-17T17:57:26Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310424",
-   "title": "Inspiring FOSS project Crosspoint Reader has lessons about tech, communities, and LLMs",
-   "link": "https://www.theregister.com/software/2026/11/17/inspiring-foss-project-crosspoint-reader-has-lessons-about-tech-communities-and-llms/5310424",
-   "summary": "Cheap tiny e-readers and the perils of LLM-generated drive-by pull requests – plus much more",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T17:45:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310530",
-   "title": "SAP's cloud migration chief is migrating to Ionos as CEO",
-   "link": "https://www.theregister.com/software/2026/11/17/saps-cloud-migration-chief-is-migrating-to-ionos-as-ceo/5310530",
-   "summary": "After more than two decades in Walldorf, Thomas Saueressig takes reins at hosting provider in April",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T17:13:28Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310517",
-   "title": "Opting out of Gemini tracking? Google will still hold your data 20x longer",
-   "link": "https://www.theregister.com/ai-and-ml/2026/11/17/opting-out-of-gemini-tracking-google-will-still-hold-your-data-20x-longer/5310517",
-   "summary": "From 72 hours to 2 months in a single quiet announcement. Careful what you ask Google's AI, because it's storing it even if you ask it not to",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T17:00:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310464",
-   "title": "Hackers smash 'n' grab AI vendor: Take off with license data of Uber drivers",
-   "link": "https://www.theregister.com/security/2026/11/17/hackers-smash-n-grab-ai-vendor-take-off-with-license-data-of-uber-drivers/5310464",
-   "summary": "Ride-hailing biz says stolen credentials allowed crooks to help themselves to driver's license data",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T16:15:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/hardware/flipper-devices-launches-399-flipper-one-linux-based-multi-tool/",
-   "title": "Flipper Devices launches $399 ‘Flipper One’ Linux-based multi-tool",
-   "link": "https://www.bleepingcomputer.com/news/hardware/flipper-devices-launches-399-flipper-one-linux-based-multi-tool/",
-   "summary": "Flipper Devices, the company behind the popular Flipper Zero pentesting device, has launched a crowdfunding campaign for Flipper One, a portable Linux computer and networking multi-tool.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T16:00:00Z"
-  },
-  {
    "id": "https://securite.developpez.com/actu/389199/123456-a-ete-l-un-des-mots-de-passe-les-plus-utilises-sur-7-des-8-dernieres-annees-selon-un-rapport-qui-souleve-des-questions-sur-la-responsabilite-des-utilisateurs-et-la-conception-des-systemes-informatiques/",
    "title": "123456 a été l'un des mots de passe les plus utilisés sur 7 des 8 dernières années, selon un rapport qui soulève des questions sur la responsabilité des utilisateurs et la conception des systèmes informatiques",
    "link": "https://securite.developpez.com/actu/389199/123456-a-ete-l-un-des-mots-de-passe-les-plus-utilises-sur-7-des-8-dernieres-annees-selon-un-rapport-qui-souleve-des-questions-sur-la-responsabilite-des-utilisateurs-et-la-conception-des-systemes-informatiques/",
@@ -257,26 +397,6 @@
    "published": "2026-11-17T15:48:00Z"
   },
   {
-   "id": "https://hardware.developpez.com/actu/389196/Quelques-mois-avant-sa-chute-Jensen-Huang-a-cede-a-ses-heritiers-des-actions-Nvidia-d-une-valeur-estimee-a-10-milliards-de-dollars-a-l-abri-de-toute-imposition-un-transfert-de-fortune-d-une-ampleur-inedite/",
-   "title": "Quelques mois avant sa chute, Jensen Huang a cédé à ses héritiers des actions Nvidia d'une valeur estimée à 10 milliards de dollars à l'abri de toute imposition, un transfert de fortune d'une ampleur inédite",
-   "link": "https://hardware.developpez.com/actu/389196/Quelques-mois-avant-sa-chute-Jensen-Huang-a-cede-a-ses-heritiers-des-actions-Nvidia-d-une-valeur-estimee-a-10-milliards-de-dollars-a-l-abri-de-toute-imposition-un-transfert-de-fortune-d-une-ampleur-inedite/",
-   "summary": "Quelques mois avant sa chute, Jensen Huang a cédé à ses héritiers des actions Nvidia d'une valeur estimée à 10 milliards de dollars à l'abri de toute imposition un transfert de fortune d'une ampleur inédite Jensen Huang et son épouse…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-17T15:34:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310402",
-   "title": "Windows 11 previews remote padlock only IT can open",
-   "link": "https://www.theregister.com/os-platforms/2026/11/17/windows-11-previews-remote-padlock-only-it-can-open/5310402",
-   "summary": "Intune feature blocks normal sign-ins without wiping data, while another test build drops Offline Maps settings",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T15:29:00Z"
-  },
-  {
    "id": "https://intelligence-artificielle.developpez.com/actu/389185/Le-mari-d-Alice-Huang-batit-un-empire-de-centres-de-donnees-soutenu-par-l-Etat-chinois-avec-des-projets-de-construction-d-une-valeur-de-plus-de-9-milliards-beneficiant-du-soutien-des-pouvoirs-publics/",
    "title": "Le mari d'Alice Huang bâtit un empire de centres de données soutenu par l'État chinois, avec des projets de construction d'une valeur de plus de 9 milliards $, bénéficiant du soutien des pouvoirs publics",
    "link": "https://intelligence-artificielle.developpez.com/actu/389185/Le-mari-d-Alice-Huang-batit-un-empire-de-centres-de-donnees-soutenu-par-l-Etat-chinois-avec-des-projets-de-construction-d-une-valeur-de-plus-de-9-milliards-beneficiant-du-soutien-des-pouvoirs-publics/",
@@ -285,16 +405,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-17T15:25:00Z"
-  },
-  {
-   "id": "https://microsoft.developpez.com/actu/389186/La-panne-mondiale-de-Microsoft-pourrait-etre-plus-grave-que-celles-d-Amazon-ou-de-CrowdStrike-selon-un-expert-les-gouvernements-les-hopitaux-et-les-tribunaux-ont-ete-paralyses-par-la-panne-de-Microsoft/",
-   "title": "La panne mondiale de Microsoft pourrait être plus grave que celles d'Amazon ou de CrowdStrike, selon un expert, les gouvernements, les hôpitaux et les tribunaux ont été paralysés par la panne de Microsoft",
-   "link": "https://microsoft.developpez.com/actu/389186/La-panne-mondiale-de-Microsoft-pourrait-etre-plus-grave-que-celles-d-Amazon-ou-de-CrowdStrike-selon-un-expert-les-gouvernements-les-hopitaux-et-les-tribunaux-ont-ete-paralyses-par-la-panne-de-Microsoft/",
-   "summary": "La panne mondiale de Microsoft pourrait être plus grave que celles d'Amazon ou de CrowdStrike, selon un expert, les gouvernements, les hôpitaux et les tribunaux ont été paralysés par la panne de Microsoft Récemment, une panne massive de…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-17T15:22:00Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/oracle-to-patch-11-java-flaws-today-as.html",
@@ -317,16 +427,6 @@
    "published": "2026-11-17T15:17:28Z"
   },
   {
-   "id": "https://www.bleepingcomputer.com/news/security/inside-modern-phishing-kits-built-to-steal-microsoft-365-sessions/",
-   "title": "Inside Modern Phishing Kits Built to Steal Microsoft 365 Sessions",
-   "link": "https://www.bleepingcomputer.com/news/security/inside-modern-phishing-kits-built-to-steal-microsoft-365-sessions/",
-   "summary": "Huntress researchers break down how EvilTokens, Knight Office, and Kali365 capture and replay M365 tokens, plus how defenders can detect and contain them.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T15:01:11Z"
-  },
-  {
    "id": "https://intelligence-artificielle.developpez.com/actu/389183/Un-professeur-de-mathematiques-de-l-institut-de-technologie-de-Californie-decide-d-arreter-de-noter-les-devoirs-a-faire-a-la-maison-sur-leur-exactitude-en-raison-de-l-utilisation-de-l-IA-par-les-etudiants/",
    "title": "Un professeur de mathématiques de l'institut de technologie de Californie décide d'arrêter de noter les devoirs à faire à la maison sur leur exactitude en raison de l'utilisation de l'IA par les étudiants",
    "link": "https://intelligence-artificielle.developpez.com/actu/389183/Un-professeur-de-mathematiques-de-l-institut-de-technologie-de-Californie-decide-d-arreter-de-noter-les-devoirs-a-faire-a-la-maison-sur-leur-exactitude-en-raison-de-l-utilisation-de-l-IA-par-les-etudiants/",
@@ -345,36 +445,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-17T12:50:00Z"
-  },
-  {
-   "id": "https://hardware.developpez.com/actu/389163/Intel-est-poursuivi-en-justice-par-des-actionnaires-qui-l-accusent-d-avoir-dissimule-l-impact-du-recul-des-ventes-d-ordinateurs-entrainant-une-chute-de-28-6-pourcent-du-cours-de-l-action-en-une-journee/",
-   "title": "Intel est poursuivi en justice par des actionnaires qui l'accusent d'avoir dissimulé l'impact du recul des ventes d'ordinateurs, entraînant une chute de 28,6 % du cours de l'action en une journée",
-   "link": "https://hardware.developpez.com/actu/389163/Intel-est-poursuivi-en-justice-par-des-actionnaires-qui-l-accusent-d-avoir-dissimule-l-impact-du-recul-des-ventes-d-ordinateurs-entrainant-une-chute-de-28-6-pourcent-du-cours-de-l-action-en-une-journee/",
-   "summary": "Intel est poursuivi en justice par des actionnaires qui l'accusent d'avoir dissimulé l'impact du recul des ventes d'ordinateurs, entraînant une chute de 28,6 % du cours de l'action en une journée Les actionnaires d'Intel ont intenté un…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-17T12:49:00Z"
-  },
-  {
-   "id": "https://droit.developpez.com/actu/389166/Les-USA-comblent-une-faille-qui-permettait-a-la-Chine-d-acceder-a-distance-aux-puces-Nvidia-exigeant-une-licence-supplementaire-pour-exporter-ou-transferer-des-puces-vers-des-pays-de-detournement/",
-   "title": "Les USA comblent une faille qui permettait à la Chine d'accéder à distance aux puces Nvidia, exigeant une licence supplémentaire pour exporter ou transférer des puces vers des pays « de détournement »",
-   "link": "https://droit.developpez.com/actu/389166/Les-USA-comblent-une-faille-qui-permettait-a-la-Chine-d-acceder-a-distance-aux-puces-Nvidia-exigeant-une-licence-supplementaire-pour-exporter-ou-transferer-des-puces-vers-des-pays-de-detournement/",
-   "summary": "Les USA comblent une faille qui permettait à la Chine d'accéder à distance aux puces Nvidia, exigeant une licence supplémentaire pour exporter ou transférer des puces vers des pays « de détournement » Le gouvernement américain a annoncé…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-17T12:48:00Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389165/Les-depenses-mondiales-en-matiere-d-IA-devraient-atteindre-4-000-milliards-en-2027-dont-59-pourcent-devraient-correspondre-aux-depenses-mondiales-consacrees-aux-infrastructures-d-IA-d-apres-Gartner/",
-   "title": "Les dépenses mondiales en matière d'IA devraient atteindre 4 000 milliards $ en 2027, dont 59 % devraient correspondre aux dépenses mondiales consacrées aux infrastructures d'IA, d'après Gartner",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389165/Les-depenses-mondiales-en-matiere-d-IA-devraient-atteindre-4-000-milliards-en-2027-dont-59-pourcent-devraient-correspondre-aux-depenses-mondiales-consacrees-aux-infrastructures-d-IA-d-apres-Gartner/",
-   "summary": "Les dépenses mondiales en matière d'IA devraient atteindre 4 000 milliards $ en 2027, dont 59 % devraient correspondre aux dépenses mondiales consacrées aux infrastructures d'IA, d'après Gartner Les dépenses mondiales en matière…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-17T12:45:00Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/hackers-found-way-around-github-sha.html",
@@ -397,46 +467,6 @@
    "published": "2026-11-17T12:14:36Z"
   },
   {
-   "id": "https://thehackernews.com/2026/11/new-gitdoor-and-graphdoor-backdoors.html",
-   "title": "New GitDoor and GraphDoor Backdoors Turn GitHub and SharePoint Into Covert C2 Channels",
-   "link": "https://thehackernews.com/2026/11/new-gitdoor-and-graphdoor-backdoors.html",
-   "summary": "Government sectors in Asia and Africa have been targeted by an active cyber intrusion campaign that delivers to previously undocumented backdoors that leverage legitimate services like Microsoft SharePoint and GitHub for…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T11:20:18Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-testing-remote-lock-for-lost-or-stolen-windows-devices/",
-   "title": "Microsoft testing Remote Lock for lost or stolen Windows devices",
-   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-testing-remote-lock-for-lost-or-stolen-windows-devices/",
-   "summary": "Microsoft is testing a new feature that lets enterprise IT administrators remotely lock stolen or lost Windows devices without wiping them.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T11:19:51Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/apple-tightens-macos-app-permissions-to.html",
-   "title": "Apple Tightens macOS App Permissions to Limit Data Access Amid AI Agent Security Risks",
-   "link": "https://thehackernews.com/2026/11/apple-tightens-macos-app-permissions-to.html",
-   "summary": "Apple on Monday introduced new controls that allow Mac users to give more granular access to data they give to apps, including those that use artificial intelligence (AI) agents. The changes, currently previewed in macOS 27.3 beta 2…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T11:07:31Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/court-clears-brothers-of-25-million-ethereum-crypto-heist-charges/",
-   "title": "Court clears brothers of $25 million Ethereum crypto heist charges",
-   "link": "https://www.bleepingcomputer.com/news/security/court-clears-brothers-of-25-million-ethereum-crypto-heist-charges/",
-   "summary": "US District Judge Jessica Clarke has acquitted two brothers accused of stealing $25 million in cryptocurrency in about 12 seconds through a scheme that exploited a bug in the Ethereum blockchain.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T09:44:22Z"
-  },
-  {
    "id": "tag:linuxfr.org,2005:News/43319",
    "title": "Revue de presse de l’April pour la semaine 46 de l’année 2026",
    "link": "https://linuxfr.org/news/revue-de-presse-de-l-april-pour-la-semaine-46-de-l-annee-2026",
@@ -445,36 +475,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-17T07:54:07Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/hijacked-optimizely-scripts-served-card.html",
-   "title": "Hijacked Optimizely Scripts Served Card Skimmer and iOS Exploit Kits to CNN, BBC and Zoom Visitors",
-   "link": "https://thehackernews.com/2026/11/hijacked-optimizely-scripts-served-card.html",
-   "summary": "An attacker exploited a flaw in Optimizely Web Experimentation to plant malicious code in some of the scripts that customers' websites load from the service, Optimizely said early today. Visitors to sites run by at least 178 organizations…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T07:12:13Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/connectwise-warns-screenconnect-attacks.html",
-   "title": "ConnectWise Warns ScreenConnect Attacks Continue as SCKit Targets Unpatched Systems",
-   "link": "https://thehackernews.com/2026/11/connectwise-warns-screenconnect-attacks.html",
-   "summary": "ConnectWise on Monday said it completed its investigation into unauthorized access targeting partner ScreenConnect environments, and recommended customers to ensure that the technician client is running version 26.6.5 or later. The company…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T06:29:27Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/n-able-patches-17-n-central-flaws-as.html",
-   "title": "N-able Patches 17 N-central Flaws as Attackers Exploit Earlier Bugs to Deploy Crypto Miners",
-   "link": "https://thehackernews.com/2026/11/n-able-patches-17-n-central-flaws-as.html",
-   "summary": "N-able has released a new security update to address additional critical security flaws impacting N-central. Describing N-central 2026.4 Hotfix 3 as a critical security update, the company said it includes a number of security patches and…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T05:00:34Z"
   },
   {
    "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1553/",
@@ -660,7 +660,7 @@
    "id": "https://github.blog/?p=100077",
    "title": "Git security vulnerabilities announced",
    "link": "https://github.blog/open-source/git/git-security-vulnerabilities-announced-7/",
-   "summary": "Git is releasing updates addressing six security vulnerabilities affecting recursive clones, reference handling, merges, binary patches, and imports. Here is what users need to know.",
+   "summary": "Git is releasing updates addressing six security vulnerabilities affecting clones, reference handling, merges, binary patches, and imports. Here is what users need to know.",
    "source": "GitHub Blog",
    "category": "Développement",
    "lang": "en",
