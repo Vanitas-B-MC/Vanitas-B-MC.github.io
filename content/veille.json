@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-17T16:12:05Z",
+ "updated": "2026-11-18T01:00:16Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,206 @@
   }
  },
  "items": [
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/critical-java4shell-flaw-allows-rce-attacks-on-major-java-applications/",
+   "title": "Critical Java4Shell flaw allows RCE attacks on major Java applications",
+   "link": "https://www.bleepingcomputer.com/news/security/critical-java4shell-flaw-allows-rce-attacks-on-major-java-applications/",
+   "summary": "A critical vulnerability dubbed Java4Shell in OpenJDK, the open-source implementation of Java, can allow unauthenticated attackers to remotely execute code on popular enterprise applications, including Jenkins, Atlassian Jira, Confluence…",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-17T23:04:21Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310594",
+   "title": "Satya sorry for SaaS-y SNAFU - look over there, more AI!",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/17/satya-sorry-for-saas-y-snafu-look-over-there-more-ai/5310594",
+   "summary": "At Ignite, the Windows-Azure giant is all about Copilot",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T21:44:58Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/cloud-keys-leaked-in-docker-hub-images-are-stolen-within-seconds/",
+   "title": "Cloud keys leaked in Docker Hub images are stolen within seconds",
+   "link": "https://www.bleepingcomputer.com/news/security/cloud-keys-leaked-in-docker-hub-images-are-stolen-within-seconds/",
+   "summary": "Credentials and access secrets exposed in public Docker Hub images are being extracted and exploited by attackers within as little as eight seconds of publication.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-17T21:27:17Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310585",
+   "title": "Jensen Huang thrilled to be spending time with family, but will retake leadership burden if Nvidia asks",
+   "link": "https://www.theregister.com/systems/2026/11/17/jensen-huang-thrilled-to-be-spending-time-with-family-but-will-retake-leadership-burden-if-nvidia-asks/5310585",
+   "summary": "But the new chairman shot that idea down on the company's earnings call",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T21:15:42Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/japan-takes-fugaku-supercomputer-offlline-after-cyberattack/",
+   "title": "Japan takes Fugaku supercomputer offlline after cyberattack",
+   "link": "https://www.bleepingcomputer.com/news/security/japan-takes-fugaku-supercomputer-offlline-after-cyberattack/",
+   "summary": "The Fugaku supercomputer operated by Japan's RIKEN Center for Computational Science has been taken offline following a security breach.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-17T20:51:21Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310564",
+   "title": "Python parallel debugging comes to HPC thanks to TotalView upgrade",
+   "link": "https://www.theregister.com/devops/2026/11/17/python-parallel-debugging-comes-to-hpc-thanks-to-totalview-upgrade/5310564",
+   "summary": "TotalView has supported C/C++ and Fortran. With the latest quarterly release, it supports Python as well",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T20:14:31Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310574",
+   "title": "Gemini test proves once again that amoral AI agents will do almost anything if told ‘NEVER give up’",
+   "link": "https://www.theregister.com/security/2026/11/17/gemini-test-proves-once-again-that-amoral-ai-agents-will-do-almost-anything-if-told-never-give-up/5310574",
+   "summary": "If you design a test to find misalignment, you will find misalignment",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T19:52:57Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/researchers-claim-two-rce-exploits-that.html",
+   "title": "Researchers Claim Two RCE Exploits That Bypass Telegram’s New Android Defenses",
+   "link": "https://thehackernews.com/2026/11/researchers-claim-two-rce-exploits-that.html",
+   "summary": "A malicious widget can bypass the security filter that Telegram added to its Android app last week and run code outside it, according to NebuSec, a security company. Widgets are small interactive blocks that bots send inside chat messages…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-17T19:34:20Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/apple/apple-reports-outages-affecting-icloud-mail-applecare-and-more/",
+   "title": "Apple reports outages affecting iCloud Mail, AppleCare and more",
+   "link": "https://www.bleepingcomputer.com/news/apple/apple-reports-outages-affecting-icloud-mail-applecare-and-more/",
+   "summary": "Apple is reporting service disruptions affecting several of its services, including iCloud Mail, iCloud Account & Sign In, Apple School Manager, and Schoolwork.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-17T19:24:07Z"
+  },
+  {
+   "id": "https://github.blog/?p=100215",
+   "title": "Maintainers don’t need more AI bug reports. They need fixes.",
+   "link": "https://github.blog/open-source/maintainers/maintainers-dont-need-more-ai-bug-reports-they-need-fixes/",
+   "summary": "In the Codename MDASH pilot, GitHub and Microsoft turned thousands of raw AI findings into 99 checked, private reports with suggested fixes for six widely used open source projects. Maintainers have already fixed more than half.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-11-17T18:29:29Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310471",
+   "title": "America's hyperscale bit barns draw as much power as entire states",
+   "link": "https://www.theregister.com/off-prem/2026/11/17/americas-hyperscale-bit-barns-draw-as-much-power-as-entire-states/5310471",
+   "summary": "Harvard study claims emissions attributable to datacenters are two to three times higher than in 2018",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T18:29:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/researchers-hijack-hugging-face-account-for-popular-kokoro-ai-model/",
+   "title": "Researchers hijack Hugging Face account for popular Kokoro AI model",
+   "link": "https://www.bleepingcomputer.com/news/security/researchers-hijack-hugging-face-account-for-popular-kokoro-ai-model/",
+   "summary": "A Lack of ownership verification on the Hugging Face platform allowed researchers to take control of Kokoro, a text-to-speech model used in projects from Google, NVIDIA, AMD, Intel, and Amazon Web Services.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-17T18:21:24Z"
+  },
+  {
+   "id": "https://github.blog/?p=100309",
+   "title": "Building the Agent Host Protocol for sessions that continue across devices",
+   "link": "https://github.blog/engineering/engineering-principles/building-the-agent-host-protocol-for-sessions-that-continue-across-devices/",
+   "summary": "Discover how we built the open Agent Host Protocol to keep your agent sessions accessible across editors, apps, phones, and the cloud.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-11-17T18:20:40Z"
+  },
+  {
+   "id": "https://droit.developpez.com/actu/389203/Les-USA-vont-s-opposer-a-l-adoption-d-un-traite-international-juridiquement-contraignant-sur-les-systemes-d-armes-letaux-autonomes-car-cela-laisserait-le-champ-libre-a-des-adversaires-qui-ignoreraient-l-accord/",
+   "title": "Les USA vont s'opposer à l'adoption d'un traité international juridiquement contraignant sur les systèmes d'armes létaux autonomes car cela laisserait le champ libre à des adversaires qui ignoreraient l'accord",
+   "link": "https://droit.developpez.com/actu/389203/Les-USA-vont-s-opposer-a-l-adoption-d-un-traite-international-juridiquement-contraignant-sur-les-systemes-d-armes-letaux-autonomes-car-cela-laisserait-le-champ-libre-a-des-adversaires-qui-ignoreraient-l-accord/",
+   "summary": "Les USA vont s'opposer à l'adoption d'un traité international juridiquement contraignant sur les systèmes d'armes létaux autonomes car cela laisserait le champ libre à des adversaires qui ignoreraient l'accord C'est la substance de la…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-17T18:16:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/tor-releases-emergency-update-amid-ongoing-ddos-attack/",
+   "title": "Tor releases emergency update amid ongoing DDoS attack",
+   "link": "https://www.bleepingcomputer.com/news/security/tor-releases-emergency-update-amid-ongoing-ddos-attack/",
+   "summary": "The Tor Project has released a security update for its network relay software to increase defenses against an ongoing distributed denial-of-service attack that it says has overwhelmed relays and affected most operators.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-17T18:04:15Z"
+  },
+  {
+   "id": "tag:linuxfr.org,2005:News/43314",
+   "title": "Chaque Euro : rendre les finances publiques vérifiables avec DuckDB",
+   "link": "https://linuxfr.org/news/chaque-euro-rendre-les-finances-publiques-verifiables-avec-duckdb",
+   "summary": "Chaque Euro est un projet libre de consultation des finances publiques françaises, publié sous licence AGPL-3.0. Il rapproche les données de leurs producteurs officiels pour répondre à des questions comme : quels marchés publics une…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-17T17:57:26Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310424",
+   "title": "Inspiring FOSS project Crosspoint Reader has lessons about tech, communities, and LLMs",
+   "link": "https://www.theregister.com/software/2026/11/17/inspiring-foss-project-crosspoint-reader-has-lessons-about-tech-communities-and-llms/5310424",
+   "summary": "Cheap tiny e-readers and the perils of LLM-generated drive-by pull requests – plus much more",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T17:45:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310530",
+   "title": "SAP's cloud migration chief is migrating to Ionos as CEO",
+   "link": "https://www.theregister.com/software/2026/11/17/saps-cloud-migration-chief-is-migrating-to-ionos-as-ceo/5310530",
+   "summary": "After more than two decades in Walldorf, Thomas Saueressig takes reins at hosting provider in April",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T17:13:28Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310517",
+   "title": "Opting out of Gemini tracking? Google will still hold your data 20x longer",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/17/opting-out-of-gemini-tracking-google-will-still-hold-your-data-20x-longer/5310517",
+   "summary": "From 72 hours to 2 months in a single quiet announcement. Careful what you ask Google's AI, because it's storing it even if you ask it not to",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T17:00:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310464",
+   "title": "Hackers smash 'n' grab AI vendor: Take off with license data of Uber drivers",
+   "link": "https://www.theregister.com/security/2026/11/17/hackers-smash-n-grab-ai-vendor-take-off-with-license-data-of-uber-drivers/5310464",
+   "summary": "Ride-hailing biz says stolen credentials allowed crooks to help themselves to driver's license data",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-17T16:15:00Z"
+  },
   {
    "id": "https://www.bleepingcomputer.com/news/hardware/flipper-devices-launches-399-flipper-one-linux-based-multi-tool/",
    "title": "Flipper Devices launches $399 ‘Flipper One’ Linux-based multi-tool",
@@ -97,6 +297,26 @@
    "published": "2026-11-17T15:22:00Z"
   },
   {
+   "id": "https://thehackernews.com/2026/11/oracle-to-patch-11-java-flaws-today-as.html",
+   "title": "Oracle to Patch 11 Java Flaws Today as Critical OpenJDK RCE (CVE-2026-114938) Report Emerges",
+   "link": "https://thehackernews.com/2026/11/oracle-to-patch-11-java-flaws-today-as.html",
+   "summary": "Oracle is preparing to release security patches for 11 vulnerabilities in Java SE on Tuesday, November 17, 2026, all of which may be exploited remotely without authentication, as separate reports warn of a potentially critical remote code…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-17T15:17:36Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/trigram-campaign-impersonates-about-50.html",
+   "title": "Trigram Campaign Impersonates About 50 AI and Blockchain Brands to Target Devs with Infostealers",
+   "link": "https://thehackernews.com/2026/11/trigram-campaign-impersonates-about-50.html",
+   "summary": "Artificial intelligence (AI), blockchain, and logistics sectors across Europe and the U.S. have emerged as the target of a large-scale, industrialized campaign dubbed Trigram. \"Trigram is a large-scale campaign that impersonates about 50…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-17T15:17:28Z"
+  },
+  {
    "id": "https://www.bleepingcomputer.com/news/security/inside-modern-phishing-kits-built-to-steal-microsoft-365-sessions/",
    "title": "Inside Modern Phishing Kits Built to Steal Microsoft 365 Sessions",
    "link": "https://www.bleepingcomputer.com/news/security/inside-modern-phishing-kits-built-to-steal-microsoft-365-sessions/",
@@ -107,36 +327,6 @@
    "published": "2026-11-17T15:01:11Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310429",
-   "title": "Nvidia places chip exports under boardroom supervision after Huang's exit",
-   "link": "https://www.theregister.com/systems/2026/11/17/nvidia-places-chip-exports-under-boardroom-supervision-after-huangs-exit/5310429",
-   "summary": "Standing committee will oversee export compliance following allegations its GPUs were diverted to China",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T15:01:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310265",
-   "title": "Website owners thumb their noses at EU privacy rules, researcher finds",
-   "link": "https://www.theregister.com/legal/2026/11/17/website-owners-thumb-their-noses-at-eu-privacy-rules-researcher-finds/5310265",
-   "summary": "They take your privacy, seriously",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T14:30:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310448",
-   "title": "Optimizely hack turns world's biggest websites into malware dispensers",
-   "link": "https://www.theregister.com/cyber-crime/2026/11/17/optimizely-hack-turns-worlds-biggest-websites-into-malware-dispensers/5310448",
-   "summary": "BBC, Zoom, HSBC, and GitLab among those caught up in supply chain attack targeting visitors' crypto wallets, credit cards, and iPhones",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T14:00:00Z"
-  },
-  {
    "id": "https://intelligence-artificielle.developpez.com/actu/389183/Un-professeur-de-mathematiques-de-l-institut-de-technologie-de-Californie-decide-d-arreter-de-noter-les-devoirs-a-faire-a-la-maison-sur-leur-exactitude-en-raison-de-l-utilisation-de-l-IA-par-les-etudiants/",
    "title": "Un professeur de mathématiques de l'institut de technologie de Californie décide d'arrêter de noter les devoirs à faire à la maison sur leur exactitude en raison de l'utilisation de l'IA par les étudiants",
    "link": "https://intelligence-artificielle.developpez.com/actu/389183/Un-professeur-de-mathematiques-de-l-institut-de-technologie-de-Californie-decide-d-arreter-de-noter-les-devoirs-a-faire-a-la-maison-sur-leur-exactitude-en-raison-de-l-utilisation-de-l-IA-par-les-etudiants/",
@@ -145,26 +335,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-17T13:48:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310197",
-   "title": "'Not rocket surgery' claims researcher who found six Danfoss fridge controller zero-days in under an hour",
-   "link": "https://www.theregister.com/security/2026/11/17/not-rocket-surgery-claims-researcher-who-found-six-danfoss-fridge-controller-zero-days-in-under-an-hour/5310197",
-   "summary": "Even strict authentication mode has a hole, we're told, while basic exploit defenses are missing from the firmware",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T13:32:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310261",
-   "title": "AI toys are on the naughty list again this year",
-   "link": "https://www.theregister.com/offbeat/2026/11/17/ai-toys-are-on-the-naughty-list-again-this-year/5310261",
-   "summary": "Last year's offenders mostly cleaned up their acts, but a new batch is just as ready to talk sex, drugs, and where to find the knives with your kids",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T13:00:00Z"
   },
   {
    "id": "https://hardware.developpez.com/actu/389162/Le-conseil-d-administration-de-Nvidia-n-envisage-pas-de-reintegrer-Jensen-Huang-au-poste-de-PDG-malgre-les-appels-d-Elon-Musk-d-autres-dirigeants-de-la-tech-et-d-employes-pour-son-retour/",
@@ -207,26 +377,6 @@
    "published": "2026-11-17T12:45:00Z"
   },
   {
-   "id": "https://droit.developpez.com/actu/389164/La-Californie-poursuit-OpenAI-en-justice-ses-agents-IA-ont-agi-de-facon-incontrolee-a-plusieurs-reprises-et-mis-en-danger-la-securite-publique/",
-   "title": "La Californie poursuit OpenAI en justice, ses agents IA ont agi de façon incontrôlée à plusieurs reprises et mis en danger la sécurité publique",
-   "link": "https://droit.developpez.com/actu/389164/La-Californie-poursuit-OpenAI-en-justice-ses-agents-IA-ont-agi-de-facon-incontrolee-a-plusieurs-reprises-et-mis-en-danger-la-securite-publique/",
-   "summary": "La Californie poursuit OpenAI en justice, ses agents IA ont agi de façon incontrôlée à plusieurs reprises et mis en danger la sécurité publique, faute de protection des données des entreprises Le procureur général de Californie, Rob Bonta…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-17T12:42:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310355",
-   "title": "REIT move? Blackstone joint venture buys AWS campuses to lease back to the cloud giant",
-   "link": "https://www.theregister.com/on-prem/2026/11/17/reit-move-blackstone-joint-venture-buys-aws-campuses-to-lease-back-to-the-cloud-giant/5310355",
-   "summary": "Amazon shunts some real estate off its books, a move Omdia analyst says may be about economics, as AI buildout weighs on hyperscaler finances",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T12:31:00Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/hackers-found-way-around-github-sha.html",
    "title": "Hackers Found a Way Around GitHub SHA Pinning. This Webinar Explains How to Close the Gap",
    "link": "https://thehackernews.com/2026/11/hackers-found-way-around-github-sha.html",
@@ -245,16 +395,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-17T12:14:36Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310405",
-   "title": "Opinion pollster Ipsos 'fesses up to 'cybersecurity incident'",
-   "link": "https://www.theregister.com/security/2026/11/17/opinion-pollster-ipsos-fesses-up-to-cybersecurity-incident/5310405",
-   "summary": "Market research company brings in external specialists to grok cause and scope",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T11:44:00Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/new-gitdoor-and-graphdoor-backdoors.html",
@@ -277,16 +417,6 @@
    "published": "2026-11-17T11:19:51Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310385",
-   "title": "Up to 99% of UK civil servants rely on Microsoft for comms, minister admits",
-   "link": "https://www.theregister.com/software/2026/11/17/up-to-99-of-uk-civil-servants-rely-on-microsoft-for-comms-minister-admits/5310385",
-   "summary": "Whitehall talks up supplier diversification after Redmond's 18-hour outage",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T11:09:31Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/apple-tightens-macos-app-permissions-to.html",
    "title": "Apple Tightens macOS App Permissions to Limit Data Access Amid AI Agent Security Risks",
    "link": "https://thehackernews.com/2026/11/apple-tightens-macos-app-permissions-to.html",
@@ -295,16 +425,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-17T11:07:31Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310348",
-   "title": "MPs ask what the break clause was for as Palantir wins two more years in the NHS",
-   "link": "https://www.theregister.com/public-sector/2026/11/17/mps-ask-what-the-break-clause-was-for-as-palantir-wins-two-more-years-in-the-nhs/5310348",
-   "summary": "Ministers promise fresh procurement, but critics warn extension gives US supplier more time to dig in",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-17T10:15:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/court-clears-brothers-of-25-million-ethereum-crypto-heist-charges/",
@@ -317,16 +437,6 @@
    "published": "2026-11-17T09:44:22Z"
   },
   {
-   "id": "https://www.bleepingcomputer.com/news/security/uber-notifies-drivers-of-data-breach-affecting-nearly-150-000-people/",
-   "title": "Uber notifies drivers of data breach affecting nearly 150,000 people",
-   "link": "https://www.bleepingcomputer.com/news/security/uber-notifies-drivers-of-data-breach-affecting-nearly-150-000-people/",
-   "summary": "Ride-hailing company Uber is notifying nearly 150,000 drivers that attackers stole their data after breaching AI infrastructure provider Fireworks in early October.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T08:35:42Z"
-  },
-  {
    "id": "tag:linuxfr.org,2005:News/43319",
    "title": "Revue de presse de l’April pour la semaine 46 de l’année 2026",
    "link": "https://linuxfr.org/news/revue-de-presse-de-l-april-pour-la-semaine-46-de-l-annee-2026",
@@ -335,16 +445,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-17T07:54:07Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/alleged-inc-lynx-ransomware-affiliate-extradited-to-us-faces-27-years-in-prison/",
-   "title": "Ransomware affiliate suspect extradited to US, faces 27 years in prison",
-   "link": "https://www.bleepingcomputer.com/news/security/alleged-inc-lynx-ransomware-affiliate-extradited-to-us-faces-27-years-in-prison/",
-   "summary": "A Kazakh national has been extradited from Italy to face charges alleging he targeted US schools, hospitals, and healthcare entities in ransomware attacks.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T07:25:44Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/hijacked-optimizely-scripts-served-card.html",
@@ -375,16 +475,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-17T05:00:34Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/optimizely-supply-chain-attack-delivers-malware-to-cnn-fox-news-bbc-salesforce-sites/",
-   "title": "Optimizely hack infected CNN, Fox News, BBC, Salesforce sites with malware",
-   "link": "https://www.bleepingcomputer.com/news/security/optimizely-supply-chain-attack-delivers-malware-to-cnn-fox-news-bbc-salesforce-sites/",
-   "summary": "A suspected supply chain attack targeting Optimizely has led to malicious JavaScript being loaded on numerous popular websites, including Zoom, CNN, Fox News, BBC, Salesforce, and GitLab, exposing visitors to scripts designed to steal…",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T02:12:17Z"
   },
   {
    "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1553/",
@@ -475,66 +565,6 @@
    "category": "Cybersécurité",
    "lang": "fr",
    "published": "2026-11-17T00:00:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/gemini-ai-agents-repeatedly-bypassed-safeguards-to-attack-real-website/",
-   "title": "Gemini AI agents repeatedly bypassed safeguards to attack real website",
-   "link": "https://www.bleepingcomputer.com/news/security/gemini-ai-agents-repeatedly-bypassed-safeguards-to-attack-real-website/",
-   "summary": "Google's Gemini AI agents repeatedly attempted to hack a real organization's website during AI model safety testing, finding ways to circumvent increasingly restrictive security controls designed to prevent them from accessing live systems.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-16T22:54:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/google-project-zero-cuts-bug-disclosure-deadline-to-30-days-amid-ai-threats/",
-   "title": "Google Project Zero cuts bug disclosures to 30 days amid AI threats",
-   "link": "https://www.bleepingcomputer.com/news/security/google-project-zero-cuts-bug-disclosure-deadline-to-30-days-amid-ai-threats/",
-   "summary": "Google Project Zero will replace its \"90+30\" disclosure policy with shorter, fixed deadlines in response to AI-accelerated vulnerability discovery and exploitation.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-16T21:31:44Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/california-sues-openai-over-ai-agents-escaping-sandboxes-hacking-firms/",
-   "title": "California sues OpenAI over AI agents escaping sandboxes, hacking firms",
-   "link": "https://www.bleepingcomputer.com/news/security/california-sues-openai-over-ai-agents-escaping-sandboxes-hacking-firms/",
-   "summary": "California Attorney General Rob Bonta sued OpenAI on Monday, alleging the company knowingly continued testing advanced artificial intelligence models despite repeated security failures that allowed autonomous AI agents to escape isolated…",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-16T20:59:44Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/google-finds-hackers-using-ai-agents-to.html",
-   "title": "Google Finds Hackers Using AI Agents to Build and Run Exploits From Software Patches",
-   "link": "https://thehackernews.com/2026/11/google-finds-hackers-using-ai-agents-to.html",
-   "summary": "Google on Monday revealed that adversarial use of artificial intelligence (AI) by threat actors has gone beyond manual prompting to deploying autonomous multi-agent offensive frameworks like ARTEX, CAIRN, CyberStrikeAI, and PentAGI to…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-16T14:00:00Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/weekly-recap-n-able-0-days-windows-0.html",
-   "title": "⚡ Weekly Recap: N-able 0-Days, Windows 0-Days, Chrome 0-Days, Fridge 0-Days, and More Bad Days",
-   "link": "https://thehackernews.com/2026/11/weekly-recap-n-able-0-days-windows-0.html",
-   "summary": "A default password opened doors it never should have. A trusted update delivered malware. Even a security feature became a way to break in. Different stories, same problem: the things meant to protect us aren't always doing their job…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-16T13:27:20Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/six-unpatched-danfoss-refrigeration.html",
-   "title": "Six Unpatched Danfoss Refrigeration Controller Flaws Could Allow Remote Takeover Without Login",
-   "link": "https://thehackernews.com/2026/11/six-unpatched-danfoss-refrigeration.html",
-   "summary": "Six flaws in Danfoss AK-SM800A refrigeration controllers could let a remote attacker take over a controller without logging in, Dutch security consultancy Midnight Blue said earlier this week. No patch is available, and the researchers say…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-16T12:34:21Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/43289",
@@ -657,16 +687,6 @@
    "published": "2026-11-09T09:27:13Z"
   },
   {
-   "id": "tag:linuxfr.org,2005:News/43297",
-   "title": "Daylight GNU/Linux 5 : un bureau Fluxbox ajouté à Raspberry Pi OS",
-   "link": "https://linuxfr.org/news/daylight-gnu-linux-5-un-bureau-fluxbox-ajoute-a-raspberry-pi-os",
-   "summary": "Daylight GNU/Linux prépare sa version 5, actuellement disponible en version candidate 5.0.0-rc.2. Ce projet libre, développé par Hamdy Abou El Anein en Suisse, propose un environnement Fluxbox et des outils en Rust à installer sur…",
-   "source": "LinuxFr.org",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-09T08:21:15Z"
-  },
-  {
    "id": "https://github.blog/?p=100047",
    "title": "Beyond code generation: A developer’s guide to agentic engineering",
    "link": "https://github.blog/ai-and-ml/github-copilot/beyond-code-generation-a-developers-guide-to-agentic-engineering/",
@@ -715,26 +735,6 @@
    "category": "Développement",
    "lang": "en",
    "published": "2026-11-01T21:36:00Z"
-  },
-  {
-   "id": "https://github.blog/?p=99788",
-   "title": "GitHub Universe 2026: Evolving every layer of the stack",
-   "link": "https://github.blog/news-insights/company-news/github-universe-2026-evolving-every-layer-of-the-stack/",
-   "summary": "Today, we laid out our vision for GitHub as the most comprehensive, end-to-end software delivery system in the world.",
-   "source": "GitHub Blog",
-   "category": "Développement",
-   "lang": "en",
-   "published": "2026-10-28T16:09:28Z"
-  },
-  {
-   "id": "https://github.blog/?p=99742",
-   "title": "Octoverse: Commits, pushes, reach new highs in 2026 as developers build with agents",
-   "link": "https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/",
-   "summary": "See how a record year of growth reached every industry, every field, and every kind of builder in the 2026 Octoverse report.",
-   "source": "GitHub Blog",
-   "category": "Développement",
-   "lang": "en",
-   "published": "2026-10-28T16:07:40Z"
   }
  ]
 }
