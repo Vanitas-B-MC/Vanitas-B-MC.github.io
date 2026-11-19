@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-18T20:39:45Z",
+ "updated": "2026-11-19T02:38:43Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,76 @@
   }
  },
  "items": [
+  {
+   "id": "https://www.theregister.com/a/5310927",
+   "title": "Chinese web giant Tencent says new US GPU ban ‘sets everyone back in China’",
+   "link": "https://www.theregister.com/systems/2026/11/19/chinese-web-giant-tencent-says-new-us-gpu-ban-sets-everyone-back-in-china/5310927",
+   "summary": "Don’t hoist the Mission Accomplished banner, because company president thinks it also will spur China’s chip biz into action",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T00:39:16Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/ukraine-fbi-arrest-ransomware-gang-members-tied-to-40m-in-ransoms/",
+   "title": "Ukraine, FBI arrest ransomware gang members tied to $40M in ransoms",
+   "link": "https://www.bleepingcomputer.com/news/security/ukraine-fbi-arrest-ransomware-gang-members-tied-to-40m-in-ransoms/",
+   "summary": "Ukrainian authorities, working with the FBI, have arrested four suspected members of an international ransomware organization linked to more than $40.5 million in ransom payments from at least 28 companies worldwide.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T23:08:33Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310911",
+   "title": "Get ready for another critical PHP security release to drop",
+   "link": "https://www.theregister.com/patches/2026/11/18/get-ready-for-another-critical-php-security-release-to-drop/5310911",
+   "summary": "At least one dangerous RCE bug will get a fix on Thursday",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T22:38:12Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310872",
+   "title": "Anthropic decides to go head-to-head with GTA VI release, schedules IPO for the same day",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/18/anthropic-decides-to-go-head-to-head-with-gta-vi-release-schedules-ipo-for-the-same-day/5310872",
+   "summary": "We get it, Dario - you don't want people calling out sick to play",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T21:40:09Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310887",
+   "title": "AI found more critical bugs in another widely used technology running 225M websites",
+   "link": "https://www.theregister.com/security/2026/11/18/ai-found-more-critical-bugs-in-another-widely-used-technology-running-225m-websites/5310887",
+   "summary": "Open source NGINX joins patchapalooza",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T21:11:04Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/coinbase-blocks-47-million-in-transfers-to-elon-musk-deepfake-scam/",
+   "title": "Coinbase blocks $4.7 million in transfers to Elon Musk deepfake scam",
+   "link": "https://www.bleepingcomputer.com/news/security/coinbase-blocks-47-million-in-transfers-to-elon-musk-deepfake-scam/",
+   "summary": "Coinbase says it blocked $4.7 million in cryptocurrency transfers to scammers promoting a fake giveaway using an AI-generated deepfake of Elon Musk during a Tesla livestream that attracted more than 500,000 viewers.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-18T20:49:32Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310878",
+   "title": "To rank the world's biggest supercomputers, we're gonna need a bigger bench",
+   "link": "https://www.theregister.com/hpc/2026/11/18/to-rank-the-worlds-biggest-supercomputers-were-gonna-need-a-bigger-bench/5310878",
+   "summary": "AI has birthed some truly colossal supers, they just aren't on the Top500",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-18T20:15:44Z"
+  },
   {
    "id": "https://www.bleepingcomputer.com/news/security/data-breach-impacts-40-irish-credit-unions-in-reported-it-provider-hack/",
    "title": "Data breach impacts 40 Irish credit unions in reported IT provider hack",
@@ -177,16 +247,6 @@
    "published": "2026-11-18T16:00:00Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310791",
-   "title": "PowerShell 7 heading into Windows as 5.1 hits the end of the road",
-   "link": "https://www.theregister.com/os-platforms/2026/11/18/powershell-7-heading-into-windows-as-51-hits-the-end-of-the-road/5310791",
-   "summary": "Next OS release will bundle modern successor, giving admins a compatibility checklist to work through",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T15:29:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/from-deepfakes-to-helpdesk-impersonation-why-stronger-verification-matters/",
    "title": "From Deepfakes to Helpdesk Impersonation: Why Stronger Verification Matters",
    "link": "https://www.bleepingcomputer.com/news/security/from-deepfakes-to-helpdesk-impersonation-why-stronger-verification-matters/",
@@ -195,36 +255,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-18T15:00:10Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310515",
-   "title": "AI-powered cyber threats are changing the rules of enterprise recovery",
-   "link": "https://www.theregister.com/security/2026/11/18/sponsored-ai-powered-cyber-threats-are-changing-the-rules-of-enterprise-recovery/5310515",
-   "summary": "SPONSORED POST: As cyberattacks become more sophisticated, organizations need to look beyond prevention and ensure they can recover critical data quickly and reliably",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T15:00:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310751",
-   "title": "Space robot legend Voyager 1 is now more than 1 light-day away",
-   "link": "https://www.theregister.com/science/2026/11/18/space-robot-legend-voyager-1-is-now-more-than-1-light-day-away/5310751",
-   "summary": "As the world is hit by IT snafu after IT snafu, Voyager sails on, almost half a century after launch",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T14:57:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310775",
-   "title": "StubHub International warns customer data may have left the venue",
-   "link": "https://www.theregister.com/cyber-crime/2026/11/18/stubhub-international-warns-customer-data-may-have-left-the-venue/5310775",
-   "summary": "Names and contact details potentially exposed, ticket reseller finds no evidence passwords or payment information were accessed",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T14:45:00Z"
   },
   {
    "id": "https://intelligence-artificielle.developpez.com/actu/389253/-Pratiquement-inutilisable-les-nouveaux-modeles-GPT-6-2-Astra-et-Sol-lances-par-OpenAI-sont-accueillis-negativement-par-les-experts-qui-y-voient-les-pires-modeles-jamais-lances-par-OpenAI/",
@@ -245,16 +275,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-18T14:11:28Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310772",
-   "title": "Business as usual, but Huang ain't coming back, says Nvidia",
-   "link": "https://www.theregister.com/systems/2026/11/18/business-as-usual-but-huang-aint-coming-back-says-nvidia/5310772",
-   "summary": "GPU giant puts on a brave face for investors, while analysts say doubts remain over the company's future",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T13:54:00Z"
   },
   {
    "id": "https://hardware.developpez.com/actu/389212/L-ancien-PDG-de-Nvidia-Jensen-Huang-se-dit-ouvert-a-un-retour-dans-sa-premiere-declaration-depuis-sa-demission-regrettant-profondement-d-avoir-cause-des-problemes-au-conseil-d-administration/",
@@ -515,26 +535,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-17T23:04:21Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/cloud-keys-leaked-in-docker-hub-images-are-stolen-within-seconds/",
-   "title": "Cloud keys leaked in Docker Hub images are stolen within seconds",
-   "link": "https://www.bleepingcomputer.com/news/security/cloud-keys-leaked-in-docker-hub-images-are-stolen-within-seconds/",
-   "summary": "Credentials and access secrets exposed in public Docker Hub images are being extracted and exploited by attackers within as little as eight seconds of publication.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T21:27:17Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/japan-takes-fugaku-supercomputer-offlline-after-cyberattack/",
-   "title": "Japan takes Fugaku supercomputer offlline after cyberattack",
-   "link": "https://www.bleepingcomputer.com/news/security/japan-takes-fugaku-supercomputer-offlline-after-cyberattack/",
-   "summary": "The Fugaku supercomputer operated by Japan's RIKEN Center for Computational Science has been taken offline following a security breach.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T20:51:21Z"
   },
   {
    "id": "https://github.blog/?p=100215",
