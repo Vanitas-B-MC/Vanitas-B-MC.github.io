@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-19T02:38:43Z",
+ "updated": "2026-11-19T11:51:13Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,156 @@
   }
  },
  "items": [
+  {
+   "id": "https://www.theregister.com/a/5310979",
+   "title": "Cyberattack on service provider exposes payee data at 40 Irish credit unions",
+   "link": "https://www.theregister.com/security/2026/11/19/cyberattack-on-service-provider-exposes-payee-data-at-40-irish-credit-unions/5310979",
+   "summary": "Minister calls notification delay 'not acceptable' after October attack on Irish banking player Wellington IT came to light in November",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T11:45:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310985",
+   "title": "TfL takes Oyster photocard website offline after attackers compromise customer accounts",
+   "link": "https://www.theregister.com/security/2026/11/19/tfl-takes-oyster-photocard-website-offline-after-attackers-compromise-customer-accounts/5310985",
+   "summary": "Around 265,000 customers potentially affected as London transport operator grapples with another security breach",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T11:01:00Z"
+  },
+  {
+   "id": "tag:linuxfr.org,2005:News/43256",
+   "title": "Nouvelles de Haiku - Automne 2026",
+   "link": "https://linuxfr.org/news/nouvelles-de-haiku-automne-2026",
+   "summary": "Ce rapport d’activité couvre les mois d’août, septembre et octobre, ce qui correspond aux changements numérotés hrev59922 à hrev60317 dans le code source de Haiku. La grosse nouvelle du trimestre est bien sûr la publication de la version…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-19T10:42:17Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-confirms-app-installation-launch-issues-after-hotpatch/",
+   "title": "Microsoft confirms app installation, launch issues after hotpatch",
+   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-confirms-app-installation-launch-issues-after-hotpatch/",
+   "summary": "Microsoft has shared a workaround for installation and launch issues affecting Office and third-party applications after installing this month's Windows 11 hotpatch.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-19T10:35:05Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310908",
+   "title": "Sticky note on monitor provided keys to the company’s kingdom",
+   "link": "https://www.theregister.com/security/2026/11/19/sticky-note-on-monitor-provided-keys-to-the-companys-kingdom/5310908",
+   "summary": "Don't leave your credentials out in public, where any visitor can see them.",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T10:15:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/n-able-confirms-hackers-accessed-cloud.html",
+   "title": "Hackers Breach N-able Cloud Server, Disrupting Email Security Management Across 3 Regions",
+   "link": "https://thehackernews.com/2026/11/n-able-confirms-hackers-accessed-cloud.html",
+   "summary": "N-able on Wednesday disclosed that unknown threat actors gained unauthorized access to one of the servers in the Mail Assure and Spam Experts Hosted Cloud, causing it to disable management interfaces and APIs. \"We have taken steps to…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-19T09:31:26Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310891",
+   "title": "Uncensored AI models are thriving on code hosting platforms",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/19/uncensored-ai-models-are-thriving-on-code-hosting-platforms/5310891",
+   "summary": "Making a mockery of alignment",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T09:30:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/nvidia-investigating-gentlemen-ransomware-breach-claims/",
+   "title": "NVIDIA investigating Gentlemen ransomware breach claims",
+   "link": "https://www.bleepingcomputer.com/news/security/nvidia-investigating-gentlemen-ransomware-breach-claims/",
+   "summary": "NVIDIA is investigating claims of a security breach after the Gentlemen ransomware group has added the company to its dark web data leak site.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-19T09:23:21Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/ruby-releases-fixes-for-7-regex-and.html",
+   "title": "Ruby Releases Fixes for 7 Regex and String Flaws, Warns 5 Have Proof-of-Concept RCE",
+   "link": "https://thehackernews.com/2026/11/ruby-releases-fixes-for-7-regex-and.html",
+   "summary": "Ruby contains seven memory-safety flaws in its regular expression engine and its string case-conversion code. For five of them, its maintainers say, proof-of-concept exploits, or PoCs, have shown that crafted input can run code on the…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-19T08:42:11Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310934",
+   "title": "Google continues model chemistry experiment with Neon",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/19/google-continues-model-chemistry-experiment-with-neon/5310934",
+   "summary": "Which model to choose? It's elementary but not obvious",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T08:30:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/researcher-demonstrates-database-rce.html",
+   "title": "Researcher Demonstrates Database RCE Exploits Affecting PostgreSQL, MySQL and Oracle",
+   "link": "https://thehackernews.com/2026/11/researcher-demonstrates-database-rce.html",
+   "summary": "Low-privilege database accounts that cannot read a single application table can still be used to run code on the database server itself, a researcher has shown, by reaching memory-corruption bugs in the engine code behind ordinary SQL. The…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-19T08:14:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/cisa-warns-of-4-exploited-flaws-linked.html",
+   "title": "CISA Warns of 4 Exploited Flaws Linked to Ransomware, Cryptomining, and LLMjacking Attacks",
+   "link": "https://thehackernews.com/2026/11/cisa-warns-of-4-exploited-flaws-linked.html",
+   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) on Wednesday added four vulnerabilities impacting Synology DiskStation Manager (DSM), BerriAI LiteLLM, Apache Axis, and Vanderbilt University Research Electronic Data Capture…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-19T08:00:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310950",
+   "title": "GTA VI didn’t break the internet, thanks to ‘stupid DNS tricks’",
+   "link": "https://www.theregister.com/networks/2026/11/19/gta-vi-didnt-break-the-internet-thanks-to-stupid-dns-tricks/5310950",
+   "summary": "Multiple CDNs and routing users to nearby download sites kept traffic flowing for everyone",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T05:57:30Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/php-warns-of-critical-security-flaws.html",
+   "title": "PHP Warns of Critical Security Flaws Affecting All Supported Versions, Fixes Coming November 19",
+   "link": "https://thehackernews.com/2026/11/php-warns-of-critical-security-flaws.html",
+   "summary": "The maintainers of the PHP programming language on Wednesday issued an advisory announcing an upcoming security release that addresses critical flaws. The release is scheduled for November 19, 2026, between 2 and 2:30 p.m. UTC. \"These…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-19T04:33:46Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5310942",
+   "title": "South Korea tries to out exam cheats with Extreme Emergency smartphone alert",
+   "link": "https://www.theregister.com/personal-tech/2026/11/19/south-korea-tries-to-out-exam-cheats-with-extreme-emergency-smartphone-alert/5310942",
+   "summary": "At least it’s less disruptive than an internet shutdown",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T03:33:34Z"
+  },
   {
    "id": "https://www.theregister.com/a/5310927",
    "title": "Chinese web giant Tencent says new US GPU ban ‘sets everyone back in China’",
@@ -77,16 +227,6 @@
    "published": "2026-11-18T21:40:09Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310887",
-   "title": "AI found more critical bugs in another widely used technology running 225M websites",
-   "link": "https://www.theregister.com/security/2026/11/18/ai-found-more-critical-bugs-in-another-widely-used-technology-running-225m-websites/5310887",
-   "summary": "Open source NGINX joins patchapalooza",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T21:11:04Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/coinbase-blocks-47-million-in-transfers-to-elon-musk-deepfake-scam/",
    "title": "Coinbase blocks $4.7 million in transfers to Elon Musk deepfake scam",
    "link": "https://www.bleepingcomputer.com/news/security/coinbase-blocks-47-million-in-transfers-to-elon-musk-deepfake-scam/",
@@ -95,16 +235,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-18T20:49:32Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310878",
-   "title": "To rank the world's biggest supercomputers, we're gonna need a bigger bench",
-   "link": "https://www.theregister.com/hpc/2026/11/18/to-rank-the-worlds-biggest-supercomputers-were-gonna-need-a-bigger-bench/5310878",
-   "summary": "AI has birthed some truly colossal supers, they just aren't on the Top500",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T20:15:44Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/data-breach-impacts-40-irish-credit-unions-in-reported-it-provider-hack/",
@@ -157,16 +287,6 @@
    "published": "2026-11-18T18:01:00Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310841",
-   "title": "California tells Waymo to take the next exit after freeway mishaps",
-   "link": "https://www.theregister.com/security/2026/11/18/california-tells-waymo-to-take-the-next-exit-after-freeway-mishaps/5310841",
-   "summary": "Robotaxi operator suspends driverless rides on high-speed roads nationwide after construction zone incursions and a run-in with patrol vehicles",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T17:45:00Z"
-  },
-  {
    "id": "https://securite.developpez.com/actu/389256/Des-centaines-de-sites-web-majeurs-diffusent-un-puissant-cocktail-de-logiciels-malveillants-a-des-visiteurs-qui-ne-se-doutent-de-rien-dont-des-malwares-destinees-au-vol-de-cryptomonnaies/",
    "title": "Des centaines de sites web majeurs diffusent un puissant « cocktail » de logiciels malveillants à des visiteurs qui ne se doutent de rien, dont des malwares destinées au vol de cryptomonnaies",
    "link": "https://securite.developpez.com/actu/389256/Des-centaines-de-sites-web-majeurs-diffusent-un-puissant-cocktail-de-logiciels-malveillants-a-des-visiteurs-qui-ne-se-doutent-de-rien-dont-des-malwares-destinees-au-vol-de-cryptomonnaies/",
@@ -177,16 +297,6 @@
    "published": "2026-11-18T17:26:00Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310858",
-   "title": "Microsoft's official Python agent framework hijacked to distribute malware",
-   "link": "https://www.theregister.com/security/2026/11/18/microsofts-official-python-agent-framework-hijacked-to-distribute-malware/5310858",
-   "summary": "In today's how-could-things-get-worse-for-Microsoft news, it seems someone's GitHub org admin creds have been compromised",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T17:23:37Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/critical-apache-roller-rce-flaw-under.html",
    "title": "Critical Apache Roller RCE Flaw Under Active Exploitation, No Authentication Required",
    "link": "https://thehackernews.com/2026/11/critical-apache-roller-rce-flaw-under.html",
@@ -195,16 +305,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-18T17:10:45Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310809",
-   "title": "MongoDB snaps up Firebolt to bring transactions and analytics under one roof",
-   "link": "https://www.theregister.com/databases/2026/11/18/mongodb-snaps-up-firebolt-to-bring-transactions-and-analytics-under-one-roof/5310809",
-   "summary": "Many have tried to marry analytics with transactions. The document DB posterchild takes another crack at it",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T17:02:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/microsofts-agent-framework-pypi-package-compromised-to-steal-credentials/",
@@ -225,26 +325,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-18T16:47:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310831",
-   "title": "The wrong setting for AI cache can cost you a lot of cash",
-   "link": "https://www.theregister.com/ai-and-ml/2026/11/18/the-wrong-setting-for-ai-cache-can-cost-you-a-lot-of-cash/5310831",
-   "summary": "Beware of the temptation to drop just a few more dollars to get the work done",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T16:17:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5309325",
-   "title": "Cyber insurers now want proof you can actually recover",
-   "link": "https://www.theregister.com/security/2026/11/18/partner-content-cyber-insurers-now-want-proof-you-can-actually-recover/5309325",
-   "summary": "PARTNER CONTENT: As carriers tighten underwriting, a backup job marked green is no longer enough. Here’s the evidence underwriters expect",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-18T16:00:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/from-deepfakes-to-helpdesk-impersonation-why-stronger-verification-matters/",
@@ -337,26 +417,6 @@
    "published": "2026-11-18T12:28:30Z"
   },
   {
-   "id": "https://thehackernews.com/2026/11/ai-pentesting-checklist-for-web-apps-15.html",
-   "title": "AI Pentesting Checklist for Web Apps: 15 Questions to Ask Before Choosing a Vendor",
-   "link": "https://thehackernews.com/2026/11/ai-pentesting-checklist-for-web-apps-15.html",
-   "summary": "TL;DR Attackers move first. On average, exploitation now starts before a patch exists (Mandiant M-Trends 2026). In 1H 2026, 23% of vulnerabilities VulnCheck added to its exploited list were hit on or before disclosure day. AI pentesting…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-18T12:15:00Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/java4shell-cve-2026-114938-enables-pre.html",
-   "title": "Java4Shell Flaw (CVE-2026-114938) Enables Pre-Auth RCE in Jira, Jenkins, Keycloak and More",
-   "link": "https://thehackernews.com/2026/11/java4shell-cve-2026-114938-enables-pre.html",
-   "summary": "A Java flaw called Java4Shell can let attackers without an account run their own code on Jira, Jenkins, Keycloak, and three other widely used applications, says Calif, the security research firm that disclosed it this week. The flaw is…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-18T11:55:49Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/dizigom-illegal-streaming-service-with-21m-monthly-visits-shuts-down/",
    "title": "Dizigom illegal streaming service with 21M monthly visits shuts down",
    "link": "https://www.bleepingcomputer.com/news/security/dizigom-illegal-streaming-service-with-21m-monthly-visits-shuts-down/",
@@ -365,16 +425,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-18T11:50:25Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/quality-isnt-main-worry-about-ai.html",
-   "title": "Quality Isn’t The Main Worry About AI Pentesting — Data Privacy and Production Safety Are",
-   "link": "https://thehackernews.com/2026/11/quality-isnt-main-worry-about-ai.html",
-   "summary": "AI is speeding up how software is built, which means more code, more changes, and more chances for vulnerabilities to reach production. It's speeding up how attackers find and exploit them too, with time-to-exploit now down to a single…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-18T11:03:57Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/apache-warns-of-roller-rce-vulnerability-exploited-in-attacks/",
@@ -395,36 +445,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-18T09:24:31Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/hackers-exploiting-critical-puppet-rce.html",
-   "title": "Hackers Exploiting Critical Puppet RCE Flaw Affecting Enterprise Management Servers",
-   "link": "https://thehackernews.com/2026/11/hackers-exploiting-critical-puppet-rce.html",
-   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) on Tuesday added a critical security flaw impacting Perforce Puppet, an enterprise infrastructure-as-code (IaC) and configuration management platform, to its Known Exploited…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-18T08:24:31Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/cisa-urges-immediate-patching-of.html",
-   "title": "CISA Urges Immediate Patching of Java4Shell Flaw That Could Allow Remote Code Execution",
-   "link": "https://thehackernews.com/2026/11/cisa-urges-immediate-patching-of.html",
-   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) has urged organizations to immediately patch a newly disclosed critical security flaw impacting Oracle Java. The flaw, tracked as CVE-2026-114938 (CVSS score: 8.1), refers to…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-18T08:24:23Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/british-scattered-spider-hacker-sentenced-to-6-years-in-prison/",
-   "title": "British Scattered Spider hacker sentenced to 6 years in prison",
-   "link": "https://www.bleepingcomputer.com/news/security/british-scattered-spider-hacker-sentenced-to-6-years-in-prison/",
-   "summary": "A leader of the Scattered Spider cybercrime collective has been sentenced to six years in prison in the United States for stealing millions in cryptocurrency and conspiring to hack a dozen companies.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-18T08:24:18Z"
   },
   {
    "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1562/",
@@ -525,16 +545,6 @@
    "category": "Cybersécurité",
    "lang": "fr",
    "published": "2026-11-18T00:00:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/critical-java4shell-flaw-allows-rce-attacks-on-major-java-applications/",
-   "title": "Critical Java4Shell flaw allows RCE attacks on major Java applications",
-   "link": "https://www.bleepingcomputer.com/news/security/critical-java4shell-flaw-allows-rce-attacks-on-major-java-applications/",
-   "summary": "A critical vulnerability dubbed Java4Shell in OpenJDK, the open-source implementation of Java, can allow unauthenticated attackers to remotely execute code on popular enterprise applications, including Jenkins, Atlassian Jira, Confluence…",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-17T23:04:21Z"
   },
   {
    "id": "https://github.blog/?p=100215",
@@ -675,16 +685,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-09T15:00:41Z"
-  },
-  {
-   "id": "tag:linuxfr.org,2005:News/43287",
-   "title": "🪶 Les journaux LinuxFr.org les mieux notés d’octobre 2026",
-   "link": "https://linuxfr.org/news/les-journaux-linuxfr-org-les-mieux-notes-d-octobre-2026",
-   "summary": "LinuxFr.org propose des dépêches et articles, soumis par tout un chacun, puis revus et corrigés par l’équipe de modération avant publication. C’est la partie la plus visible de LinuxFr.org, ce sont les dépêches qui sont le plus lues et…",
-   "source": "LinuxFr.org",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-09T09:27:13Z"
   },
   {
    "id": "https://github.blog/?p=100047",
