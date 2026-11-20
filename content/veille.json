@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-19T20:45:32Z",
+ "updated": "2026-11-20T02:23:56Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -37,6 +37,116 @@
  },
  "items": [
   {
+   "id": "https://www.theregister.com/a/5311193",
+   "title": "Flaws in VMware and KVM need attention, if you have time while fixing Java, PHP, and everything else",
+   "link": "https://www.theregister.com/security/2026/11/20/flaws-in-vmware-and-kvm-need-attention-if-you-have-time-while-fixing-java-php-and-everything-else/5311193",
+   "summary": "Critical Virtzilla bugs, plus a strange Digital Ocean reaction to a nested virtualization issue",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-20T00:57:45Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/vmware-patches-vcenter-zero-day-exploited-in-attacks-since-september/",
+   "title": "VMware patches vCenter zero-day exploited in attacks since September",
+   "link": "https://www.bleepingcomputer.com/news/security/vmware-patches-vcenter-zero-day-exploited-in-attacks-since-september/",
+   "summary": "Broadcom has released security updates to fix a critical VMware vCenter Server authentication bypass vulnerability that Chinese-linked hackers have exploited in zero-day attacks since September 2026.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-20T00:26:25Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311186",
+   "title": "Germ Network infects Android, but in a good way",
+   "link": "https://www.theregister.com/security/2026/11/20/germ-network-infects-android-but-in-a-good-way/5311186",
+   "summary": "Bluesky's preferred encrypted messaging app allows multiple identities without tying you to a phone number",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-20T00:06:35Z"
+  },
+  {
+   "id": "https://jetbrains.developpez.com/actu/389299/JetBrains-presente-les-ameliorations-qu-apportent-Rider-2026-3-l-EDI-pour-le-developpement-NET-pour-le-developpement-de-jeux-video-plugins-Lua-et-Verse-et-amelioration-du-debogage-Cplusplus/",
+   "title": "JetBrains présente les améliorations qu'apportent Rider 2026.3, l'EDI pour le développement .NET, pour le développement de jeux vidéo, plugins Lua et Verse et amélioration du débogage C++",
+   "link": "https://jetbrains.developpez.com/actu/389299/JetBrains-presente-les-ameliorations-qu-apportent-Rider-2026-3-l-EDI-pour-le-developpement-NET-pour-le-developpement-de-jeux-video-plugins-Lua-et-Verse-et-amelioration-du-debogage-Cplusplus/",
+   "summary": "JetBrains présente les améliorations qu'apportent Rider 2026.3, l'EDI pour le développement .NET, pour le développement de jeux vidéo, plugins Lua et Verse et amélioration du débogage C++ JetBrains est une société spécialisée dans le…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-19T23:58:00Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389301/Gemini-4-Neon-est-le-modele-d-IA-le-plus-puissant-de-Google-il-surpasse-Opus-5-5-et-GPT-6-2-tout-en-offrant-un-leger-gain-d-intelligence-par-rapport-a-Gemini-4-Carbon-avec-un-cout-par-tache-reduit-de-17-pourcent/",
+   "title": "Gemini 4 Neon est le modèle d'IA le plus puissant de Google : il surpasse Opus 5.5 et GPT-6.2, tout en offrant un léger gain d'intelligence par rapport à Gemini 4 Carbon, avec un coût par tâche réduit de 17 %",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389301/Gemini-4-Neon-est-le-modele-d-IA-le-plus-puissant-de-Google-il-surpasse-Opus-5-5-et-GPT-6-2-tout-en-offrant-un-leger-gain-d-intelligence-par-rapport-a-Gemini-4-Carbon-avec-un-cout-par-tache-reduit-de-17-pourcent/",
+   "summary": "Gemini 4 Neon est le modèle d'IA le plus puissant de Google : il surpasse Opus 5.5 et GPT-6.2, tout en offrant un léger gain d'intelligence par rapport à Gemini 4 Carbon, avec un coût par tâche réduit de 17 % Google DeepMind a lancé Gemini…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-19T23:56:00Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389270/L-IA-a-l-origine-des-pannes-technologiques-mondiales-selon-un-haut-responsable-americain-et-plusieurs-PDG-les-pannes-auraient-ete-causees-par-des-corrections-de-failles-de-securite-detectees-par-l-IA/",
+   "title": "L'IA à l'origine des pannes technologiques mondiales : selon un haut responsable américain et plusieurs PDG, les pannes auraient été causées par des corrections de failles de sécurité détectées par l'IA",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389270/L-IA-a-l-origine-des-pannes-technologiques-mondiales-selon-un-haut-responsable-americain-et-plusieurs-PDG-les-pannes-auraient-ete-causees-par-des-corrections-de-failles-de-securite-detectees-par-l-IA/",
+   "summary": "L'IA à l'origine des pannes technologiques mondiales : selon un haut responsable américain et plusieurs PDG, les pannes auraient été causées par des corrections de failles de sécurité détectées par l'IA À la suite de pannes généralisées à…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-19T23:16:00Z"
+  },
+  {
+   "id": "https://microsoft.developpez.com/actu/389288/Le-framework-Python-officiel-de-Microsoft-pour-les-agents-IA-a-ete-detourne-pour-diffuser-des-logiciels-malveillants-concus-pour-exfiltrer-des-identifiants-sensibles-et-des-variables-d-environnement/",
+   "title": "Le framework Python officiel de Microsoft pour les agents IA a été détourné pour diffuser des logiciels malveillants, conçus pour exfiltrer des identifiants sensibles et des variables d'environnement",
+   "link": "https://microsoft.developpez.com/actu/389288/Le-framework-Python-officiel-de-Microsoft-pour-les-agents-IA-a-ete-detourne-pour-diffuser-des-logiciels-malveillants-concus-pour-exfiltrer-des-identifiants-sensibles-et-des-variables-d-environnement/",
+   "summary": "Le framework Python officiel de Microsoft pour les agents IA a été détourné pour diffuser des logiciels malveillants conçus pour exfiltrer des identifiants sensibles et des variables d'environnement L'infrastructure officielle de Microsoft…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-19T23:13:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/hackers-steal-data-of-16-million-sbc-medical-group-customers/",
+   "title": "Hackers steal data of 1.6 million SBC Medical Group customers",
+   "link": "https://www.bleepingcomputer.com/news/security/hackers-steal-data-of-16-million-sbc-medical-group-customers/",
+   "summary": "SBC Medical Group has warned in a filing with the U.S. Securities and Exchange Commission (SEC) that two cybersecurity incidents exposed sensitive customer and employee information, including personal data belonging to 1.6 million people.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-19T22:25:42Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/asus-warns-of-critical-hard-coded-key-flaw-in-control-center-express/",
+   "title": "ASUS warns of critical hard-coded key flaw in Control Center Express",
+   "link": "https://www.bleepingcomputer.com/news/security/asus-warns-of-critical-hard-coded-key-flaw-in-control-center-express/",
+   "summary": "ASUS released Control Center Express v1.7.29 to fix three critical vulnerabilities that could let remote attackers gain administrative control of the management console and the devices it manages.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-19T21:15:59Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311175",
+   "title": "Chase, Visa, Mastercard confirm third-party cyberattacks that may have exposed customers' info",
+   "link": "https://www.theregister.com/security/2026/11/19/chase-visa-mastercard-confirm-third-party-cyberattacks-that-may-have-exposed-customers-info/5311175",
+   "summary": "First service outages, then data breaches…what's next?!",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T21:12:33Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311168",
+   "title": "Palo Alto Networks opens wallet for open-weight training biz",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/19/palo-alto-networks-opens-wallet-for-open-weight-training-biz/5311168",
+   "summary": "Security shop buys the hand that feeds it",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T20:00:00Z"
+  },
+  {
    "id": "https://intelligence-artificielle.developpez.com/actu/389298/Un-lycee-de-Pennsylvanie-debranche-un-detecteur-d-armes-base-sur-l-IA-apres-que-celui-ci-n-a-cesse-de-confondre-des-objets-du-quotidien-avec-des-armes-a-feu-il-est-loin-d-etre-fiable/",
    "title": "Un lycée de Pennsylvanie débranche un détecteur d'armes basé sur l'IA après que celui-ci n'a cessé de confondre des objets du quotidien avec des armes à feu : « il est loin d'être fiable »",
    "link": "https://intelligence-artificielle.developpez.com/actu/389298/Un-lycee-de-Pennsylvanie-debranche-un-detecteur-d-armes-base-sur-l-IA-apres-que-celui-ci-n-a-cesse-de-confondre-des-objets-du-quotidien-avec-des-armes-a-feu-il-est-loin-d-etre-fiable/",
@@ -45,6 +155,16 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-19T19:04:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311153",
+   "title": "Nvidia adds possible hack to list of very bad things under investigation",
+   "link": "https://www.theregister.com/security/2026/11/19/nvidia-adds-possible-hack-to-list-of-very-bad-things-under-investigation/5311153",
+   "summary": "Ransomware group sets a deadline for the chipmaker to pay up - or see its data leaked",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-19T18:52:53Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/threatsday-gpt-62-jailbreak-flaws.html",
@@ -80,7 +200,7 @@
    "id": "https://www.theregister.com/a/5311143",
    "title": "Anthropic throws open doors at $2T valuation as shares pop 34% in initial trading",
    "link": "https://www.theregister.com/ai-and-ml/2026/11/19/anthropic-throws-open-doors-at-2t-valuation-as-shares-pop-34-in-initial-trading/5311143",
-   "summary": "Company still has to content with massive compute obligations and the threat of open models, neither of which Dario Amodei is worried about, he claims",
+   "summary": "Company still has to contend with massive compute obligations and the threat of open models, neither of which Dario Amodei is worried about, he claims",
    "source": "The Register",
    "category": "Infrastructure",
    "lang": "en",
@@ -130,7 +250,7 @@
    "id": "https://embarque.developpez.com/actu/389296/Des-personnes-agees-achetent-des-Tesla-et-s-abandonnent-au-FSD-pour-couvrir-leurs-trajets-C-est-un-probleme-selon-des-observateurs-d-avis-que-ces-seniors-se-mettent-en-danger-en-s-appuyant-sur-ce-systeme/",
    "title": "Des personnes âgées achètent des Tesla et s'abandonnent au FSD pour couvrir leurs trajets. « C'est un problème », selon des observateurs d'avis que ces séniors se mettent en danger en s'appuyant sur ce système",
    "link": "https://embarque.developpez.com/actu/389296/Des-personnes-agees-achetent-des-Tesla-et-s-abandonnent-au-FSD-pour-couvrir-leurs-trajets-C-est-un-probleme-selon-des-observateurs-d-avis-que-ces-seniors-se-mettent-en-danger-en-s-appuyant-sur-ce-systeme/",
-   "summary": "Des personnes âgées achètent des Tesla et s'abandonnent au FSD pour couvrir leurs trajets. « C'est un problème », selon des observateurs d'avis que ces séniors se mettent en danger en s'appuyant sur ce système En 2026, T esla continue de…",
+   "summary": "Des personnes âgées achètent des Tesla et s'abandonnent au FSD pour couvrir leurs trajets. « C'est un problème », selon des observateurs d'avis que ces séniors se mettent en danger en s'appuyant sur ce système En 2026, Tesla continue de…",
    "source": "Developpez.com",
    "category": "Développement",
    "lang": "fr",
@@ -167,16 +287,6 @@
    "published": "2026-11-19T15:18:07Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311103",
-   "title": "European Commission scrambles to contain AI-assisted cyberattack",
-   "link": "https://www.theregister.com/cyber-crime/2026/11/19/european-commission-scrambles-to-contain-ai-assisted-cyberattack/5311103",
-   "summary": "Staff HR and medical reimbursement systems taken offline as officials investigate whether personal data was compromised",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-19T15:14:54Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/critical-vmware-vcenter-flaw-cvss-98.html",
    "title": "Critical VMware vCenter Flaw (CVSS 9.8) Lets Network Attackers Bypass Authentication",
    "link": "https://thehackernews.com/2026/11/critical-vmware-vcenter-flaw-cvss-98.html",
@@ -207,16 +317,6 @@
    "published": "2026-11-19T14:57:24Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311050",
-   "title": "Union demands Capita lose Whitehall payroll deal after pensions fiasco",
-   "link": "https://www.theregister.com/public-sector/2026/11/19/union-demands-capita-lose-whitehall-payroll-deal-after-pensions-fiasco/5311050",
-   "summary": "PCS wants services for more than 250,000 civil servants brought in-house as ministers defend outsourcing decision",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-19T14:44:00Z"
-  },
-  {
    "id": "https://intelligence-artificielle.developpez.com/actu/389294/L-introduction-en-bourse-d-Anthropic-leve-plus-de-81-milliards-pour-une-valorisation-de-1-500-milliards-la-plus-grande-IPO-jamais-enregistree-depassant-celle-de-SpaceX-a-83-par-action/",
    "title": "L'introduction en bourse d'Anthropic lève plus de 81 milliards $ pour une valorisation de 1 500 milliards $, la plus grande IPO jamais enregistrée, dépassant celle de SpaceX, à 83 $ par action",
    "link": "https://intelligence-artificielle.developpez.com/actu/389294/L-introduction-en-bourse-d-Anthropic-leve-plus-de-81-milliards-pour-une-valorisation-de-1-500-milliards-la-plus-grande-IPO-jamais-enregistree-depassant-celle-de-SpaceX-a-83-par-action/",
@@ -237,36 +337,6 @@
    "published": "2026-11-19T14:33:06Z"
   },
   {
-   "id": "https://www.theregister.com/a/5310966",
-   "title": "Qualcomm offers test drive of its rack-scale Nvidia AI challenger",
-   "link": "https://www.theregister.com/systems/2026/11/19/qualcomm-offers-test-drive-of-its-rack-scale-nvidia-ai-challenger/5310966",
-   "summary": "Selected customers can put Dragonfly AI200 through its paces on Cirrascale's cloud",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-19T14:03:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310991",
-   "title": "Voyager 1 celebrates one light-day with a nice lie-down",
-   "link": "https://www.theregister.com/science/2026/11/19/voyager-1-celebrates-one-light-day-with-a-nice-lie-down/5310991",
-   "summary": "Carrier signal still reaches Earth, but science and engineering data have gone AWOL",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-19T13:15:00Z"
-  },
-  {
-   "id": "https://microsoft.developpez.com/actu/389288/Le-framework-Python-officiel-de-Microsoft-pour-les-agents-IA-a-ete-detourne-pour-diffuser-des-logiciels-malveillants-concus-pour-exfiltrer-des-identifiants-sensibles-et-des-variables-d-environnement/",
-   "title": "Le framework Python officiel de Microsoft pour les agents IA a été détourné pour diffuser des logiciels malveillants, conçus pour exfiltrer des identifiants sensibles et des variables d'environnement",
-   "link": "https://microsoft.developpez.com/actu/389288/Le-framework-Python-officiel-de-Microsoft-pour-les-agents-IA-a-ete-detourne-pour-diffuser-des-logiciels-malveillants-concus-pour-exfiltrer-des-identifiants-sensibles-et-des-variables-d-environnement/",
-   "summary": "Le framework Python officiel de Microsoft pour les agents IA a été détourné pour diffuser des logiciels malveillants conçus pour exfiltrer des identifiants sensibles et des variables d'environnement L'infrastructure officielle de Microsoft…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-19T13:13:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/drupal-patches-critical-rce-flaw-warns-exploits-may-surface-quickly/",
    "title": "Drupal patches critical RCE flaw, warns exploits may surface quickly",
    "link": "https://www.bleepingcomputer.com/news/security/drupal-patches-critical-rce-flaw-warns-exploits-may-surface-quickly/",
@@ -275,26 +345,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-19T13:08:08Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310973",
-   "title": "Microsoft To Do will soon become Microsoft Done",
-   "link": "https://www.theregister.com/personal-tech/2026/11/19/microsoft-to-do-will-soon-become-microsoft-done/5310973",
-   "summary": "Apps retire in June 2027, with no automatic task migration and no Planner replacement for personal accounts",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-19T12:26:00Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389270/L-IA-a-l-origine-des-pannes-technologiques-mondiales-selon-un-haut-responsable-americain-et-plusieurs-PDG-les-pannes-auraient-ete-causees-par-des-corrections-de-failles-de-securite-detectees-par-l-IA/",
-   "title": "L'IA à l'origine des pannes technologiques mondiales : selon un haut responsable américain et plusieurs PDG, les pannes auraient été causées par des corrections de failles de sécurité détectées par l'IA",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389270/L-IA-a-l-origine-des-pannes-technologiques-mondiales-selon-un-haut-responsable-americain-et-plusieurs-PDG-les-pannes-auraient-ete-causees-par-des-corrections-de-failles-de-securite-detectees-par-l-IA/",
-   "summary": "L'IA à l'origine des pannes technologiques mondiales : selon un haut responsable américain et plusieurs PDG, les pannes auraient été causées par des corrections de failles de sécurité détectées par l'IA À la suite de pannes généralisées à…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-19T12:16:00Z"
   },
   {
    "id": "https://ios.developpez.com/actu/389267/Apple-sera-jugee-en-France-pour-obsolescence-programmee-presumee-des-iPhone-en-raison-de-restrictions-sur-les-reparations-hors-reseau-agree-par-Apple-touchant-24-modeles/",
@@ -325,26 +375,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-19T12:11:00Z"
-  },
-  {
-   "id": "https://windows.developpez.com/actu/389271/Microsoft-Windows-Server-2028-privilegie-la-securite-prete-a-l-emploi-au-detriment-de-la-compatibilite-avec-des-parametres-par-defaut-renforces-conformes-aux-normes-du-ministere-americain-de-la-Defense/",
-   "title": "Microsoft Windows Server 2028 privilégie la sécurité prête à l'emploi au détriment de la compatibilité, avec des paramètres par défaut renforcés conformes aux normes du ministère américain de la Défense",
-   "link": "https://windows.developpez.com/actu/389271/Microsoft-Windows-Server-2028-privilegie-la-securite-prete-a-l-emploi-au-detriment-de-la-compatibilite-avec-des-parametres-par-defaut-renforces-conformes-aux-normes-du-ministere-americain-de-la-Defense/",
-   "summary": "Microsoft Windows Server 2028 privilégie la sécurité prête à l'emploi au détriment de la compatibilité, avec des paramètres par défaut renforcés conformes aux normes du ministère américain de la Défense Microsoft a officiellement annoncé…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-19T12:09:00Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389269/Google-ouvre-l-acces-a-Genie-4-son-dernier-modele-d-IA-destine-a-generer-des-mondes-interactifs-aux-abonnes-payants-avec-des-sons-et-la-possibilite-de-modifier-l-environnement-en-cours-de-session/",
-   "title": "Google ouvre l'accès à Genie 4, son dernier modèle d'IA destiné à générer des mondes interactifs, aux abonnés payants, avec des sons et la possibilité de modifier l'environnement en cours de session",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389269/Google-ouvre-l-acces-a-Genie-4-son-dernier-modele-d-IA-destine-a-generer-des-mondes-interactifs-aux-abonnes-payants-avec-des-sons-et-la-possibilite-de-modifier-l-environnement-en-cours-de-session/",
-   "summary": "Google ouvre l'accès à Genie 4, son dernier modèle d'IA destiné à générer des mondes interactifs, aux abonnés payants, avec des sons et la possibilité de modifier l'environnement en cours de session Google a ouvert l'accès à Genie 4, son…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-19T12:07:00Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/everything-is-web-application-including.html",
@@ -395,16 +425,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-19T09:31:26Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/nvidia-investigating-gentlemen-ransomware-breach-claims/",
-   "title": "NVIDIA investigating Gentlemen ransomware breach claims",
-   "link": "https://www.bleepingcomputer.com/news/security/nvidia-investigating-gentlemen-ransomware-breach-claims/",
-   "summary": "NVIDIA is investigating claims of a security breach after the Gentlemen ransomware group has added the company to its dark web data leak site.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-19T09:23:21Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/ruby-releases-fixes-for-7-regex-and.html",
@@ -535,26 +555,6 @@
    "category": "Cybersécurité",
    "lang": "fr",
    "published": "2026-11-19T00:00:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/ukraine-fbi-arrest-ransomware-gang-members-tied-to-40m-in-ransoms/",
-   "title": "Ukraine, FBI arrest ransomware gang members tied to $40M in ransoms",
-   "link": "https://www.bleepingcomputer.com/news/security/ukraine-fbi-arrest-ransomware-gang-members-tied-to-40m-in-ransoms/",
-   "summary": "Ukrainian authorities, working with the FBI, have arrested four suspected members of an international ransomware organization linked to more than $40.5 million in ransom payments from at least 28 companies worldwide.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-18T23:08:33Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/coinbase-blocks-47-million-in-transfers-to-elon-musk-deepfake-scam/",
-   "title": "Coinbase blocks $4.7 million in transfers to Elon Musk deepfake scam",
-   "link": "https://www.bleepingcomputer.com/news/security/coinbase-blocks-47-million-in-transfers-to-elon-musk-deepfake-scam/",
-   "summary": "Coinbase says it blocked $4.7 million in cryptocurrency transfers to scammers promoting a fake giveaway using an AI-generated deepfake of Elon Musk during a Tesla livestream that attracted more than 500,000 viewers.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-18T20:49:32Z"
   },
   {
    "id": "https://github.blog/?p=100215",
