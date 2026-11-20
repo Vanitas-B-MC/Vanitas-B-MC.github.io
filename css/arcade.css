@@ -1,0 +1,188 @@
+/* =========================================================
+   ARCADE — page secrète (jeu Data Snake)
+   S'appuie sur css/style.css (variables, header, boutons, footer).
+========================================================= */
+
+.arcade-back {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transition: color .2s ease;
+}
+
+.arcade-back:hover { color: var(--cyan); }
+
+.arcade {
+  width: min(100% - 36px, 640px);
+  margin-inline: auto;
+  padding: 64px 0 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.arcade .eyebrow { margin-bottom: 20px; }
+
+.arcade-title {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 11vw, 100px);
+  font-weight: 700;
+  line-height: .95;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  text-shadow: 0 0 28px rgba(252, 238, 10, .28);
+}
+
+.arcade-lead {
+  max-width: 46ch;
+  margin: 18px 0 38px;
+  color: var(--muted);
+}
+
+/* Cadre du jeu */
+.game {
+  width: 100%;
+  padding: 22px 22px 26px;
+}
+
+.game-hud {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.game-hud strong {
+  margin-left: 6px;
+  color: var(--yellow);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.game-state { color: var(--cyan); }
+
+/* Plateau */
+.game-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  margin: 16px 0 20px;
+  background: #0a0a12;
+  border: 1px solid var(--line-strong);
+  box-shadow: inset 0 0 40px rgba(0, 240, 255, .05), 0 0 28px -10px rgba(0, 240, 255, .35);
+}
+
+.game-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;   /* le glisser du doigt dirige le serpent au lieu de faire défiler */
+}
+
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 24px;
+  background: rgba(7, 7, 11, .84);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.game-overlay[hidden] { display: none; }
+
+.overlay-title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 7vw, 42px);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  line-height: 1.1;
+}
+
+.overlay-text {
+  max-width: 30ch;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+
+/* Aide clavier */
+.game-help {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 22px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+}
+
+kbd {
+  display: inline-block;
+  margin: 0 2px;
+  padding: 1px 7px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Croix directionnelle : uniquement sur écran tactile */
+.dpad {
+  display: none;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-rows: repeat(2, 64px);
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.dpad button {
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  color: var(--cyan);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dpad button:active {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: #000;
+}
+
+.dpad [data-dir="up"] { grid-column: 2; grid-row: 1; }
+.dpad [data-dir="left"] { grid-column: 1; grid-row: 2; }
+.dpad [data-dir="down"] { grid-column: 2; grid-row: 2; }
+.dpad [data-dir="right"] { grid-column: 3; grid-row: 2; }
+
+@media (hover: none) and (pointer: coarse) {
+  .dpad { display: grid; }
+  .game-help { display: none; }
+}
+
+@media (max-width: 480px) {
+  .arcade { padding-top: 40px; }
+  .game { padding: 16px 14px 20px; }
+}

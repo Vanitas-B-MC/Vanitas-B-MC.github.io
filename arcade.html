@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#07070b">
+  <meta name="robots" content="noindex, nofollow">
+  <title>ARCADE // zone secrète — Mathieu Contamin</title>
+  <meta name="description" content="Page cachée du portfolio : un petit jeu.">
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/arcade.css">
+  <script type="module" src="js/arcade.js"></script>
+</head>
+<body class="arcade-page">
+  <a class="skip-link" href="#jeu">Aller au jeu</a>
+
+  <header class="site-header">
+    <div class="header">
+      <a class="logo" href="index.html" aria-label="Retour au portfolio">
+        <img src="assets/favicon.svg" width="40" height="40" alt="">
+        <span class="logo-text">MC<span>//</span>ARCADE</span>
+      </a>
+      <a class="arcade-back" href="index.html"><span aria-hidden="true">←</span> Portfolio</a>
+    </div>
+  </header>
+
+  <main id="jeu" class="arcade">
+    <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span>Zone secrète // accès autorisé</p>
+
+    <h1 class="arcade-title glitch" data-text="Data Snake">Data Snake</h1>
+    <p class="arcade-lead">Récupère les fragments de données sans toucher les murs ni ta propre trace.</p>
+
+    <section class="game chamfer" aria-label="Jeu Data Snake">
+      <div class="game-hud">
+        <p>Score <strong id="score">0</strong></p>
+        <p>Record <strong id="best">0</strong></p>
+        <p class="game-state" id="state" aria-live="polite">Prêt</p>
+      </div>
+
+      <div class="game-stage">
+        <canvas id="board" width="480" height="480"
+                aria-label="Plateau de jeu"></canvas>
+
+        <div class="game-overlay" id="overlay">
+          <p class="overlay-title" id="overlay-title">Data Snake</p>
+          <p class="overlay-text" id="overlay-text">Appuie sur Entrée ou sur le bouton pour lancer.</p>
+          <button class="button button-primary" id="start" type="button">Lancer la partie</button>
+        </div>
+      </div>
+
+      <div class="dpad" aria-label="Commandes tactiles">
+        <button type="button" data-dir="up" aria-label="Haut">▲</button>
+        <button type="button" data-dir="left" aria-label="Gauche">◀</button>
+        <button type="button" data-dir="down" aria-label="Bas">▼</button>
+        <button type="button" data-dir="right" aria-label="Droite">▶</button>
+      </div>
+
+      <ul class="game-help">
+        <li><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> ou <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> pour diriger</li>
+        <li><kbd>Espace</kbd> pause</li>
+        <li><kbd>Entrée</kbd> relancer</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="logo" href="index.html" aria-label="Retour au portfolio">
+      <img src="assets/favicon.svg" width="32" height="32" alt="">
+    </a>
+    <p>Tu as trouvé le code secret. Bien joué.</p>
+    <p class="footer-end" aria-hidden="true">// fin de transmission</p>
+  </footer>
+
+  <noscript>
+    <p class="noscript">Ce jeu nécessite JavaScript.</p>
+  </noscript>
+</body>
+</html>
