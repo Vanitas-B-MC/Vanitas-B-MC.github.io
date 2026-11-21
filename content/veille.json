@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-20T20:29:39Z",
+ "updated": "2026-11-21T02:26:43Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,56 @@
   }
  },
  "items": [
+  {
+   "id": "https://www.theregister.com/a/5311493",
+   "title": "Amazon's split personality: AWS embraces bot commerce while main site enforces bans",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/20/amazons-split-personality-aws-embraces-bot-commerce-while-main-site-enforces-bans/5311493",
+   "summary": "Bot-based buying is here or not, depending on where you stand in the Amazon empire",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-20T23:41:14Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311486",
+   "title": "PHP 8.6: Things are gonna get a lot more strict around here",
+   "link": "https://www.theregister.com/devops/2026/11/20/php-86-things-are-gonna-get-a-lot-more-strict-around-here/5311486",
+   "summary": "Like a parent disciplining a misbehaving child, PHP’s annual update clamps down on loose default behaviors to curb malicious hacker horseplay.",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-20T23:28:47Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389341/Google-vient-de-lancer-Gemini-Tasks-un-agent-IA-autonome-fonctionnant-en-arriere-plan-et-alimente-par-Gemini-4-Hydrogen-permettant-d-effectuer-des-taches-de-la-vie-quotidienne-gratuitement/",
+   "title": "Google vient de lancer « Gemini Tasks », un agent IA autonome fonctionnant en arrière-plan et alimenté par Gemini 4 Hydrogen, permettant d'effectuer des tâches de la vie quotidienne, gratuitement",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389341/Google-vient-de-lancer-Gemini-Tasks-un-agent-IA-autonome-fonctionnant-en-arriere-plan-et-alimente-par-Gemini-4-Hydrogen-permettant-d-effectuer-des-taches-de-la-vie-quotidienne-gratuitement/",
+   "summary": "Google vient de lancer « Gemini Tasks », un agent IA autonome fonctionnant en arrière-plan et alimenté par Gemini 4 Hydrogen, permettant d'effectuer des tâches de la vie quotidienne, gratuitement Google a annoncé une extension majeure de…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-20T22:46:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311478",
+   "title": "Visa, Mastercard theft included info useful for phishing, but not draining bank accounts, say researchers",
+   "link": "https://www.theregister.com/cyber-crime/2026/11/20/visa-mastercard-theft-included-info-useful-for-phishing-but-not-draining-bank-accounts-say-researchers/5311478",
+   "summary": "No financial details, but plenty of other clues",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-20T21:27:56Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311466",
+   "title": "Signal slams door on prying AI agents to protect privacy",
+   "link": "https://www.theregister.com/security/2026/11/20/signal-slams-door-on-prying-ai-agents-to-protect-privacy/5311466",
+   "summary": "Apple, Google, and Microsoft called out for failing to provide developers with adequate AI agent controls",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-20T20:42:04Z"
+  },
   {
    "id": "https://www.bleepingcomputer.com/news/security/bell-canada-says-agentic-hacker-stole-enterprise-customer-data/",
    "title": "Bell Canada says 'agentic' hacker stole enterprise customer data",
@@ -177,16 +227,6 @@
    "published": "2026-11-20T13:18:36Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311221",
-   "title": "AI could open wallets where ERP upgrade pitches can't, says PwC",
-   "link": "https://www.theregister.com/ai-and-ml/2026/11/20/ai-could-open-wallets-where-erp-upgrade-pitches-cant-says-pwc/5311221",
-   "summary": "Consultancy argues a 'clean core' makes agents easier to deploy – but Kingfisher is taking a different route",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T12:47:00Z"
-  },
-  {
    "id": "https://hardware.developpez.com/actu/389335/Madison-la-fille-de-Jensen-Huang-aurait-harcele-et-insulte-des-employes-poussant-certains-cadres-talentueux-a-quitter-le-fabricant-de-puces-elle-incarnait-les-yeux-et-les-oreilles-de-son-pere/",
    "title": "Madison, la fille de Jensen Huang, aurait harcelé et insulté des employés, poussant certains cadres talentueux à quitter le fabricant de puces : « elle incarnait les yeux et les oreilles de son père »",
    "link": "https://hardware.developpez.com/actu/389335/Madison-la-fille-de-Jensen-Huang-aurait-harcele-et-insulte-des-employes-poussant-certains-cadres-talentueux-a-quitter-le-fabricant-de-puces-elle-incarnait-les-yeux-et-les-oreilles-de-son-pere/",
@@ -205,16 +245,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-20T12:20:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311292",
-   "title": "Spy court blasts UK secrecy, forces government to admit Apple ‘backdoor’ demand",
-   "link": "https://www.theregister.com/security/2026/11/20/spy-court-blasts-uk-secrecy-forces-government-to-admit-apple-backdoor-demand/5311292",
-   "summary": "Notice's existence can be acknowledged without harming national security, but its precise demands remain under wraps",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T12:18:19Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-now-automatically-installs-windows-11-26h2-on-personal-and-unmanaged-pcs/",
@@ -307,16 +337,6 @@
    "published": "2026-11-20T11:30:00Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311263",
-   "title": "Windows 11 passkey bug cries failure after successful sign-in",
-   "link": "https://www.theregister.com/security/2026/11/20/windows-11-passkey-bug-cries-failure-after-successful-sign-in/5311263",
-   "summary": "Optional update fixes misleading Android error for versions 25H2 and 26H2",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T11:09:44Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/f5-releases-emergency-patches-for-critical-big-ip-rce-flaws/",
    "title": "F5 releases emergency patches for critical BIG-IP RCE flaws",
    "link": "https://www.bleepingcomputer.com/news/security/f5-releases-emergency-patches-for-critical-big-ip-rce-flaws/",
@@ -355,16 +375,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-20T09:38:15Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5310837",
-   "title": "Ubuntu Core Desktop targets 28.04 debut, with default status in its sights",
-   "link": "https://www.theregister.com/os-platforms/2026/11/20/ubuntu-core-desktop-targets-2804-debut-with-default-status-in-its-sights/5310837",
-   "summary": "Canonical's stretch goal is to make the immutable OS standard in 30.04 – without retiring the traditional distro",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T09:29:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/microsoft/windows-11-kb5132057-update-released-with-28-changes-and-fixes/",
@@ -515,16 +525,6 @@
    "category": "Cybersécurité",
    "lang": "fr",
    "published": "2026-11-20T00:00:00Z"
-  },
-  {
-   "id": "https://jetbrains.developpez.com/actu/389299/JetBrains-presente-les-ameliorations-qu-apportent-Rider-2026-3-l-EDI-pour-le-developpement-NET-pour-le-developpement-de-jeux-video-plugins-Lua-et-Verse-et-amelioration-du-debogage-Cplusplus/",
-   "title": "JetBrains présente les améliorations qu'apportent Rider 2026.3, l'EDI pour le développement .NET, pour le développement de jeux vidéo, plugins Lua et Verse et amélioration du débogage C++",
-   "link": "https://jetbrains.developpez.com/actu/389299/JetBrains-presente-les-ameliorations-qu-apportent-Rider-2026-3-l-EDI-pour-le-developpement-NET-pour-le-developpement-de-jeux-video-plugins-Lua-et-Verse-et-amelioration-du-debogage-Cplusplus/",
-   "summary": "JetBrains présente les améliorations qu'apportent Rider 2026.3, l'EDI pour le développement .NET, pour le développement de jeux vidéo, plugins Lua et Verse et amélioration du débogage C++ JetBrains est une société spécialisée dans le…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-19T23:58:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/hackers-steal-data-of-16-million-sbc-medical-group-customers/",
