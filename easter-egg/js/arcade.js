@@ -9,6 +9,9 @@ import { createRouletteUI } from "./ui-roulette.js";
 import { createClickerUI } from "./ui-clicker.js";
 import { createTetrisUI } from "./ui-tetris.js";
 import { createTowerDefenseUI } from "./ui-td.js";
+import { createSurvivorsUI } from "./ui-survivors.js";
+import { createBreachUI } from "./ui-breach.js";
+import { createMusic } from "./music.js";
 import { fmt, fmtRate } from "./ui.js";
 
 const $ = (selector) => document.querySelector(selector);
@@ -22,7 +25,9 @@ const GAMES = {
   roulette: { title: "Roulette", ui: createRouletteUI($("#roulette-root"), wallet) },
   clicker: { title: "Mineur de données", ui: createClickerUI($("#clicker-root"), wallet) },
   tetris: { title: "Tetris", ui: createTetrisUI($("#tetris-root"), wallet) },
-  td: { title: "Pare-feu", ui: createTowerDefenseUI($("#td-root"), wallet) }
+  td: { title: "Pare-feu", ui: createTowerDefenseUI($("#td-root"), wallet) },
+  survivors: { title: "Survivor Arena", ui: createSurvivorsUI($("#survivors-root"), wallet) },
+  breach: { title: "Breach Protocol", ui: createBreachUI($("#breach-root"), wallet) }
 };
 
 /* ---------- Portefeuille et infos du hub ---------- */
@@ -51,6 +56,9 @@ function renderWallet() {
   const rate = perSecond(wallet.data.levels, wallet.data.blueLevels);
   $("#meta-clicker").textContent = `${fmtRate(rate)} crédit${rate >= 2 ? "s" : ""} / s`;
   $("#meta-tetris").textContent = `Record : ${fmt(wallet.data.bestTetris)}`;
+  const best = wallet.data.bestSurvivor;
+  $("#meta-survivors").textContent = `Record : ${Math.floor(best / 60)}:${String(best % 60).padStart(2, "0")}`;
+  $("#meta-breach").textContent = `Meilleur gain : ${fmt(wallet.data.bestBreach)} ¤`;
   const towers = wallet.data.towers.length;
   $("#meta-td").textContent = `Record : ${fmt(wallet.data.bestWave)} vague${wallet.data.bestWave > 1 ? "s" : ""} · ${towers} tour${towers > 1 ? "s" : ""}`;
 }
@@ -67,7 +75,9 @@ const sections = {
   roulette: $("#game-roulette"),
   clicker: $("#game-clicker"),
   tetris: $("#game-tetris"),
-  td: $("#game-td")
+  td: $("#game-td"),
+  survivors: $("#game-survivors"),
+  breach: $("#game-breach")
 };
 let current = null;
 
@@ -111,6 +121,33 @@ setInterval(() => {
   carry = gain.carry;
   if (gain.whole > 0) wallet.addCredits(gain.whole, { mined: true });
 }, 250);
+
+/* ---------- Musique (désactivée au départ : le navigateur exige un clic pour lancer le son) ---------- */
+
+const music = createMusic();
+const musicButton = $("#music-toggle");
+const volumeInput = $("#music-volume");
+
+music.subscribe(({ on, volume }) => {
+  musicButton.setAttribute("aria-pressed", String(on));
+  $("#music-state").textContent = on ? "on" : "off";
+  volumeInput.value = Math.round(volume * 100);
+});
+volumeInput.value = Math.round(music.volume * 100);
+musicButton.addEventListener("click", () => music.toggle());
+volumeInput.addEventListener("input", () => music.setVolume(volumeInput.value / 100));
+
+// Si le joueur l'avait activée la dernière fois, elle repart dès son premier clic ou appui de touche.
+if (music.wantedOn) {
+  const resume = (event) => {
+    if (event.target instanceof Element && event.target.closest("#music-toggle, #music-volume")) return;
+    document.removeEventListener("pointerdown", resume, true);
+    document.removeEventListener("keydown", resume, true);
+    music.start();
+  };
+  document.addEventListener("pointerdown", resume, true);
+  document.addEventListener("keydown", resume, true);
+}
 
 /* ---------- Remise à zéro ---------- */
 

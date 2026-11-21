@@ -40,7 +40,7 @@
 
     <!-- Portefeuille partagé entre tous les jeux -->
     <div class="wallet-bar chamfer" role="group" aria-label="Portefeuille">
-      <p class="wallet-item" title="Pièces bleues : rares, gagnées au Snake et au Tetris, jouées à la Roulette et dans les améliorations du Clicker">
+      <p class="wallet-item" title="Pièces bleues : rares, gagnées au Snake, au Tetris, en survivant longtemps ou en piratant à fond ; jouées à la Roulette et dans les améliorations du Clicker">
         <span class="coin" aria-hidden="true"></span>
         <span class="wallet-label">Pièces bleues</span>
         <strong id="wallet-blue">0</strong>
@@ -50,6 +50,13 @@
         <span class="wallet-label">Crédits</span>
         <strong id="wallet-credits">0</strong>
       </p>
+      <div class="music-control">
+        <button class="music-toggle" id="music-toggle" type="button" aria-pressed="false">
+          <span aria-hidden="true">♪</span> Musique : <span id="music-state">off</span>
+        </button>
+        <label class="music-volume"><span class="visually-hidden">Volume de la musique</span>
+          <input id="music-volume" type="range" min="0" max="100" value="50"></label>
+      </div>
     </div>
 
     <!-- ============ CHOIX DU JEU ============ -->
@@ -105,6 +112,22 @@
             <span class="card-name">Pare-feu</span>
             <span class="card-desc">Tower defense : arrête les intrus. Débloque des tours avec tes crédits.</span>
             <span class="card-meta" id="meta-td">Record : 0 vague</span>
+          </a>
+        </li>
+        <li>
+          <a class="game-card chamfer" href="#survivors">
+            <span class="card-index">// 07</span>
+            <span class="card-name">Survivor Arena</span>
+            <span class="card-desc">Survis à des vagues d'ennemis. Tir automatique, une amélioration à chaque niveau.</span>
+            <span class="card-meta" id="meta-survivors">Record : 0:00</span>
+          </a>
+        </li>
+        <li>
+          <a class="game-card chamfer" href="#breach">
+            <span class="card-index">// 08</span>
+            <span class="card-name">Breach Protocol</span>
+            <span class="card-desc">Pirate le réseau : enchaîne les codes de la matrice avant la fin du temps.</span>
+            <span class="card-meta" id="meta-breach">Meilleur gain : 0 ¤</span>
           </a>
         </li>
       </ul>
@@ -186,6 +209,20 @@
       <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
       <h2 class="game-title glitch" id="title-td" data-text="Pare-feu" tabindex="-1">Pare-feu</h2>
       <div class="game-body" id="td-root"></div>
+    </section>
+
+    <!-- ============ SURVIVOR ARENA ============ -->
+    <section id="game-survivors" class="game-view" aria-labelledby="title-survivors" hidden>
+      <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
+      <h2 class="game-title glitch" id="title-survivors" data-text="Survivor Arena" tabindex="-1">Survivor Arena</h2>
+      <div class="game-body" id="survivors-root"></div>
+    </section>
+
+    <!-- ============ BREACH PROTOCOL ============ -->
+    <section id="game-breach" class="game-view" aria-labelledby="title-breach" hidden>
+      <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
+      <h2 class="game-title glitch" id="title-breach" data-text="Breach Protocol" tabindex="-1">Breach Protocol</h2>
+      <div class="game-body" id="breach-root"></div>
     </section>
   </main>
 

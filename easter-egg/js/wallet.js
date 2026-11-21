@@ -14,7 +14,7 @@ const MAX = Number.MAX_SAFE_INTEGER;
 
 export const CLICKER_IDS = UPGRADES.map((u) => u.id);
 export const BLUE_IDS = BLUE_UPGRADES.map((u) => u.id);
-export const BEST_KEYS = ["bestSnake", "bestTetris", "bestWave"];
+export const BEST_KEYS = ["bestSnake", "bestTetris", "bestWave", "bestSurvivor", "bestBreach"];
 
 function freshData() {
   return {
@@ -23,6 +23,8 @@ function freshData() {
     bestSnake: 0,
     bestTetris: 0,
     bestWave: 0,
+    bestSurvivor: 0,      // secondes survécues dans Survivor Arena
+    bestBreach: 0,        // meilleur gain (crédits) d'un Breach Protocol
     blueFound: 0,         // pièces bleues ramassées dans le Snake
     minedTotal: 0,        // crédits gagnés avec le Clicker, au total
     clicksTotal: 0,
