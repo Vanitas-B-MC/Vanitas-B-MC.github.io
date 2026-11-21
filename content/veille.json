@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-21T02:26:43Z",
+ "updated": "2026-11-21T11:20:19Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,36 @@
   }
  },
  "items": [
+  {
+   "id": "https://thehackernews.com/2026/11/signal-blocks-ai-agents-from-reading.html",
+   "title": "Signal Blocks AI Agents From Reading Private Chats via Screenshots on Android and iOS",
+   "link": "https://thehackernews.com/2026/11/signal-blocks-ai-agents-from-reading.html",
+   "summary": "Signal has announced that it will restrict screenshots by default to stop artificial intelligence (AI) agents from reading private chats on Android and iOS devices, but conceded that the protection is \"incomplete.\" The feature applies to…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-21T08:49:20Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/hackers-exploit-critical-vmware-cisco.html",
+   "title": "Hackers Exploit Critical VMware, Cisco, and Apache Flaws as Espionage Attacks Emerge",
+   "link": "https://thehackernews.com/2026/11/hackers-exploit-critical-vmware-cisco.html",
+   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) on Friday added four flaws impacting Apache Roller, Cisco Expressway, SAP NetWeaver, and Broadcom VMware vCenter to its Known Exploited Vulnerabilities (KEV), citing evidence…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-21T08:49:13Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311360",
+   "title": "NASA Mars rover and orbiter suffer glitches",
+   "link": "https://www.theregister.com/science/2026/11/21/nasa-mars-rover-and-orbiter-suffer-glitches/5311360",
+   "summary": "It isn't only systems on Earth suffering technical problems",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-21T07:47:00Z"
+  },
   {
    "id": "https://www.theregister.com/a/5311493",
    "title": "Amazon's split personality: AWS embraces bot commerce while main site enforces bans",
@@ -110,7 +140,7 @@
    "id": "https://thehackernews.com/2026/11/whatsapp-patches-3-security-flaws.html",
    "title": "WhatsApp Patches 3 Security Flaws, Including Android Bug Suspected of Use in Scams",
    "link": "https://thehackernews.com/2026/11/whatsapp-patches-3-security-flaws.html",
-   "summary": "Meta-owned WhatsApp has addressed security vulnerabilities, including one impacting its Android app that it suspects may have been exploited in connection with scam messages. The vulnerability, tracked as CVE-2026-23871, has been described…",
+   "summary": "Meta-owned WhatsApp has addressed security vulnerabilities, including one impacting its Android app that it suspects may have been exploited in connection with scam messages. The vulnerability, tracked as CVE-2026-23871 (CVSS score: 3.5)…",
    "source": "The Hacker News",
    "category": "Cybersécurité",
    "lang": "en",
@@ -205,16 +235,6 @@
    "category": "Infrastructure",
    "lang": "en",
    "published": "2026-11-20T14:28:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311279",
-   "title": "Microsoft suggests Registry hack to work around hotpatch woes",
-   "link": "https://www.theregister.com/os-platforms/2026/11/20/microsoft-suggests-registry-hack-to-work-around-hotpatch-woes/5311279",
-   "summary": "App problems in Windows after default hotpatching? Who could have foreseen that?",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T13:39:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/microsoft/n-able-says-recent-security-breach-led-to-major-service-outage/",
@@ -407,16 +427,6 @@
    "published": "2026-11-20T07:11:39Z"
   },
   {
-   "id": "https://thehackernews.com/2026/11/new-unpatched-windows-0-day-fastunlock.html",
-   "title": "New Unpatched Windows 0-Day FastUnlock Lets Someone Holding a Locked PC Run Programs on It",
-   "link": "https://thehackernews.com/2026/11/new-unpatched-windows-0-day-fastunlock.html",
-   "summary": "A newly disclosed unpatched zero-day technique called FastUnlock lets someone with physical access to a locked Windows computer start programs without signing in. Whoever uses it gets only a limited account, not administrator control of…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T05:30:01Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/vmware-patches-vcenter-zero-day-exploited-in-attacks-since-september/",
    "title": "VMware patches vCenter zero-day exploited in attacks since September",
    "link": "https://www.bleepingcomputer.com/news/security/vmware-patches-vcenter-zero-day-exploited-in-attacks-since-september/",
@@ -535,16 +545,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-19T22:25:42Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/threatsday-gpt-62-jailbreak-flaws.html",
-   "title": "ThreatsDay: GPT-6.2 Jailbreak Flaws, BubbleLoader PNG Malware, $500M Ransom Demands + 17 More Stories",
-   "link": "https://thehackernews.com/2026/11/threatsday-gpt-62-jailbreak-flaws.html",
-   "summary": "The easiest way to fool someone is to give them something they already expect. A job offer. A message about a service outage. A familiar app. Nothing looks strange at first. And that's the problem. This week's stories show how ordinary…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-19T18:47:58Z"
   },
   {
    "id": "https://github.blog/?p=100161",
