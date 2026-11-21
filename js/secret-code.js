@@ -1,12 +1,12 @@
 // js/secret-code.js — codes secrets tapés au clavier. Rien n'est visible tant qu'on n'en tape pas.
-//   « awesome »    ouvre la page cachée (arcade.html)
+//   « awesome »    ouvre la page cachée (easter-egg/arcade.html)
 //   « edgerunner » active / désactive le style Edgerunners (rouge, vert)
-// Chargé sur index.html, veille.html et arcade.html.
+// Chargé sur index.html, veille.html et easter-egg/arcade.html.
 
 import { toggleEdgerunners } from "./theme.js";
 
 export const SECRET_CODE = "awesome";
-export const SECRET_PAGE = "arcade.html";
+export const SECRET_PAGE = "easter-egg/arcade.html";
 export const THEME_CODE = "edgerunner";
 
 // Garde les dernières lettres tapées ; renvoie true quand elles forment le code.
