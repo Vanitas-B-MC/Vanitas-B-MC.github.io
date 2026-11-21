@@ -24,8 +24,21 @@ export const UPGRADES = {
   crit:     { name: "Coup critique",     desc: "+10 % de chance de coup critique (×2)", max: 5, apply: (s) => { s.crit += 0.1; } },
   orbit:    { name: "Lames orbitales",   desc: "+1 lame qui tourne autour de toi",     max: 5, apply: (s) => { s.orbit += 1; } },
   nova:     { name: "Onde de choc",      desc: "Impulsion périodique autour de toi",   max: 5, apply: (s) => { s.nova += 1; } },
+  lightning:{ name: "Foudre",           desc: "Des éclairs frappent des ennemis au hasard", max: 5, apply: (s) => { s.lightning += 1; } },
+  vampire:  { name: "Vol de vie",        desc: "+0,6 PV par ennemi éliminé",           max: 5, apply: (s) => { s.vampire += 1; } },
   projspeed:{ name: "Munitions rapides", desc: "+30 % de vitesse des projectiles",     max: 3, apply: (s) => { s.projSpeed *= 1.3; } }
 };
+// Personnages : unlock = crédits pour le débloquer. apply modifie les statistiques de départ.
+export const CHARACTERS = [
+  { id: "runner", name: "Coureur", desc: "Équilibré. Le personnage de départ.", unlock: 0, apply: () => {} },
+  { id: "tank",   name: "Colosse", desc: "+60 PV, 15 % plus lent, commence avec une onde de choc.", unlock: 800,
+    apply: (st, p, owned) => { st.maxHp += 60; p.hp = st.maxHp; st.speed *= 0.85; st.nova = 1; owned.nova = 1; } },
+  { id: "hacker", name: "Hacker",  desc: "−30 PV, +15 % de critiques, commence avec 2 lames orbitales.", unlock: 2500,
+    apply: (st, p, owned) => { st.maxHp -= 30; p.hp = st.maxHp; st.crit += 0.15; st.orbit = 2; owned.orbit = 2; } }
+];
+export const CHARACTER_IDS = CHARACTERS.map((c) => c.id);
+export const FREE_CHARACTER = "runner";
+
 export const UPGRADE_IDS = Object.keys(UPGRADES);
 
 const HEAL = { id: "heal", name: "Réparation", desc: "Soigne 40 PV" };
@@ -36,7 +49,9 @@ export const ENEMY_DEFS = {
   grunt: { name: "Drone",   hp: 20,  speed: 55, r: 9,  dmg: 10, xp: 1,  color: "#ff2a6d" },
   swarm: { name: "Essaim",  hp: 8,   speed: 95, r: 6,  dmg: 6,  xp: 1,  color: "#fcee0a" },
   brute: { name: "Brute",   hp: 90,  speed: 38, r: 15, dmg: 20, xp: 5,  color: "#a066ff" },
-  boss:  { name: "Virus",   hp: 700, speed: 42, r: 26, dmg: 30, xp: 40, color: "#ffffff" }
+  elite: { name: "Élite",   hp: 160, speed: 50, r: 13, dmg: 18, xp: 12, color: "#00f0ff" },
+  boss:  { name: "Virus",   hp: 700, speed: 42, r: 26, dmg: 30, xp: 40, color: "#ffffff" },
+  overlord: { name: "Overlord", hp: 1100, speed: 38, r: 28, dmg: 35, xp: 60, color: "#ff8a3d" }
 };
 
 export const xpNeeded = (level) => Math.round(3 + level * 3 + level * level * 0.4);
@@ -44,16 +59,16 @@ const hpScale = (time) => 1 + time / 120;
 
 /* ---------- Partie ---------- */
 
-export function createState(rng = Math.random) {
+export function createState(rng = Math.random, characterId = FREE_CHARACTER) {
   const stats = {
     maxHp: 140, speed: 130, damage: 14, cooldown: 0.5, shots: 1, pierce: 0,
-    projSpeed: 340, magnet: 50, regen: 0, crit: 0, orbit: 0, nova: 0
+    projSpeed: 340, magnet: 50, regen: 0, crit: 0, orbit: 0, nova: 0, lightning: 0, vampire: 0
   };
-  return {
+  const state = {
     rng,
     time: 0,
     over: false,
-    player: { x: W / 2, y: H / 2, hp: stats.maxHp, inv: 0, cd: 0, nova: 0, spin: 0 },
+    player: { x: W / 2, y: H / 2, hp: stats.maxHp, inv: 0, cd: 0, nova: 0, spin: 0, bolt: 1 },
     stats,
     level: 1,
     xp: 0,
@@ -67,8 +82,13 @@ export function createState(rng = Math.random) {
     kills: 0,
     spawnClock: 0,
     nextBoss: BOSS_EVERY,
-    nextId: 1
+    bossCount: 0,
+    nextElite: 50,
+    nextId: 1,
+    character: characterId
   };
+  (CHARACTERS.find((c) => c.id === characterId) || CHARACTERS[0]).apply(stats, state.player, state.owned);
+  return state;
 }
 
 const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
@@ -129,6 +149,7 @@ function damageEnemy(state, enemy, amount) {
     enemy.dead = true;
     state.kills += 1;
     state.gems.push({ x: enemy.x, y: enemy.y, xp: ENEMY_DEFS[enemy.type].xp });
+    if (state.stats.vampire) state.player.hp = Math.min(state.stats.maxHp, state.player.hp + 0.6 * state.stats.vampire);
   }
 }
 
@@ -170,7 +191,12 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
   }
   if (state.time >= state.nextBoss) {
     state.nextBoss += BOSS_EVERY;
-    spawnEnemy(state, "boss");
+    state.bossCount += 1;
+    spawnEnemy(state, state.bossCount % 2 === 0 ? "overlord" : "boss");   // un boss sur deux invoque des drones
+  }
+  if (state.time >= state.nextElite) {
+    state.nextElite += 50;
+    spawnEnemy(state, "elite");
   }
 
   /* Tir automatique sur l'ennemi le plus proche */
@@ -242,11 +268,36 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
     }
   }
 
+  /* Foudre : des éclairs sur des ennemis au hasard */
+  if (stats.lightning > 0) {
+    player.bolt -= dt;
+    if (player.bolt <= 0) {
+      player.bolt = Math.max(1.1, 3 - stats.lightning * 0.35);
+      const near = state.enemies.filter((e) => !e.dead && dist2(player, e) < 380 * 380);
+      for (let i = 0; i < 1 + stats.lightning && near.length; i++) {
+        const e = near.splice(Math.floor(state.rng() * near.length), 1)[0];
+        damageEnemy(state, e, stats.damage * 2);
+        state.fx.push({ kind: "bolt", x: player.x, y: player.y, x2: e.x, y2: e.y, ttl: 0.18, max: 0.18 });
+      }
+    }
+  }
+
   /* Ennemis : poursuite et contact */
   for (const e of state.enemies) {
     if (e.dead) continue;
     e.hitCd = Math.max(0, e.hitCd - dt);
     const def = ENEMY_DEFS[e.type];
+    if (e.type === "overlord") {
+      e.summon = (e.summon ?? 4) - dt;
+      if (e.summon <= 0) {
+        e.summon = 5;
+        for (let i = 0; i < 3 && state.enemies.length < MAX_ENEMIES; i++) {
+          const g = ENEMY_DEFS.grunt;
+          const hp = g.hp * hpScale(state.time);
+          state.enemies.push({ id: state.nextId++, type: "grunt", x: e.x + (i - 1) * 18, y: e.y + 14, hp, maxHp: hp, hitCd: 0, fresh: true });
+        }
+      }
+    }
     const d = Math.sqrt(dist2(player, e)) || 1;
     e.x += ((player.x - e.x) / d) * def.speed * dt;
     e.y += ((player.y - e.y) / d) * def.speed * dt;

@@ -32,3 +32,11 @@ export function themeColor(name, fallback) {
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   return value || fallback;
 }
+
+// Sur téléphone, amène la zone de jeu en haut de l'écran au lancement d'une partie,
+// pour voir le plateau et les commandes sans avoir à faire défiler la page.
+export function scrollToPlay(el) {
+  if (!el || !window.matchMedia("(max-width: 760px)").matches) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - 8;
+  window.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
+}

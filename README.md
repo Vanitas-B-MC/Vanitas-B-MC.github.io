@@ -30,6 +30,8 @@ assets/                     favicon, images
 - Taper `awesome` sur le site ouvre l'arcade cachée (`easter-egg/arcade.html`) : Data Snake, Blackjack, Roulette,
   Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena et Breach Protocol, avec une musique
   synthwave générée en direct (bouton « Musique », désactivée par défaut).
+  Le Clicker a un arbre de compétences (par partie) et un Rebirth (formatage) avec éclats et arbre permanent.
+  Pare-feu : 3 cartes et 7 tours (déblocage en crédits). Survivor Arena : 3 personnages (déblocage en crédits), foudre, vol de vie, élites et boss.
   Pièces bleues (Snake, Tetris, longues parties de Survivor Arena, piratages complets) : Roulette et améliorations par paliers du Clicker. Crédits (Clicker, vagues du
   Pare-feu, Survivor Arena, Breach Protocol) : Blackjack et déblocage des tours. La progression est enregistrée dans le navigateur.
 - Taper `edgerunner` active (ou désactive) le style Cyberpunk: Edgerunners, rouge et vert, sur tout le site.

@@ -2,7 +2,7 @@
 // Chaque jeu a son fichier (ui-*.js) et sa logique pure (snake.js, blackjack.js…).
 
 import { createWallet } from "./wallet.js";
-import { idleGain, perSecond } from "./clicker.js";
+import { idleGain, perSecond, bonusOf } from "./clicker.js";
 import { createSnakeUI } from "./ui-snake.js";
 import { createBlackjackUI } from "./ui-blackjack.js";
 import { createRouletteUI } from "./ui-roulette.js";
@@ -53,7 +53,7 @@ function renderWallet() {
   lastCredits = wallet.credits;
 
   $("#meta-snake").textContent = `Record : ${fmt(wallet.data.bestSnake)} · ${fmt(wallet.data.blueFound)} pièce${wallet.data.blueFound > 1 ? "s" : ""} bleue${wallet.data.blueFound > 1 ? "s" : ""} trouvée${wallet.data.blueFound > 1 ? "s" : ""}`;
-  const rate = perSecond(wallet.data.levels, wallet.data.blueLevels);
+  const rate = perSecond(wallet.data.levels, wallet.data.blueLevels, bonusOf(wallet.data));
   $("#meta-clicker").textContent = `${fmtRate(rate)} crédit${rate >= 2 ? "s" : ""} / s`;
   $("#meta-tetris").textContent = `Record : ${fmt(wallet.data.bestTetris)}`;
   const best = wallet.data.bestSurvivor;
@@ -117,7 +117,7 @@ setInterval(() => {
   const elapsed = Math.min(now - lastTick, 30000);   // un onglet en veille ne doit pas rapporter une fortune
   lastTick = now;
 
-  const gain = idleGain(wallet.data.levels, elapsed, carry, wallet.data.blueLevels);
+  const gain = idleGain(wallet.data.levels, elapsed, carry, wallet.data.blueLevels, bonusOf(wallet.data));
   carry = gain.carry;
   if (gain.whole > 0) wallet.addCredits(gain.whole, { mined: true });
 }, 250);

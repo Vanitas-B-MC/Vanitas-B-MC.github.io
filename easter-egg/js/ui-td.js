@@ -3,11 +3,11 @@
 // coûte de l'ÉNERGIE, gagnée pendant la partie.
 
 import {
-  COLS, ROWS, CELL, MAX_LEVEL, PATH_POINTS, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
+  COLS, ROWS, CELL, MAX_LEVEL, MAPS, FREE_MAP, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
   createState, canPlace, placeTower, upgradeTower, sellTower, startWave, update, towerAt,
   towerRange, towerDamage, upgradeCost, invested, waveCredits, SELL_RATIO, START_LIVES
 } from "./td.js";
-import { h, fmt, prefersReducedMotion } from "./ui.js";
+import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
 
 const W = COLS * CELL;
 const H = ROWS * CELL;
@@ -22,7 +22,8 @@ const REASONS = {
 
 export function createTowerDefenseUI(root, wallet) {
   let active = false;
-  let state = createState(wallet.data.towers);
+  let mapId = FREE_MAP;
+  let state = createState(wallet.data.towers, mapId);
   let status = "idle";           // idle | running | paused | over
   let placing = null;            // type de tour en cours de pose
   let selectedId = null;         // tour sélectionnée (pour améliorer ou vendre)
@@ -53,6 +54,12 @@ export function createTowerDefenseUI(root, wallet) {
   const waveButton = h("button", { class: "button button-primary", id: "td-wave", type: "button", onclick: () => launchWave() }, "Lancer la vague 1");
   const speedButton = h("button", { class: "button button-secondary", id: "td-speed", type: "button", onclick: () => toggleSpeed() }, "Vitesse ×1");
 
+  const mapButtons = MAPS.map((m) => {
+    const button = h("button", { class: "map-button", type: "button", "data-map": m.id, onclick: () => onMap(m.id) });
+    return { m, button };
+  });
+  const mapBar = h("div", { class: "td-maps", role: "group", "aria-label": "Carte" }, mapButtons.map((x) => x.button));
+
   const palette = TOWER_IDS.map((id, index) => {
     const def = TOWER_DEFS[id];
     const main = h("span", { class: "tw-main" },
@@ -73,9 +80,10 @@ export function createTowerDefenseUI(root, wallet) {
 
   root.replaceChildren(
     h("p", { class: "game-rules" },
-      `Des ennemis suivent le chemin : arrête-les avant la sortie (${START_LIVES} vies). Pose des tours avec l'énergie gagnée en jeu. Débloque de nouvelles tours avec tes crédits ; chaque vague repoussée t'en rapporte.`),
+      `Des ennemis suivent le chemin : arrête-les avant la sortie (${START_LIVES} vies). Pose des tours avec l'énergie gagnée en jeu. Débloque de nouvelles tours et de nouvelles cartes avec tes crédits ; chaque vague repoussée t'en rapporte.`),
     h("div", { class: "td-layout" },
       h("div", { class: "td-main" },
+        mapBar,
         h("div", { class: "td-board-wrap chamfer" },
           h("div", { class: "game-stage td-stage" }, board, toast, overlay)),
         h("div", { class: "td-actions" }, waveButton, speedButton, stateEl)),
@@ -87,7 +95,7 @@ export function createTowerDefenseUI(root, wallet) {
         selection,
         h("ul", { class: "game-help" },
           h("li", {}, "Clique une case pour poser, une tour pour la sélectionner"),
-          h("li", {}, h("kbd", {}, "1"), "–", h("kbd", {}, "5"), " choisir · ", h("kbd", {}, "←↑↓→"), " curseur · ", h("kbd", {}, "Espace"), " poser"),
+          h("li", {}, h("kbd", {}, "1"), "–", h("kbd", {}, "7"), " choisir · ", h("kbd", {}, "←↑↓→"), " curseur · ", h("kbd", {}, "Espace"), " poser"),
           h("li", {}, h("kbd", {}, "Entrée"), " vague · ", h("kbd", {}, "U"), " améliorer · ", h("kbd", {}, "V"), " vendre · ", h("kbd", {}, "P"), " pause"))))
   );
 
@@ -121,7 +129,7 @@ export function createTowerDefenseUI(root, wallet) {
     ctx.lineCap = "square";
     ctx.lineJoin = "miter";
     ctx.beginPath();
-    PATH_POINTS.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+    state.map.points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
     ctx.strokeStyle = "rgba(255, 255, 255, 0.09)";
     ctx.lineWidth = CELL - 4;
     ctx.stroke();
@@ -267,6 +275,16 @@ export function createTowerDefenseUI(root, wallet) {
     setText(waveButton, inWave ? `Vague ${state.wave} en cours…` : `Lancer la vague ${state.wave + 1}`);
     setText(speedButton, `Vitesse ×${speed}`);
 
+    for (const { m, button } of mapButtons) {
+      const owned = wallet.data.maps.includes(m.id);
+      setText(button, owned ? `${m.name}${m.reward > 1 ? ` (×${m.reward} ¤)` : ""}` : `${m.name} · débloquer ${fmt(m.unlock)} ¤`);
+      button.title = m.desc;
+      button.classList.toggle("is-active", owned && mapId === m.id);
+      button.classList.toggle("is-locked", !owned);
+      button.setAttribute("aria-pressed", String(owned && mapId === m.id));
+      button.disabled = status === "running" || status === "paused" || (!owned && wallet.credits < m.unlock);
+    }
+
     for (const { id, def, cost, button } of palette) {
       const unlocked = state.unlocked.includes(id);
       button.classList.toggle("is-locked", !unlocked);
@@ -307,6 +325,24 @@ export function createTowerDefenseUI(root, wallet) {
 
   function syncUnlocked() {
     for (const id of wallet.data.towers) if (!state.unlocked.includes(id)) state.unlocked.push(id);
+  }
+
+  // Choix de la carte : seulement entre deux parties. Une carte verrouillée se débloque avec des crédits.
+  function onMap(id) {
+    if (status === "running" || status === "paused") return;
+    const m = MAPS.find((x) => x.id === id);
+    if (!wallet.data.maps.includes(id)) {
+      const price = m.unlock;                       // figé avant l'achat (le solde change pendant l'achat)
+      if (!wallet.unlockMap(id, price)) { say(`Il faut ${fmt(price)} crédits pour débloquer cette carte.`); return; }
+      say(`Carte ${m.name} débloquée !`);
+    }
+    mapId = id;
+    state = createState(wallet.data.towers, mapId);
+    placing = null;
+    selectedId = null;
+    if (status === "over") { setStatus("idle"); showOverlay("Pare-feu", `Carte ${m.name} : ${m.desc}`, "Commencer", false); }
+    updateHud();
+    draw();
   }
 
   function onPalette(id) {
@@ -372,7 +408,8 @@ export function createTowerDefenseUI(root, wallet) {
   }
 
   function startGame() {
-    state = createState(wallet.data.towers);
+    scrollToPlay(root.querySelector(".td-board-wrap"));
+    state = createState(wallet.data.towers, mapId);
     placing = TOWER_DEFS.laser && state.unlocked.includes("laser") ? "laser" : null;
     selectedId = null;
     setStatus("running");
@@ -520,7 +557,7 @@ export function createTowerDefenseUI(root, wallet) {
       return;
     }
 
-    if (/^[1-5]$/.test(key)) {
+    if (/^[1-7]$/.test(key)) {
       onPalette(TOWER_IDS[Number(key) - 1]);
       return;
     }

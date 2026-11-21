@@ -2,17 +2,18 @@
 // Déplacement : flèches, ZQSD/WASD, ou glisser le doigt sur l'arène. Le tir est automatique.
 
 import {
-  W, H, PLAYER_R, ENEMY_DEFS, createState, update, chooseUpgrade, describe, xpNeeded,
+  W, H, PLAYER_R, ENEMY_DEFS, CHARACTERS, FREE_CHARACTER, createState, update, chooseUpgrade, describe, xpNeeded,
   creditsFor, coinsFor, SECONDS_PER_COIN
 } from "./survivors.js";
-import { h, fmt, prefersReducedMotion } from "./ui.js";
+import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
 
 const STEP = 1 / 60;
 const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 export function createSurvivorsUI(root, wallet) {
   let active = false;
-  let state = createState();
+  let charId = FREE_CHARACTER;
+  let state = createState(Math.random, charId);
   let status = "idle";           // idle | running | paused | over
   let rafId = 0;
   let lastTime = 0;
@@ -20,6 +21,7 @@ export function createSurvivorsUI(root, wallet) {
   const keys = new Set();
   let drag = null;               // { x, y } point de départ du glisser (en pixels écran)
   let dragVec = { dx: 0, dy: 0 };
+  let stick = null;              // joystick affiché : { x0, y0, x1, y1 } en coordonnées du canvas
   let toastTimer = 0;
   let shownChoices = null;
 
@@ -48,11 +50,15 @@ export function createSurvivorsUI(root, wallet) {
   const stateEl = h("p", { class: "game-state", id: "sv-state", "aria-live": "polite" }, "Prêt");
   const ownedList = h("ul", { class: "sv-owned" });
 
+  const charButtons = CHARACTERS.map((c) => ({ c, button: h("button", { class: "map-button", type: "button", "data-char": c.id, onclick: () => onChar(c.id) }) }));
+  const charBar = h("div", { class: "td-maps", role: "group", "aria-label": "Personnage" }, charButtons.map((x) => x.button));
+
   root.replaceChildren(
     h("p", { class: "game-rules" },
       "Survis le plus longtemps possible. Ton personnage tire tout seul : déplace-toi pour esquiver et choisis une amélioration à chaque niveau. Récompense : des crédits, et une pièce bleue toutes les 2 minutes."),
     h("div", { class: "sv-layout" },
       h("div", { class: "sv-main" },
+        charBar,
         h("div", { class: "sv-board-wrap chamfer" },
           h("div", { class: "game-stage sv-stage" }, board, toast, overlay, levelPanel)),
         h("div", { class: "sv-bars" },
@@ -106,6 +112,17 @@ export function createSurvivorsUI(root, wallet) {
     // Ondes de choc
     for (const f of state.fx) {
       const k = f.ttl / f.max;
+      if (f.kind === "bolt") {
+        ctx.globalAlpha = k;
+        ctx.strokeStyle = "#b58cff";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(f.x, f.y);
+        ctx.lineTo((f.x + f.x2) / 2 + (f.y2 - f.y) * 0.08, (f.y + f.y2) / 2 - (f.x2 - f.x) * 0.08);
+        ctx.lineTo(f.x2, f.y2);
+        ctx.stroke();
+        continue;
+      }
       ctx.globalAlpha = k * 0.8;
       ctx.strokeStyle = "#b58cff";
       ctx.lineWidth = 3;
@@ -155,6 +172,21 @@ export function createSurvivorsUI(root, wallet) {
       }
     }
 
+    // Joystick virtuel (glisser du doigt)
+    if (stick) {
+      ctx.globalAlpha = 0.35;
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(stick.x0, stick.y0, 40, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(stick.x1, stick.y1, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
     // Joueur (clignote quand il est invulnérable)
     if (!(player.inv > 0 && Math.floor(player.inv * 20) % 2 === 0)) {
       ctx.fillStyle = "#fff";
@@ -197,7 +229,31 @@ export function createSurvivorsUI(root, wallet) {
     setText(stateEl, LABELS[next]);
   }
 
+  // Choix du personnage : seulement entre deux parties. Un personnage verrouillé se débloque avec des crédits.
+  function onChar(id) {
+    if (status === "running" || status === "paused") return;
+    const c = CHARACTERS.find((x) => x.id === id);
+    if (!wallet.data.chars.includes(id)) {
+      const price = c.unlock;                        // figé avant l'achat (le solde change pendant l'achat)
+      if (!wallet.unlockChar(id, price)) { say(`Il faut ${fmt(price)} crédits pour débloquer ${c.name}.`); return; }
+      say(`${c.name} débloqué !`);
+    }
+    charId = id;
+    state = createState(Math.random, charId);
+    updateHud();
+    draw();
+  }
+
   function updateHud() {
+    for (const { c, button } of charButtons) {
+      const owned = wallet.data.chars.includes(c.id);
+      setText(button, owned ? c.name : `${c.name} · débloquer ${fmt(c.unlock)} ¤`);
+      button.title = c.desc;
+      button.classList.toggle("is-active", owned && charId === c.id);
+      button.classList.toggle("is-locked", !owned);
+      button.setAttribute("aria-pressed", String(owned && charId === c.id));
+      button.disabled = status === "running" || status === "paused" || (!owned && wallet.credits < c.unlock);
+    }
     const { player, stats } = state;
     setText(timeEl, clock(state.time));
     setText(levelEl, state.level);
@@ -253,7 +309,8 @@ export function createSurvivorsUI(root, wallet) {
   /* ---------- Partie ---------- */
 
   function startGame() {
-    state = createState();
+    scrollToPlay(root.querySelector(".sv-board-wrap"));
+    state = createState(Math.random, charId);
     shownChoices = null;
     keys.clear();
     setStatus("running");
@@ -380,9 +437,16 @@ export function createSurvivorsUI(root, wallet) {
     if (dir) keys.delete(dir);
   });
 
+  function toCanvas(event) {
+    const rect = board.getBoundingClientRect();
+    return { x: ((event.clientX - rect.left) / rect.width) * W, y: ((event.clientY - rect.top) / rect.height) * H };
+  }
+
   board.addEventListener("pointerdown", (event) => {
     if (status !== "running") return;
     drag = { x: event.clientX, y: event.clientY };
+    const p0 = toCanvas(event);
+    stick = { x0: p0.x, y0: p0.y, x1: p0.x, y1: p0.y };
     board.setPointerCapture?.(event.pointerId);
   });
   board.addEventListener("pointermove", (event) => {
@@ -390,9 +454,15 @@ export function createSurvivorsUI(root, wallet) {
     const dx = event.clientX - drag.x;
     const dy = event.clientY - drag.y;
     const len = Math.hypot(dx, dy);
+    const p1 = toCanvas(event);
+    if (stick) {
+      const k = Math.min(1, 40 / Math.max(1, Math.hypot(p1.x - stick.x0, p1.y - stick.y0)));
+      stick.x1 = stick.x0 + (p1.x - stick.x0) * k;
+      stick.y1 = stick.y0 + (p1.y - stick.y0) * k;
+    }
     dragVec = len < 8 ? { dx: 0, dy: 0 } : { dx: dx / Math.max(len, 40), dy: dy / Math.max(len, 40) };
   });
-  const endDrag = () => { drag = null; dragVec = { dx: 0, dy: 0 }; };
+  const endDrag = () => { drag = null; stick = null; dragVec = { dx: 0, dy: 0 }; };
   board.addEventListener("pointerup", endDrag);
   board.addEventListener("pointercancel", endDrag);
 

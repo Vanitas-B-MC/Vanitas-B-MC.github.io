@@ -6,7 +6,7 @@ import {
   DIFFICULTIES, generate, createState, pick, canPick, isUsed, activeLine, bufferCodes, progress,
   tick, giveUp, rewards
 } from "./breach.js";
-import { h, fmt } from "./ui.js";
+import { h, fmt, scrollToPlay } from "./ui.js";
 
 const REASONS = {
   done: "Tous les daemons sont piratés.",
@@ -137,6 +137,7 @@ export function createBreachUI(root, wallet) {
   /* ---------- Partie ---------- */
 
   function start() {
+    scrollToPlay(root.querySelector(".bp-board"));
     paid = false;
     state = createState(generate(Math.random, difficulty));
     result.hidden = true;

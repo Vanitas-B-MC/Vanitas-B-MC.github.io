@@ -5,8 +5,9 @@
 // Tout est sauvegardé dans le navigateur (localStorage). Si le stockage est indisponible
 // (navigation privée, par exemple), le jeu marche quand même, simplement sans sauvegarde.
 
-import { UPGRADES, BLUE_UPGRADES } from "./clicker.js";
-import { TOWER_IDS, FREE_TOWER } from "./td.js";
+import { UPGRADES, BLUE_UPGRADES, SKILLS, CORE } from "./clicker.js";
+import { CHARACTER_IDS, FREE_CHARACTER } from "./survivors.js";
+import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP } from "./td.js";
 
 const KEY = "mc-arcade-wallet-v1";
 const START_CREDITS = 100;
@@ -14,6 +15,8 @@ const MAX = Number.MAX_SAFE_INTEGER;
 
 export const CLICKER_IDS = UPGRADES.map((u) => u.id);
 export const BLUE_IDS = BLUE_UPGRADES.map((u) => u.id);
+export const SKILL_IDS = SKILLS.map((x) => x.id);
+export const CORE_IDS = CORE.map((x) => x.id);
 export const BEST_KEYS = ["bestSnake", "bestTetris", "bestWave", "bestSurvivor", "bestBreach"];
 
 function freshData() {
@@ -28,9 +31,17 @@ function freshData() {
     blueFound: 0,         // pièces bleues ramassées dans le Snake
     minedTotal: 0,        // crédits gagnés avec le Clicker, au total
     clicksTotal: 0,
+    minedRun: 0,          // crédits minés depuis le dernier formatage (Rebirth)
+    shards: 0,            // éclats disponibles (monnaie du Rebirth)
+    shardsTotal: 0,       // éclats gagnés à vie : chacun donne +2 % aux gains
+    rebirths: 0,
+    skills: Object.fromEntries(SKILL_IDS.map((id) => [id, 0])),   // arbre de compétences de la partie
+    core: Object.fromEntries(CORE_IDS.map((id) => [id, 0])),      // arbre permanent du Rebirth
     levels: Object.fromEntries(CLICKER_IDS.map((id) => [id, 0])),
     blueLevels: Object.fromEntries(BLUE_IDS.map((id) => [id, 0])),
     towers: [FREE_TOWER],  // tours du Tower Defense débloquées
+    maps: [FREE_MAP],      // cartes du Tower Defense débloquées
+    chars: [FREE_CHARACTER], // personnages de Survivor Arena débloqués
     achievements: []
   };
 }
@@ -48,13 +59,21 @@ export function sanitize(raw) {
   if (!raw || typeof raw !== "object") return data;
 
   data.credits = toCount(raw.credits, data.credits);
-  for (const key of ["blue", "blueFound", "minedTotal", "clicksTotal", ...BEST_KEYS]) data[key] = toCount(raw[key]);
+  for (const key of ["blue", "blueFound", "minedTotal", "clicksTotal", "minedRun", "shards", "shardsTotal", "rebirths", ...BEST_KEYS]) data[key] = toCount(raw[key]);
 
   for (const id of CLICKER_IDS) data.levels[id] = toCount(raw.levels?.[id]);
   for (const id of BLUE_IDS) data.blueLevels[id] = toCount(raw.blueLevels?.[id]);
+  for (const sk of SKILLS) data.skills[sk.id] = Math.min(toCount(raw.skills?.[sk.id]), sk.max);
+  for (const node of CORE) data.core[node.id] = Math.min(toCount(raw.core?.[node.id]), node.max);
 
   if (Array.isArray(raw.towers)) {
     for (const id of raw.towers) if (TOWER_IDS.includes(id) && !data.towers.includes(id)) data.towers.push(id);
+  }
+  if (Array.isArray(raw.chars)) {
+    for (const id of raw.chars) if (CHARACTER_IDS.includes(id) && !data.chars.includes(id)) data.chars.push(id);
+  }
+  if (Array.isArray(raw.maps)) {
+    for (const id of raw.maps) if (MAP_IDS.includes(id) && !data.maps.includes(id)) data.maps.push(id);
   }
   if (Array.isArray(raw.achievements)) {
     for (const id of raw.achievements.slice(0, 200)) {
@@ -107,7 +126,10 @@ export function createWallet(storage = defaultStorage()) {
       const clickCount = toCount(clicks);
       if (!amount && !clickCount) return;
       data.credits = addCapped(data.credits, amount);
-      if (mined) data.minedTotal = addCapped(data.minedTotal, amount);
+      if (mined) {
+        data.minedTotal = addCapped(data.minedTotal, amount);
+        data.minedRun = addCapped(data.minedRun, amount);
+      }
       data.clicksTotal = addCapped(data.clicksTotal, clickCount);
       commit();
     },
@@ -161,12 +183,58 @@ export function createWallet(storage = defaultStorage()) {
       commit();
     },
 
+    // Compétences de la partie, éclats et arbre du Rebirth. Les règles (prix, prérequis) sont dans clicker.js.
+    skillUp(id) {
+      if (!(id in data.skills)) return;
+      data.skills[id] = addCapped(data.skills[id], 1);
+      commit();
+    },
+    coreUp(id) {
+      if (!(id in data.core)) return;
+      data.core[id] = addCapped(data.core[id], 1);
+      commit();
+    },
+    spendShards(n) {
+      const amount = toCount(n);
+      if (amount > data.shards) return false;
+      data.shards -= amount;
+      commit();
+      return true;
+    },
+    // Formatage : on garde crédits, pièces bleues, paliers bleus, tours, succès et arbre du Rebirth.
+    rebirth({ shards = 0, credits = 0, start = {} } = {}) {
+      data.shards = addCapped(data.shards, toCount(shards));
+      data.shardsTotal = addCapped(data.shardsTotal, toCount(shards));
+      data.credits = addCapped(data.credits, toCount(credits));
+      data.rebirths = addCapped(data.rebirths, 1);
+      data.minedRun = 0;
+      for (const id of CLICKER_IDS) data.levels[id] = toCount(start[id]);
+      for (const id of SKILL_IDS) data.skills[id] = 0;
+      commit();
+    },
+
     // Tower Defense : débloque une tour contre des crédits. false si déjà débloquée ou trop cher.
     hasTower(id) { return data.towers.includes(id); },
     unlockTower(id, price) {
       if (!TOWER_IDS.includes(id) || data.towers.includes(id)) return false;
       if (!this.spendCredits(price)) return false;
       data.towers.push(id);
+      commit();
+      return true;
+    },
+
+    unlockChar(id, price) {
+      if (!CHARACTER_IDS.includes(id) || data.chars.includes(id)) return false;
+      if (!this.spendCredits(price)) return false;
+      data.chars.push(id);
+      commit();
+      return true;
+    },
+    hasMap(id) { return data.maps.includes(id); },
+    unlockMap(id, price) {
+      if (!MAP_IDS.includes(id) || data.maps.includes(id)) return false;
+      if (!this.spendCredits(price)) return false;
+      data.maps.push(id);
       commit();
       return true;
     },

@@ -6,7 +6,7 @@ import {
   createState, tryMove, rotate, softDrop, hardDrop, gravity, isGrounded, ghostY,
   holdPiece, cellsOf, dropInterval
 } from "./tetris.js";
-import { h, fmt, prefersReducedMotion, themeColor } from "./ui.js";
+import { h, fmt, scrollToPlay, prefersReducedMotion, themeColor } from "./ui.js";
 
 const CELL = 30;
 const BOARD_W = COLS * CELL;
@@ -35,7 +35,7 @@ export function createTetrisUI(root, wallet) {
   const toast = h("p", { class: "game-toast", id: "tt-toast", "aria-live": "polite" });
 
   const overlayTitle = h("p", { class: "overlay-title" }, "Tetris");
-  const overlayText = h("p", { class: "overlay-text" }, "Appuie sur Entrée ou sur le bouton pour lancer.");
+  const overlayText = h("p", { class: "overlay-text" }, "Lance la partie. Sur téléphone : toucher = tourner, glisser = bouger, coup sec vers le bas = chute.");
   const startButton = h("button", { class: "button button-primary", id: "tt-start", type: "button" }, "Lancer la partie");
   const overlay = h("div", { class: "game-overlay", id: "tt-overlay" }, overlayTitle, overlayText, startButton);
 
@@ -289,6 +289,7 @@ export function createTetrisUI(root, wallet) {
   /* ---------- Actions ---------- */
 
   function startGame() {
+    scrollToPlay(root.querySelector(".tt-layout"));
     state = createState();
     newPieceReset();
     setStatus("running");
@@ -412,13 +413,43 @@ export function createTetrisUI(root, wallet) {
     for (const type of ["pointerup", "pointercancel", "pointerleave"]) button.addEventListener(type, stop);
   });
 
+  // Gestes sur le plateau (téléphone) : toucher = tourner, glisser = bouger / descendre, coup sec vers le bas = chute.
+  let gesture = null;
+  board.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse" || status !== "running") return;
+    gesture = { x: event.clientX, y: event.clientY, t: performance.now(), stepX: 0, stepY: 0, moved: false };
+    board.setPointerCapture?.(event.pointerId);
+  });
+  board.addEventListener("pointermove", (event) => {
+    if (!gesture) return;
+    const cell = board.clientWidth / COLS;
+    const dx = event.clientX - gesture.x;
+    const dy = event.clientY - gesture.y;
+    const wantX = Math.trunc(dx / cell);
+    while (gesture.stepX < wantX) { actions.right(); gesture.stepX += 1; gesture.moved = true; }
+    while (gesture.stepX > wantX) { actions.left(); gesture.stepX -= 1; gesture.moved = true; }
+    const wantY = Math.trunc(dy / cell);
+    while (gesture.stepY < wantY) { actions.down(); gesture.stepY += 1; gesture.moved = true; }
+  });
+  const endGesture = (event) => {
+    if (!gesture) return;
+    const dx = event.clientX - gesture.x;
+    const dy = event.clientY - gesture.y;
+    const quick = performance.now() - gesture.t < 260;
+    if (!gesture.moved && Math.hypot(dx, dy) < 10 && quick) actions.rotate();
+    else if (quick && dy > 70 && Math.abs(dx) < 40 && gesture.stepX === 0) actions.drop();
+    gesture = null;
+  };
+  board.addEventListener("pointerup", endGesture);
+  board.addEventListener("pointercancel", () => { gesture = null; });
+
   document.addEventListener("visibilitychange", () => { if (document.hidden) pauseGame(); });
 
   /* ---------- Démarrage ---------- */
 
   updateHud();
   draw();
-  showOverlay("Tetris", "Appuie sur Entrée ou sur le bouton pour lancer.", "Lancer la partie", false);
+  showOverlay("Tetris", "Lance la partie. Sur téléphone : toucher = tourner, glisser = bouger, coup sec vers le bas = chute.", "Lancer la partie", false);
   overlay.hidden = false;
 
   return {

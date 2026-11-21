@@ -1,9 +1,11 @@
 // js/clicker.js — logique pure du Clicker « Mineur de données ». Aucun accès au DOM.
 //
-// Deux sortes d'améliorations :
+// Trois niveaux de progression :
 //   - en CRÉDITS  (UPGRADES)      : ajoutent des crédits par clic ou par seconde ;
 //   - en PIÈCES BLEUES (BLUE_UPGRADES) : paliers incrémentiels qui multiplient les gains,
-//     ou font baisser les prix. Les pièces bleues viennent du Snake et du Tetris.
+//     ou font baisser les prix. Les pièces bleues viennent du Snake et du Tetris ;
+//   - COMPÉTENCES (SKILLS) : arbre de la partie en cours, points gagnés en minant, remis à zéro au Rebirth ;
+//   - REBIRTH : on « formate » pour gagner des éclats, qui achètent un arbre permanent (CORE).
 
 // kind "click" : crédits par clic. kind "auto" : crédits par seconde.
 export const UPGRADES = [
@@ -31,17 +33,74 @@ export const blueUpgradeById = (id) => BLUE_UPGRADES.find((u) => u.id === id);
 
 const level = (levels, id) => Math.max(0, Math.floor(levels?.[id] || 0));
 
+/* ---------- Arbre de compétences (remis à zéro à chaque Rebirth) ---------- */
+
+// branch : colonne d'affichage. cost : points par rang. req : rangs nécessaires dans d'autres compétences.
+export const SKILLS = [
+  { id: "c1", branch: "click", name: "Réflexes",             desc: "+10 % de crédits par clic",                     max: 5, cost: 1, req: [] },
+  { id: "c2", branch: "click", name: "Frappe critique",      desc: "+3 % de chance de clic critique (×5)",          max: 5, cost: 2, req: [{ id: "c1", rank: 2 }] },
+  { id: "c3", branch: "click", name: "Main de fer",          desc: "Le clic gagne +1 % de tes crédits / seconde",   max: 3, cost: 3, req: [{ id: "c2", rank: 1 }] },
+  { id: "a1", branch: "auto",  name: "Optimisation",         desc: "+10 % de crédits par seconde",                  max: 5, cost: 1, req: [] },
+  { id: "a2", branch: "auto",  name: "Parallélisme",         desc: "Scripts et bots +25 %",                         max: 3, cost: 2, req: [{ id: "a1", rank: 2 }] },
+  { id: "a3", branch: "auto",  name: "Refroidissement",      desc: "Fermes et centres de données +25 %",            max: 3, cost: 3, req: [{ id: "a2", rank: 1 }] },
+  { id: "e1", branch: "eco",   name: "Négociation",          desc: "−3 % sur le prix des améliorations",            max: 5, cost: 1, req: [] },
+  { id: "e2", branch: "eco",   name: "Chasseur de paquets",  desc: "Paquets plus fréquents (−15 %) et +20 % de gain", max: 3, cost: 2, req: [{ id: "e1", rank: 1 }] },
+  { id: "e3", branch: "eco",   name: "Filon bleu",           desc: "+3 % de chance qu'un paquet contienne une pièce bleue", max: 3, cost: 3, req: [{ id: "e2", rank: 2 }] },
+  { id: "s1", branch: "eco",   name: "Convergence ouvrière", desc: "+25 % à tous les gains",                        max: 1, cost: 5, req: [{ id: "c1", rank: 3 }, { id: "a1", rank: 3 }, { id: "e1", rank: 3 }] }
+];
+export const SKILL_BRANCHES = [
+  { id: "click", name: "Clic" },
+  { id: "auto",  name: "Automatisation" },
+  { id: "eco",   name: "Économie" }
+];
+export const skillById = (id) => SKILLS.find((x) => x.id === id);
+
+// Un point de compétence à chaque seuil de crédits minés pendant la partie en cours.
+export const SKILL_THRESHOLDS = Array.from({ length: 20 }, (_, n) => Math.round(500 * 2.2 ** n));
+
+/* ---------- Arbre du Rebirth (permanent, acheté avec des éclats) ---------- */
+
+export const REBIRTH_MIN = 50000;        // crédits minés dans la partie pour pouvoir formater
+export const SHARD_BONUS = 0.02;         // +2 % à tous les gains par éclat gagné, à vie
+
+export const CORE = [
+  { id: "k1", name: "Noyau d'énergie",   desc: "+15 % à tous les gains",                            max: 20, base: 2,  growth: 1.45 },
+  { id: "k2", name: "Tête de pont",      desc: "Chaque partie commence avec +3 scripts et +1 bot",  max: 10, base: 3,  growth: 1.6 },
+  { id: "k3", name: "Éclat avide",       desc: "+10 % d'éclats à chaque formatage",                 max: 10, base: 5,  growth: 1.7 },
+  { id: "k4", name: "Mémoire vive",      desc: "+1 point de compétence au départ",                  max: 8,  base: 8,  growth: 1.9 },
+  { id: "k5", name: "Marché noir",       desc: "−2 % sur le prix des améliorations",                max: 10, base: 4,  growth: 1.6 },
+  { id: "k6", name: "Clic automatique",  desc: "Un clic automatique par seconde",                   max: 5,  base: 10, growth: 2.2 },
+  { id: "k7", name: "Indemnité",         desc: "Le formatage rend 2 % des crédits minés de la partie", max: 10, base: 6,  growth: 1.7 }
+];
+export const coreById = (id) => CORE.find((x) => x.id === id);
+
+export const NO_BONUS = Object.freeze({ skills: {}, core: {}, shards: 0 });
+export const bonusOf = (data) => ({ skills: data?.skills || {}, core: data?.core || {}, shards: data?.shardsTotal || 0 });
+
+const rank = (table, id, max) => Math.min(level(table, id), max);
+const skillRank = (bonus, id) => rank(bonus.skills, id, skillById(id).max);
+const coreRank = (bonus, id) => rank(bonus.core, id, coreById(id).max);
+
+export function coreCostOf(node, owned) {
+  if (owned >= node.max) return null;
+  return Math.ceil(node.base * node.growth ** owned);
+}
+
 /* ---------- Prix ---------- */
 
-// Remise fournisseur : 1 = plein tarif, 0,6 = 40 % de réduction (maximum).
-export function discountFactor(blueLevels = {}) {
-  const u = blueUpgradeById("supplier");
-  return 1 - u.per * Math.min(level(blueLevels, u.id), u.max);
+// 1 = plein tarif. Remises cumulées (fournisseur, négociation, marché noir), plafonnées à −70 %.
+export function discountFactor(blueLevels = {}, bonus = NO_BONUS) {
+  const sup = blueUpgradeById("supplier");
+  const total =
+    sup.per * Math.min(level(blueLevels, sup.id), sup.max) +
+    0.03 * skillRank(bonus, "e1") +
+    0.02 * coreRank(bonus, "k5");
+  return 1 - Math.min(0.7, total);
 }
 
 // Prix de la prochaine amélioration en crédits, quand on en possède déjà `owned`.
-export function costOf(upgrade, owned, blueLevels = {}) {
-  return Math.max(1, Math.ceil(upgrade.base * upgrade.growth ** owned * discountFactor(blueLevels)));
+export function costOf(upgrade, owned, blueLevels = {}, bonus = NO_BONUS) {
+  return Math.max(1, Math.ceil(upgrade.base * upgrade.growth ** owned * discountFactor(blueLevels, bonus)));
 }
 
 // Prix en pièces bleues du prochain palier, ou null quand le palier maximum est atteint.
@@ -52,30 +111,58 @@ export function blueCostOf(upgrade, owned) {
 
 /* ---------- Gains ---------- */
 
-function multiplier(blueLevels, effect) {
+// Tous les multiplicateurs, pour « click », « auto » ou « all ».
+function multiplier(blueLevels, effect, bonus) {
   let mult = 1;
   for (const u of BLUE_UPGRADES) {
     if (u.effect === effect || u.effect === "all") mult *= 1 + u.per * Math.min(level(blueLevels, u.id), u.max);
   }
+  if (effect === "click") mult *= 1 + 0.10 * skillRank(bonus, "c1");
+  if (effect === "auto") mult *= 1 + 0.10 * skillRank(bonus, "a1");
+  mult *= 1 + 0.25 * skillRank(bonus, "s1");
+  mult *= 1 + 0.15 * coreRank(bonus, "k1");
+  mult *= 1 + SHARD_BONUS * (bonus.shards || 0);
   return mult;
 }
 
-export const clickMultiplier = (blueLevels = {}) => multiplier(blueLevels, "click");
-export const autoMultiplier = (blueLevels = {}) => multiplier(blueLevels, "auto");
+export const clickMultiplier = (blueLevels = {}, bonus = NO_BONUS) => multiplier(blueLevels, "click", bonus);
+export const autoMultiplier = (blueLevels = {}, bonus = NO_BONUS) => multiplier(blueLevels, "auto", bonus);
 
-// Crédits par clic (un nombre à virgule : voir clickGain).
-export function clickPower(levels, blueLevels = {}) {
+// Gain automatique des améliorations, avant les multiplicateurs.
+function baseAuto(levels, bonus) {
+  let rate = 0;
+  for (const u of UPGRADES) {
+    if (u.kind !== "auto") continue;
+    let value = u.value;
+    if (u.id === "script" || u.id === "botnet") value *= 1 + 0.25 * skillRank(bonus, "a2");
+    if (u.id === "farm" || u.id === "dc") value *= 1 + 0.25 * skillRank(bonus, "a3");
+    rate += value * level(levels, u.id);
+  }
+  return rate;
+}
+
+// Crédits par clic, sans la compétence « Main de fer » (qui dépend du gain par seconde).
+function baseClick(levels, blueLevels, bonus) {
   let power = 1;
   for (const u of UPGRADES) if (u.kind === "click") power += u.value * level(levels, u.id);
-  return power * clickMultiplier(blueLevels);
+  return power * clickMultiplier(blueLevels, bonus);
 }
 
-// Crédits par seconde, sans rien faire.
-export function perSecond(levels, blueLevels = {}) {
-  let rate = 0;
-  for (const u of UPGRADES) if (u.kind === "auto") rate += u.value * level(levels, u.id);
-  return rate * autoMultiplier(blueLevels);
+// Crédits par seconde, sans rien faire (y compris les clics automatiques du Rebirth).
+export function perSecond(levels, blueLevels = {}, bonus = NO_BONUS) {
+  const auto = baseAuto(levels, bonus) * autoMultiplier(blueLevels, bonus);
+  const autoClicks = coreRank(bonus, "k6") * baseClick(levels, blueLevels, bonus);
+  return auto + autoClicks;
 }
+
+// Crédits par clic (un nombre à virgule : voir clickGain).
+export function clickPower(levels, blueLevels = {}, bonus = NO_BONUS) {
+  const ironHand = 0.01 * skillRank(bonus, "c3") * baseAuto(levels, bonus) * autoMultiplier(blueLevels, bonus);
+  return baseClick(levels, blueLevels, bonus) + ironHand;
+}
+
+export const critChance = (bonus = NO_BONUS) => 0.03 * skillRank(bonus, "c2");
+export const CRIT_MULTIPLIER = 5;
 
 // Un crédit est entier : on garde la partie décimale (`carry`) pour le prochain passage.
 function whole(exact) {
@@ -83,13 +170,16 @@ function whole(exact) {
   return { whole: w, carry: Math.max(0, exact - w) };
 }
 
-export function clickGain(levels, blueLevels = {}, carry = 0) {
-  return whole(clickPower(levels, blueLevels) + carry);
+// Gain d'un clic. rng permet de tester les coups critiques.
+export function clickGain(levels, blueLevels = {}, carry = 0, bonus = NO_BONUS, rng = Math.random) {
+  const crit = rng() < critChance(bonus);
+  const exact = clickPower(levels, blueLevels, bonus) * (crit ? CRIT_MULTIPLIER : 1) + carry;
+  return { ...whole(exact), crit };
 }
 
 // Gain passif pendant `ms` millisecondes.
-export function idleGain(levels, ms, carry = 0, blueLevels = {}) {
-  return whole((perSecond(levels, blueLevels) * ms) / 1000 + carry);
+export function idleGain(levels, ms, carry = 0, blueLevels = {}, bonus = NO_BONUS) {
+  return whole((perSecond(levels, blueLevels, bonus) * ms) / 1000 + carry);
 }
 
 /* ---------- Achats ---------- */
@@ -98,7 +188,7 @@ export function idleGain(levels, ms, carry = 0, blueLevels = {}) {
 export function buy(wallet, id) {
   const upgrade = upgradeById(id);
   if (!upgrade) return false;
-  const price = costOf(upgrade, wallet.data.levels[id] || 0, wallet.data.blueLevels);
+  const price = costOf(upgrade, wallet.data.levels[id] || 0, wallet.data.blueLevels, bonusOf(wallet.data));
   if (!wallet.spendCredits(price)) return false;
   wallet.levelUp(id);
   return true;
@@ -114,19 +204,91 @@ export function buyBlue(wallet, id) {
   return true;
 }
 
+/* ---------- Points de compétence ---------- */
+
+export function pointsEarned(data) {
+  const bonus = bonusOf(data);
+  const fromMining = SKILL_THRESHOLDS.filter((t) => (data.minedRun || 0) >= t).length;
+  return fromMining + coreRank(bonus, "k4");
+}
+
+export const pointsSpent = (data) => SKILLS.reduce((sum, sk) => sum + skillRank(bonusOf(data), sk.id) * sk.cost, 0);
+export const pointsFree = (data) => pointsEarned(data) - pointsSpent(data);
+
+// Prochain seuil de crédits minés qui donnera un point (null s'ils sont tous atteints).
+export const nextThreshold = (data) => SKILL_THRESHOLDS.find((t) => (data.minedRun || 0) < t) ?? null;
+
+export function skillState(data, id) {
+  const sk = skillById(id);
+  const bonus = bonusOf(data);
+  const current = skillRank(bonus, id);
+  const missing = sk.req.filter((r) => skillRank(bonus, r.id) < r.rank);
+  if (current >= sk.max) return { current, state: "max", missing };
+  if (missing.length) return { current, state: "locked", missing };
+  if (pointsFree(data) < sk.cost) return { current, state: "poor", missing };
+  return { current, state: "ready", missing };
+}
+
+export function skillUp(wallet, id) {
+  if (!skillById(id) || skillState(wallet.data, id).state !== "ready") return false;
+  wallet.skillUp(id);
+  return true;
+}
+
+/* ---------- Rebirth ---------- */
+
+export function shardsFor(data) {
+  const run = data.minedRun || 0;
+  if (run < REBIRTH_MIN) return 0;
+  const bonus = bonusOf(data);
+  return Math.floor(Math.sqrt(run / REBIRTH_MIN) * (1 + 0.10 * coreRank(bonus, "k3")));
+}
+
+export const canRebirth = (data) => shardsFor(data) >= 1;
+
+// Crédits rendus au formatage (arbre du Rebirth « Indemnité »).
+export const refundFor = (data) => Math.floor((data.minedRun || 0) * 0.02 * coreRank(bonusOf(data), "k7"));
+
+// Niveaux d'amélioration offerts au début de chaque partie (« Tête de pont »).
+export function startLevels(data) {
+  const r = coreRank(bonusOf(data), "k2");
+  return r > 0 ? { script: 3 * r, botnet: r } : {};
+}
+
+// Formate : remet à zéro les améliorations en crédits et l'arbre de compétences, donne les éclats.
+// Les crédits, pièces bleues, paliers bleus, tours et succès sont conservés.
+export function rebirth(wallet) {
+  if (!canRebirth(wallet.data)) return null;
+  const result = { shards: shardsFor(wallet.data), credits: refundFor(wallet.data), start: startLevels(wallet.data) };
+  wallet.rebirth(result);
+  return result;
+}
+
+export function buyCore(wallet, id) {
+  const node = coreById(id);
+  if (!node) return false;
+  const price = coreCostOf(node, wallet.data.core?.[id] || 0);
+  if (price === null || !wallet.spendShards(price)) return false;
+  wallet.coreUp(id);
+  return true;
+}
+
 /* ---------- Paquet de données (événement aléatoire) ---------- */
 
 export const PACKET_MIN_DELAY = 40000;   // ms entre deux paquets
 export const PACKET_MAX_DELAY = 90000;
 export const PACKET_LIFETIME = 9000;     // ms pendant lesquelles on peut le cliquer
 
-export const nextPacketDelay = (rng = Math.random) =>
-  PACKET_MIN_DELAY + Math.floor(rng() * (PACKET_MAX_DELAY - PACKET_MIN_DELAY));
+export const nextPacketDelay = (rng = Math.random, bonus = NO_BONUS) =>
+  Math.round((PACKET_MIN_DELAY + Math.floor(rng() * (PACKET_MAX_DELAY - PACKET_MIN_DELAY))) * 0.85 ** skillRank(bonus, "e2"));
 
 // Récompense : environ 45 secondes de gains passifs plus 25 clics, au moins 75 crédits.
-export function packetReward(levels, blueLevels = {}) {
-  return Math.max(75, Math.floor(perSecond(levels, blueLevels) * 45 + clickPower(levels, blueLevels) * 25));
+export function packetReward(levels, blueLevels = {}, bonus = NO_BONUS) {
+  const base = perSecond(levels, blueLevels, bonus) * 45 + clickPower(levels, blueLevels, bonus) * 25;
+  return Math.max(75, Math.floor(base * (1 + 0.2 * skillRank(bonus, "e2"))));
 }
+
+export const packetBlueChance = (bonus = NO_BONUS) => 0.03 * skillRank(bonus, "e3");
 
 /* ---------- Succès ---------- */
 
@@ -139,11 +301,17 @@ export const ACHIEVEMENTS = [
   { id: "mined_1k",     name: "Petit mineur",          desc: "1 000 crédits minés",                        reward: 100,     test: (s) => s.mined >= 1000 },
   { id: "mined_100k",   name: "Gros mineur",           desc: "100 000 crédits minés",                      reward: 5000,    test: (s) => s.mined >= 100000 },
   { id: "mined_10m",    name: "Magnat des données",    desc: "10 millions de crédits minés",               reward: 250000,  test: (s) => s.mined >= 10000000 },
+  { id: "mined_1b",     name: "Empire des données",    desc: "1 milliard de crédits minés",                reward: 5000000, test: (s) => s.mined >= 1000000000 },
   { id: "scripts_10",   name: "Automatisation",        desc: "10 scripts automatiques",                    reward: 300,     test: (s) => (s.levels.script || 0) >= 10 },
   { id: "farm_5",       name: "Salle des machines",    desc: "5 fermes de serveurs",                       reward: 5000,    test: (s) => (s.levels.farm || 0) >= 5 },
   { id: "every_tier",   name: "Panoplie complète",     desc: "Au moins 1 de chaque amélioration",          reward: 50000,   test: (s) => UPGRADES.every((u) => (s.levels[u.id] || 0) >= 1) },
   { id: "blue_first",   name: "Premier bleu",          desc: "Première amélioration en pièces bleues",     reward: 100,     test: (s) => s.blueTotal >= 1 },
-  { id: "blue_10",      name: "Collectionneur",        desc: "10 paliers en pièces bleues",                reward: 2000,    test: (s) => s.blueTotal >= 10 }
+  { id: "blue_10",      name: "Collectionneur",        desc: "10 paliers en pièces bleues",                reward: 2000,    test: (s) => s.blueTotal >= 10 },
+  { id: "skill_first",  name: "Spécialisation",        desc: "Prends une première compétence",             reward: 500,     test: (s) => s.skillRanks >= 1 },
+  { id: "skill_10",     name: "Maître opérateur",      desc: "10 rangs de compétence dans une partie",     reward: 20000,   test: (s) => s.skillRanks >= 10 },
+  { id: "rebirth_1",    name: "Renaissance",           desc: "Premier formatage",                          reward: 25000,   test: (s) => s.rebirths >= 1 },
+  { id: "rebirth_5",    name: "Cycle éternel",         desc: "5 formatages",                               reward: 500000,  test: (s) => s.rebirths >= 5 },
+  { id: "core_10",      name: "Cœur de silicium",      desc: "10 rangs dans l'arbre du Rebirth",           reward: 100000,  test: (s) => s.coreRanks >= 10 }
 ];
 
 export function statsOf(data) {
@@ -152,7 +320,10 @@ export function statsOf(data) {
     mined: data.minedTotal || 0,
     levels: data.levels || {},
     blueLevels: data.blueLevels || {},
-    blueTotal: sum(data.blueLevels)
+    blueTotal: sum(data.blueLevels),
+    skillRanks: sum(data.skills),
+    coreRanks: sum(data.core),
+    rebirths: data.rebirths || 0
   };
 }
 
