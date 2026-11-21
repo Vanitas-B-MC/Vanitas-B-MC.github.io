@@ -1,8 +1,13 @@
-// js/secret-code.js — ouvre la page cachée quand on tape la bonne suite de touches.
-// Chargé sur index.html et veille.html. Rien n'est visible tant que le code n'est pas tapé.
+// js/secret-code.js — codes secrets tapés au clavier. Rien n'est visible tant qu'on n'en tape pas.
+//   « awesome »    ouvre la page cachée (arcade.html)
+//   « edgerunner » active / désactive le style Edgerunners (rouge, vert)
+// Chargé sur index.html, veille.html et arcade.html.
+
+import { toggleEdgerunners } from "./theme.js";
 
 export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "arcade.html";
+export const THEME_CODE = "edgerunner";
 
 // Garde les dernières lettres tapées ; renvoie true quand elles forment le code.
 export function createMatcher(code = SECRET_CODE) {
@@ -50,23 +55,58 @@ const STYLE = `
   letter-spacing: .05em;
   line-height: 1;
   text-transform: uppercase;
-  text-shadow: 0 0 28px rgba(252, 238, 10, .35);
+  text-shadow: 0 0 28px currentColor;
+}
+.secret-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 1000;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 12px 22px;
+  background: var(--bg, #07070b);
+  border: 1px solid var(--yellow, #fcee0a);
+  box-shadow: 0 0 24px -4px var(--yellow, #fcee0a);
+  color: var(--cyan, #00f0ff);
+  font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+  font-size: 13px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-align: center;
+  animation: secret-toast 2.2s ease both;
 }
 @keyframes secret-in { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .secret-unlock { animation: none; } }
+@keyframes secret-toast {
+  0% { opacity: 0; transform: translate(-50%, 12px); }
+  12%, 85% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .secret-unlock, .secret-toast { animation: none; }
+}
 `;
 
 function init() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const push = createMatcher();
+  const pushPage = createMatcher(SECRET_CODE);
+  const pushTheme = createMatcher(THEME_CODE);
+  const onArcade = document.body.classList.contains("arcade-page");
   let overlay = null;
   let timer = 0;
+  let toastTimer = 0;
+
+  function addStyle() {
+    if (document.getElementById("secret-style")) return;
+    const style = document.createElement("style");
+    style.id = "secret-style";
+    style.textContent = STYLE;
+    document.head.append(style);
+  }
 
   function unlock() {
     if (overlay) return;
-
-    const style = document.createElement("style");
-    style.textContent = STYLE;
+    addStyle();
 
     const line = document.createElement("p");
     line.className = "secret-unlock-line";
@@ -79,10 +119,24 @@ function init() {
     overlay = document.createElement("div");
     overlay.className = "secret-unlock";
     overlay.setAttribute("role", "status");
-    overlay.append(style, line, title);
+    overlay.append(line, title);
     document.body.append(overlay);
 
     timer = window.setTimeout(() => { window.location.href = SECRET_PAGE; }, reduceMotion ? 300 : 900);
+  }
+
+  function themeToast(on) {
+    addStyle();
+    document.querySelector(".secret-toast")?.remove();
+
+    const toast = document.createElement("p");
+    toast.className = "secret-toast";
+    toast.setAttribute("role", "status");
+    toast.textContent = on ? "> mode edgerunner : activé" : "> mode edgerunner : désactivé";
+    document.body.append(toast);
+
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => toast.remove(), 2200);
   }
 
   document.addEventListener("keydown", (event) => {
@@ -91,7 +145,12 @@ function init() {
     if (event.key.length !== 1) return;          // ignore Shift, flèches, etc.
     if (isTypingField(event.target)) return;
 
-    if (push(event.key)) unlock();
+    // On alimente toujours les deux détecteurs : chacun suit sa propre suite de lettres.
+    const page = pushPage(event.key);
+    const theme = pushTheme(event.key);
+
+    if (page && !onArcade) unlock();
+    if (theme) themeToast(toggleEdgerunners());
   });
 
   // Retour arrière du navigateur : la page revient telle quelle, on retire le message.

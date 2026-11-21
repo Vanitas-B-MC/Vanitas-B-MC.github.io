@@ -1,0 +1,169 @@
+/* =========================================================
+   MODE EDGERUNNERS — easter egg (taper « edgerunner » sur le site)
+   Palette inspirée de Cyberpunk: Edgerunners : rouge vif, vert acide,
+   contours violets, fond sombre bleuté.
+
+   Tout est limité à html.edgerunners : sans cette classe, rien ne change.
+   Le thème remplace surtout les variables de couleur du site, puis corrige
+   les quelques couleurs écrites en dur dans style.css et veille.css.
+========================================================= */
+
+html.edgerunners {
+  --bg: #080910;
+  --surface: #0f1019;
+  --surface-2: #181927;
+  --line: #2b2145;
+  --line-strong: #52308f;
+
+  --text: #f2f3fb;
+  --muted: #aeaecb;
+
+  /* rôles repris des deux thèmes (index : yellow/cyan/pink, veille : hot/blue/violet) */
+  --yellow: #ff2a5f;   /* rouge vif : l'accent principal */
+  --cyan: #2bff88;     /* vert acide */
+  --pink: #ff4d7d;
+  --hot: #ff1f55;
+  --blue: #2bff88;
+  --violet: #a066ff;
+
+  --er-red-rgb: 255, 42, 95;
+  --er-green-rgb: 43, 255, 136;
+  --er-violet-rgb: 138, 60, 255;
+
+  scrollbar-color: var(--line-strong) var(--bg);
+}
+
+/* Fond : lueurs rouge et verte, grille violette */
+html.edgerunners body::before {
+  background:
+    radial-gradient(60vw 55vh at 92% -8%, rgba(var(--er-red-rgb), .2), transparent 70%),
+    radial-gradient(55vw 50vh at -8% 106%, rgba(var(--er-green-rgb), .13), transparent 70%),
+    radial-gradient(40vw 40vh at 50% 48%, rgba(var(--er-violet-rgb), .08), transparent 70%),
+    linear-gradient(rgba(var(--er-violet-rgb), .07) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(90deg, rgba(var(--er-violet-rgb), .07) 1px, transparent 1px) 0 0 / 56px 56px;
+}
+
+/* Titres : aberration chromatique (décalage vert / violet, comme les images glitchées) */
+html.edgerunners .hero-name,
+html.edgerunners .arcade-title,
+html.edgerunners .vtitle {
+  text-shadow:
+    -3px 0 rgba(var(--er-green-rgb), .55),
+    3px 0 rgba(var(--er-violet-rgb), .65),
+    0 0 30px rgba(var(--er-red-rgb), .4);
+}
+
+html.edgerunners .game-title,
+html.edgerunners .overlay-title {
+  text-shadow: -2px 0 rgba(var(--er-green-rgb), .5), 2px 0 rgba(var(--er-violet-rgb), .6);
+}
+
+/* Le texte sélectionné et les accents principaux */
+html.edgerunners ::selection {
+  background: var(--yellow);
+  color: #fff;
+}
+
+/* ---------- Couleurs écrites en dur dans style.css ---------- */
+
+html.edgerunners .site-header.is-scrolled {
+  border-bottom-color: rgba(var(--er-red-rgb), .55);
+  box-shadow: 0 6px 24px -12px rgba(var(--er-red-rgb), .5);
+}
+
+/* Logo (une image) : on décale les teintes, jaune -> rouge et cyan -> vert */
+html.edgerunners .logo img,
+html.edgerunners .brand img,
+html.edgerunners .card-head img {
+  filter: hue-rotate(-62deg);
+}
+
+html.edgerunners .logo:hover img,
+html.edgerunners .brand:hover img {
+  filter: hue-rotate(-62deg) drop-shadow(0 0 8px rgba(var(--er-red-rgb), .7));
+}
+
+html.edgerunners .github-link:hover {
+  background: rgba(var(--er-green-rgb), .1);
+}
+
+html.edgerunners .about-seeking {
+  background: rgba(var(--er-red-rgb), .08);
+}
+
+html.edgerunners .timeline li:first-child::before {
+  box-shadow: 0 0 12px rgba(var(--er-red-rgb), .8);
+}
+
+html.edgerunners .project:hover {
+  filter: drop-shadow(0 0 16px rgba(var(--er-red-rgb), .35));
+}
+
+html.edgerunners .contact-list a {
+  border-bottom-color: rgba(var(--er-red-rgb), .45);
+}
+
+html.edgerunners .status-dot {
+  box-shadow: 0 0 0 0 rgba(var(--er-red-rgb), .6);
+  animation-name: pulse-edgerunners;
+}
+
+@keyframes pulse-edgerunners {
+  0% { box-shadow: 0 0 0 0 rgba(var(--er-red-rgb), .55); }
+  70%, 100% { box-shadow: 0 0 0 10px rgba(var(--er-red-rgb), 0); }
+}
+
+/* Texte sur fond rouge : blanc plutôt que noir (plus lisible sur ce rouge) */
+html.edgerunners .button-primary,
+html.edgerunners .section-number,
+html.edgerunners .skip-link {
+  color: #fff;
+}
+
+html.edgerunners .button-primary:hover {
+  color: #000;
+}
+
+/* ---------- veille.css ---------- */
+
+html.edgerunners .hud > div:nth-child(3) { border-left-color: var(--violet); }
+html.edgerunners .hud > div:nth-child(3) dd { color: var(--violet); }
+
+html.edgerunners .banner {
+  background:
+    radial-gradient(60% 90% at 88% 15%, rgba(var(--er-red-rgb), .26), transparent 70%),
+    radial-gradient(50% 80% at 8% 100%, rgba(var(--er-green-rgb), .17), transparent 70%);
+}
+
+html.edgerunners .field select:focus,
+html.edgerunners .field input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--er-green-rgb), .3);
+}
+
+html.edgerunners .step-num {
+  -webkit-text-stroke-color: rgba(var(--er-red-rgb), .65);
+}
+
+/* Couleur d'accent des articles et des sources, par catégorie.
+   (Les règles de veille.css sont moins précises : on les redéfinit toutes ici.) */
+html.edgerunners .shard,
+html.edgerunners .source-token { --accent-rgb: var(--er-green-rgb); }
+
+html.edgerunners .shard[data-cat="cybersecurite"],
+html.edgerunners .source-token[data-cat="cybersecurite"] { --accent-rgb: var(--er-red-rgb); }
+
+html.edgerunners .shard[data-cat="developpement"],
+html.edgerunners .source-token[data-cat="developpement"] { --accent-rgb: 160, 102, 255; }
+
+html.edgerunners .shard[data-cat="infrastructure"],
+html.edgerunners .source-token[data-cat="infrastructure"] { --accent-rgb: 232, 234, 255; }
+
+/* ---------- Arcade ---------- */
+
+html.edgerunners .game-stage {
+  box-shadow: inset 0 0 40px rgba(var(--er-green-rgb), .05), 0 0 28px -10px rgba(var(--er-red-rgb), .5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.edgerunners .status-dot { animation: none; }
+}

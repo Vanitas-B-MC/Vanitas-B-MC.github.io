@@ -246,6 +246,16 @@ function setupRain() {
   let visible = true;
   let last = 0;
 
+  // Couleurs de la pluie : celles du thème (elles changent avec le mode Edgerunners).
+  let palette = [];
+  const readPalette = () => {
+    const css = getComputedStyle(document.documentElement);
+    const pick = (name, fallback) => css.getPropertyValue(name).trim() || fallback;
+    palette = [pick("--pink", "#ff4fa3"), pick("--blue", "#3db8ff"), pick("--violet", "#8a5cff")];
+  };
+  readPalette();
+  window.addEventListener("mc-theme", readPalette);
+
   const resize = () => {
     const box = canvas.parentElement.getBoundingClientRect();
     canvas.width = Math.max(1, Math.floor(box.width));
@@ -269,7 +279,7 @@ function setupRain() {
     for (let i = 0; i < columns; i++) {
       const y = drops[i] * size;
       if (y > 0) {
-        ctx.fillStyle = i % 3 === 0 ? "#ff4fa3" : i % 3 === 1 ? "#3db8ff" : "#8a5cff";
+        ctx.fillStyle = palette[i % 3];
         ctx.fillText(glyphs[Math.floor(Math.random() * glyphs.length)], i * size, y);
       }
       if (y > canvas.height && Math.random() > 0.97) drops[i] = 0;
