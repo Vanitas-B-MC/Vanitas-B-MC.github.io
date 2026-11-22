@@ -12,11 +12,16 @@ import { h, fmt, fmtRate, prefersReducedMotion } from "./ui.js";
 
 const MAX_POPUPS = 12;
 
+const FRENZY_FACTOR = 7;
+const FRENZY_MS = 15000;
+
 export function createClickerUI(root, wallet) {
   let active = false;
   let clickCarry = 0;
   let checking = false;
   let packetTimer = 0;
+  let frenzyUntil = 0;           // fin de la frénésie (clics x7), en ms
+  let frenzyTimer = 0;
   let packetHideTimer = 0;
   let messageTimer = 0;
 
@@ -192,8 +197,10 @@ export function createClickerUI(root, wallet) {
   mineButton.addEventListener("click", (event) => {
     const gain = clickGain(wallet.data.levels, wallet.data.blueLevels, clickCarry, bonusOf(wallet.data));
     clickCarry = gain.carry;
-    wallet.addCredits(gain.whole, { mined: true, clicks: 1 });
-    popup(gain.whole, event, gain.crit);
+    const factor = Date.now() < frenzyUntil ? FRENZY_FACTOR : 1;
+    const total = gain.whole * factor;
+    wallet.addCredits(total, { mined: true, clicks: 1 });
+    popup(total, event, gain.crit);
     afterChange();
   });
 
@@ -221,11 +228,26 @@ export function createClickerUI(root, wallet) {
   packet.addEventListener("click", () => {
     const bonus = bonusOf(wallet.data);
     const reward = packetReward(wallet.data.levels, wallet.data.blueLevels, bonus);
+    const roll = Math.random();
+    if (roll < 0.2) {
+      // Frénésie : les clics rapportent FRENZY_FACTOR fois plus pendant FRENZY_MS.
+      frenzyUntil = Date.now() + FRENZY_MS;
+      mineButton.classList.add("is-frenzy");
+      window.clearTimeout(frenzyTimer);
+      frenzyTimer = window.setTimeout(() => mineButton.classList.remove("is-frenzy"), FRENZY_MS);
+      hidePacket();
+      say(`Frénésie ! Tes clics rapportent ×${FRENZY_FACTOR} pendant ${FRENZY_MS / 1000} secondes.`);
+      schedulePacket();
+      afterChange();
+      return;
+    }
+    const surge = roll < 0.3;                       // surtension : le paquet vaut 5 fois plus
+    const amount = surge ? reward * 5 : reward;
     const blueDrop = Math.random() < packetBlueChance(bonus);
-    wallet.addCredits(reward, { mined: true });
+    wallet.addCredits(amount, { mined: true });
     if (blueDrop) wallet.addBlue(1);
     hidePacket();
-    say(`Paquet récupéré : +${fmt(reward)} crédits${blueDrop ? " et 1 pièce bleue !" : "."}`);
+    say(`${surge ? "Surtension ×5 ! " : ""}Paquet récupéré : +${fmt(amount)} crédits${blueDrop ? " et 1 pièce bleue !" : "."}`);
     schedulePacket();
     afterChange();
   });

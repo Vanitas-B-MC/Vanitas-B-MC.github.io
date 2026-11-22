@@ -45,6 +45,7 @@ function freshData() {
     chars: [FREE_CHARACTER], // personnages de Survivor Arena débloqués
     achievements: [],
     hunt: freshHunt(),     // équipement, matériaux et victoires du RPG « Chasse aux Titans »
+    trophies: 0,           // monnaie du RPG : gagnée uniquement en chassant
     bestHunt: 0            // nombre de monstres différents vaincus
   };
 }
@@ -62,7 +63,7 @@ export function sanitize(raw) {
   if (!raw || typeof raw !== "object") return data;
 
   data.credits = toCount(raw.credits, data.credits);
-  for (const key of ["blue", "blueFound", "minedTotal", "clicksTotal", "minedRun", "shards", "shardsTotal", "rebirths", ...BEST_KEYS]) data[key] = toCount(raw[key]);
+  for (const key of ["blue", "blueFound", "minedTotal", "clicksTotal", "minedRun", "shards", "trophies", "shardsTotal", "rebirths", ...BEST_KEYS]) data[key] = toCount(raw[key]);
 
   for (const id of CLICKER_IDS) data.levels[id] = toCount(raw.levels?.[id]);
   for (const id of BLUE_IDS) data.blueLevels[id] = toCount(raw.blueLevels?.[id]);
@@ -127,6 +128,7 @@ export function createWallet(storage = defaultStorage()) {
 
   return {
     get data() { return data; },
+    get trophies() { return data.trophies; },
     get credits() { return data.credits; },
     get blue() { return data.blue; },
 
@@ -246,20 +248,20 @@ export function createWallet(storage = defaultStorage()) {
       return true;
     },
     // RPG : récompense d'une chasse, équipement. Les règles (prix, prérequis) sont dans hunt.js.
-    huntReward(monsterId, { credits = 0, parts = 0 } = {}) {
+    huntReward(monsterId, { trophies = 0, parts = 0 } = {}) {
       if (!(monsterId in data.hunt.kills)) return;
       data.hunt.kills[monsterId] = addCapped(data.hunt.kills[monsterId], 1);
       data.hunt.parts[monsterId] = addCapped(data.hunt.parts[monsterId], toCount(parts));
-      data.credits = addCapped(data.credits, toCount(credits));
+      data.trophies = addCapped(data.trophies, toCount(trophies));
       data.bestHunt = Object.values(data.hunt.kills).filter((k) => k > 0).length;
       commit();
     },
     // Achat atomique : crédits ET matériaux, ou rien du tout.
     huntPurchase(slot, family, buy) {
       const hunt = data.hunt;
-      if (buy.credits > data.credits) return false;
+      if (buy.trophies > data.trophies) return false;
       if (buy.partId && (hunt.parts[buy.partId] || 0) < buy.parts) return false;
-      data.credits -= buy.credits;
+      data.trophies -= buy.trophies;
       if (buy.partId) hunt.parts[buy.partId] -= buy.parts;
       if (slot === "weapon") {
         hunt.weapons[family] = buy.tier;

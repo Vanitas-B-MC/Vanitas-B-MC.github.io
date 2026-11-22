@@ -1,21 +1,21 @@
 // js/hunt.js — logique pure de « Chasse aux Titans », le RPG au tour par tour (aucun accès au DOM).
 //
-// On chasse des monstres mécaniques. Chaque victoire rapporte des crédits et des matériaux ; à la
-// forge, l'équipement (arme, armure, talisman) s'achète avec BEAUCOUP de crédits plus des matériaux
-// du monstre précédent. Un meilleur équipement permet de chasser le monstre suivant.
+// On chasse des monstres mécaniques. Chaque victoire rapporte des TROPHÉES (une monnaie propre au RPG, qu'on ne peut
+// pas gagner ailleurs) et des matériaux ; à la forge, l'équipement (arme, armure, talisman) s'achète
+// avec des trophées plus des matériaux du monstre précédent. Un meilleur équipement permet de chasser le monstre suivant.
 
 /* ---------- Équipement ---------- */
 
-export const TIER_NAMES = ["Rouillé", "Acier", "Plasma", "Néon", "Chrome", "Quantique", "Légendaire"];
+export const TIER_NAMES = ["Rouillé", "Acier", "Plasma", "Néon", "Chrome", "Quantique", "Légendaire", "Mythique", "Titanesque"];
 export const MAX_TIER = TIER_NAMES.length - 1;
 
-export const WEAPON_ATK = [16, 36, 80, 175, 380, 820, 1700];
-export const ARMOR_HP = [0, 40, 110, 250, 520, 1100, 2300];
-export const ARMOR_DEF = [0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30];
+export const WEAPON_ATK = [16, 36, 80, 175, 380, 820, 1700, 3500, 7000];
+export const ARMOR_HP = [0, 40, 110, 250, 520, 1100, 2300, 4600, 9000];
+export const ARMOR_DEF = [0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.33, 0.36];
 
-// Prix en crédits du tier 1 à 6 (le tier 0 est gratuit), et nombre de matériaux du monstre précédent.
-export const GEAR_COST = [0, 300, 1800, 9000, 45000, 220000, 1100000];
-export const GEAR_PARTS = [0, 2, 3, 3, 4, 4, 5];
+// Prix en trophées du tier 1 à 8 (le tier 0 est gratuit), et nombre de matériaux du monstre précédent.
+export const GEAR_COST = [0, 300, 1800, 9000, 45000, 220000, 1100000, 5500000, 25000000];
+export const GEAR_PARTS = [0, 2, 3, 3, 4, 4, 5, 5, 6];
 export const NEW_WEAPON_COST = 250;      // acheter une nouvelle famille d'arme (au tier 0)
 
 export const FAMILIES = {
@@ -35,20 +35,24 @@ export const SLOT_DESCS = {
 
 /* ---------- Monstres ---------- */
 
-// part : matériau lâché. reward : crédits d'une victoire. Un monstre se débloque en battant le précédent.
+// part : matériau lâché. reward : trophées d'une victoire. Un monstre se débloque en battant le précédent.
 export const MONSTERS = [
-  { id: "m0", name: "Rat glitché",        hp: 150,   atk: 14,  reward: 180,    part: "Puce rongée",        desc: "Un rongeur de câbles, vif mais fragile.",
+  { id: "m0", name: "Rat glitché",        weak: "bow",    hp: 150,   atk: 14,  reward: 180,    part: "Puce rongée",        desc: "Un rongeur de câbles, vif mais fragile.",
     moves: ["Coup de griffe", "Morsure", "Grincement", "Décharge"] },
-  { id: "m1", name: "Loup néon",          hp: 400,   atk: 28,  reward: 700,    part: "Croc fluorescent",   desc: "Chasse en meute dans les ruelles éclairées.",
+  { id: "m1", name: "Loup néon",          weak: "sword", hp: 400,   atk: 28,  reward: 700,    part: "Croc fluorescent",   desc: "Chasse en meute dans les ruelles éclairées.",
     moves: ["Coup de patte", "Morsure électrique", "Hurlement", "Charge néon"] },
-  { id: "m2", name: "Wyverne chromée",    hp: 1000,  atk: 55,  reward: 3000,   part: "Écaille chromée",    desc: "Un prédateur aérien aux ailes de métal.",
+  { id: "m2", name: "Wyverne chromée",    weak: "bow", hp: 1000,  atk: 55,  reward: 3000,   part: "Écaille chromée",    desc: "Un prédateur aérien aux ailes de métal.",
     moves: ["Coup d'aile", "Morsure", "Cri strident", "Souffle de plasma"] },
-  { id: "m3", name: "Béhémoth rouillé",   hp: 2400,  atk: 100, reward: 12000,  part: "Plaque de blindage", desc: "Un colosse de ferraille qui écrase tout.",
+  { id: "m3", name: "Béhémoth rouillé",   weak: "hammer", hp: 2400,  atk: 100, reward: 12000,  part: "Plaque de blindage", desc: "Un colosse de ferraille qui écrase tout.",
     moves: ["Coup de poing", "Coup de corne", "Beuglement", "Piétinement"] },
-  { id: "m4", name: "Hydre quantique",    hp: 5500,  atk: 190, reward: 50000,  part: "Noyau instable",     desc: "Ses têtes se régénèrent entre deux dimensions.",
+  { id: "m4", name: "Hydre quantique",    weak: "sword", hp: 5500,  atk: 190, reward: 50000,  part: "Noyau instable",     desc: "Ses têtes se régénèrent entre deux dimensions.",
     moves: ["Coup de queue", "Triple morsure", "Sifflement", "Rayon quantique"] },
-  { id: "m5", name: "Léviathan du réseau", hp: 12000, atk: 380, reward: 200000, part: "Fragment de serveur", desc: "L'ancien gardien du réseau. Personne ne l'a vaincu.",
-    moves: ["Coup de nageoire", "Morsure abyssale", "Chant du vide", "Raz-de-marée"] }
+  { id: "m5", name: "Léviathan du réseau", weak: "hammer", hp: 12000, atk: 380, reward: 200000, part: "Fragment de serveur", desc: "L'ancien gardien du réseau. Personne ne l'a vaincu.",
+    moves: ["Coup de nageoire", "Morsure abyssale", "Chant du vide", "Raz-de-marée"] },
+  { id: "m6", name: "Titan Alpha",        weak: "bow",    hp: 26000, atk: 760, reward: 800000,  part: "Cœur de titan",      desc: "Le premier des Titans, forgé dans l'acier du premier serveur.",
+    moves: ["Coup de poing titanesque", "Écrasement", "Rugissement d'acier", "Onde de destruction"] },
+  { id: "m7", name: "Titan Omega",        weak: "sword",  hp: 60000, atk: 1500, reward: 3000000, part: "Couronne d'Omega",  desc: "Le dernier. Il ne reste de lui que la colère.",
+    moves: ["Frappe finale", "Faux de néant", "Cri de fin du monde", "Extinction"] }
 ];
 export const monsterById = (id) => MONSTERS.find((m) => m.id === id);
 
@@ -71,6 +75,9 @@ export const PART_IDS = Object.keys(PARTS);
 /* ---------- Chasseur ---------- */
 
 export const START_POTIONS = 3;
+export const START_BOMBS = 2;
+export const WEAK_BONUS = 1.25;          // dégâts en plus avec l'arme à laquelle le monstre est faible
+export const HARD = { hp: 1.8, atk: 1.4, reward: 2.5 };   // « traque enragée » : version plus dure d'un monstre déjà vaincu
 export const ENERGY_MAX = 6;
 
 // Statistiques du chasseur à partir de l'équipement (un objet { family, weapon, armor, charm }).
@@ -92,20 +99,21 @@ export function hunterStats(gear) {
 
 /* ---------- Combat ---------- */
 
-export function createFight(monsterId, stats, rng = Math.random) {
+export function createFight(monsterId, stats, rng = Math.random, { hard = false } = {}) {
   const def = monsterById(monsterId);
   if (!def) return null;
   const parts = {};
   for (const p of PART_IDS) {
-    const max = Math.max(1, Math.round(def.hp * PARTS[p].hp));
+    const max = Math.max(1, Math.round(def.hp * (hard ? HARD.hp : 1) * PARTS[p].hp));
     parts[p] = { hp: max, max, broken: false };
   }
   const fight = {
     rng,
     monsterId,
     stats,
-    monster: { hp: def.hp, maxHp: def.hp, atk: def.atk, parts, stunned: false, enraged: false },
-    hunter: { hp: stats.maxHp, maxHp: stats.maxHp, energy: 3, potions: START_POTIONS, rattled: false },
+    hard,
+    monster: { hp: Math.round(def.hp * (hard ? HARD.hp : 1)), maxHp: Math.round(def.hp * (hard ? HARD.hp : 1)), atk: Math.round(def.atk * (hard ? HARD.atk : 1)), parts, stunned: false, enraged: false },
+    hunter: { hp: stats.maxHp, maxHp: stats.maxHp, energy: 3, potions: START_POTIONS, bombs: START_BOMBS, rattled: false },
     intent: null,
     turn: 1,
     log: [],
@@ -114,7 +122,7 @@ export function createFight(monsterId, stats, rng = Math.random) {
     won: false
   };
   fight.intent = pickIntent(fight, null);
-  say(fight, `${def.name} apparaît !`);
+  say(fight, hard ? `${def.name} enragé apparaît !` : `${def.name} apparaît !`);
   return fight;
 }
 
@@ -151,6 +159,7 @@ function strike(fight, partId, mult, label) {
   const crit = fight.rng() < stats.crit;
   let damage = stats.atk * mult * part.mult * variance(fight) * (crit ? 1.5 : 1);
   if (hunter.rattled) damage *= 0.7;
+  if (monsterById(fight.monsterId).weak === stats.family) damage *= WEAK_BONUS;
   damage = Math.max(1, Math.round(damage));
   monster.hp = Math.max(0, monster.hp - damage);
   say(fight, `${label} sur ${part.name.toLowerCase()} : ${damage} dégâts${crit ? " (critique !)" : ""}.`);
@@ -222,6 +231,17 @@ export function act(fight, action) {
       hunter.rattled = false;
       say(fight, "Tu te mets en garde.");
       break;
+    case "bomb": {
+      if (hunter.bombs <= 0) return false;
+      hunter.bombs -= 1;
+      let damage = stats.atk * 3 * variance(fight);
+      if (monsterById(fight.monsterId).weak === stats.family) damage *= WEAK_BONUS;
+      damage = Math.max(1, Math.round(damage));
+      monster.hp = Math.max(0, monster.hp - damage);
+      say(fight, `Bombe : ${damage} dégâts.`);
+      hunter.rattled = false;
+      break;
+    }
     case "potion": {
       if (hunter.potions <= 0 || hunter.hp >= hunter.maxHp) return false;
       hunter.potions -= 1;
@@ -274,12 +294,12 @@ export const canSkill = (fight) => !fight.over && fight.hunter.energy >= FAMILIE
 
 // Matériaux lâchés : 1 de base, +1 par partie brisée (les récompenses sont fixes : pas de hasard).
 export function rewardsOf(fight, firstKill = false) {
-  if (!fight.won) return { credits: 0, parts: 0 };
+  if (!fight.won) return { trophies: 0, parts: 0 };
   const def = monsterById(fight.monsterId);
   const bonus = 1 + 0.1 * fight.breaks;
   return {
-    credits: Math.round(def.reward * bonus * (firstKill ? 2 : 1)),
-    parts: 1 + fight.breaks + (firstKill ? 1 : 0)
+    trophies: Math.round(def.reward * bonus * (firstKill && !fight.hard ? 2 : 1) * (fight.hard ? HARD.reward : 1)),
+    parts: 1 + fight.breaks + (firstKill && !fight.hard ? 1 : 0) + (fight.hard ? 1 : 0)
   };
 }
 
@@ -307,7 +327,7 @@ export const isUnlocked = (hunt, monsterId) => {
   return i === 0 || (i > 0 && (hunt.kills[MONSTERS[i - 1].id] || 0) >= 1);
 };
 
-// Prochain achat d'un emplacement : { tier, credits, parts, partId, partName } ou null si au maximum.
+// Prochain achat d'un emplacement : { tier, trophies, parts, partId, partName } ou null si au maximum.
 // Pour une arme : family indique la famille (une famille non possédée coûte NEW_WEAPON_COST au tier 0).
 export function nextPurchase(hunt, slot, family = hunt.equipped) {
   let current;
@@ -315,11 +335,11 @@ export function nextPurchase(hunt, slot, family = hunt.equipped) {
   else current = hunt[slot];
   const tier = current + 1;
   if (tier > MAX_TIER) return null;
-  if (slot === "weapon" && tier === 0) return { tier: 0, credits: NEW_WEAPON_COST, parts: 0, partId: null, partName: null };
+  if (slot === "weapon" && tier === 0) return { tier: 0, trophies: NEW_WEAPON_COST, parts: 0, partId: null, partName: null };
   const previous = MONSTERS[tier - 1];
   return {
     tier,
-    credits: Math.round(GEAR_COST[tier] * (slot === "charm" ? 0.8 : 1)),
+    trophies: Math.round(GEAR_COST[tier] * (slot === "charm" ? 0.8 : 1)),
     parts: GEAR_PARTS[tier],
     partId: previous.id,
     partName: previous.part

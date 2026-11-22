@@ -23,13 +23,16 @@ export const BET_TYPES = {
   odd:      { pays: 1,  wins: (n) => n % 2 === 1 },
   low:      { pays: 1,  wins: (n) => n >= 1 && n <= 18 },
   high:     { pays: 1,  wins: (n) => n >= 19 && n <= 36 },
-  dozen:    { pays: 2,  wins: (n, bet) => n >= (bet.d - 1) * 12 + 1 && n <= bet.d * 12 }
+  dozen:    { pays: 2,  wins: (n, bet) => n >= (bet.d - 1) * 12 + 1 && n <= bet.d * 12 },
+  // Colonne : c = 1 (1, 4, 7…), 2 (2, 5, 8…) ou 3 (3, 6, 9…)
+  column:   { pays: 2,  wins: (n, bet) => n !== 0 && ((n - 1) % 3) + 1 === bet.c }
 };
 
 // Identifiant unique d'une mise, pour regrouper les jetons posés au même endroit.
 export function betKey(bet) {
   if (bet.type === "straight") return `straight:${bet.n}`;
   if (bet.type === "dozen") return `dozen:${bet.d}`;
+  if (bet.type === "column") return `column:${bet.c}`;
   return bet.type;
 }
 

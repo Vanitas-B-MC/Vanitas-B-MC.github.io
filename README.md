@@ -28,7 +28,7 @@ assets/                     favicon, images
 ## Easter eggs
 
 - Taper `awesome` sur le site ouvre l'arcade cachée (`easter-egg/arcade.html`) : Data Snake, Blackjack, Roulette,
-  Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena, Breach Protocol et Chasse aux Titans (RPG au tour par tour : l'équipement se forge avec des crédits et des matériaux de monstres), avec une musique
+  Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena, Breach Protocol et Chasse aux Titans (RPG au tour par tour : l'équipement se forge avec des trophées ✦, une monnaie propre au RPG, et des matériaux de monstres), avec une musique
   synthwave générée en direct (bouton « Musique », désactivée par défaut).
   Le Clicker a un arbre de compétences (par partie) et un Rebirth (formatage) avec éclats et arbre permanent.
   Pare-feu : 3 cartes et 7 tours (déblocage en crédits). Survivor Arena : 3 personnages (déblocage en crédits), foudre, vol de vie, élites et boss.

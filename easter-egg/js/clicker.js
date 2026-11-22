@@ -12,12 +12,15 @@ export const UPGRADES = [
   { id: "click",   kind: "click", name: "Implant neuronal",        desc: "+1 crédit par clic",         base: 25,      growth: 1.18, value: 1 },
   { id: "click2",  kind: "click", name: "Gants haptiques",         desc: "+6 crédits par clic",        base: 450,     growth: 1.19, value: 6 },
   { id: "click3",  kind: "click", name: "Interface neuro-directe", desc: "+45 crédits par clic",       base: 8000,    growth: 1.20, value: 45 },
+  { id: "click4",  kind: "click", name: "Symbiose neuronale",     desc: "+400 crédits par clic",      base: 150000,  growth: 1.21, value: 400 },
   { id: "script",  kind: "auto",  name: "Script automatique",      desc: "+1 crédit / seconde",        base: 60,      growth: 1.15, value: 1 },
   { id: "botnet",  kind: "auto",  name: "Réseau de bots",          desc: "+8 crédits / seconde",       base: 650,     growth: 1.15, value: 8 },
   { id: "farm",    kind: "auto",  name: "Ferme de serveurs",       desc: "+50 crédits / seconde",      base: 6000,    growth: 1.15, value: 50 },
   { id: "dc",      kind: "auto",  name: "Centre de données",       desc: "+320 crédits / seconde",     base: 70000,   growth: 1.15, value: 320 },
   { id: "quantum", kind: "auto",  name: "Ordinateur quantique",    desc: "+2 200 crédits / seconde",   base: 800000,  growth: 1.15, value: 2200 },
-  { id: "ai",      kind: "auto",  name: "IA autonome",             desc: "+16 000 crédits / seconde",  base: 9500000, growth: 1.16, value: 16000 }
+  { id: "ai",      kind: "auto",  name: "IA autonome",             desc: "+16 000 crédits / seconde",  base: 9500000, growth: 1.16, value: 16000 },
+  { id: "sim",     kind: "auto",  name: "Simulation d'univers",    desc: "+120 000 crédits / seconde", base: 120000000,  growth: 1.16, value: 120000 },
+  { id: "singu",   kind: "auto",  name: "Singularité",             desc: "+900 000 crédits / seconde", base: 1500000000, growth: 1.17, value: 900000 }
 ];
 
 // effect : "click" (gains par clic), "auto" (gains par seconde), "all" (les deux), "discount" (prix des améliorations).
@@ -311,6 +314,20 @@ export const ACHIEVEMENTS = [
   { id: "skill_10",     name: "Maître opérateur",      desc: "10 rangs de compétence dans une partie",     reward: 20000,   test: (s) => s.skillRanks >= 10 },
   { id: "rebirth_1",    name: "Renaissance",           desc: "Premier formatage",                          reward: 25000,   test: (s) => s.rebirths >= 1 },
   { id: "rebirth_5",    name: "Cycle éternel",         desc: "5 formatages",                               reward: 500000,  test: (s) => s.rebirths >= 5 },
+  { id: "clicks_10000", name: "Clic compulsif",        desc: "10 000 clics",                               reward: 50000,    test: (s) => s.clicks >= 10000 },
+  { id: "clicks_100k",  name: "Souris légendaire",     desc: "100 000 clics",                              reward: 1000000,  test: (s) => s.clicks >= 100000 },
+  { id: "mined_100m",   name: "Cent millions",         desc: "100 millions de crédits minés",              reward: 2000000,  test: (s) => s.mined >= 100000000 },
+  { id: "mined_100b",   name: "Économie mondiale",     desc: "100 milliards de crédits minés",             reward: 50000000, test: (s) => s.mined >= 100000000000 },
+  { id: "scripts_100",  name: "Légion de scripts",     desc: "100 scripts automatiques",                   reward: 50000,    test: (s) => (s.levels.script || 0) >= 100 },
+  { id: "botnet_25",    name: "Zombies",               desc: "25 réseaux de bots",                         reward: 100000,   test: (s) => (s.levels.botnet || 0) >= 25 },
+  { id: "dc_10",        name: "Hyperscaler",           desc: "10 centres de données",                      reward: 500000,   test: (s) => (s.levels.dc || 0) >= 10 },
+  { id: "quantum_5",    name: "Superposition",         desc: "5 ordinateurs quantiques",                   reward: 5000000,  test: (s) => (s.levels.quantum || 0) >= 5 },
+  { id: "ai_1",         name: "Éveil",                 desc: "Une IA autonome",                            reward: 2000000,  test: (s) => (s.levels.ai || 0) >= 1 },
+  { id: "sim_1",        name: "Architecte",            desc: "Une simulation d'univers",                   reward: 100000000, test: (s) => (s.levels.sim || 0) >= 1 },
+  { id: "blue_25",      name: "Banquier bleu",         desc: "25 paliers en pièces bleues",                reward: 50000,    test: (s) => s.blueTotal >= 25 },
+  { id: "skill_20",     name: "Grand maître",          desc: "20 rangs de compétence dans une partie",     reward: 500000,   test: (s) => s.skillRanks >= 20 },
+  { id: "rebirth_10",   name: "Boucle infinie",        desc: "10 formatages",                              reward: 5000000,  test: (s) => s.rebirths >= 10 },
+  { id: "core_30",      name: "Cœur de diamant",       desc: "30 rangs dans l'arbre du Rebirth",           reward: 2000000,  test: (s) => s.coreRanks >= 30 },
   { id: "core_10",      name: "Cœur de silicium",      desc: "10 rangs dans l'arbre du Rebirth",           reward: 100000,  test: (s) => s.coreRanks >= 10 }
 ];
 

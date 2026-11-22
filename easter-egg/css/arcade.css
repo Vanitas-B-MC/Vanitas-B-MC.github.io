@@ -668,10 +668,10 @@ kbd {
 
 .rl-board {
   display: grid;
-  grid-template-columns: 54px repeat(12, minmax(40px, 1fr));
+  grid-template-columns: 54px repeat(12, minmax(40px, 1fr)) 54px;
   grid-template-rows: repeat(3, 48px) 42px 42px;
   gap: 3px;
-  min-width: 640px;
+  min-width: 700px;
 }
 
 .bet-cell {
@@ -903,6 +903,9 @@ kbd {
   font-size: 13px;
   text-align: center;
 }
+
+.is-frenzy { animation: frenzy-glow .5s ease-in-out infinite alternate; }
+@keyframes frenzy-glow { to { box-shadow: 0 0 26px 4px var(--yellow); } }
 
 .packet {
   position: absolute;
@@ -1208,6 +1211,10 @@ kbd {
 .hunt-meta { color: var(--yellow); font-family: var(--font-mono); font-size: 11px; }
 .hunt-hunter { font-family: var(--font-mono); font-size: 12px; color: var(--cyan); }
 .hunt-gear { flex-wrap: wrap; }
+.hunt-monster-actions { display: grid; gap: 6px; justify-items: end; flex-shrink: 0; }
+.hunt-weak { color: var(--cyan); font-family: var(--font-mono); font-size: 11px; }
+.trophy { color: #c78bff; }
+.hunt-hard { min-height: 36px; font-size: 12px; }
 .hunt-gear-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .hunt-max { color: var(--yellow); font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; }
 
@@ -1242,6 +1249,25 @@ kbd {
   .hunt-gear-actions .button { flex: 1 1 100%; }
 }
 
+/* Blackjack : plusieurs mains, mise libre */
+.bj-hands { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+.bj-hand { padding: 8px; border: 1px solid transparent; }
+.bj-hand.is-active { border-color: var(--yellow); box-shadow: 0 0 14px -4px var(--yellow); }
+.rl-stats { margin: 8px 0 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); min-height: 1.2em; }
+.bj-stats { min-height: 1.2em; margin: 8px 0 0; text-align: center; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.bet-field { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.bet-input {
+  width: 9em;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  text-align: right;
+}
+.bet-input:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
 /* =========================
    7. RESPONSIVE
 ========================= */
@@ -1262,7 +1288,7 @@ kbd {
 @media (max-width: 640px) {
   .rl-board-wrap { overflow: visible; }
   .rl-board {
-    grid-template-columns: 30px repeat(12, minmax(0, 1fr));
+    grid-template-columns: 30px repeat(12, minmax(0, 1fr)) 30px;
     grid-template-rows: repeat(3, 46px) 38px 38px;
     gap: 2px;
     min-width: 0;

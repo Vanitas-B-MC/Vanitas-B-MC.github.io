@@ -36,6 +36,7 @@ const GAMES = {
 
 const blueEl = $("#wallet-blue");
 const creditsEl = $("#wallet-credits");
+const trophiesEl = $("#wallet-trophies");
 let lastBlue = wallet.blue;
 let lastCredits = wallet.credits;
 
@@ -49,6 +50,7 @@ function bump(el) {
 function renderWallet() {
   blueEl.textContent = fmt(wallet.blue);
   creditsEl.textContent = fmt(wallet.credits);
+  trophiesEl.textContent = fmt(wallet.trophies);
   if (wallet.blue > lastBlue) bump(blueEl);
   if (wallet.credits > lastCredits) bump(creditsEl);
   lastBlue = wallet.blue;
@@ -60,7 +62,7 @@ function renderWallet() {
   $("#meta-tetris").textContent = `Record : ${fmt(wallet.data.bestTetris)}`;
   const best = wallet.data.bestSurvivor;
   $("#meta-survivors").textContent = `Record : ${Math.floor(best / 60)}:${String(best % 60).padStart(2, "0")}`;
-  $("#meta-hunt").textContent = `Monstres vaincus : ${wallet.data.bestHunt} / 6`;
+  $("#meta-hunt").textContent = `Monstres vaincus : ${wallet.data.bestHunt} / 8`;
   $("#meta-breach").textContent = `Meilleur gain : ${fmt(wallet.data.bestBreach)} ¤`;
   const towers = wallet.data.towers.length;
   $("#meta-td").textContent = `Record : ${fmt(wallet.data.bestWave)} vague${wallet.data.bestWave > 1 ? "s" : ""} · ${towers} tour${towers > 1 ? "s" : ""}`;

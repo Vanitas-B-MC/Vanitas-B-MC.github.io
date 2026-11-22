@@ -6,7 +6,7 @@ import {
   MONSTERS, PARTS, PART_IDS, FAMILIES, FAMILY_IDS, SLOT_NAMES, SLOT_DESCS, TIER_NAMES, MAX_TIER,
   WEAPON_ATK, ARMOR_HP, ARMOR_DEF, START_POTIONS, ENERGY_MAX,
   hunterStats, gearOf, isUnlocked, nextPurchase, buyGear, createFight, act, canSkill,
-  intentName, intentKind, rewardsOf, monsterById
+  intentName, intentKind, rewardsOf, monsterById, START_BOMBS, HARD, WEAK_BONUS
 } from "./hunt.js";
 import { h, fmt, scrollToPlay } from "./ui.js";
 
@@ -43,13 +43,19 @@ export function createHuntUI(root, wallet) {
         class: "button button-primary hunt-go", type: "button", "data-monster": m.id, disabled: !open,
         onclick: () => startFight(m.id)
       }, open ? "Chasser" : "Verrouillé");
+      const hardButton = kills > 0 ? h("button", {
+        class: "button button-secondary hunt-hard", type: "button", "data-monster": m.id,
+        title: `Version enragée : ${HARD.hp}× PV, ${HARD.atk}× dégâts, ${HARD.reward}× trophées`,
+        onclick: () => startFight(m.id, true)
+      }, "Traque enragée") : null;
       return h("li", { class: `hunt-monster${open ? "" : " is-locked"}`, "data-monster": m.id },
         h("div", { class: "hunt-monster-info" },
           h("strong", {}, open ? m.name : "???"),
           h("span", { class: "hunt-desc" }, open ? m.desc : `Vaincs d'abord : ${MONSTERS[MONSTERS.indexOf(m) - 1].name}.`),
           open ? h("span", { class: "hunt-meta" },
-            `${fmt(m.hp)} PV · ${fmt(m.reward)} ¤ · ${m.part}${kills ? ` · vaincu ×${fmt(kills)}` : ""}`) : null),
-        button);
+            `${fmt(m.hp)} PV · ${fmt(m.reward)} ✦ · ${m.part}${kills ? ` · vaincu ×${fmt(kills)}` : ""}`) : null,
+          open ? h("span", { class: "hunt-weak" }, `Faible contre : ${FAMILIES[m.weak].name} (+${Math.round((WEAK_BONUS - 1) * 100)} %)`) : null),
+        h("div", { class: "hunt-monster-actions" }, button, hardButton));
     });
 
     const forgeRows = [];
@@ -81,7 +87,7 @@ export function createHuntUI(root, wallet) {
 
     root.replaceChildren(
       h("p", { class: "game-rules" },
-        "Chasse des monstres mécaniques au tour par tour. Chaque victoire rapporte des crédits et des matériaux. À la forge, l'équipement coûte beaucoup de crédits plus des matériaux du monstre précédent : un meilleur équipement te permet d'affronter le suivant."),
+        "Chasse des monstres mécaniques au tour par tour. Chaque victoire rapporte des trophées ✦ (une monnaie à part, qu'on ne gagne qu'ici) et des matériaux. À la forge, l'équipement coûte des trophées plus des matériaux du monstre précédent. Chaque monstre est faible contre un type d'arme ; une fois vaincu, tu peux le défier en version enragée."),
       h("div", { class: "hunt-layout" },
         h("section", { class: "hunt-col" },
           h("h3", { class: "subhead" }, "Chasses"),
@@ -102,10 +108,10 @@ export function createHuntUI(root, wallet) {
       buyButton = h("span", { class: "hunt-max" }, "Maximum");
     } else {
       const haveParts = !buy.partId || (wallet.data.hunt.parts[buy.partId] || 0) >= buy.parts;
-      const haveCredits = wallet.credits >= buy.credits;
+      const haveCredits = wallet.trophies >= buy.trophies;
       const cost = buy.partId
-        ? `${fmt(buy.credits)} ¤ + ${buy.parts} × ${buy.partName}`
-        : `${fmt(buy.credits)} ¤`;
+        ? `${fmt(buy.trophies)} ✦ + ${buy.parts} × ${buy.partName}`
+        : `${fmt(buy.trophies)} ✦`;
       buyButton = h("button", {
         class: "button button-secondary hunt-buy", type: "button",
         disabled: !(haveParts && haveCredits), onclick: onBuy
@@ -128,7 +134,7 @@ export function createHuntUI(root, wallet) {
     const label = slot === "weapon" ? FAMILIES[family].name : SLOT_NAMES[slot];
     notice = buyGear(wallet, slot, family)
       ? `${label} : ${TIER_NAMES[buy.tier]} !`
-      : "Il manque des crédits ou des matériaux.";
+      : "Il manque des trophées ou des matériaux.";
     renderCamp();
   }
 
@@ -140,13 +146,13 @@ export function createHuntUI(root, wallet) {
     return { el: h("div", { class: "sv-bar hunt-bar" }, fill, text), fill, text };
   }
 
-  function startFight(monsterId) {
+  function startFight(monsterId, hard = false) {
     const hunt = wallet.data.hunt;
     const stats = hunterStats(gearOf(hunt));
-    fight = createFight(monsterId, stats);
+    fight = createFight(monsterId, stats, Math.random, { hard });
     target = "body";
     screen = "fight";
-    result = { firstKill: (hunt.kills[monsterId] || 0) === 0 };
+    result = { firstKill: (hunt.kills[monsterId] || 0) === 0, hard };
     buildFight();
     scrollToPlay(root.querySelector(".hunt-fight"));
   }
@@ -170,6 +176,7 @@ export function createHuntUI(root, wallet) {
     const intentEl = h("p", { class: "hunt-intent", id: "hunt-intent", "aria-live": "polite" });
     const energyEl = h("span", { class: "hunt-energy", id: "hunt-energy" });
     const potionsEl = h("span", { id: "hunt-potions" });
+    const bombsEl = h("span", { id: "hunt-bombs" });
     const logEl = h("ul", { class: "hunt-log", id: "hunt-log", "aria-live": "polite" });
 
     const fam = FAMILIES[fight.stats.family];
@@ -177,23 +184,24 @@ export function createHuntUI(root, wallet) {
     const skillBtn = h("button", { class: "button button-secondary", id: "hunt-skill", type: "button", title: fam.skillDesc, onclick: () => doAct({ type: "skill", part: target }) },
       `${fam.skill} — ${fam.skillCost} énergie (E)`);
     const guardBtn = h("button", { class: "button button-secondary", id: "hunt-guard", type: "button", onclick: () => doAct({ type: "guard" }) }, "Garde (G)");
+    const bombBtn = h("button", { class: "button button-secondary", id: "hunt-bomb", type: "button", title: "Dégâts fixes (3× ton attaque), sans viser", onclick: () => doAct({ type: "bomb" }) }, "Bombe (B)");
     const potionBtn = h("button", { class: "button button-secondary", id: "hunt-potion", type: "button", onclick: () => doAct({ type: "potion" }) }, "Potion (V)");
     const fleeBtn = h("button", { class: "link-button", id: "hunt-flee", type: "button", onclick: () => flee() }, "Fuir");
 
-    view = { monsterBar, hunterBar, partViews, intentEl, energyEl, potionsEl, logEl, attackBtn, skillBtn, guardBtn, potionBtn, fleeBtn };
+    view = { monsterBar, hunterBar, partViews, intentEl, energyEl, potionsEl, bombsEl, logEl, attackBtn, skillBtn, guardBtn, potionBtn, bombBtn, fleeBtn };
 
     root.replaceChildren(
       h("div", { class: "hunt-fight" },
         h("div", { class: "hunt-arena chamfer" },
-          h("h3", { class: "hunt-name" }, def.name),
+          h("h3", { class: "hunt-name" }, fight.hard ? `${def.name} (enragé)` : def.name),
           monsterBar.el,
           intentEl,
           h("div", { class: "hunt-parts-row", role: "group", "aria-label": "Partie visée" }, partButtons)),
         h("div", { class: "hunt-hunter-panel chamfer" },
           h("p", { class: "hunt-label" }, "Chasseur"),
           hunterBar.el,
-          h("p", { class: "hunt-resources" }, "Énergie ", energyEl, " · Potions ", potionsEl),
-          h("div", { class: "hunt-actions" }, attackBtn, skillBtn, guardBtn, potionBtn),
+          h("p", { class: "hunt-resources" }, "Énergie ", energyEl, " · Potions ", potionsEl, " · Bombes ", bombsEl),
+          h("div", { class: "hunt-actions" }, attackBtn, skillBtn, guardBtn, potionBtn, bombBtn),
           fleeBtn),
         logEl));
     update();
@@ -229,6 +237,8 @@ export function createHuntUI(root, wallet) {
 
     view.energyEl.textContent = `${"●".repeat(hunter.energy)}${"○".repeat(ENERGY_MAX - hunter.energy)} ${hunter.energy}/${ENERGY_MAX}`;
     view.potionsEl.textContent = `${hunter.potions} / ${START_POTIONS}`;
+    view.bombsEl.textContent = `${hunter.bombs} / ${START_BOMBS}`;
+    view.bombBtn.disabled = fight.over || hunter.bombs <= 0;
     view.skillBtn.disabled = !canSkill(fight);
     view.potionBtn.disabled = fight.over || hunter.potions <= 0 || hunter.hp >= hunter.maxHp;
     view.logEl.replaceChildren(...fight.log.slice(-6).reverse().map((line, i) => h("li", { class: i === 0 ? "is-new" : "" }, line)));
@@ -270,7 +280,7 @@ export function createHuntUI(root, wallet) {
       h("div", { class: "hunt-result chamfer", id: "hunt-result" },
         h("p", { class: "overlay-title" }, won ? "Chasse réussie" : "Chasse ratée"),
         h("p", { class: "overlay-text" }, won
-          ? `${def.name} est vaincu en ${turns} tours.\n+${fmt(gain.credits)} crédits · +${gain.parts} × ${def.part}${firstKill ? "\n(première victoire : récompenses doublées)" : ""}${next && firstKill ? `\nNouveau monstre : ${next.name}` : ""}`
+          ? `${def.name} est vaincu en ${turns} tours.\n+${fmt(gain.trophies)} ✦ trophées · +${gain.parts} × ${def.part}${firstKill ? "\n(première victoire : trophées doublés)" : ""}${next && firstKill ? `\nNouveau monstre : ${next.name}` : ""}`
           : "Tu es à terre. Améliore ton équipement à la forge, ou utilise ta garde et tes potions plus tôt."),
         h("ul", { class: "hunt-log" }, log.map((line) => h("li", {}, line))),
         h("div", { class: "hunt-actions" },
@@ -299,6 +309,7 @@ export function createHuntUI(root, wallet) {
     else if (key === "e") doAct({ type: "skill", part: target });
     else if (key === "g") doAct({ type: "guard" });
     else if (key === "v") doAct({ type: "potion" });
+    else if (key === "b") doAct({ type: "bomb" });
   });
 
   // Quand le portefeuille change hors combat, la forge se met à jour (crédits, matériaux).

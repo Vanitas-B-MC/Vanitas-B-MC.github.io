@@ -25,7 +25,9 @@ export const MAPS = [
   { id: "spirale",    name: "Spirale",    desc: "Un long chemin qui s'enroule vers le cœur.", unlock: 1500, hpMul: 1.15, reward: 1.5,
     waypoints: [[-1, 7], [12, 7], [12, 1], [1, 1], [1, 5], [8, 5]] },
   { id: "zigzag",     name: "Zigzag",     desc: "Sept virages serrés : peu de place pour les tours.", unlock: 5000, hpMul: 1.3,  reward: 2,
-    waypoints: [[-1, 4], [3, 4], [3, 1], [8, 1], [8, 7], [12, 7], [12, 4], [14, 4]] }
+    waypoints: [[-1, 4], [3, 4], [3, 1], [8, 1], [8, 7], [12, 7], [12, 4], [14, 4]] },
+  { id: "labyrinthe", name: "Labyrinthe", desc: "Un très long chemin : beaucoup d'ennemis, beaucoup de crédits.", unlock: 15000, hpMul: 1.5, reward: 2.6,
+    waypoints: [[-1, 1], [12, 1], [12, 3], [1, 3], [1, 5], [12, 5], [12, 7], [14, 7]] }
 ];
 export const MAP_IDS = MAPS.map((m) => m.id);
 export const FREE_MAP = "serpent";
@@ -85,6 +87,8 @@ export const TOWER_DEFS = {
   sniper: { id: "sniper", name: "Sniper",          desc: "Portée immense et gros dégâts, mais lent.",            cost: 120, unlock: 900,  range: 6,   rate: 0.5,  dmg: 100, color: "#fcee0a" },
   tesla:  { id: "tesla",  name: "Tesla",           desc: "Un éclair qui rebondit sur 3 ennemis.",                cost: 140, unlock: 1800, range: 2.7, rate: 1.2,  dmg: 26, color: "#b58cff", chain: 3 },
   venin:  { id: "venin",  name: "Injecteur viral", desc: "Empoisonne : dégâts sur la durée, ignore le blindage.", cost: 110, unlock: 1200, range: 2.6, rate: 1.3,  dmg: 6,  color: "#3ddc84", poisonDps: 18, poisonTime: 4 },
+  mortier:{ id: "mortier", name: "Mortier",        desc: "Portée énorme, énormes dégâts de zone, très lent.",    cost: 150, unlock: 5000, range: 5,   rate: 0.3,  dmg: 90, color: "#ffb347", splash: 1.7 },
+  gatling:{ id: "gatling", name: "Gatling",         desc: "Cadence folle, dégâts minuscules. Achève les essaims.", cost: 130, unlock: 7000, range: 2.4, rate: 6,    dmg: 4,  color: "#e6e6e6" },
   pulsar: { id: "pulsar", name: "Pulsar",          desc: "Onde qui touche tous les ennemis proches.",            cost: 160, unlock: 3000, range: 2.2, rate: 0.7,  dmg: 24, color: "#ff6bd6", pulse: true }
 };
 export const TOWER_IDS = Object.keys(TOWER_DEFS);
@@ -156,7 +160,8 @@ export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP) {
     fx: [],                 // effets visuels de courte durée (tirs, explosions)
     nextId: 1,
     creditsEarned: 0,
-    kills: 0
+    kills: 0,
+    strikeCd: 0             // temps restant avant de pouvoir relancer la frappe orbitale
   };
 }
 
@@ -201,6 +206,20 @@ export function sellTower(state, id) {
   state.gold += refund;
   state.towers.splice(index, 1);
   return { ok: true, refund };
+}
+
+// Frappe orbitale : pouvoir actif, utilisable en pleine vague. Touche tous les ennemis (4 × les PV de base).
+export const STRIKE_COOLDOWN = 50;
+export const strikeReady = (state) => state.phase === "wave" && state.strikeCd <= 0;
+
+export function orbitalStrike(state) {
+  if (!strikeReady(state)) return false;
+  const events = { killed: 0, leaked: 0 };
+  const damage = baseHp(state.wave) * 4 * state.map.hpMul;
+  for (const e of state.enemies) if (!e.dead) hit(state, e, damage, events);
+  state.strikeCd = STRIKE_COOLDOWN;
+  state.fx.push({ kind: "boom", x: (COLS * CELL) / 2, y: (ROWS * CELL) / 2, r: (COLS * CELL) / 2, ttl: 0.5, max: 0.5, color: "#ffffff" });
+  return true;
 }
 
 export function startWave(state) {
@@ -303,6 +322,7 @@ export function update(state, dt) {
   const events = { killed: 0, leaked: 0, waveCleared: false, credits: 0, over: false };
   if (state.phase === "over") return events;
   state.time += dt;
+  if (state.strikeCd > 0) state.strikeCd = Math.max(0, state.strikeCd - dt);
 
   // Apparitions
   if (state.phase === "wave") {

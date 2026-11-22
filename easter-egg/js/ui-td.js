@@ -4,7 +4,7 @@
 
 import {
   COLS, ROWS, CELL, MAX_LEVEL, MAPS, FREE_MAP, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
-  createState, canPlace, placeTower, upgradeTower, sellTower, startWave, update, towerAt,
+  createState, canPlace, placeTower, upgradeTower, sellTower, startWave, orbitalStrike, update, towerAt,
   towerRange, towerDamage, upgradeCost, invested, waveCredits, SELL_RATIO, START_LIVES
 } from "./td.js";
 import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
@@ -52,6 +52,7 @@ export function createTowerDefenseUI(root, wallet) {
   const stateEl = h("p", { class: "game-state", id: "td-state", "aria-live": "polite" }, "Prêt");
 
   const waveButton = h("button", { class: "button button-primary", id: "td-wave", type: "button", onclick: () => launchWave() }, "Lancer la vague 1");
+  const strikeButton = h("button", { class: "button button-secondary", id: "td-strike", type: "button", title: "Touche tous les ennemis (4 × les PV de base). Recharge : 50 s.", onclick: () => doStrike() }, "Frappe orbitale (F)");
   const speedButton = h("button", { class: "button button-secondary", id: "td-speed", type: "button", onclick: () => toggleSpeed() }, "Vitesse ×1");
 
   const mapButtons = MAPS.map((m) => {
@@ -86,7 +87,7 @@ export function createTowerDefenseUI(root, wallet) {
         mapBar,
         h("div", { class: "td-board-wrap chamfer" },
           h("div", { class: "game-stage td-stage" }, board, toast, overlay)),
-        h("div", { class: "td-actions" }, waveButton, speedButton, stateEl)),
+        h("div", { class: "td-actions" }, waveButton, speedButton, strikeButton, stateEl)),
       h("aside", { class: "td-side" },
         h("dl", { class: "td-stats" },
           stat("Énergie", goldEl), stat("Vies", livesEl), stat("Vague", waveEl), stat("Record", bestEl)),
@@ -273,6 +274,8 @@ export function createTowerDefenseUI(root, wallet) {
     const inWave = state.phase === "wave";
     waveButton.disabled = status !== "running" || inWave || state.phase === "over";
     setText(waveButton, inWave ? `Vague ${state.wave} en cours…` : `Lancer la vague ${state.wave + 1}`);
+    strikeButton.disabled = status !== "running" || state.phase !== "wave" || state.strikeCd > 0;
+    setText(strikeButton, state.strikeCd > 0 ? `Frappe orbitale : ${Math.ceil(state.strikeCd)} s` : "Frappe orbitale (F)");
     setText(speedButton, `Vitesse ×${speed}`);
 
     for (const { m, button } of mapButtons) {
@@ -395,6 +398,12 @@ export function createTowerDefenseUI(root, wallet) {
     }
     updateHud();
     draw();
+  }
+
+  function doStrike() {
+    if (status !== "running" || !orbitalStrike(state)) return;
+    say("Frappe orbitale !");
+    updateHud();
   }
 
   function launchWave() {
@@ -557,7 +566,7 @@ export function createTowerDefenseUI(root, wallet) {
       return;
     }
 
-    if (/^[1-7]$/.test(key)) {
+    if (/^[1-9]$/.test(key)) {
       onPalette(TOWER_IDS[Number(key) - 1]);
       return;
     }
@@ -567,6 +576,7 @@ export function createTowerDefenseUI(root, wallet) {
       showCursor = true;
       return;
     }
+    if (key === "f") doStrike();
     if (key === "u") doUpgrade();
     if (key === "v" || key === "delete") doSell();
   });

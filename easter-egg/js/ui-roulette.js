@@ -39,6 +39,8 @@ export function createRouletteUI(root, wallet) {
   const bets = new Map();      // clé de mise -> { type, n?, d?, amount }
   const undo = [];             // clés dans l'ordre où on a posé les jetons
   const history = [];          // derniers numéros sortis
+  const counts = new Map();    // combien de fois chaque numéro est sorti (cette session)
+  let lastBets = [];           // mises du dernier tour, pour « Rejouer »
   let chip = 1;
   let spinning = false;
   let pending = null;          // gain en attente de versement pendant un tour
@@ -166,8 +168,12 @@ export function createRouletteUI(root, wallet) {
   const outsideCells = OUTSIDE.map((def, i) =>
     betCell(def, `is-outside${def.tint ? ` is-${def.tint}` : ""}`, def.label, `grid-column:${2 + i * 2} / span 2; grid-row:5`));
 
+  // Colonnes (payées 2 pour 1) : à droite de chaque rangée de numéros.
+  const columnCells = ROWS.map((_, r) =>
+    betCell({ type: "column", c: 3 - r }, "is-outside", "2:1", `grid-column:14; grid-row:${r + 1}`));
+
   const board = h("div", { class: "rl-board", role: "group", "aria-label": "Plateau de mises" },
-    numberCells, dozenCells, outsideCells);
+    numberCells, columnCells, dozenCells, outsideCells);
 
   /* ---------- Contrôles ---------- */
 
@@ -182,6 +188,9 @@ export function createRouletteUI(root, wallet) {
   const spinButton = h("button", { class: "button button-primary", type: "button", id: "rl-spin", onclick: spin }, "Lancer la roue");
   const undoButton = h("button", { class: "button button-secondary", type: "button", id: "rl-undo", onclick: undoLast }, "Annuler");
   const clearButton = h("button", { class: "button button-secondary", type: "button", id: "rl-clear", onclick: clearBets }, "Tout retirer");
+  const replayButton = h("button", { class: "button button-secondary", type: "button", id: "rl-replay", onclick: replayBets, title: "Repose les mises du tour précédent" }, "Rejouer");
+  const doubleButton = h("button", { class: "button button-secondary", type: "button", id: "rl-double", onclick: doubleBets, title: "Double toutes les mises posées" }, "Doubler");
+  const statsEl = h("p", { class: "rl-stats", id: "rl-stats" });
 
   const totalEl = h("strong", {}, "0");
   const messageEl = h("p", { class: "rl-message", role: "status", "aria-live": "polite" },
@@ -193,15 +202,15 @@ export function createRouletteUI(root, wallet) {
 
   root.replaceChildren(
     h("p", { class: "game-rules" },
-      "Roulette européenne (0 à 36). Numéro plein payé 35 pour 1, douzaine 2 pour 1, le reste 1 pour 1. Le 0 fait perdre les mises extérieures."),
+      "Roulette européenne (0 à 36). Numéro plein payé 35 pour 1, douzaine et colonne 2 pour 1, le reste 1 pour 1. Le 0 fait perdre les mises extérieures."),
     h("div", { class: "rl-layout" },
-      h("div", { class: "rl-wheel chamfer" }, canvas, historyEl),
+      h("div", { class: "rl-wheel chamfer" }, canvas, historyEl, statsEl),
       h("div", { class: "rl-side" },
         h("div", { class: "rl-chips" },
           h("p", { class: "bet-line" }, "Jeton : "),
           h("div", { class: "chips", role: "group", "aria-label": "Valeur du jeton" }, chipButtons)),
         h("p", { class: "bet-line" }, "Mise totale : ", totalEl, " pièces bleues"),
-        h("div", { class: "rl-buttons" }, spinButton, undoButton, clearButton),
+        h("div", { class: "rl-buttons" }, spinButton, undoButton, clearButton, replayButton, doubleButton),
         messageEl,
         hint
       )
@@ -232,6 +241,37 @@ export function createRouletteUI(root, wallet) {
     if (existing) existing.amount += amount;
     else bets.set(key, { ...def, amount });
     undo.push({ key, amount });
+    updateControls();
+  }
+
+  // Repose les mises du tour précédent (si le solde le permet).
+  function replayBets() {
+    if (spinning || !lastBets.length) return;
+    const need = lastBets.reduce((sum, b) => sum + b.amount, 0);
+    if (need > wallet.blue) { say("Pas assez de pièces bleues pour rejouer ces mises.", "lose"); return; }
+    for (const b of lastBets) {
+      const amount = b.amount;                      // figé avant de payer
+      if (!wallet.spendBlue(amount)) continue;
+      const key = betKey(b);
+      const existing = bets.get(key);
+      if (existing) existing.amount += amount;
+      else bets.set(key, { ...b, amount });
+      undo.push({ key, amount });
+    }
+    updateControls();
+  }
+
+  // Double chaque mise posée (même répartition, montants x2).
+  function doubleBets() {
+    if (spinning || !bets.size) return;
+    const current = [...bets.entries()].map(([key, b]) => ({ key, amount: b.amount, bet: b }));
+    const need = current.reduce((sum, c) => sum + c.amount, 0);
+    if (need > wallet.blue) { say("Pas assez de pièces bleues pour doubler.", "lose"); return; }
+    for (const c of current) {
+      if (!wallet.spendBlue(c.amount)) continue;
+      c.bet.amount += c.amount;
+      undo.push({ key: c.key, amount: c.amount });
+    }
     updateControls();
   }
 
@@ -274,6 +314,8 @@ export function createRouletteUI(root, wallet) {
       chipButtons.forEach((button, i) => button.setAttribute("aria-pressed", String(CHIP_VALUES[i] === chip)));
     }
 
+    replayButton.disabled = spinning || lastBets.length === 0;
+    doubleButton.disabled = spinning || total === 0;
     spinButton.disabled = spinning || total === 0;
     undoButton.disabled = spinning || undo.length === 0;
     clearButton.disabled = spinning || total === 0;
@@ -299,6 +341,8 @@ export function createRouletteUI(root, wallet) {
     if (result.returned > 0) wallet.addBlue(result.returned);
 
     winningNumber = result.number;
+    counts.set(result.number, (counts.get(result.number) || 0) + 1);
+    lastBets = result.lines.map(({ type, n, d, c, amount }) => ({ type, n, d, c, amount }));
     history.unshift(result.number);
     history.length = Math.min(history.length, 10);
     renderHistory();
@@ -322,7 +366,17 @@ export function createRouletteUI(root, wallet) {
     if (active) spinButton.focus({ preventScroll: true });
   }
 
+  function renderStats() {
+    const spins = [...counts.values()].reduce((a, b) => a + b, 0);
+    if (!spins) { statsEl.textContent = ""; return; }
+    let red = 0; let black = 0; let zero = 0;
+    for (const [n, k] of counts) { const col = colorOf(n); if (col === "red") red += k; else if (col === "black") black += k; else zero += k; }
+    const hot = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0];
+    statsEl.textContent = `${spins} tirage${spins > 1 ? "s" : ""} : ${red} rouge · ${black} noir · ${zero} zéro. Plus fréquent : ${hot[0]} (×${hot[1]}).`;
+  }
+
   function renderHistory() {
+    renderStats();
     historyEl.replaceChildren(...history.map((n) =>
       h("li", { class: `pill is-${colorOf(n)}` }, String(n))));
   }

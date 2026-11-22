@@ -26,6 +26,8 @@ export const UPGRADES = {
   nova:     { name: "Onde de choc",      desc: "Impulsion périodique autour de toi",   max: 5, apply: (s) => { s.nova += 1; } },
   lightning:{ name: "Foudre",           desc: "Des éclairs frappent des ennemis au hasard", max: 5, apply: (s) => { s.lightning += 1; } },
   vampire:  { name: "Vol de vie",        desc: "+0,6 PV par ennemi éliminé",           max: 5, apply: (s) => { s.vampire += 1; } },
+  armor:    { name: "Plaques d'acier",   desc: "−8 % de dégâts subis",                 max: 5, apply: (s) => { s.armor += 0.08; } },
+  xpgain:   { name: "Décodeur",         desc: "+25 % d'expérience gagnée",           max: 4, apply: (s) => { s.xpGain += 0.25; } },
   projspeed:{ name: "Munitions rapides", desc: "+30 % de vitesse des projectiles",     max: 3, apply: (s) => { s.projSpeed *= 1.3; } }
 };
 // Personnages : unlock = crédits pour le débloquer. apply modifie les statistiques de départ.
@@ -34,7 +36,11 @@ export const CHARACTERS = [
   { id: "tank",   name: "Colosse", desc: "+60 PV, 15 % plus lent, commence avec une onde de choc.", unlock: 800,
     apply: (st, p, owned) => { st.maxHp += 60; p.hp = st.maxHp; st.speed *= 0.85; st.nova = 1; owned.nova = 1; } },
   { id: "hacker", name: "Hacker",  desc: "−30 PV, +15 % de critiques, commence avec 2 lames orbitales.", unlock: 2500,
-    apply: (st, p, owned) => { st.maxHp -= 30; p.hp = st.maxHp; st.crit += 0.15; st.orbit = 2; owned.orbit = 2; } }
+    apply: (st, p, owned) => { st.maxHp -= 30; p.hp = st.maxHp; st.crit += 0.15; st.orbit = 2; owned.orbit = 2; } },
+  { id: "ghost",  name: "Fantôme", desc: "−40 PV, +25 % de vitesse, les tirs traversent 2 ennemis.", unlock: 6000,
+    apply: (st, p) => { st.maxHp -= 40; p.hp = st.maxHp; st.speed *= 1.25; st.pierce += 2; } },
+  { id: "gunner", name: "Artilleur", desc: "Tire 2 projectiles par salve, mais 25 % plus lentement.", unlock: 12000,
+    apply: (st) => { st.shots = 2; st.cooldown *= 1.25; } }
 ];
 export const CHARACTER_IDS = CHARACTERS.map((c) => c.id);
 export const FREE_CHARACTER = "runner";
@@ -62,7 +68,7 @@ const hpScale = (time) => 1 + time / 120;
 export function createState(rng = Math.random, characterId = FREE_CHARACTER) {
   const stats = {
     maxHp: 140, speed: 130, damage: 14, cooldown: 0.5, shots: 1, pierce: 0,
-    projSpeed: 340, magnet: 50, regen: 0, crit: 0, orbit: 0, nova: 0, lightning: 0, vampire: 0
+    projSpeed: 340, magnet: 50, regen: 0, crit: 0, orbit: 0, nova: 0, lightning: 0, vampire: 0, armor: 0, xpGain: 0
   };
   const state = {
     rng,
@@ -302,7 +308,7 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
     e.x += ((player.x - e.x) / d) * def.speed * dt;
     e.y += ((player.y - e.y) / d) * def.speed * dt;
     if (d < def.r + PLAYER_R && player.inv <= 0) {
-      player.hp -= def.dmg;
+      player.hp -= def.dmg * (1 - Math.min(0.6, stats.armor));
       player.inv = 0.6;
     }
   }
@@ -317,7 +323,7 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
       g.x += ((player.x - g.x) / d) * v;
       g.y += ((player.y - g.y) / d) * v;
     }
-    if (d < PLAYER_R + 5) { state.xp += g.xp; g.taken = true; }
+    if (d < PLAYER_R + 5) { state.xp += g.xp * (1 + stats.xpGain); g.taken = true; }
   }
   state.gems = state.gems.filter((g) => !g.taken);
 
