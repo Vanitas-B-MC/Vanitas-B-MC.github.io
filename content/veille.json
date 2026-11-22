@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-21T11:20:19Z",
+ "updated": "2026-11-22T01:24:06Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,106 @@
   }
  },
  "items": [
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/rackspace-spot-breach-let-hackers-access-customer-kubernetes-secrets/",
+   "title": "Rackspace Spot breach let hackers access customer Kubernetes secrets",
+   "link": "https://www.bleepingcomputer.com/news/security/rackspace-spot-breach-let-hackers-access-customer-kubernetes-secrets/",
+   "summary": "Rackspace warned customers that hackers breached its Rackspace Spot cloud platform using compromised credentials, allowing them to deploy unauthorized workloads and access Kubernetes secrets in customer clusters.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-21T22:59:58Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/microsoft-entra-connect-health-flaw-exploited-to-steal-tenant-data/",
+   "title": "Microsoft Entra Connect Health flaw exploited to steal tenant data",
+   "link": "https://www.bleepingcomputer.com/news/security/microsoft-entra-connect-health-flaw-exploited-to-steal-tenant-data/",
+   "summary": "Microsoft is warning organizations that it suffered a data breach after attackers exploited a vulnerability in its Entra Connect Health service to gain unauthorized access to administrator email addresses and tenant configuration…",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-21T18:01:58Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/badbox-30-botnet-returns-with-record-breaking-40-billion-daily-ad-requests/",
+   "title": "BADBOX botnet returns with record-breaking 40 billion daily ad requests",
+   "link": "https://www.bleepingcomputer.com/news/security/badbox-30-botnet-returns-with-record-breaking-40-billion-daily-ad-requests/",
+   "summary": "The BADBOX malware found in a broad range of generic Android TV boxes has returned to large-scale ad-fraud operations following last year's disruptions.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-21T15:17:27Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311511",
+   "title": "AWS got hit by an outage too. Here's why you didn't hear about it",
+   "link": "https://www.theregister.com/columnists/2026/11/21/aws-got-hit-by-an-outage-too-heres-why-you-didnt-hear-about-it/5311511",
+   "summary": "If a service falls in the forest and nobody hears it...",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-21T14:35:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/fbi-reportedly-hacked-again-this-time-targeting-nationwide-police-database/",
+   "title": "FBI reportedly hacked again, this time targeting nationwide police database",
+   "link": "https://www.bleepingcomputer.com/news/security/fbi-reportedly-hacked-again-this-time-targeting-nationwide-police-database/",
+   "summary": "FBI systems have reportedly been breached for the second time in two months, this time targeting the agency's National Crime Information Center (NCIC), which is used to share information between local, state, and federal law enforcement…",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-21T14:26:04Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389344/Un-employe-de-Meta-discutait-avec-Muse-de-la-meteo-et-des-marees-lorsque-l-agent-IA-a-evoque-2-soldes-bancaires-l-un-de-Capital-One-un-autre-de-Charles-Schwab-et-a-indique-les-montants-au-centime-pres/",
+   "title": "Un employé de Meta discutait avec Muse de la météo et des marées lorsque l'agent IA a évoqué 2 soldes bancaires: l'un de Capital One, un autre de Charles Schwab et a indiqué les montants au centime près",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389344/Un-employe-de-Meta-discutait-avec-Muse-de-la-meteo-et-des-marees-lorsque-l-agent-IA-a-evoque-2-soldes-bancaires-l-un-de-Capital-One-un-autre-de-Charles-Schwab-et-a-indique-les-montants-au-centime-pres/",
+   "summary": "Un employé de Meta discutait avec Muse de la météo et des marées lorsque l'agent IA a évoqué 2 soldes bancaires: l'un de Capital One, un autre de Charles Schwab et a indiqué les montants au centime près C'est l'une des récentes anecdotes…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-21T11:59:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/a-single-malicious-webpage-let.html",
+   "title": "A Single Malicious Webpage Let Researchers Hijack Meta Muse and Access Private Chats",
+   "link": "https://thehackernews.com/2026/11/a-single-malicious-webpage-let.html",
+   "summary": "A malicious webpage could extract a Meta Muse user's private conversations and stored memories from the assistant without triggering any approval prompt, researchers have shown. The same attack could be extended to reach the credentials…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-21T11:53:07Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311418",
+   "title": "ChatGPT shrunk down to run on a Super Nintendo",
+   "link": "https://www.theregister.com/offbeat/2026/11/21/chatgpt-shrunk-down-to-run-on-a-super-nintendo/5311418",
+   "summary": "Just don't expect complex, coherent, or always correct answers",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-21T11:46:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/gnupg-warns-critical-gpgme-flaw-could.html",
+   "title": "GnuPG Warns Critical GPGME Flaw Could Expose App Data via Malicious OpenPGP Keys",
+   "link": "https://thehackernews.com/2026/11/gnupg-warns-critical-gpgme-flaw-could.html",
+   "summary": "A malicious OpenPGP key with an unusually long user ID can trigger a critical memory bug in GPGME, the standard library that programs use to work with GnuPG. The GnuPG project warned yesterday that the flaw could be used to steal data from…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-21T11:05:53Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/attackers-ai-agents-found-zero-day-in.html",
+   "title": "Attackers' AI Agents Found a Zero-Day in Medical-Imaging Software and Gained Root Access",
+   "link": "https://thehackernews.com/2026/11/attackers-ai-agents-found-zero-day-in.html",
+   "summary": "Suspected China-linked hackers used autonomous AI agents to find a previously unknown flaw in MONAI Label, an open-source medical imaging server, and gain root access to a university server, Amazon Threat Intelligence said this week. The…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-21T11:03:17Z"
+  },
   {
    "id": "https://thehackernews.com/2026/11/signal-blocks-ai-agents-from-reading.html",
    "title": "Signal Blocks AI Agents From Reading Private Chats via Screenshots on Android and iOS",
@@ -187,16 +287,6 @@
    "published": "2026-11-20T16:44:00Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311335",
-   "title": "AI boom threatens circuit board crunch to rival pandemic-era chip shortage",
-   "link": "https://www.theregister.com/systems/2026/11/20/ai-boom-threatens-circuit-board-crunch-to-rival-pandemic-era-chip-shortage/5311335",
-   "summary": "Trade body warns automotive, medical, and defense orders are being crowded out, with relief unlikely before mid-2028",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T16:01:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/vendor-data-breach-exposes-chase-visa-mastercard-customer-info/",
    "title": "Vendor data breach exposes Chase, Visa, Mastercard customer info",
    "link": "https://www.bleepingcomputer.com/news/security/vendor-data-breach-exposes-chase-visa-mastercard-customer-info/",
@@ -225,16 +315,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-20T15:00:10Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311300",
-   "title": "Microsoft's last non-security preview of 2026 packs a punch",
-   "link": "https://www.theregister.com/os-platforms/2026/11/20/microsofts-last-non-security-preview-of-2026-packs-a-punch/5311300",
-   "summary": "Windows Search gets a makeover, while Hello lights up dim rooms",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T14:28:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/microsoft/n-able-says-recent-security-breach-led-to-major-service-outage/",
@@ -347,26 +427,6 @@
    "published": "2026-11-20T11:32:00Z"
   },
   {
-   "id": "https://windows.developpez.com/actu/389312/Microsoft-teste-Remote-Lock-une-nouvelle-fonctionnalite-qui-permet-aux-administrateurs-IT-d-entreprise-de-verrouiller-a-distance-les-appareils-Windows-11-voles-ou-perdus-sans-effacer-les-donnees/",
-   "title": "Microsoft teste Remote Lock, une nouvelle fonctionnalité qui permet aux administrateurs IT d'entreprise de verrouiller à distance les appareils Windows 11 volés ou perdus, sans effacer les données",
-   "link": "https://windows.developpez.com/actu/389312/Microsoft-teste-Remote-Lock-une-nouvelle-fonctionnalite-qui-permet-aux-administrateurs-IT-d-entreprise-de-verrouiller-a-distance-les-appareils-Windows-11-voles-ou-perdus-sans-effacer-les-donnees/",
-   "summary": "Microsoft teste actuellement Remote Lock, une nouvelle fonctionnalité qui permet aux administrateurs IT d'entreprise de verrouiller à distance les appareils Windows 11 volés ou perdus, sans effacer les données Microsoft teste actuellement…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-20T11:30:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/f5-releases-emergency-patches-for-critical-big-ip-rce-flaws/",
-   "title": "F5 releases emergency patches for critical BIG-IP RCE flaws",
-   "link": "https://www.bleepingcomputer.com/news/security/f5-releases-emergency-patches-for-critical-big-ip-rce-flaws/",
-   "summary": "US cybersecurity company F5 warned customers to patch five critical BIG-IP vulnerabilities that attackers can exploit to trigger denial-of-service (DoS) or gain remote code execution.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T10:57:43Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/sonicwall-warns-gen-6-firewalls-wont.html",
    "title": "SonicWall Warns Gen 6 Firewalls Won't Get Security Patches, Even for Critical Flaws",
    "link": "https://thehackernews.com/2026/11/sonicwall-warns-gen-6-firewalls-wont.html",
@@ -377,36 +437,6 @@
    "published": "2026-11-20T10:38:22Z"
   },
   {
-   "id": "https://thehackernews.com/2026/11/hackers-exploit-critical-cisco.html",
-   "title": "Hackers Exploit Critical Cisco Expressway Flaw, Breach Four Devices and Reach Internal Network",
-   "link": "https://thehackernews.com/2026/11/hackers-exploit-critical-cisco.html",
-   "summary": "Threat actors have been observed exploiting a recently disclosed critical security flaw in Cisco Expressway to breach a Russian organization shortly after the public release of a proof-of-concept (PoC) exploit. The activity involves the…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T10:32:50Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/china-linked-hackers-exploit-critical.html",
-   "title": "China-Linked Hackers Exploit Critical VMware vCenter Zero-Day to Gain Admin Access and Steal Data",
-   "link": "https://thehackernews.com/2026/11/china-linked-hackers-exploit-critical.html",
-   "summary": "The suspected China-nexus cyber espionage group known as Armory Castle (formerly UNC5221) has been attributed to the zero-day exploitation of a critical security flaw in VMware vCenter Server in early September 2026. The vulnerability…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T09:38:15Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/microsoft/windows-11-kb5132057-update-released-with-28-changes-and-fixes/",
-   "title": "Windows 11 KB5132057 update released with 28 changes and fixes",
-   "link": "https://www.bleepingcomputer.com/news/microsoft/windows-11-kb5132057-update-released-with-28-changes-and-fixes/",
-   "summary": "Microsoft released the KB5132057 November Windows 11 preview update, which comes with 28 changes, including improvements to Windows Search, Windows Hello, and the Run dialog.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T09:25:35Z"
-  },
-  {
    "id": "tag:linuxfr.org,2005:News/43326",
    "title": "Un Nabaztag, une médecin et une IA : histoire d’une résurrection",
    "link": "https://linuxfr.org/news/un-nabaztag-une-medecin-et-une-ia-histoire-d-une-resurrection",
@@ -415,26 +445,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-20T08:27:21Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/romulus-clickfix-attacks-deliver-rat.html",
-   "title": "ROMULUS ClickFix Attacks Deliver RAT That Can Spy on Users and Control PCs",
-   "link": "https://thehackernews.com/2026/11/romulus-clickfix-attacks-deliver-rat.html",
-   "summary": "Threat actors have been observed using the ROMULUS ClickFix malware delivery platform to deliver a previously undocumented remote access trojan (RAT) that shares similarities with CNCMachineRMS. \"ROMULUS likely operates as a delivery…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T07:11:39Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/vmware-patches-vcenter-zero-day-exploited-in-attacks-since-september/",
-   "title": "VMware patches vCenter zero-day exploited in attacks since September",
-   "link": "https://www.bleepingcomputer.com/news/security/vmware-patches-vcenter-zero-day-exploited-in-attacks-since-september/",
-   "summary": "Broadcom has released security updates to fix a critical VMware vCenter Server authentication bypass vulnerability that Chinese-linked hackers have exploited in zero-day attacks since September 2026.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T00:26:25Z"
   },
   {
    "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1598/",
@@ -535,16 +545,6 @@
    "category": "Cybersécurité",
    "lang": "fr",
    "published": "2026-11-20T00:00:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/hackers-steal-data-of-16-million-sbc-medical-group-customers/",
-   "title": "Hackers steal data of 1.6 million SBC Medical Group customers",
-   "link": "https://www.bleepingcomputer.com/news/security/hackers-steal-data-of-16-million-sbc-medical-group-customers/",
-   "summary": "SBC Medical Group has warned in a filing with the U.S. Securities and Exchange Commission (SEC) that two cybersecurity incidents exposed sensitive customer and employee information, including personal data belonging to 1.6 million people.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-19T22:25:42Z"
   },
   {
    "id": "https://github.blog/?p=100161",
