@@ -11,7 +11,7 @@ export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "easter-egg/arcade.html";
 export const THEME_CODE = "edgerunner";
 export const NEON_CODE = "neon";
-export const PSYCHO_CODE = "cyberpsychosis";
+export const PSYCHO_CODE = "cyberpsycho";
 
 // Un code par thème : `theme` est le nom de la classe sur <html> (voir theme.js).
 export const THEME_CODES = [
@@ -165,7 +165,9 @@ function init() {
     if (hit) themeToast(hit.label, toggleTheme(hit.theme));
     if (psycho) {
       // Chargé seulement quand on en a besoin.
-      import("./cyberpsychosis.js").then((module) => module.startCyberpsychosis()).catch(() => {});
+      import("./cyberpsychosis.js")
+        .then((module) => module.startCyberpsychosis())
+        .catch((error) => console.error("[cyberpsychosis]", error));
     }
   });
 
