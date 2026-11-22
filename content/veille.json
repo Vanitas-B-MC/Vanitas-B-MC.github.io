@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-21T19:25:26Z",
+ "updated": "2026-11-22T01:24:06Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,16 @@
   }
  },
  "items": [
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/rackspace-spot-breach-let-hackers-access-customer-kubernetes-secrets/",
+   "title": "Rackspace Spot breach let hackers access customer Kubernetes secrets",
+   "link": "https://www.bleepingcomputer.com/news/security/rackspace-spot-breach-let-hackers-access-customer-kubernetes-secrets/",
+   "summary": "Rackspace warned customers that hackers breached its Rackspace Spot cloud platform using compromised credentials, allowing them to deploy unauthorized workloads and access Kubernetes secrets in customer clusters.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-21T22:59:58Z"
+  },
   {
    "id": "https://www.bleepingcomputer.com/news/security/microsoft-entra-connect-health-flaw-exploited-to-steal-tenant-data/",
    "title": "Microsoft Entra Connect Health flaw exploited to steal tenant data",
@@ -415,16 +425,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-20T11:32:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/f5-releases-emergency-patches-for-critical-big-ip-rce-flaws/",
-   "title": "F5 releases emergency patches for critical BIG-IP RCE flaws",
-   "link": "https://www.bleepingcomputer.com/news/security/f5-releases-emergency-patches-for-critical-big-ip-rce-flaws/",
-   "summary": "US cybersecurity company F5 warned customers to patch five critical BIG-IP vulnerabilities that attackers can exploit to trigger denial-of-service (DoS) or gain remote code execution.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T10:57:43Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/sonicwall-warns-gen-6-firewalls-wont.html",
