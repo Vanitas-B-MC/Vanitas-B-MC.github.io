@@ -21,6 +21,15 @@ const REASONS = {
   max: "Cette tour est déjà au niveau maximum."
 };
 
+// Chiffres clés d'une tour, affichés à côté de son nom dans la palette.
+const num = (n, d = 1) => Number(n).toFixed(d).replace(".", ",").replace(/,0$/, "");
+function towerBrief(def) {
+  const st = towerStats(def, 0);
+  if (def.support) return `Aura ${num(st.range / CELL)} · +${Math.round(st.boostDamage * 100)} % dég. · +${Math.round(st.boostRate * 100)} % cad.`;
+  if (def.income) return `+${st.income} énergie / vague`;
+  return `Dég ${Math.round(st.damage)} · Port ${num(st.range / CELL)} · ${num(st.rate)}/s`;
+}
+
 export function createTowerDefenseUI(root, wallet) {
   let active = false;
   let mapId = FREE_MAP;
@@ -66,9 +75,10 @@ export function createTowerDefenseUI(root, wallet) {
     const def = TOWER_DEFS[id];
     const main = h("span", { class: "tw-main" },
       h("strong", {}, `${index + 1}. ${def.name}`),
-      h("span", { class: "tw-desc" }, def.desc));
+      h("span", { class: "tw-stats" }, towerBrief(def)));
     const cost = h("span", { class: "tw-cost" });
-    const button = h("button", { class: "tower-button", type: "button", "data-tower": id, onclick: () => onPalette(id) }, main, cost);
+    // La description complète est dans l'infobulle ; les chiffres clés sont affichés à côté du nom.
+    const button = h("button", { class: "tower-button", type: "button", "data-tower": id, title: def.desc, onclick: () => onPalette(id) }, main, cost);
     button.style.setProperty("--tw", def.color);
     return { id, def, cost, button };
   });
@@ -93,12 +103,12 @@ export function createTowerDefenseUI(root, wallet) {
       h("aside", { class: "td-side" },
         h("dl", { class: "td-stats" },
           stat("Énergie", goldEl), stat("Vies", livesEl), stat("Vague", waveEl), stat("Record", bestEl)),
+        selection,
         h("h3", { class: "subhead" }, "Tours"),
         h("ul", { class: "tower-list" }, palette.map((p) => h("li", {}, p.button))),
-        selection,
         h("ul", { class: "game-help" },
           h("li", {}, "Clique une case pour poser, une tour pour la sélectionner"),
-          h("li", {}, h("kbd", {}, "1"), "–", h("kbd", {}, "7"), " choisir · ", h("kbd", {}, "←↑↓→"), " curseur · ", h("kbd", {}, "Espace"), " poser"),
+          h("li", {}, h("kbd", {}, "1"), "–", h("kbd", {}, "0"), " choisir · ", h("kbd", {}, "←↑↓→"), " curseur · ", h("kbd", {}, "Espace"), " poser"),
           h("li", {}, h("kbd", {}, "Entrée"), " vague · ", h("kbd", {}, "U"), " améliorer · ", h("kbd", {}, "V"), " vendre · ", h("kbd", {}, "P"), " pause"))))
   );
 
@@ -308,10 +318,10 @@ export function createTowerDefenseUI(root, wallet) {
       button.classList.toggle("is-active", placing === id);
       button.setAttribute("aria-pressed", placing === id ? "true" : "false");
       if (unlocked) {
-        setText(cost, `${fmt(def.cost)} énergie`);
+        setText(cost, `${fmt(def.cost)} ⚡`);
         button.disabled = false;
       } else {
-        setText(cost, `Débloquer : ${fmt(def.unlock)} ¤`);
+        setText(cost, `🔒 ${fmt(def.unlock)} ¤`);
         button.disabled = wallet.credits < def.unlock;
       }
     }

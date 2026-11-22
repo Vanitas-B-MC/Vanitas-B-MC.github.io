@@ -38,6 +38,7 @@
 
 /* Survivor Arena : sur grand écran la page s'élargit pour offrir une vraie grande arène */
 .arcade:has(#game-survivors:not([hidden])) { width: min(100% - 36px, 1480px); }
+.arcade:has(#game-td:not([hidden])) { width: min(100% - 36px, 1360px); }
 
 .arcade .eyebrow { margin-bottom: 20px; }
 
@@ -1011,7 +1012,7 @@ kbd {
 
 .td-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) 440px;
   gap: 24px;
   align-items: start;
   text-align: left;
@@ -1025,14 +1026,15 @@ kbd {
 .td-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
 .td-side { display: grid; gap: 12px; min-width: 0; }
 
-.tower-list { display: grid; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.tower-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; list-style: none; margin: 0; padding: 0; }
 
 .tower-button {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2px 10px;
+  grid-template-columns: 1fr;
+  gap: 2px;
   width: 100%;
-  padding: 10px 12px;
+  height: 100%;
+  padding: 7px 9px;
   background: var(--surface);
   border: 1px solid var(--line-strong);
   border-left: 4px solid var(--tw, var(--cyan));
@@ -1045,9 +1047,9 @@ kbd {
 .tower-button.is-active { background: rgba(255, 255, 255, .08); box-shadow: 0 0 14px -2px var(--tw, var(--cyan)); }
 .tower-button.is-locked { opacity: .8; border-left-style: dashed; }
 .tower-button:disabled { opacity: .45; cursor: not-allowed; }
-.tw-main strong { display: block; font-family: var(--font-display); letter-spacing: .04em; text-transform: uppercase; }
-.tw-desc { display: block; color: var(--muted); font-size: 12px; }
-.tw-cost { align-self: center; color: var(--yellow); font-family: var(--font-mono); font-size: 12px; text-align: right; }
+.tw-main strong { display: block; font-family: var(--font-display); font-size: 13px; letter-spacing: .03em; text-transform: uppercase; }
+.tw-stats { display: block; color: var(--muted); font-family: var(--font-mono); font-size: 11px; line-height: 1.35; }
+.tw-cost { color: var(--yellow); font-family: var(--font-mono); font-size: 12px; }
 
 .td-selection { --cut: 12px; padding: 12px; display: grid; gap: 6px; background: var(--surface); }
 .sel-stats { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
@@ -1364,7 +1366,8 @@ kbd {
   .tower-list { grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr); overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; }
   .tower-list li { scroll-snap-align: start; }
   .tower-button { min-height: 64px; }
-  .tw-desc { display: none; }
+  .tower-list { grid-template-columns: none; }
+  .tw-stats { font-size: 10px; }
   .td-actions .button { flex: 1 1 140px; }
   .td-side .game-help { display: none; }
 
@@ -1435,3 +1438,8 @@ kbd {
 .sel-perks { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 3px; font-size: 12px; color: var(--muted); text-align: left; }
 .sel-perks li { opacity: .55; }
 .sel-perks li.is-on { opacity: 1; color: var(--cyan); }
+
+/* Pare-feu : sur grand écran, le panneau de droite reste visible pendant qu'on joue */
+@media (min-width: 901px) {
+  .td-side { position: sticky; top: 140px; max-height: calc(100vh - 156px); overflow-y: auto; scrollbar-width: thin; }
+}
