@@ -11,6 +11,7 @@ import { createTetrisUI } from "./ui-tetris.js";
 import { createTowerDefenseUI } from "./ui-td.js";
 import { createSurvivorsUI } from "./ui-survivors.js";
 import { createBreachUI } from "./ui-breach.js";
+import { createHuntUI } from "./ui-hunt.js";
 import { createMusic } from "./music.js";
 import { fmt, fmtRate } from "./ui.js";
 
@@ -27,7 +28,8 @@ const GAMES = {
   tetris: { title: "Tetris", ui: createTetrisUI($("#tetris-root"), wallet) },
   td: { title: "Pare-feu", ui: createTowerDefenseUI($("#td-root"), wallet) },
   survivors: { title: "Survivor Arena", ui: createSurvivorsUI($("#survivors-root"), wallet) },
-  breach: { title: "Breach Protocol", ui: createBreachUI($("#breach-root"), wallet) }
+  breach: { title: "Breach Protocol", ui: createBreachUI($("#breach-root"), wallet) },
+  hunt: { title: "Chasse aux Titans", ui: createHuntUI($("#hunt-root"), wallet) }
 };
 
 /* ---------- Portefeuille et infos du hub ---------- */
@@ -58,6 +60,7 @@ function renderWallet() {
   $("#meta-tetris").textContent = `Record : ${fmt(wallet.data.bestTetris)}`;
   const best = wallet.data.bestSurvivor;
   $("#meta-survivors").textContent = `Record : ${Math.floor(best / 60)}:${String(best % 60).padStart(2, "0")}`;
+  $("#meta-hunt").textContent = `Monstres vaincus : ${wallet.data.bestHunt} / 6`;
   $("#meta-breach").textContent = `Meilleur gain : ${fmt(wallet.data.bestBreach)} ¤`;
   const towers = wallet.data.towers.length;
   $("#meta-td").textContent = `Record : ${fmt(wallet.data.bestWave)} vague${wallet.data.bestWave > 1 ? "s" : ""} · ${towers} tour${towers > 1 ? "s" : ""}`;
@@ -77,7 +80,8 @@ const sections = {
   tetris: $("#game-tetris"),
   td: $("#game-td"),
   survivors: $("#game-survivors"),
-  breach: $("#game-breach")
+  breach: $("#game-breach"),
+  hunt: $("#game-hunt")
 };
 let current = null;
 

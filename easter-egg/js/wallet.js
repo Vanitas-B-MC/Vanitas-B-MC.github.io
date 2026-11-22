@@ -7,6 +7,7 @@
 
 import { UPGRADES, BLUE_UPGRADES, SKILLS, CORE } from "./clicker.js";
 import { CHARACTER_IDS, FREE_CHARACTER } from "./survivors.js";
+import { MONSTERS, FAMILIES, FAMILY_IDS, MAX_TIER, freshHunt } from "./hunt.js";
 import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP } from "./td.js";
 
 const KEY = "mc-arcade-wallet-v1";
@@ -17,7 +18,7 @@ export const CLICKER_IDS = UPGRADES.map((u) => u.id);
 export const BLUE_IDS = BLUE_UPGRADES.map((u) => u.id);
 export const SKILL_IDS = SKILLS.map((x) => x.id);
 export const CORE_IDS = CORE.map((x) => x.id);
-export const BEST_KEYS = ["bestSnake", "bestTetris", "bestWave", "bestSurvivor", "bestBreach"];
+export const BEST_KEYS = ["bestSnake", "bestTetris", "bestWave", "bestSurvivor", "bestBreach", "bestHunt"];
 
 function freshData() {
   return {
@@ -42,7 +43,9 @@ function freshData() {
     towers: [FREE_TOWER],  // tours du Tower Defense débloquées
     maps: [FREE_MAP],      // cartes du Tower Defense débloquées
     chars: [FREE_CHARACTER], // personnages de Survivor Arena débloqués
-    achievements: []
+    achievements: [],
+    hunt: freshHunt(),     // équipement, matériaux et victoires du RPG « Chasse aux Titans »
+    bestHunt: 0            // nombre de monstres différents vaincus
   };
 }
 
@@ -68,6 +71,18 @@ export function sanitize(raw) {
 
   if (Array.isArray(raw.towers)) {
     for (const id of raw.towers) if (TOWER_IDS.includes(id) && !data.towers.includes(id)) data.towers.push(id);
+  }
+  if (raw.hunt && typeof raw.hunt === "object") {
+    const h = data.hunt;
+    const tier = (v, min = 0) => Math.min(Math.max(min, Math.floor(Number(v)) || 0), MAX_TIER);
+    for (const f of FAMILY_IDS) h.weapons[f] = f === "sword" ? tier(raw.hunt.weapons?.[f]) : tier(raw.hunt.weapons?.[f] ?? -1, -1);
+    h.armor = tier(raw.hunt.armor);
+    h.charm = tier(raw.hunt.charm);
+    h.equipped = FAMILY_IDS.includes(raw.hunt.equipped) && h.weapons[raw.hunt.equipped] >= 0 ? raw.hunt.equipped : "sword";
+    for (const m of MONSTERS) {
+      h.parts[m.id] = toCount(raw.hunt.parts?.[m.id]);
+      h.kills[m.id] = toCount(raw.hunt.kills?.[m.id]);
+    }
   }
   if (Array.isArray(raw.chars)) {
     for (const id of raw.chars) if (CHARACTER_IDS.includes(id) && !data.chars.includes(id)) data.chars.push(id);
@@ -227,6 +242,37 @@ export function createWallet(storage = defaultStorage()) {
       if (!CHARACTER_IDS.includes(id) || data.chars.includes(id)) return false;
       if (!this.spendCredits(price)) return false;
       data.chars.push(id);
+      commit();
+      return true;
+    },
+    // RPG : récompense d'une chasse, équipement. Les règles (prix, prérequis) sont dans hunt.js.
+    huntReward(monsterId, { credits = 0, parts = 0 } = {}) {
+      if (!(monsterId in data.hunt.kills)) return;
+      data.hunt.kills[monsterId] = addCapped(data.hunt.kills[monsterId], 1);
+      data.hunt.parts[monsterId] = addCapped(data.hunt.parts[monsterId], toCount(parts));
+      data.credits = addCapped(data.credits, toCount(credits));
+      data.bestHunt = Object.values(data.hunt.kills).filter((k) => k > 0).length;
+      commit();
+    },
+    // Achat atomique : crédits ET matériaux, ou rien du tout.
+    huntPurchase(slot, family, buy) {
+      const hunt = data.hunt;
+      if (buy.credits > data.credits) return false;
+      if (buy.partId && (hunt.parts[buy.partId] || 0) < buy.parts) return false;
+      data.credits -= buy.credits;
+      if (buy.partId) hunt.parts[buy.partId] -= buy.parts;
+      if (slot === "weapon") {
+        hunt.weapons[family] = buy.tier;
+        hunt.equipped = family;
+      } else {
+        hunt[slot] = buy.tier;
+      }
+      commit();
+      return true;
+    },
+    huntEquip(family) {
+      if (!FAMILIES[family] || data.hunt.weapons[family] < 0) return false;
+      data.hunt.equipped = family;
       commit();
       return true;
     },

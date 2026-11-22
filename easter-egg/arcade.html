@@ -45,7 +45,7 @@
         <span class="wallet-label">Pièces bleues</span>
         <strong id="wallet-blue">0</strong>
       </p>
-      <p class="wallet-item" title="Crédits : gagnés dans le Clicker et le Tower Defense, joués au Blackjack, utilisés pour débloquer les tours">
+      <p class="wallet-item" title="Crédits : gagnés dans le Clicker et le Tower Defense, joués au Blackjack, utilisés pour débloquer les tours, les cartes et les personnages, et pour forger l'équipement de la Chasse">
         <span class="credit" aria-hidden="true">¤</span>
         <span class="wallet-label">Crédits</span>
         <strong id="wallet-credits">0</strong>
@@ -128,6 +128,14 @@
             <span class="card-name">Breach Protocol</span>
             <span class="card-desc">Pirate le réseau : enchaîne les codes de la matrice avant la fin du temps.</span>
             <span class="card-meta" id="meta-breach">Meilleur gain : 0 ¤</span>
+          </a>
+        </li>
+        <li>
+          <a class="game-card chamfer" href="#hunt">
+            <span class="card-index">// 09</span>
+            <span class="card-name">Chasse aux Titans</span>
+            <span class="card-desc">RPG au tour par tour : chasse des monstres, forge ton équipement avec tes crédits.</span>
+            <span class="card-meta" id="meta-hunt">Monstres vaincus : 0 / 6</span>
           </a>
         </li>
       </ul>
@@ -223,6 +231,13 @@
       <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
       <h2 class="game-title glitch" id="title-breach" data-text="Breach Protocol" tabindex="-1">Breach Protocol</h2>
       <div class="game-body" id="breach-root"></div>
+    </section>
+
+    <!-- ============ CHASSE AUX TITANS (RPG) ============ -->
+    <section id="game-hunt" class="game-view" aria-labelledby="title-hunt" hidden>
+      <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
+      <h2 class="game-title glitch" id="title-hunt" data-text="Chasse aux Titans" tabindex="-1">Chasse aux Titans</h2>
+      <div class="game-body" id="hunt-root"></div>
     </section>
   </main>
 

@@ -12,7 +12,7 @@ js/main.js, js/veille.js
 easter-egg/arcade.html      page cachée : salle d'arcade (accessible en tapant « awesome »)
 easter-egg/css/arcade.css   style de l'arcade
 easter-egg/js/arcade.js      choix du jeu, portefeuille, gain passif du Clicker
-easter-egg/js/*.js          logique pure des jeux (snake, blackjack, roulette, clicker, tetris, td, survivors, breach, music) + ui-*.js
+easter-egg/js/*.js          logique pure des jeux (snake, blackjack, roulette, clicker, tetris, td, survivors, breach, hunt, music) + ui-*.js
 js/ui-*.js                  affichage de chaque jeu ; js/ui.js outils partagés
 js/wallet.js                pièces bleues, crédits et progression (localStorage)
 js/secret-code.js           détecte les codes tapés au clavier
@@ -28,7 +28,7 @@ assets/                     favicon, images
 ## Easter eggs
 
 - Taper `awesome` sur le site ouvre l'arcade cachée (`easter-egg/arcade.html`) : Data Snake, Blackjack, Roulette,
-  Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena et Breach Protocol, avec une musique
+  Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena, Breach Protocol et Chasse aux Titans (RPG au tour par tour : l'équipement se forge avec des crédits et des matériaux de monstres), avec une musique
   synthwave générée en direct (bouton « Musique », désactivée par défaut).
   Le Clicker a un arbre de compétences (par partie) et un Rebirth (formatage) avec éclats et arbre permanent.
   Pare-feu : 3 cartes et 7 tours (déblocage en crédits). Survivor Arena : 3 personnages (déblocage en crédits), foudre, vol de vie, élites et boss.

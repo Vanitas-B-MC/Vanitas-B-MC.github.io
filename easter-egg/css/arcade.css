@@ -1184,6 +1184,65 @@ kbd {
 .bp-daemon.is-failed em { color: #ff2a6d; }
 
 /* =========================
+   6f. CHASSE AUX TITANS (RPG)
+========================= */
+
+.hunt-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 24px; align-items: start; text-align: left; }
+.hunt-col { min-width: 0; }
+.hunt-monsters, .hunt-forge, .hunt-parts { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.hunt-parts { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+.hunt-monster, .hunt-gear {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+}
+.hunt-monster.is-locked { opacity: .5; }
+.hunt-monster-info, .hunt-gear-info { display: grid; gap: 2px; min-width: 0; }
+.hunt-monster strong, .hunt-gear strong { font-family: var(--font-display); letter-spacing: .04em; text-transform: uppercase; }
+.hunt-desc { color: var(--muted); font-size: 12px; }
+.hunt-meta { color: var(--yellow); font-family: var(--font-mono); font-size: 11px; }
+.hunt-hunter { font-family: var(--font-mono); font-size: 12px; color: var(--cyan); }
+.hunt-gear { flex-wrap: wrap; }
+.hunt-gear-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.hunt-max { color: var(--yellow); font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; }
+
+/* Combat */
+.hunt-fight { display: grid; gap: 14px; max-width: 640px; margin-inline: auto; text-align: left; }
+.hunt-arena, .hunt-hunter-panel, .hunt-result { --cut: 14px; padding: 14px; background: var(--surface); border: 1px solid var(--line-strong); display: grid; gap: 10px; }
+.hunt-name { margin: 0; font-family: var(--font-display); text-transform: uppercase; letter-spacing: .05em; color: var(--yellow); }
+.hunt-bar { height: 22px; }
+.hunt-monster-hp { background: #b02a4a; }
+.hunt-intent { min-height: 1.4em; margin: 0; font-family: var(--font-mono); font-size: 13px; color: var(--cyan); }
+.hunt-intent.is-heavy { color: #ff5a7a; }
+.hunt-parts-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.hunt-part { display: grid; gap: 4px; padding: 10px; background: transparent; border: 1px solid var(--line-strong); color: var(--text); text-align: left; cursor: pointer; min-height: 56px; }
+.hunt-part em { color: var(--muted); font-size: 12px; font-style: normal; font-family: var(--font-mono); }
+.hunt-part.is-target { border-color: var(--yellow); box-shadow: 0 0 12px -3px var(--yellow); }
+.hunt-part.is-broken { opacity: .55; }
+.hunt-part-track { display: block; height: 4px; background: rgba(255,255,255,.1); }
+.hunt-part-fill { display: block; height: 100%; background: var(--cyan); }
+.hunt-label { margin: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.hunt-resources { margin: 0; font-family: var(--font-mono); font-size: 13px; }
+.hunt-energy { color: var(--cyan); letter-spacing: .1em; }
+.hunt-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.hunt-log { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.hunt-log .is-new { color: var(--text); }
+.hunt-result { text-align: center; max-width: 520px; margin-inline: auto; }
+.hunt-result .hunt-log { text-align: left; }
+
+@media (max-width: 760px) {
+  .hunt-layout { grid-template-columns: 1fr; }
+  .hunt-part, .hunt-actions .button { min-height: 52px; }
+  .hunt-gear-actions { width: 100%; }
+  .hunt-gear-actions .button { flex: 1 1 100%; }
+}
+
+/* =========================
    7. RESPONSIVE
 ========================= */
 
