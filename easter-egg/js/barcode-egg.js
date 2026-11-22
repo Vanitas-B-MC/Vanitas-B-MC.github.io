@@ -9,14 +9,15 @@ const GLITCH_MS = 500;     // durée de chaque glitch
 
 // Contenu alternatif : modifie-le librement.
 const ALTER = {
+  // [libellé, valeur, icône facultative]
   fields: [
     ["Nom", "Vanitas B. Blade"],
     ["Rôle", "Mercenaire"],
+    ["Statut", "Edgerunner", "assets/edgerunner-symbol.png"],
   ],
   // Texte affiché sous les champs (une ligne par élément). Mets ici le texte de ton choix.
   lines: [
-    "Identité effacée.",
-    "Profil alternatif chargé.",
+    "Who's Ready For Tomorrow",
   ],
 };
 
@@ -40,6 +41,13 @@ const STYLE = `
   90%  { transform: translate(-2px, 1px); clip-path: inset(0); opacity: 1;
          filter: drop-shadow(2px 0 var(--cyan, #00f0ff)); }
   100% { transform: none; filter: none; clip-path: inset(0); opacity: 1; }
+}
+.alter-icon {
+  display: inline-block;
+  height: 1.2em;
+  width: auto;
+  margin-right: .5em;
+  vertical-align: -.22em;
 }
 .alter-lines {
   margin: 14px 0 0;
@@ -79,12 +87,19 @@ function init() {
 
   // Même structure que renderHero() dans main.js : <div><dt>…</dt><dd>…</dd></div>
   function buildAlterFields() {
-    return ALTER.fields.map(([label, value]) => {
+    return ALTER.fields.map(([label, value, icon]) => {
       const row = document.createElement("div");
       const dt = document.createElement("dt");
       dt.textContent = label;
       const dd = document.createElement("dd");
-      dd.textContent = value;
+      if (icon) {
+        const img = document.createElement("img");
+        img.className = "alter-icon";
+        img.src = icon;
+        img.alt = "";
+        dd.append(img);
+      }
+      dd.append(value);
       row.append(dt, dd);
       return row;
     });
