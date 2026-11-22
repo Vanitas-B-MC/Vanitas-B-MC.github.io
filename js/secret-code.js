@@ -1,13 +1,21 @@
 // js/secret-code.js — codes secrets tapés au clavier. Rien n'est visible tant qu'on n'en tape pas.
 //   « awesome »    ouvre la page cachée (easter-egg/arcade.html)
 //   « edgerunner » active / désactive le style Edgerunners (rouge, vert)
+//   « neon »       active / désactive le style Neon (rose néon, cyan)
 // Chargé sur index.html, veille.html et easter-egg/arcade.html.
 
-import { toggleEdgerunners } from "./theme.js";
+import { toggleTheme } from "./theme.js";
 
 export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "easter-egg/arcade.html";
 export const THEME_CODE = "edgerunner";
+export const NEON_CODE = "neon";
+
+// Un code par thème : `theme` est le nom de la classe sur <html> (voir theme.js).
+export const THEME_CODES = [
+  { code: THEME_CODE, theme: "edgerunners", label: "edgerunner" },
+  { code: NEON_CODE, theme: "neon", label: "neon" },
+];
 
 // Garde les dernières lettres tapées ; renvoie true quand elles forment le code.
 export function createMatcher(code = SECRET_CODE) {
@@ -90,7 +98,7 @@ const STYLE = `
 function init() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const pushPage = createMatcher(SECRET_CODE);
-  const pushTheme = createMatcher(THEME_CODE);
+  const themeMatchers = THEME_CODES.map((entry) => ({ ...entry, push: createMatcher(entry.code) }));
   const onArcade = document.body.classList.contains("arcade-page");
   let overlay = null;
   let timer = 0;
@@ -125,14 +133,14 @@ function init() {
     timer = window.setTimeout(() => { window.location.href = SECRET_PAGE; }, reduceMotion ? 300 : 900);
   }
 
-  function themeToast(on) {
+  function themeToast(label, on) {
     addStyle();
     document.querySelector(".secret-toast")?.remove();
 
     const toast = document.createElement("p");
     toast.className = "secret-toast";
     toast.setAttribute("role", "status");
-    toast.textContent = on ? "> mode edgerunner : activé" : "> mode edgerunner : désactivé";
+    toast.textContent = `> mode ${label} : ${on ? "activé" : "désactivé"}`;
     document.body.append(toast);
 
     window.clearTimeout(toastTimer);
@@ -145,12 +153,12 @@ function init() {
     if (event.key.length !== 1) return;          // ignore Shift, flèches, etc.
     if (isTypingField(event.target)) return;
 
-    // On alimente toujours les deux détecteurs : chacun suit sa propre suite de lettres.
+    // On alimente toujours tous les détecteurs : chacun suit sa propre suite de lettres.
     const page = pushPage(event.key);
-    const theme = pushTheme(event.key);
+    const hit = themeMatchers.map((matcher) => matcher.push(event.key) && matcher).find(Boolean);
 
     if (page && !onArcade) unlock();
-    if (theme) themeToast(toggleEdgerunners());
+    if (hit) themeToast(hit.label, toggleTheme(hit.theme));
   });
 
   // Retour arrière du navigateur : la page revient telle quelle, on retire le message.

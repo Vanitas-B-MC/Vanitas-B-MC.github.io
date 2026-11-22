@@ -1,0 +1,177 @@
+/* =========================================================
+   MODE NEON — easter egg (taper « neon » sur le site)
+   Cyberpunk rose néon : rose électrique, cyan glacé, violet profond,
+   fond noir violacé avec lueurs et grille.
+
+   Tout est limité à html.neon : sans cette classe, rien ne change.
+   Même principe que edgerunners.css : on remplace les variables de couleur
+   du site, puis on corrige les couleurs écrites en dur dans style.css et veille.css.
+========================================================= */
+
+html.neon {
+  --bg: #0a0213;
+  --surface: #13061f;
+  --surface-2: #1d0a2e;
+  --line: #3a1457;
+  --line-strong: #7a1fa8;
+
+  --text: #fdf2ff;
+  --muted: #c9a8dc;
+
+  /* rôles repris des deux thèmes (index : yellow/cyan/pink, veille : hot/blue/violet) */
+  --yellow: #ff2bd6;   /* rose néon : l'accent principal */
+  --cyan: #00f0ff;     /* cyan électrique */
+  --pink: #ff6ec7;
+  --hot: #ff2bd6;
+  --blue: #00f0ff;
+  --violet: #b44dff;
+
+  --nn-pink-rgb: 255, 43, 214;
+  --nn-cyan-rgb: 0, 240, 255;
+  --nn-violet-rgb: 180, 77, 255;
+
+  scrollbar-color: var(--line-strong) var(--bg);
+}
+
+/* Fond : lueur rose en haut à droite, cyan en bas à gauche, grille violette */
+html.neon body::before {
+  background:
+    radial-gradient(60vw 55vh at 92% -8%, rgba(var(--nn-pink-rgb), .24), transparent 70%),
+    radial-gradient(55vw 50vh at -8% 106%, rgba(var(--nn-cyan-rgb), .13), transparent 70%),
+    radial-gradient(40vw 40vh at 50% 48%, rgba(var(--nn-violet-rgb), .1), transparent 70%),
+    linear-gradient(rgba(var(--nn-pink-rgb), .07) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(90deg, rgba(var(--nn-cyan-rgb), .06) 1px, transparent 1px) 0 0 / 56px 56px;
+}
+
+/* Titres : tube néon rose, avec un décalage cyan / violet de chaque côté */
+html.neon .hero-name,
+html.neon .arcade-title,
+html.neon .vtitle {
+  text-shadow:
+    -3px 0 rgba(var(--nn-cyan-rgb), .55),
+    3px 0 rgba(var(--nn-violet-rgb), .7),
+    0 0 14px rgba(var(--nn-pink-rgb), .75),
+    0 0 38px rgba(var(--nn-pink-rgb), .5);
+}
+
+html.neon .game-title,
+html.neon .overlay-title {
+  text-shadow:
+    -2px 0 rgba(var(--nn-cyan-rgb), .5),
+    2px 0 rgba(var(--nn-violet-rgb), .6),
+    0 0 18px rgba(var(--nn-pink-rgb), .55);
+}
+
+/* Titres de section : léger halo rose */
+html.neon .section-heading h2 {
+  text-shadow: 0 0 18px rgba(var(--nn-pink-rgb), .45);
+}
+
+/* Le texte sélectionné */
+html.neon ::selection {
+  background: var(--yellow);
+  color: #12001a;
+}
+
+/* ---------- Couleurs écrites en dur dans style.css ---------- */
+
+html.neon .site-header.is-scrolled {
+  border-bottom-color: rgba(var(--nn-pink-rgb), .6);
+  box-shadow: 0 6px 28px -10px rgba(var(--nn-pink-rgb), .6);
+}
+
+/* Logo (une image jaune et cyan) : on garde ses couleurs et on ajoute un halo rose */
+html.neon .logo img,
+html.neon .brand img,
+html.neon .card-head img {
+  filter: drop-shadow(0 0 6px rgba(var(--nn-pink-rgb), .5));
+}
+
+html.neon .logo:hover img,
+html.neon .brand:hover img {
+  filter: drop-shadow(0 0 12px rgba(var(--nn-pink-rgb), .9));
+}
+
+html.neon .github-link:hover {
+  background: rgba(var(--nn-cyan-rgb), .1);
+}
+
+html.neon .about-seeking {
+  background: rgba(var(--nn-pink-rgb), .09);
+}
+
+html.neon .timeline li:first-child::before {
+  box-shadow: 0 0 14px rgba(var(--nn-pink-rgb), .9);
+}
+
+/* Cartes à coins coupés : un filter suit la forme, un box-shadow serait coupé */
+html.neon .profile-card,
+html.neon .terminal {
+  filter: drop-shadow(0 0 14px rgba(var(--nn-pink-rgb), .22));
+}
+
+html.neon .project:hover {
+  filter: drop-shadow(0 0 18px rgba(var(--nn-pink-rgb), .5));
+}
+
+html.neon .button-primary {
+  box-shadow: 0 0 18px -2px rgba(var(--nn-pink-rgb), .65);
+}
+
+html.neon .contact-list a {
+  border-bottom-color: rgba(var(--nn-pink-rgb), .5);
+}
+
+html.neon .status-dot {
+  box-shadow: 0 0 0 0 rgba(var(--nn-pink-rgb), .6);
+  animation-name: pulse-neon;
+}
+
+@keyframes pulse-neon {
+  0% { box-shadow: 0 0 0 0 rgba(var(--nn-pink-rgb), .6); }
+  70%, 100% { box-shadow: 0 0 0 10px rgba(var(--nn-pink-rgb), 0); }
+}
+
+/* ---------- veille.css ---------- */
+
+html.neon .hud > div:nth-child(3) { border-left-color: var(--violet); }
+html.neon .hud > div:nth-child(3) dd { color: var(--violet); }
+
+html.neon .banner {
+  background:
+    radial-gradient(60% 90% at 88% 15%, rgba(var(--nn-pink-rgb), .3), transparent 70%),
+    radial-gradient(50% 80% at 8% 100%, rgba(var(--nn-cyan-rgb), .16), transparent 70%);
+}
+
+html.neon .field select:focus,
+html.neon .field input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--nn-cyan-rgb), .35);
+}
+
+html.neon .step-num {
+  -webkit-text-stroke-color: rgba(var(--nn-pink-rgb), .7);
+}
+
+/* Couleur d'accent des articles et des sources, par catégorie.
+   (Les règles de veille.css sont moins précises : on les redéfinit toutes ici.) */
+html.neon .shard,
+html.neon .source-token { --accent-rgb: var(--nn-cyan-rgb); }
+
+html.neon .shard[data-cat="cybersecurite"],
+html.neon .source-token[data-cat="cybersecurite"] { --accent-rgb: var(--nn-pink-rgb); }
+
+html.neon .shard[data-cat="developpement"],
+html.neon .source-token[data-cat="developpement"] { --accent-rgb: var(--nn-violet-rgb); }
+
+html.neon .shard[data-cat="infrastructure"],
+html.neon .source-token[data-cat="infrastructure"] { --accent-rgb: 253, 242, 255; }
+
+/* ---------- Arcade ---------- */
+
+html.neon .game-stage {
+  box-shadow: inset 0 0 40px rgba(var(--nn-cyan-rgb), .06), 0 0 30px -8px rgba(var(--nn-pink-rgb), .6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.neon .status-dot { animation: none; }
+}

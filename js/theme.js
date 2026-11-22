@@ -1,16 +1,23 @@
-// js/theme.js — mode « Edgerunners » (rouge, vert, violet), activé par un easter egg.
-// Le mode est mémorisé dans le navigateur. Les pages le remettent au chargement grâce à
-// une petite ligne dans leur <head> (pour qu'il n'y ait pas de flash de l'ancien style).
+// js/theme.js — thèmes secrets (Edgerunners : rouge, vert, violet ; Neon : rose, cyan), activés par des easter eggs.
+// Un seul thème est actif à la fois. Il est mémorisé dans le navigateur. Les pages le remettent
+// au chargement grâce à une petite ligne dans leur <head> (pour qu'il n'y ait pas de flash de l'ancien style).
+//
+// Pour ajouter un thème : l'ajouter dans THEMES, créer css/<nom>.css (règles sous html.<nom>),
+// le lier dans les pages, ajouter son nom dans la ligne du <head>, puis lui donner un code dans secret-code.js.
 
 const KEY = "mc-theme";
-const NAME = "edgerunners";
+export const THEMES = ["edgerunners", "neon"];
 
-export const isEdgerunners = () => document.documentElement.classList.contains(NAME);
+// Nom du thème actif, ou null si le site a son style normal.
+export const currentTheme = () =>
+  THEMES.find((name) => document.documentElement.classList.contains(name)) ?? null;
 
-export function setEdgerunners(on) {
-  document.documentElement.classList.toggle(NAME, on);
+// Active un thème (et désactive les autres), ou rétablit le style normal avec null.
+export function setTheme(name) {
+  const next = THEMES.includes(name) ? name : null;
+  for (const theme of THEMES) document.documentElement.classList.toggle(theme, theme === next);
   try {
-    if (on) localStorage.setItem(KEY, NAME);
+    if (next) localStorage.setItem(KEY, next);
     else localStorage.removeItem(KEY);
   } catch { /* stockage indisponible : le mode vaut pour cette page seulement */ }
 
@@ -18,8 +25,22 @@ export function setEdgerunners(on) {
   window.dispatchEvent(new Event("mc-theme"));
 }
 
-export const toggleEdgerunners = () => {
-  const next = !isEdgerunners();
-  setEdgerunners(next);
-  return next;
-};
+// Bascule un thème : l'active s'il ne l'est pas, sinon revient au style normal.
+// Renvoie true si le thème demandé est maintenant actif.
+export function toggleTheme(name) {
+  const turnOn = currentTheme() !== name;
+  setTheme(turnOn ? name : null);
+  return turnOn;
+}
+
+// --- Compatibilité avec le code existant ---
+export const isEdgerunners = () => currentTheme() === "edgerunners";
+export const isNeon = () => currentTheme() === "neon";
+
+export function setEdgerunners(on) {
+  if (on) setTheme("edgerunners");
+  else if (isEdgerunners()) setTheme(null);
+}
+
+export const toggleEdgerunners = () => toggleTheme("edgerunners");
+export const toggleNeon = () => toggleTheme("neon");
