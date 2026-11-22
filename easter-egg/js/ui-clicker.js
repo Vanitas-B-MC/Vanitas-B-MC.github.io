@@ -8,7 +8,7 @@ import {
   pointsEarned, pointsFree, nextThreshold, skillState, skillUp,
   shardsFor, canRebirth, refundFor, startLevels, rebirth, coreCostOf, buyCore
 } from "./clicker.js";
-import { h, fmt, fmtRate, prefersReducedMotion } from "./ui.js";
+import { h, fmtShort as fmt, fmtRate, prefersReducedMotion } from "./ui.js";
 
 const MAX_POPUPS = 12;
 

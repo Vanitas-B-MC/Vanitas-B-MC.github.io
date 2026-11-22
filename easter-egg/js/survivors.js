@@ -65,16 +65,20 @@ const hpScale = (time) => 1 + time / 120;
 
 /* ---------- Partie ---------- */
 
-export function createState(rng = Math.random, characterId = FREE_CHARACTER) {
+// `size` : dimensions logiques de l'arène (la vue les adapte à l'écran : plus grande sur PC).
+export function createState(rng = Math.random, characterId = FREE_CHARACTER, size = {}) {
+  const w = Math.max(360, Math.round(size.w || W));
+  const h = Math.max(240, Math.round(size.h || H));
   const stats = {
     maxHp: 140, speed: 130, damage: 14, cooldown: 0.5, shots: 1, pierce: 0,
     projSpeed: 340, magnet: 50, regen: 0, crit: 0, orbit: 0, nova: 0, lightning: 0, vampire: 0, armor: 0, xpGain: 0
   };
   const state = {
     rng,
+    w, h,
     time: 0,
     over: false,
-    player: { x: W / 2, y: H / 2, hp: stats.maxHp, inv: 0, cd: 0, nova: 0, spin: 0, bolt: 1 },
+    player: { x: w / 2, y: h / 2, hp: stats.maxHp, inv: 0, cd: 0, nova: 0, spin: 0, bolt: 1 },
     stats,
     level: 1,
     xp: 0,
@@ -134,8 +138,8 @@ function spawnEnemy(state, type) {
   const side = Math.floor(state.rng() * 4);
   const t = state.rng();
   const m = def.r + 2;
-  const x = side === 0 ? -m : side === 1 ? W + m : t * W;
-  const y = side === 2 ? -m : side === 3 ? H + m : t * H;
+  const x = side === 0 ? -m : side === 1 ? state.w + m : t * state.w;
+  const y = side === 2 ? -m : side === 3 ? state.h + m : t * state.h;
   const hp = def.hp * hpScale(state.time);
   state.enemies.push({ id: state.nextId++, type, x, y, hp, maxHp: hp, hitCd: 0 });
 }
@@ -182,8 +186,8 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
   let { dx, dy } = input;
   const len = Math.hypot(dx, dy);
   if (len > 1) { dx /= len; dy /= len; }
-  player.x = Math.min(W - PLAYER_R, Math.max(PLAYER_R, player.x + dx * stats.speed * dt));
-  player.y = Math.min(H - PLAYER_R, Math.max(PLAYER_R, player.y + dy * stats.speed * dt));
+  player.x = Math.min(state.w - PLAYER_R, Math.max(PLAYER_R, player.x + dx * stats.speed * dt));
+  player.y = Math.min(state.h - PLAYER_R, Math.max(PLAYER_R, player.y + dy * stats.speed * dt));
   player.inv = Math.max(0, player.inv - dt);
   player.hp = Math.min(stats.maxHp, player.hp + stats.regen * dt);
   player.spin += dt * 3;
@@ -191,7 +195,8 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
   /* Apparition des ennemis */
   state.spawnClock -= dt;
   if (state.spawnClock <= 0) {
-    state.spawnClock = Math.max(0.25, 1.1 - state.time * 0.003);
+    // arène plus vaste → un peu plus d'ennemis, pour garder la même pression
+    state.spawnClock = Math.max(0.25, 1.1 - state.time * 0.003) / Math.sqrt((state.w * state.h) / (W * H));
     const count = 1 + Math.floor(state.time / 70);
     for (let i = 0; i < count && state.enemies.length < MAX_ENEMIES; i++) spawnEnemy(state, pickType(state));
   }
@@ -230,7 +235,7 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
     s.x += s.vx * dt;
     s.y += s.vy * dt;
     s.life -= dt;
-    if (s.x < -20 || s.x > W + 20 || s.y < -20 || s.y > H + 20) s.life = 0;
+    if (s.x < -20 || s.x > state.w + 20 || s.y < -20 || s.y > state.h + 20) s.life = 0;
     if (s.life <= 0) continue;
     for (const e of state.enemies) {
       if (e.dead || s.hit.has(e.id)) continue;

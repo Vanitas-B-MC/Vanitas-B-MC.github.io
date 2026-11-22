@@ -13,7 +13,7 @@ import { createSurvivorsUI } from "./ui-survivors.js";
 import { createBreachUI } from "./ui-breach.js";
 import { createHuntUI } from "./ui-hunt.js";
 import { createMusic } from "./music.js";
-import { fmt, fmtRate } from "./ui.js";
+import { fmt, fmtShort, fmtRate } from "./ui.js";
 
 const $ = (selector) => document.querySelector(selector);
 const wallet = createWallet();
@@ -49,7 +49,8 @@ function bump(el) {
 
 function renderWallet() {
   blueEl.textContent = fmt(wallet.blue);
-  creditsEl.textContent = fmt(wallet.credits);
+  creditsEl.textContent = fmtShort(wallet.credits);
+  creditsEl.title = fmt(wallet.credits);
   trophiesEl.textContent = fmt(wallet.trophies);
   if (wallet.blue > lastBlue) bump(blueEl);
   if (wallet.credits > lastCredits) bump(creditsEl);

@@ -21,8 +21,26 @@ export function h(tag, props = {}, ...children) {
 // Nombre lisible : 12 345
 export const fmt = (n) => Number(n).toLocaleString("fr-FR");
 
-// Idem, avec au plus une décimale (gains qui ne tombent pas juste : 1,3 crédit par clic)
-export const fmtRate = (n) => Number(n).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+// Nombre compact pour les gros chiffres : 1 234 → 1,23 K · 4 500 000 → 4,5 M · 7e9 → 7 B …
+// En dessous de 1 000 le nombre reste exact (avec au plus `maxDecimals` décimales).
+const SUFFIXES = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+export function fmtShort(n, maxDecimals = 0) {
+  const value = Number(n);
+  if (!Number.isFinite(value)) return "∞";
+  const abs = Math.abs(value);
+  if (abs < 1000) return value.toLocaleString("fr-FR", { maximumFractionDigits: maxDecimals });
+  let tier = Math.min(SUFFIXES.length - 1, Math.floor(Math.log10(abs) / 3));
+  let scaled = abs / 1000 ** tier;
+  // tronque (et n'arrondit pas) à 3 chiffres significatifs : jamais « 1000 K »
+  const digits = scaled >= 100 ? 0 : scaled >= 10 ? 1 : 2;
+  const factor = 10 ** digits;
+  scaled = Math.floor(scaled * factor + 1e-9) / factor;
+  const text = scaled.toLocaleString("fr-FR", { maximumFractionDigits: digits });
+  return `${value < 0 ? "-" : ""}${text} ${SUFFIXES[tier]}`.replace(" ", "\u00a0");
+}
+
+// Gains par seconde / par clic : une décimale au plus, compact au-delà de 1 000.
+export const fmtRate = (n) => fmtShort(n, 1);
 
 export const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;

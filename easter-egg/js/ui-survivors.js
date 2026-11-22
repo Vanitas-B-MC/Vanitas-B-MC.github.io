@@ -10,10 +10,22 @@ import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
 const STEP = 1 / 60;
 const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
+// Dimensions logiques de l'arène : sur grand écran elle suit la largeur disponible (sprites à
+// taille réelle, donc plus d'espace), sur téléphone elle garde le format 3:2 compact.
+const WIDE_MIN = 900;
+function arenaSize(root) {
+  const avail = root ? (root.querySelector(".sv-main")?.clientWidth || 0) - 20 : 0;
+  if (avail < WIDE_MIN) return { w: W, h: H };
+  const w = Math.min(1400, Math.round(avail));
+  const h = Math.min(Math.round(w * 0.58), Math.max(480, Math.round(window.innerHeight * 0.78)));
+  return { w, h };
+}
+
 export function createSurvivorsUI(root, wallet) {
   let active = false;
   let charId = FREE_CHARACTER;
-  let state = createState(Math.random, charId);
+  let size = arenaSize(root);
+  let state = createState(Math.random, charId, size);
   let status = "idle";           // idle | running | paused | over
   let rafId = 0;
   let lastTime = 0;
@@ -53,6 +65,8 @@ export function createSurvivorsUI(root, wallet) {
   const charButtons = CHARACTERS.map((c) => ({ c, button: h("button", { class: "map-button", type: "button", "data-char": c.id, onclick: () => onChar(c.id) }) }));
   const charBar = h("div", { class: "td-maps", role: "group", "aria-label": "Personnage" }, charButtons.map((x) => x.button));
 
+  const stage = h("div", { class: "game-stage sv-stage" }, board, toast, overlay, levelPanel);
+
   root.replaceChildren(
     h("p", { class: "game-rules" },
       "Survis le plus longtemps possible. Ton personnage tire tout seul : déplace-toi pour esquiver et choisis une amélioration à chaque niveau. Récompense : des crédits, et une pièce bleue toutes les 2 minutes."),
@@ -60,7 +74,7 @@ export function createSurvivorsUI(root, wallet) {
       h("div", { class: "sv-main" },
         charBar,
         h("div", { class: "sv-board-wrap chamfer" },
-          h("div", { class: "game-stage sv-stage" }, board, toast, overlay, levelPanel)),
+          stage),
         h("div", { class: "sv-bars" },
           h("div", { class: "sv-bar", role: "img", "aria-label": "Points de vie" }, hpBar, hpText),
           h("div", { class: "sv-bar", role: "img", "aria-label": "Expérience" }, xpBar))),
@@ -83,23 +97,40 @@ export function createSurvivorsUI(root, wallet) {
   /* ---------- Canvas ---------- */
 
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  board.width = W * dpr;
-  board.height = H * dpr;
   const ctx = board.getContext("2d");
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  function resizeBoard() {
+    board.width = Math.round(state.w * dpr);
+    board.height = Math.round(state.h * dpr);
+    stage.style.aspectRatio = `${state.w} / ${state.h}`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  resizeBoard();
+
+  // Hors partie, l'arène se recale sur la place disponible (changement de fenêtre, rotation…).
+  function refitIdle() {
+    if (status === "running" || status === "paused") return;
+    const next = arenaSize(root);
+    if (next.w === state.w && next.h === state.h) return;
+    size = next;
+    state = createState(Math.random, charId, size);
+    resizeBoard();
+    draw();
+  }
+  window.addEventListener("resize", () => { if (active) refitIdle(); });
 
   function draw() {
     const { player, stats } = state;
     ctx.globalAlpha = 1;
     ctx.shadowBlur = 0;
     ctx.fillStyle = "#08080f";
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, state.w, state.h);
 
     ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    for (let x = 40; x < W; x += 40) { ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H); }
-    for (let y = 40; y < H; y += 40) { ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); }
+    for (let x = 40; x < state.w; x += 40) { ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, state.h); }
+    for (let y = 40; y < state.h; y += 40) { ctx.moveTo(0, y + 0.5); ctx.lineTo(state.w, y + 0.5); }
     ctx.stroke();
 
     // Gemmes
@@ -239,7 +270,9 @@ export function createSurvivorsUI(root, wallet) {
       say(`${c.name} débloqué !`);
     }
     charId = id;
-    state = createState(Math.random, charId);
+    size = arenaSize(root);
+    state = createState(Math.random, charId, size);
+    resizeBoard();
     updateHud();
     draw();
   }
@@ -310,7 +343,9 @@ export function createSurvivorsUI(root, wallet) {
 
   function startGame() {
     scrollToPlay(root.querySelector(".sv-board-wrap"));
-    state = createState(Math.random, charId);
+    size = arenaSize(root);
+    state = createState(Math.random, charId, size);
+    resizeBoard();
     shownChoices = null;
     keys.clear();
     setStatus("running");
@@ -439,7 +474,7 @@ export function createSurvivorsUI(root, wallet) {
 
   function toCanvas(event) {
     const rect = board.getBoundingClientRect();
-    return { x: ((event.clientX - rect.left) / rect.width) * W, y: ((event.clientY - rect.top) / rect.height) * H };
+    return { x: ((event.clientX - rect.left) / rect.width) * state.w, y: ((event.clientY - rect.top) / rect.height) * state.h };
   }
 
   board.addEventListener("pointerdown", (event) => {
@@ -480,6 +515,7 @@ export function createSurvivorsUI(root, wallet) {
   return {
     activate() {
       active = true;
+      refitIdle();
       updateHud();
       draw();
       if (status === "paused" && !state.choices) showOverlay("Pause", "P pour reprendre.", "Reprendre", false);

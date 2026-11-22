@@ -313,7 +313,16 @@ export function createHuntUI(root, wallet) {
   });
 
   // Quand le portefeuille change hors combat, la forge se met à jour (crédits, matériaux).
-  wallet.subscribe(() => { if (active && screen === "camp") renderCamp(); });
+  // Le revenu passif du Clicker notifie le portefeuille chaque seconde : on ne reconstruit
+  // le camp (et ses boutons) que si ce qui s'y affiche a réellement changé.
+  const campSignature = () => JSON.stringify([wallet.data.trophies, wallet.data.hunt]);
+  let lastCamp = campSignature();
+  wallet.subscribe(() => {
+    const now = campSignature();
+    if (now === lastCamp) return;
+    lastCamp = now;
+    if (active && screen === "camp") renderCamp();
+  });
 
   renderCamp();
 
