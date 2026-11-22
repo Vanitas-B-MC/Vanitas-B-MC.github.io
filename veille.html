@@ -23,7 +23,8 @@
 
   <link rel="stylesheet" href="css/veille.css">
   <link rel="stylesheet" href="css/edgerunners.css">
-  <script>try { if (localStorage.getItem("mc-theme") === "edgerunners") document.documentElement.classList.add("edgerunners"); } catch (e) {}</script>
+  <link rel="stylesheet" href="css/neon.css">
+  <script>try { var t = localStorage.getItem("mc-theme"); if (t === "edgerunners" || t === "neon") document.documentElement.classList.add(t); } catch (e) {}</script>
   <script type="module" src="js/veille.js"></script>
   <script type="module" src="js/secret-code.js"></script>
 </head>
