@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-22T11:37:56Z",
+ "updated": "2026-11-22T19:48:19Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,66 @@
   }
  },
  "items": [
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/hackers-exploit-glinet-cloud-flaw-to-infect-routers-kvm-devices/",
+   "title": "Hackers exploit GL.iNet cloud flaw to infect routers, KVM devices",
+   "link": "https://www.bleepingcomputer.com/news/security/hackers-exploit-glinet-cloud-flaw-to-infect-routers-kvm-devices/",
+   "summary": "GL.iNet has confirmed that hackers exploited a vulnerability in its cloud remote management services to install custom malware on customers' routers and KVM devices, with some affected users reporting backdoors and reverse shells giving…",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-22T18:45:37Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311412",
+   "title": "As cars go digital, US consumers pay an extra $12 billion a year for repairs",
+   "link": "https://www.theregister.com/personal-tech/2026/11/22/as-cars-go-digital-us-consumers-pay-an-extra-12-billion-a-year-for-repairs/5311412",
+   "summary": "Today's vehicles need software tools to make repairs, and the subscriptions inflate insurance fees",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-22T16:08:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/cleverbridge-warns-hackers-stole-credit-card-numbers-cvvs-in-data-breach/",
+   "title": "Cleverbridge warns hackers stole credit card numbers, CVVs in data breach",
+   "link": "https://www.bleepingcomputer.com/news/security/cleverbridge-warns-hackers-stole-credit-card-numbers-cvvs-in-data-breach/",
+   "summary": "E-commerce platform Cleverbridge is warning that hackers breached its systems and stole customers' payment card information, including credit card numbers and CVV security codes.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-22T15:43:04Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/signal-to-block-siri-gemini-ai-from-capturing-chats-on-ios-android/",
+   "title": "Signal to block Siri, Gemini AI from capturing chats on iOS, Android",
+   "link": "https://www.bleepingcomputer.com/news/security/signal-to-block-siri-gemini-ai-from-capturing-chats-on-ios-android/",
+   "summary": "Signal has announced new protections that block screenshots on iOS 27 and prevent AI assistants from capturing conversations on supported Android devices.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-22T15:15:25Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389346/Gemini-4-Neon-est-le-modele-d-IA-le-plus-puissant-il-surpasse-ses-rivaux-Opus-5-5-et-GPT-6-2-dans-les-taches-de-codage-et-d-analyse-tout-en-offrant-une-execution-rapide-et-econome-en-tokens/",
+   "title": "Gemini 4 Neon est le modèle d'IA le plus puissant : il surpasse ses rivaux Opus 5.5 et GPT-6.2 dans les tâches de codage et d'analyse, tout en offrant une exécution rapide et économe en tokens",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389346/Gemini-4-Neon-est-le-modele-d-IA-le-plus-puissant-il-surpasse-ses-rivaux-Opus-5-5-et-GPT-6-2-dans-les-taches-de-codage-et-d-analyse-tout-en-offrant-une-execution-rapide-et-econome-en-tokens/",
+   "summary": "Gemini 4 Neon est le modèle d'IA le plus puissant : il surpasse ses rivaux Opus 5.5 et GPT-6.2 dans les tâches de codage et d'analyse tout en offrant une exécution rapide et économe en tokens Le nouveau modèle d'IA Gemini 4 Neon de Google…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-22T14:08:00Z"
+  },
+  {
+   "id": "tag:linuxfr.org,2005:News/43325",
+   "title": "LuneOS en 2026",
+   "link": "https://linuxfr.org/news/luneos-en-2026",
+   "summary": "3 ans déjà… En février 2024 , je vous parlais de la sortie de la distribution GNU/Linux pour téléphones mobiles et tablettes LuneOS « Eiskaffe ». Dans cette version, les principales nouveautés concernaient le rafraîchissement de nos…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-22T14:03:55Z"
+  },
   {
    "id": "https://www.theregister.com/a/5311023",
    "title": "Passive 'ghost' radar can detect airborne threats without revealing its own position",
@@ -267,16 +327,6 @@
    "published": "2026-11-20T18:51:43Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311438",
-   "title": "Nvidia’s journey to forge the one CPU SKU to rule them all",
-   "link": "https://www.theregister.com/systems/2026/11/20/nvidias-journey-to-forge-the-one-cpu-sku-to-rule-them-all/5311438",
-   "summary": "A deeper look at Vera",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T18:45:50Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/whatsapp-patches-3-security-flaws.html",
    "title": "WhatsApp Patches 3 Security Flaws, Including Android Bug Suspected of Use in Scams",
    "link": "https://thehackernews.com/2026/11/whatsapp-patches-3-security-flaws.html",
@@ -327,26 +377,6 @@
    "published": "2026-11-20T15:16:00Z"
   },
   {
-   "id": "https://www.bleepingcomputer.com/news/security/still-tracking-company-passwords-in-spreadsheets-youre-flying-blind/",
-   "title": "Still tracking company passwords in spreadsheets? You’re flying blind.",
-   "link": "https://www.bleepingcomputer.com/news/security/still-tracking-company-passwords-in-spreadsheets-youre-flying-blind/",
-   "summary": "Tracking company passwords in spreadsheets can leave IT administrators unaware of weak, reused, or compromised credentials stored and shared outside approved systems. NordPass explains how centralized password management can improve…",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T15:00:10Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/microsoft/n-able-says-recent-security-breach-led-to-major-service-outage/",
-   "title": "N-able says recent security breach led to major service outage",
-   "link": "https://www.bleepingcomputer.com/news/microsoft/n-able-says-recent-security-breach-led-to-major-service-outage/",
-   "summary": "N-able says attackers who breached one of its servers have caused a major outage affecting Mail Assure and SpamExperts Hosted Cloud services worldwide.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T13:18:36Z"
-  },
-  {
    "id": "https://hardware.developpez.com/actu/389335/Madison-la-fille-de-Jensen-Huang-aurait-harcele-et-insulte-des-employes-poussant-certains-cadres-talentueux-a-quitter-le-fabricant-de-puces-elle-incarnait-les-yeux-et-les-oreilles-de-son-pere/",
    "title": "Madison, la fille de Jensen Huang, aurait harcelé et insulté des employés, poussant certains cadres talentueux à quitter le fabricant de puces : « elle incarnait les yeux et les oreilles de son père »",
    "link": "https://hardware.developpez.com/actu/389335/Madison-la-fille-de-Jensen-Huang-aurait-harcele-et-insulte-des-employes-poussant-certains-cadres-talentueux-a-quitter-le-fabricant-de-puces-elle-incarnait-les-yeux-et-les-oreilles-de-son-pere/",
@@ -365,16 +395,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-20T12:20:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-now-automatically-installs-windows-11-26h2-on-personal-and-unmanaged-pcs/",
-   "title": "Microsoft now automatically installs Windows 11 26H2 on unmanaged devices",
-   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-now-automatically-installs-windows-11-26h2-on-personal-and-unmanaged-pcs/",
-   "summary": "Starting this week, Microsoft has begun automatically upgrading eligible devices that aren't managed by an IT department to Windows 11 26H2.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T12:14:28Z"
   },
   {
    "id": "https://intelligence-artificielle.developpez.com/actu/389332/Uber-DoorDash-et-Airbnb-affirment-que-presque-personne-n-utilise-les-agents-d-IA-d-apres-leurs-resultats-financiers-du-3e-trimestre-Les-chiffres-questionnent-la-pertinence-de-l-utilisation-de-ces-outils/",
@@ -425,16 +445,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-20T11:34:00Z"
-  },
-  {
-   "id": "https://android.developpez.com/actu/389314/Malgre-les-vives-critiques-Google-etendra-la-verification-des-developpeurs-Android-a-l-echelle-mondiale-en-janvier-2027-couvrant-sept-boutiques-d-applications-et-tous-les-appareils-certifies/",
-   "title": "Malgré les vives critiques, Google étendra la vérification des développeurs Android à l'échelle mondiale en janvier 2027, couvrant sept boutiques d'applications et tous les appareils certifiés",
-   "link": "https://android.developpez.com/actu/389314/Malgre-les-vives-critiques-Google-etendra-la-verification-des-developpeurs-Android-a-l-echelle-mondiale-en-janvier-2027-couvrant-sept-boutiques-d-applications-et-tous-les-appareils-certifies/",
-   "summary": "Malgré les vives critiques, Google étendra la vérification des développeurs Android à l'échelle mondiale en janvier 2027, couvrant sept boutiques d'applications et tous les appareils certifiés Google a confirmé qu'elle étendrait la…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-20T11:32:00Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/43326",
@@ -675,16 +685,6 @@
    "category": "Développement",
    "lang": "en",
    "published": "2026-11-12T22:54:52Z"
-  },
-  {
-   "id": "tag:linuxfr.org,2005:News/43299",
-   "title": "Nouveautés de novembre 2026 de la communauté Scenari",
-   "link": "https://linuxfr.org/news/nouveautes-de-novembre-2026-de-la-communaute-scenari",
-   "summary": "Scenari est un ensemble de logiciels open source dédiés à la production collaborative, publication et diffusion de documents multi-support . Vous rédigez une seule fois votre contenu et vous pouvez les générer sous plusieurs formes : site…",
-   "source": "LinuxFr.org",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-12T14:32:23Z"
   },
   {
    "id": "https://github.blog/?p=100077",
