@@ -7,6 +7,9 @@ import { createSnakeUI } from "./ui-snake.js";
 import { createBlackjackUI } from "./ui-blackjack.js";
 import { createRouletteUI } from "./ui-roulette.js";
 import { createPlinkoUI } from "./ui-plinko.js";
+import { createFarmUI } from "./ui-farm.js";
+import { createRaceUI } from "./ui-race.js";
+import { createMinesUI, fmtTime } from "./ui-mines.js";
 import { createClickerUI } from "./ui-clicker.js";
 import { createTetrisUI } from "./ui-tetris.js";
 import { createTowerDefenseUI } from "./ui-td.js";
@@ -27,6 +30,9 @@ const GAMES = {
   blackjack: { title: "Blackjack", ui: createBlackjackUI($("#blackjack-root"), wallet) },
   roulette: { title: "Roulette", ui: createRouletteUI($("#roulette-root"), wallet) },
   plinko: { title: "Plinko", ui: createPlinkoUI($("#plinko-root"), wallet) },
+  farm: { title: "Pêche & Ferme", ui: createFarmUI($("#farm-root"), wallet) },
+  race: { title: "Courses d'IA", ui: createRaceUI($("#race-root"), wallet) },
+  mines: { title: "Démineur", ui: createMinesUI($("#mines-root"), wallet) },
   clicker: { title: "Mineur de données", ui: createClickerUI($("#clicker-root"), wallet) },
   tetris: { title: "Tetris", ui: createTetrisUI($("#tetris-root"), wallet) },
   td: { title: "Pare-feu", ui: createTowerDefenseUI($("#td-root"), wallet) },
@@ -70,6 +76,9 @@ function renderWallet() {
   $("#meta-dungeon").textContent = `Étage max : ${wallet.data.bestDungeon} · Âmes : ${fmt(wallet.data.dungeon.souls)}`;
   $("#meta-hunt").textContent = `Monstres vaincus : ${wallet.data.bestHunt} / 8`;
   $("#meta-breach").textContent = `Meilleur gain : ${fmt(wallet.data.bestBreach)} ¤`;
+  $("#meta-farm").textContent = `Récoltes : ${fmt(wallet.data.farm.harvests)} · Poissons : ${fmt(wallet.data.farm.caught)}`;
+  const records = ["easy", "medium", "hard"].map((id) => (wallet.data.mines[id] ? fmtTime(wallet.data.mines[id]) : "—"));
+  $("#meta-mines").textContent = `Records : ${records.join(" · ")}`;
   const towers = wallet.data.towers.length;
   $("#meta-td").textContent = `Record : ${fmt(wallet.data.bestWave)} vague${wallet.data.bestWave > 1 ? "s" : ""} · ${towers} tour${towers > 1 ? "s" : ""}`;
 }
@@ -85,6 +94,9 @@ const sections = {
   blackjack: $("#game-blackjack"),
   roulette: $("#game-roulette"),
   plinko: $("#game-plinko"),
+  farm: $("#game-farm"),
+  race: $("#game-race"),
+  mines: $("#game-mines"),
   clicker: $("#game-clicker"),
   tetris: $("#game-tetris"),
   td: $("#game-td"),

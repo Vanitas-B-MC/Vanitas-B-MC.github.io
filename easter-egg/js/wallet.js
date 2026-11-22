@@ -9,6 +9,8 @@ import { UPGRADES, BLUE_UPGRADES, SKILLS, CORE } from "./clicker.js";
 import { CHARACTER_IDS, FREE_CHARACTER } from "./survivors.js";
 import { MONSTERS, FAMILIES, FAMILY_IDS, MAX_TIER, freshHunt } from "./hunt.js";
 import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP } from "./td.js";
+import { freshFarm, sanitizeFarm } from "./farm.js";
+import { LEVEL_IDS } from "./mines.js";
 import { CLASS_IDS, FREE_CLASS, META, META_IDS, freshRanks, metaCost, classById } from "./dungeon.js";
 
 const KEY = "mc-arcade-wallet-v1";
@@ -49,7 +51,9 @@ function freshData() {
     trophies: 0,           // monnaie du RPG : gagnée uniquement en chassant
     bestHunt: 0,           // nombre de monstres différents vaincus
     bestDungeon: 0,        // étage le plus profond atteint dans « Donjon »
-    dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], runs: 0 }   // âmes, améliorations permanentes, classes
+    dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], runs: 0 },   // âmes, améliorations permanentes, classes
+    farm: freshFarm(),     // « Pêche & Ferme » : parcelles, améliorations, carnet de pêche
+    mines: Object.fromEntries(LEVEL_IDS.map((id) => [id, 0]))   // Démineur : meilleur temps (secondes) par niveau, 0 = aucun
   };
 }
 
@@ -97,6 +101,8 @@ export function sanitize(raw) {
       for (const id of raw.dungeon.classes) if (CLASS_IDS.includes(id) && !d.classes.includes(id)) d.classes.push(id);
     }
   }
+  data.farm = sanitizeFarm(raw.farm);
+  for (const id of LEVEL_IDS) data.mines[id] = toCount(raw.mines?.[id]);
   if (Array.isArray(raw.chars)) {
     for (const id of raw.chars) if (CHARACTER_IDS.includes(id) && !data.chars.includes(id)) data.chars.push(id);
   }
@@ -199,6 +205,19 @@ export function createWallet(storage = defaultStorage()) {
       return true;
     },
     setBestSnake(score) { return this.setBest("bestSnake", score); },
+
+    // Pêche & Ferme : le jeu modifie `data.farm` directement, puis demande la sauvegarde.
+    saveFarm() { commit(); },
+
+    // Démineur : enregistre un meilleur temps (en secondes). Renvoie true si c'est un nouveau record.
+    setMinesBest(level, seconds) {
+      if (!(level in data.mines)) return false;
+      const value = Math.max(1, toCount(seconds));
+      if (data.mines[level] && value >= data.mines[level]) return false;
+      data.mines[level] = value;
+      commit();
+      return true;
+    },
 
     // Donjon : fin de partie (âmes gagnées), améliorations permanentes et classes payées en âmes.
     dungeonRun(souls) {
