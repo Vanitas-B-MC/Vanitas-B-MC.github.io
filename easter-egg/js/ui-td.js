@@ -5,7 +5,7 @@
 import {
   COLS, ROWS, CELL, MAX_LEVEL, MAPS, FREE_MAP, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
   createState, canPlace, placeTower, upgradeTower, sellTower, startWave, orbitalStrike, update, towerAt,
-  towerRange, towerDamage, upgradeCost, invested, waveCredits, SELL_RATIO, START_LIVES
+  towerRange, towerDamage, upgradeCost, TOWER_PERKS, STRIKE_COST, invested, waveCredits, SELL_RATIO, START_LIVES
 } from "./td.js";
 import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
 
@@ -52,7 +52,7 @@ export function createTowerDefenseUI(root, wallet) {
   const stateEl = h("p", { class: "game-state", id: "td-state", "aria-live": "polite" }, "Prêt");
 
   const waveButton = h("button", { class: "button button-primary", id: "td-wave", type: "button", onclick: () => launchWave() }, "Lancer la vague 1");
-  const strikeButton = h("button", { class: "button button-secondary", id: "td-strike", type: "button", title: "Touche tous les ennemis (4 × les PV de base). Recharge : 50 s.", onclick: () => doStrike() }, "Frappe orbitale (F)");
+  const strikeButton = h("button", { class: "button button-secondary", id: "td-strike", type: "button", title: `Touche tous les ennemis (3 × les PV de base). Coûte ${STRIKE_COST} énergie. Recharge : 30 s.`, onclick: () => doStrike() }, `Frappe orbitale (F) · ${STRIKE_COST}`);
   const speedButton = h("button", { class: "button button-secondary", id: "td-speed", type: "button", onclick: () => toggleSpeed() }, "Vitesse ×1");
 
   const mapButtons = MAPS.map((m) => {
@@ -74,10 +74,11 @@ export function createTowerDefenseUI(root, wallet) {
 
   const selTitle = h("strong", { class: "sel-title" });
   const selStats = h("span", { class: "sel-stats" });
+  const selPerks = h("ul", { class: "sel-perks" });
   const upgradeButton = h("button", { class: "button button-secondary", id: "td-upgrade", type: "button", onclick: () => doUpgrade() });
   const sellButton = h("button", { class: "button button-secondary", id: "td-sell", type: "button", onclick: () => doSell() });
   const selection = h("div", { class: "td-selection chamfer", id: "td-selection", hidden: true },
-    selTitle, selStats, h("div", { class: "sel-buttons" }, upgradeButton, sellButton));
+    selTitle, selStats, selPerks, h("div", { class: "sel-buttons" }, upgradeButton, sellButton));
 
   root.replaceChildren(
     h("p", { class: "game-rules" },
@@ -169,14 +170,15 @@ export function createTowerDefenseUI(root, wallet) {
       ctx.arc(x + CELL / 2, y + CELL / 2, 7 + tower.level, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
-      for (let i = 0; i < tower.level; i++) ctx.fillRect(x + 7 + i * 7, y + CELL - 9, 5, 3);   // un trait par niveau
+      for (let i = 0; i < tower.level; i++) ctx.fillRect(x + 5 + i * 6, y + CELL - 9, 4, 3);
+      if (tower.level >= MAX_LEVEL) { ctx.strokeStyle = "#fcee0a"; ctx.lineWidth = 1.5; ctx.strokeRect(x + 1.5, y + 1.5, CELL - 3, CELL - 3); }   // un trait par niveau
     }
 
     // Ennemis
     for (const e of state.enemies) {
       const def = ENEMY_DEFS[e.type];
       const r = e.type === "boss" ? 13 : e.type === "tank" ? 10 : e.type === "runner" ? 6 : 8;
-      ctx.fillStyle = e.slow > 0 ? "#7fd8ff" : def.color;
+      ctx.fillStyle = e.stun > 0 ? "#fcee0a" : e.slow > 0 ? "#7fd8ff" : def.color;
       ctx.shadowColor = ctx.fillStyle;
       ctx.shadowBlur = 8;
       ctx.beginPath();
@@ -274,8 +276,8 @@ export function createTowerDefenseUI(root, wallet) {
     const inWave = state.phase === "wave";
     waveButton.disabled = status !== "running" || inWave || state.phase === "over";
     setText(waveButton, inWave ? `Vague ${state.wave} en cours…` : `Lancer la vague ${state.wave + 1}`);
-    strikeButton.disabled = status !== "running" || state.phase !== "wave" || state.strikeCd > 0;
-    setText(strikeButton, state.strikeCd > 0 ? `Frappe orbitale : ${Math.ceil(state.strikeCd)} s` : "Frappe orbitale (F)");
+    strikeButton.disabled = status !== "running" || state.phase !== "wave" || state.strikeCd > 0 || state.gold < STRIKE_COST;
+    setText(strikeButton, state.strikeCd > 0 ? `Frappe orbitale : ${Math.ceil(state.strikeCd)} s` : `Frappe orbitale (F) · ${STRIKE_COST}`);
     setText(speedButton, `Vitesse ×${speed}`);
 
     for (const { m, button } of mapButtons) {
@@ -308,8 +310,10 @@ export function createTowerDefenseUI(root, wallet) {
       const def = TOWER_DEFS[tower.type];
       setText(selTitle, `${def.name} — niveau ${tower.level + 1} / ${MAX_LEVEL + 1}`);
       setText(selStats, `Dégâts ${Math.round(towerDamage(def, tower.level))} · portée ${(towerRange(def, tower.level) / CELL).toFixed(1).replace(".", ",")} cases`);
+      selPerks.replaceChildren(...(TOWER_PERKS[tower.type] || []).map(([lvl, text]) =>
+        h("li", { class: tower.level + 1 >= lvl ? "is-on" : "" }, `Niv. ${lvl} · ${text}`)));
       const price = tower.level >= MAX_LEVEL ? null : upgradeCost(def, tower.level);
-      setText(upgradeButton, price === null ? "Niveau maximum" : `Améliorer (${fmt(price)})`);
+      setText(upgradeButton, price === null ? "Niveau maximum" : tower.level + 1 >= MAX_LEVEL ? `Amélioration ULTIME (${fmt(price)})` : `Améliorer (${fmt(price)})`);
       upgradeButton.disabled = price === null || state.gold < price || state.phase === "over";
       setText(sellButton, `Vendre (+${fmt(Math.floor(invested(tower) * SELL_RATIO))})`);
       sellButton.disabled = state.phase === "over";

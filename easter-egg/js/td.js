@@ -12,7 +12,8 @@ export const CELL = 40;
 
 export const START_LIVES = 20;
 export const START_GOLD = 140;
-export const MAX_LEVEL = 3;
+export const MAX_LEVEL = 4;          // niveaux 1 à 5 ; le niveau 5 est l'amélioration ultime
+export const ULTIMATE_LEVEL = MAX_LEVEL;
 export const SELL_RATIO = 0.6;
 
 /* ---------- Cartes et chemins des ennemis ---------- */
@@ -82,10 +83,10 @@ export const FREE_TOWER = "laser";
 // range en cases, rate en tirs par seconde.
 export const TOWER_DEFS = {
   laser:  { id: "laser",  name: "Laser",           desc: "Tir rapide, dégâts faibles. Bon partout.",             cost: 50,  unlock: 0,    range: 2.7, rate: 2.2,  dmg: 7,  color: "#00f0ff" },
-  cryo:   { id: "cryo",   name: "Tour cryo",       desc: "Ralentit les ennemis de 50 % pendant 2 s.",            cost: 70,  unlock: 150,  range: 2.5, rate: 1.4,  dmg: 3,  color: "#7fd8ff", slow: 0.5,  slowTime: 2 },
+  cryo:   { id: "cryo",   name: "Tour cryo",       desc: "Ralentit les ennemis de 50 % pendant 2 s. Évolue vers le gel.",            cost: 70,  unlock: 150,  range: 2.5, rate: 1.4,  dmg: 3,  color: "#7fd8ff", slow: 0.5,  slowTime: 2 },
   canon:  { id: "canon",  name: "Canon à plasma",  desc: "Dégâts de zone : idéal contre les groupes.",           cost: 95,  unlock: 400,  range: 2.9, rate: 0.8,  dmg: 34, color: "#ff8a3d", splash: 1.15 },
   sniper: { id: "sniper", name: "Sniper",          desc: "Portée immense et gros dégâts, mais lent.",            cost: 120, unlock: 900,  range: 6,   rate: 0.5,  dmg: 100, color: "#fcee0a" },
-  tesla:  { id: "tesla",  name: "Tesla",           desc: "Un éclair qui rebondit sur 3 ennemis.",                cost: 140, unlock: 1800, range: 2.7, rate: 1.2,  dmg: 26, color: "#b58cff", chain: 3 },
+  tesla:  { id: "tesla",  name: "Tesla",           desc: "Un éclair qui rebondit sur 3 ennemis (plus en montant de niveau) et les étourdit.",                cost: 140, unlock: 1800, range: 2.7, rate: 1.2,  dmg: 26, color: "#b58cff", chain: 3 },
   venin:  { id: "venin",  name: "Injecteur viral", desc: "Empoisonne : dégâts sur la durée, ignore le blindage.", cost: 110, unlock: 1200, range: 2.6, rate: 1.3,  dmg: 6,  color: "#3ddc84", poisonDps: 18, poisonTime: 4 },
   mortier:{ id: "mortier", name: "Mortier",        desc: "Portée énorme, énormes dégâts de zone, très lent.",    cost: 150, unlock: 5000, range: 5,   rate: 0.3,  dmg: 90, color: "#ffb347", splash: 1.7 },
   gatling:{ id: "gatling", name: "Gatling",         desc: "Cadence folle, dégâts minuscules. Achève les essaims.", cost: 130, unlock: 7000, range: 2.4, rate: 6,    dmg: 4,  color: "#e6e6e6" },
@@ -93,9 +94,88 @@ export const TOWER_DEFS = {
 };
 export const TOWER_IDS = Object.keys(TOWER_DEFS);
 
-export const towerDamage = (def, level) => def.dmg * (1 + 0.35 * level);
-export const towerRange = (def, level) => def.range * (1 + 0.06 * level) * CELL;   // en pixels
-export const upgradeCost = (def, level) => Math.round(def.cost * 0.8 * (level + 1));
+// Caractéristiques d'une tour selon son niveau : chaque tour a sa propre évolution
+// (le niveau 5 est l'amélioration ultime : stats nettement plus hautes + une capacité en plus).
+export function towerStats(def, level) {
+  const ult = level >= ULTIMATE_LEVEL;
+  const st = {
+    damage: def.dmg * (1 + 0.35 * level) * (ult ? 1.5 : 1),
+    range: def.range * (1 + 0.06 * level) * (ult ? 1.1 : 1) * CELL,   // en pixels
+    rate: def.rate * (ult ? 1.25 : 1),
+    targets: 1, splash: def.splash || 0, chain: def.chain || 0, chainFalloff: 0.85, chainReach: 2,
+    stun: 0, slow: def.slow || 0, slowTime: def.slowTime || 0, freezeChance: 0, freezeTime: 0,
+    poisonDps: def.poisonDps ? def.poisonDps * (1 + 0.35 * level) : 0, poisonTime: def.poisonTime || 0,
+    spreadCount: 0, spreadRadius: 0, crit: 0, critMul: 3, pierce: false, execute: 0,
+    pulseSlow: 0, pulseSlowTime: 0
+  };
+  switch (def.id) {
+    case "laser":
+      if (level >= 2) st.targets = 2;
+      if (ult) { st.targets = 3; st.crit = 0.25; st.critMul = 2.5; }
+      break;
+    case "cryo":
+      st.slow = Math.min(0.8, 0.5 + 0.08 * level);
+      st.slowTime = 2 + 0.5 * level;
+      if (level >= 2) { st.freezeChance = 0.2; st.freezeTime = 1; }
+      if (ult) { st.freezeChance = 0.5; st.freezeTime = 1.5; st.splash = 1.3; }
+      break;
+    case "canon":
+      st.splash += 0.1 * level;
+      if (level >= 2) st.stun = 0.3;
+      if (ult) { st.stun = 0.7; st.splash += 0.3; }
+      break;
+    case "sniper":
+      if (level >= 1) st.crit = 0.1;
+      if (level >= 2) { st.crit = 0.2; st.pierce = true; }
+      if (ult) { st.crit = 0.35; st.execute = 0.25; }
+      break;
+    case "tesla":
+      st.chain = 3 + level + (ult ? 2 : 0);
+      st.chainReach = 2 + 0.25 * level;
+      if (ult) st.chainFalloff = 0.95;
+      if (level >= 1) st.stun = 0.2 + 0.08 * level;
+      break;
+    case "venin":
+      st.poisonTime = 4 + level + (ult ? 2 : 0);
+      if (level >= 2) { st.spreadCount = 1; st.spreadRadius = 1.2; }
+      if (ult) { st.spreadCount = 4; st.spreadRadius = 1.8; }
+      break;
+    case "mortier":
+      st.splash += 0.15 * level;
+      if (level >= 2) st.stun = 0.4;
+      if (ult) { st.targets = 2; st.stun = 0.8; }
+      break;
+    case "gatling":
+      if (level >= 2) st.pierce = true;
+      if (level >= 3) st.crit = 0.1;
+      if (ult) st.rate *= 1.3;
+      break;
+    case "pulsar":
+      if (level >= 1) { st.pulseSlow = 0.3; st.pulseSlowTime = 1.2; }
+      if (level >= 2) st.stun = 0.3;
+      if (ult) st.stun = 0.6;
+      break;
+  }
+  return st;
+}
+
+export const towerDamage = (def, level) => towerStats(def, level).damage;
+export const towerRange = (def, level) => towerStats(def, level).range;
+// Les 3 premières améliorations coûtent cher progressivement ; l'ultime coûte 6 × le prix de pose.
+export const upgradeCost = (def, level) => (level >= ULTIMATE_LEVEL - 1 ? Math.round(def.cost * 6) : Math.round(def.cost * 0.8 * (level + 1)));
+
+// Ce que débloque chaque niveau (affiché dans le panneau de la tour sélectionnée).
+export const TOWER_PERKS = {
+  laser:  [[2, "Double tir : touche 2 ennemis"], [5, "ULTIME : 3 cibles, 25 % de coups critiques ×2,5"]],
+  cryo:   [[1, "Ralentissement et durée accrus à chaque niveau"], [3, "20 % de chances de GELER 1 s"], [5, "ULTIME : gel 1,5 s (50 %) en zone"]],
+  canon:  [[1, "Explosion plus large à chaque niveau"], [3, "Étourdit 0,3 s les ennemis touchés"], [5, "ULTIME : zone géante, étourdissement 0,7 s"]],
+  sniper: [[2, "Critiques ×3 (20 %), ignore le blindage"], [5, "ULTIME : 35 % de critiques, exécute sous 25 % de PV"]],
+  tesla:  [[1, "+1 rebond par niveau, étourdit brièvement"], [5, "ULTIME : +2 rebonds, plus aucune perte de dégâts"]],
+  venin:  [[1, "Poison plus long à chaque niveau"], [3, "Le poison se propage à 1 voisin"], [5, "ULTIME : propagation à 4 voisins, poison 10 s"]],
+  mortier:[[1, "Explosion plus large à chaque niveau"], [3, "Étourdit 0,4 s"], [5, "ULTIME : 2 obus par tir, étourdissement 0,8 s"]],
+  gatling:[[3, "Balles perforantes : ignore le blindage"], [4, "10 % de critiques"], [5, "ULTIME : cadence +30 %"]],
+  pulsar: [[2, "L'onde ralentit de 30 %"], [3, "L'onde étourdit 0,3 s"], [5, "ULTIME : étourdissement 0,6 s"]]
+};
 
 // Énergie dépensée au total pour une tour (pose + améliorations) : sert à calculer la revente.
 export function invested(tower) {
@@ -208,14 +288,16 @@ export function sellTower(state, id) {
   return { ok: true, refund };
 }
 
-// Frappe orbitale : pouvoir actif, utilisable en pleine vague. Touche tous les ennemis (4 × les PV de base).
-export const STRIKE_COOLDOWN = 50;
-export const strikeReady = (state) => state.phase === "wave" && state.strikeCd <= 0;
+// Frappe orbitale : pouvoir actif coûteux, utilisable en pleine vague. Touche tous les ennemis (3 × les PV de base).
+export const STRIKE_COOLDOWN = 30;
+export const STRIKE_COST = 750;
+export const strikeReady = (state) => state.phase === "wave" && state.strikeCd <= 0 && state.gold >= STRIKE_COST;
 
 export function orbitalStrike(state) {
   if (!strikeReady(state)) return false;
   const events = { killed: 0, leaked: 0 };
-  const damage = baseHp(state.wave) * 4 * state.map.hpMul;
+  const damage = baseHp(state.wave) * 3 * state.map.hpMul;
+  state.gold -= STRIKE_COST;
   for (const e of state.enemies) if (!e.dead) hit(state, e, damage, events);
   state.strikeCd = STRIKE_COOLDOWN;
   state.fx.push({ kind: "boom", x: (COLS * CELL) / 2, y: (ROWS * CELL) / 2, r: (COLS * CELL) / 2, ttl: 0.5, max: 0.5, color: "#ffffff" });
@@ -238,7 +320,7 @@ function spawn(state, entry) {
   const { x, y } = pointAt(0, state.map);
   state.enemies.push({
     id: state.nextId++, type: entry.type, hp: entry.hp, maxHp: entry.hp,
-    dist: 0, x, y, slow: 0, poison: 0, poisonLeft: 0, dead: false, speed: def.speed * CELL
+    dist: 0, x, y, slow: 0, poison: 0, poisonLeft: 0, stun: 0, dead: false, speed: def.speed * CELL
   });
 }
 
@@ -257,61 +339,99 @@ function hit(state, enemy, damage, events, pierce = false) {
 
 const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 
+// Étourdissement : les boss y résistent (durée réduite).
+function stunEnemy(e, time) {
+  if (time <= 0) return;
+  e.stun = Math.max(e.stun || 0, e.type === "boss" ? time * 0.4 : time);
+}
+
+// Effets secondaires d'un tir sur un ennemi touché (ralentissement, gel, étourdissement, poison).
+function applyEffects(state, e, st) {
+  if (e.dead) return;
+  if (st.slow) { e.slow = Math.max(e.slow, st.slow); e.slowLeft = Math.max(e.slowLeft || 0, st.slowTime); }
+  if (st.freezeChance && (state.rng || Math.random)() < st.freezeChance) stunEnemy(e, st.freezeTime);
+  if (st.stun) stunEnemy(e, st.stun);
+  if (st.poisonDps) {
+    e.poison = Math.max(e.poison, st.poisonDps);
+    e.poisonLeft = Math.max(e.poisonLeft, st.poisonTime);
+  }
+}
+
 function fire(state, tower, events) {
   const def = TOWER_DEFS[tower.type];
-  const range = towerRange(def, tower.level);
+  const st = towerStats(def, tower.level);
+  const range = st.range;
   const cx = (tower.col + 0.5) * CELL;
   const cy = (tower.row + 0.5) * CELL;
   const origin = { x: cx, y: cy };
+  const rng = state.rng || Math.random;
 
-  // Cible : l'ennemi à portée qui est le plus avancé sur le chemin.
-  let target = null;
-  for (const e of state.enemies) {
-    if (e.dead || dist2(origin, e) > range * range) continue;
-    if (!target || e.dist > target.dist) target = e;
-  }
-  if (!target) return false;
+  // Cibles : les ennemis à portée les plus avancés sur le chemin.
+  const inRange = state.enemies.filter((e) => !e.dead && dist2(origin, e) <= range * range).sort((a, b) => b.dist - a.dist);
+  if (!inRange.length) return false;
+  const target = inRange[0];
 
-  const damage = towerDamage(def, tower.level);
   const beam = (a, b) => state.fx.push({ kind: "beam", x1: a.x, y1: a.y, x2: b.x, y2: b.y, ttl: 0.1, max: 0.1, color: def.color });
+  // Dégâts d'un coup : critique et exécution (sniper) selon le niveau.
+  const strike = (e, base) => {
+    let damage = base;
+    if (st.crit && rng() < st.crit) damage *= st.critMul;
+    if (st.execute && e.type !== "boss" && e.hp - damage <= e.maxHp * st.execute) damage = Math.max(damage, e.hp);
+    hit(state, e, damage, events, st.pierce);
+  };
 
   if (def.pulse) {
     state.fx.push({ kind: "boom", x: cx, y: cy, r: range, ttl: 0.3, max: 0.3, color: def.color });
-    for (const e of state.enemies) if (!e.dead && dist2(origin, e) <= range * range) hit(state, e, damage, events);
+    for (const e of inRange) {
+      strike(e, st.damage);
+      if (st.pulseSlow && !e.dead) { e.slow = Math.max(e.slow, st.pulseSlow); e.slowLeft = Math.max(e.slowLeft || 0, st.pulseSlowTime); }
+      applyEffects(state, e, { stun: st.stun });
+    }
     return true;
   }
 
-  beam(origin, target);
-
-  if (def.splash) {
-    const radius = def.splash * CELL;
-    state.fx.push({ kind: "boom", x: target.x, y: target.y, r: radius, ttl: 0.25, max: 0.25, color: def.color });
-    for (const e of state.enemies) if (!e.dead && dist2(target, e) <= radius * radius) hit(state, e, damage, events);
-  } else if (def.chain) {
-    const struck = new Set([target.id]);
-    let from = target;
-    hit(state, target, damage, events);
-    for (let n = 1; n < def.chain; n++) {
-      let next = null;
+  for (const mainTarget of inRange.slice(0, st.targets)) {
+    beam(origin, mainTarget);
+    if (st.splash) {
+      const radius = st.splash * CELL;
+      state.fx.push({ kind: "boom", x: mainTarget.x, y: mainTarget.y, r: radius, ttl: 0.25, max: 0.25, color: def.color });
       for (const e of state.enemies) {
-        if (e.dead || struck.has(e.id) || dist2(from, e) > (2 * CELL) ** 2) continue;
-        if (!next || dist2(from, e) < dist2(from, next)) next = e;
+        if (e.dead || dist2(mainTarget, e) > radius * radius) continue;
+        strike(e, st.damage);
+        applyEffects(state, e, st);
       }
-      if (!next) break;
-      struck.add(next.id);
-      beam(from, next);
-      hit(state, next, damage * 0.85, events);
-      from = next;
-    }
-  } else {
-    hit(state, target, damage, events);
-    if (def.poisonDps) {
-      target.poison = def.poisonDps * (1 + 0.35 * tower.level);
-      target.poisonLeft = def.poisonTime;
-    }
-    if (def.slow) {
-      target.slow = def.slow;
-      target.slowLeft = def.slowTime;
+    } else if (st.chain) {
+      const struck = new Set([mainTarget.id]);
+      let from = mainTarget;
+      let dmg = st.damage;
+      strike(mainTarget, dmg);
+      applyEffects(state, mainTarget, st);
+      for (let n = 1; n < st.chain; n++) {
+        let next = null;
+        for (const e of state.enemies) {
+          if (e.dead || struck.has(e.id) || dist2(from, e) > (st.chainReach * CELL) ** 2) continue;
+          if (!next || dist2(from, e) < dist2(from, next)) next = e;
+        }
+        if (!next) break;
+        struck.add(next.id);
+        beam(from, next);
+        dmg *= st.chainFalloff;
+        strike(next, dmg);
+        applyEffects(state, next, st);
+        from = next;
+      }
+    } else {
+      strike(mainTarget, st.damage);
+      applyEffects(state, mainTarget, st);
+      if (st.spreadCount) {
+        // Contagion : le poison gagne les ennemis les plus proches de la cible.
+        const reach = (st.spreadRadius * CELL) ** 2;
+        const near = state.enemies
+          .filter((e) => !e.dead && e !== mainTarget && dist2(mainTarget, e) <= reach)
+          .sort((a, b) => dist2(mainTarget, a) - dist2(mainTarget, b))
+          .slice(0, st.spreadCount);
+        for (const e of near) { beam(mainTarget, e); applyEffects(state, e, { poisonDps: st.poisonDps * 0.7, poisonTime: st.poisonTime * 0.8 }); }
+      }
     }
   }
   return true;
@@ -336,12 +456,13 @@ export function update(state, dt) {
       e.slowLeft -= dt;
       if (e.slowLeft <= 0) e.slow = 0;
     }
+    if (e.stun > 0) e.stun = Math.max(0, e.stun - dt);
     if (e.poisonLeft > 0) {
       e.poisonLeft -= dt;
       hit(state, e, e.poison * dt, events, true);
       if (e.dead) continue;
     }
-    e.dist += e.speed * (1 - e.slow) * dt;
+    if (e.stun <= 0) e.dist += e.speed * (1 - e.slow) * dt;
     if (e.dist >= state.map.length) {
       e.dead = true;
       e.leaked = true;
@@ -358,7 +479,7 @@ export function update(state, dt) {
   for (const tower of state.towers) {
     tower.cooldown -= dt;
     if (tower.cooldown > 0) continue;
-    if (fire(state, tower, events)) tower.cooldown = 1 / TOWER_DEFS[tower.type].rate;
+    if (fire(state, tower, events)) tower.cooldown = 1 / towerStats(TOWER_DEFS[tower.type], tower.level).rate;
     else tower.cooldown = 0;   // rien à portée : elle tirera dès qu'un ennemi arrive
   }
 
