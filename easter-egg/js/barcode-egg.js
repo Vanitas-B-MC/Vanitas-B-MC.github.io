@@ -13,7 +13,7 @@ const ALTER = {
   fields: [
     ["Nom", "Vanitas B. Blade"],
     ["Rôle", "Mercenaire"],
-    ["Statut", "Edgerunner", "assets/edgerunner-symbol.png"],
+    ["Statut", "Edgerunner", "../assets/edgerunner-symbol.png"],
   ],
   // Texte affiché sous les champs (une ligne par élément). Mets ici le texte de ton choix.
   lines: [
