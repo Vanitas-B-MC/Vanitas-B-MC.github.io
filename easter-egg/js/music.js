@@ -1,14 +1,18 @@
 // js/music.js — petite musique synthwave générée en direct avec Web Audio (aucun fichier audio).
 // Boucle de 8 mesures : basse, arpège, nappe, grosse caisse et charleston.
 // Le son ne démarre qu'après un clic du joueur (les navigateurs interdisent la lecture automatique).
+// Quand le mode Neon est actif (code « neon »), un autre morceau original de 16 mesures prend le relais : plus rapide,
+// brillant et dansant (rose néon et cyan), avec grosse caisse à 4 temps, basse sur les contretemps et mélodie pop.
 // Quand le mode Edgerunners est actif (code « edgerunner »), la boucle change : morceau original de 16 mesures (~1 min),
 // lent et mélancolique, dans l'ambiance d'« I Really Want to Stay at Your House » (aucune mélodie n'est reprise).
 // Structure : intro (mesures 1-4), couplet (5-8), refrain (9-12), fin qui s'éteint (13-16). Le changement est immédiat.
 
 const BPM = 96;
 const BPM_EDGE = 62;                  // tempo du morceau Edgerunners
+const BPM_NEON = 118;                 // tempo du morceau Neon
 const isEdge = () => document.documentElement.classList.contains("edgerunners");
-const stepSeconds = () => 60 / (isEdge() ? BPM_EDGE : BPM) / 4;   // une double-croche, en secondes
+const isNeon = () => document.documentElement.classList.contains("neon");
+const stepSeconds = () => 60 / (isEdge() ? BPM_EDGE : isNeon() ? BPM_NEON : BPM) / 4;   // une double-croche, en secondes
 const LOOKAHEAD = 0.25;               // on programme les notes 250 ms à l'avance
 const KEY = "mc-music";
 
@@ -45,9 +49,32 @@ const EDGE_CHORUS = [
   [[0, 75, 8], [8, 74, 8], [16, 71, 8], [24, 66, 8]]
 ];
 const EDGE_ARP = [0, 1, 2, 1];
+
+// Morceau Neon : Ré maj7 – La – Si m7 – Sol (1 mesure chacun), répété 4 fois = 16 mesures.
+const NEON_CHORDS = [
+  { root: 38, notes: [62, 66, 69, 73] },  // Ré maj7
+  { root: 33, notes: [57, 61, 64, 69] },  // La
+  { root: 35, notes: [59, 62, 66, 69] },  // Si m7
+  { root: 31, notes: [55, 59, 62, 67] }   // Sol
+];
+const NEON_BARS = 16;
+const NEON_ARP = [0, 1, 2, 3, 2, 1, 3, 2];
+// Mélodies originales : [pas dans la mesure, note MIDI, durée en pas] — une par accord.
+const NEON_VERSE = [
+  [[0, 78, 3], [4, 76, 2], [6, 74, 2], [8, 78, 4], [12, 81, 4]],
+  [[0, 76, 3], [4, 73, 2], [6, 76, 2], [8, 81, 6], [14, 78, 2]],
+  [[0, 74, 3], [4, 78, 2], [6, 76, 2], [8, 74, 4], [12, 71, 4]],
+  [[0, 74, 3], [4, 71, 2], [6, 74, 2], [8, 79, 4], [12, 78, 4]]
+];
+const NEON_CHORUS = [
+  [[0, 81, 4], [4, 78, 4], [8, 81, 4], [12, 83, 4]],
+  [[0, 81, 4], [4, 76, 4], [8, 73, 4], [12, 76, 4]],
+  [[0, 78, 4], [4, 81, 4], [8, 83, 4], [12, 81, 4]],
+  [[0, 79, 6], [6, 78, 2], [8, 74, 4], [12, 71, 4]]
+];
 const STEPS_PER_BAR = 16;
 const BARS = 8;
-const loopSteps = () => STEPS_PER_BAR * (isEdge() ? EDGE_BARS : BARS);
+const loopSteps = () => STEPS_PER_BAR * (isEdge() ? EDGE_BARS : isNeon() ? NEON_BARS : BARS);
 
 function readPref() {
   try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
@@ -64,6 +91,9 @@ export function createMusic() {
   let master = null;
   let leadBus = null;                 // mélodie du morceau Edgerunners : filtre passe-bas + écho
   let echo = null;
+  let feedback = null;
+  let wet = null;
+  let reverbLevel = null;
   let timer = 0;
   let nextTime = 0;
   let step = 0;
@@ -112,6 +142,12 @@ export function createMusic() {
       osc.start(time);
       osc.stop(time + length + 0.05);
     }
+  }
+
+  // Synthé brillant du morceau Neon : deux dents de scie légèrement désaccordées.
+  function bright(freq, time, length, gain, dest = leadBus) {
+    note(freq * 0.997, time, length, "sawtooth", gain, dest, 0.015);
+    note(freq * 1.003, time, length, "sawtooth", gain, dest, 0.015);
   }
 
   function kick(time, level = 0.9) {
@@ -197,8 +233,51 @@ export function createMusic() {
     }
   }
 
+  // Morceau Neon (16 mesures) : intro (1-4), couplet (5-8), refrain (9-12), pont avec montée (13-16).
+  function playNeonStep(index, time) {
+    const STEP = stepSeconds();
+    const bar = Math.floor(index / STEPS_PER_BAR) % NEON_BARS;
+    const inBar = index % STEPS_PER_BAR;
+    const chord = NEON_CHORDS[bar % 4];
+    const section = Math.floor(bar / 4);          // 0 intro, 1 couplet, 2 refrain, 3 pont
+
+    // Rythme : grosse caisse à 4 temps (dès la 3e mesure), clap sur 2 et 4, charleston sur les contretemps.
+    const drums = section === 1 || section === 2 || (section === 0 && bar >= 2);
+    if (drums && inBar % 4 === 0) kick(time, 0.8);
+    if ((section === 1 || section === 2) && (inBar === 4 || inBar === 12)) hat(time, 0.2, 1400, 0.12, "bandpass");
+    if (drums && inBar % 4 === 2) hat(time, 0.14, 8000, 0.09);
+    if (section === 2 && inBar % 2 === 1) hat(time, 0.05);
+    // Montée de la dernière mesure : caisse claire de plus en plus serrée.
+    if (bar === 15 && inBar % 2 === 0) hat(time, 0.06 + inBar * 0.012, 1600, 0.08, "bandpass");
+
+    // Basse sur les contretemps (laisse la place à la grosse caisse).
+    if ((section === 1 || section === 2) && inBar % 4 === 2) {
+      note(midi(chord.root + (inBar === 14 ? 12 : 0)), time, STEP * 3, "sawtooth", 0.15);
+    }
+
+    // Arpège rapide (plus discret au couplet).
+    const arpGain = section === 1 ? 0.025 : section === 3 ? 0.03 : 0.035;
+    const n = chord.notes[NEON_ARP[inBar % NEON_ARP.length]] + (section === 2 ? 12 : 0);
+    note(midi(n), time, STEP * 1.6, "square", arpGain, leadBus, 0.008);
+
+    // Nappe (refrain et pont).
+    if (inBar === 0 && section >= 2) {
+      for (const pad of chord.notes) note(midi(pad - 12), time, STEP * 16, "triangle", 0.035, master, 0.08);
+    }
+
+    // Mélodie : couplet, refrain (plus aigu), pont (reprend le couplet, plus doux).
+    if (section >= 1) {
+      const phrases = section === 2 ? NEON_CHORUS : NEON_VERSE;
+      const gain = section === 2 ? 0.05 : section === 3 ? 0.032 : 0.04;
+      for (const [at, note_, len] of phrases[bar % 4]) {
+        if (at === inBar) bright(midi(note_), time, STEP * len, gain);
+      }
+    }
+  }
+
   function playStep(index, time) {
     if (isEdge()) return playEdgeStep(index, time);
+    if (isNeon()) return playNeonStep(index, time);
     const STEP = stepSeconds();
     const bar = Math.floor(index / STEPS_PER_BAR) % BARS;
     const inBar = index % STEPS_PER_BAR;
@@ -229,6 +308,15 @@ export function createMusic() {
     }
   }
 
+  // Écho (croche pointée) et réverbération : longs et enveloppants pour Edgerunners, courts et nets pour Neon.
+  function tune() {
+    echo.delayTime.value = stepSeconds() * 3;
+    const neon = isNeon();
+    feedback.gain.value = neon ? 0.32 : 0.45;
+    wet.gain.value = neon ? 0.32 : 0.5;
+    reverbLevel.gain.value = neon ? 0.12 : 0.45;
+  }
+
   function start() {
     if (on) return;
     try {
@@ -245,10 +333,8 @@ export function createMusic() {
         lowpass.type = "lowpass";
         lowpass.frequency.value = 3000;
         echo = ctx.createDelay(2);
-        const feedback = ctx.createGain();
-        feedback.gain.value = 0.45;
-        const wet = ctx.createGain();
-        wet.gain.value = 0.5;
+        feedback = ctx.createGain();
+        wet = ctx.createGain();
         // Réverbération : bruit qui s'éteint sur ~3 s
         const length = Math.floor(ctx.sampleRate * 3);
         const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
@@ -258,15 +344,14 @@ export function createMusic() {
         }
         const reverb = ctx.createConvolver();
         reverb.buffer = impulse;
-        const reverbLevel = ctx.createGain();
-        reverbLevel.gain.value = 0.45;
+        reverbLevel = ctx.createGain();
         leadBus.connect(lowpass).connect(master);
         lowpass.connect(echo);
         echo.connect(feedback).connect(echo);
         echo.connect(wet).connect(master);
         lowpass.connect(reverb).connect(reverbLevel).connect(master);
       }
-      echo.delayTime.value = stepSeconds() * 3;   // écho en croche pointée
+      tune();
       master.gain.value = volume * 0.6;
       ctx.resume();
       step = 0;
@@ -289,10 +374,10 @@ export function createMusic() {
     emit();
   }
 
-  // Le code « edgerunner » (ou le retour au style normal) change de morceau tout de suite, sans couper la musique.
+  // Les codes « edgerunner » et « neon » (ou le retour au style normal) changent de morceau tout de suite, sans couper la musique.
   window.addEventListener("mc-theme", () => {
     if (!ctx) return;
-    echo.delayTime.value = stepSeconds() * 3;
+    tune();
     step = 0;
     if (on) nextTime = ctx.currentTime + 0.15;
   });
