@@ -6,6 +6,7 @@ import {
   DIFFICULTIES, generate, createState, pick, canPick, isUsed, activeLine, bufferCodes, progress,
   tick, giveUp, rewards
 } from "./breach.js";
+import { wealthBonus, breachPct } from "./rewards.js";
 import { h, fmt, scrollToPlay } from "./ui.js";
 
 const REASONS = {
@@ -195,10 +196,12 @@ export function createBreachUI(root, wallet) {
     paid = true;
     // Valeurs figées avant d'écrire dans le portefeuille (ses écouteurs réagissent tout de suite).
     const gain = rewards(state);
+    const base = gain.credits;   // le record reste comparé à la récompense de base
+    gain.credits += wealthBonus(wallet.credits, breachPct(state.puzzle.difficulty, gain.hacked, gain.total));
     const reason = REASONS[state.reason] || "";
     if (gain.credits > 0) wallet.addCredits(gain.credits);
     if (gain.coins > 0) wallet.addBlue(gain.coins);
-    const record = wallet.setBest("bestBreach", gain.credits);
+    const record = wallet.setBest("bestBreach", base);
     bestEl.textContent = fmt(wallet.data.bestBreach);
 
     const ok = gain.hacked > 0;

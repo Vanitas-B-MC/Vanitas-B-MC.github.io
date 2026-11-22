@@ -28,7 +28,13 @@ export const UPGRADES = {
   vampire:  { name: "Vol de vie",        desc: "+0,6 PV par ennemi éliminé",           max: 5, apply: (s) => { s.vampire += 1; } },
   armor:    { name: "Plaques d'acier",   desc: "−8 % de dégâts subis",                 max: 5, apply: (s) => { s.armor += 0.08; } },
   xpgain:   { name: "Décodeur",         desc: "+25 % d'expérience gagnée",           max: 4, apply: (s) => { s.xpGain += 0.25; } },
-  projspeed:{ name: "Munitions rapides", desc: "+30 % de vitesse des projectiles",     max: 3, apply: (s) => { s.projSpeed *= 1.3; } }
+  projspeed:{ name: "Munitions rapides", desc: "+30 % de vitesse des projectiles",     max: 3, apply: (s) => { s.projSpeed *= 1.3; } },
+  /* Pouvoirs spectaculaires */
+  missiles: { name: "Missiles chercheurs", desc: "Des missiles à tête chercheuse explosent sur les ennemis", max: 5, apply: (s) => { s.missiles += 1; } },
+  meteor:   { name: "Pluie de météores",   desc: "Des météores s'abattent sur les ennemis (zone ciblée)",    max: 5, apply: (s) => { s.meteor += 1; } },
+  fire:     { name: "Traînée de feu",      desc: "Tu laisses derrière toi des flammes qui brûlent",          max: 5, apply: (s) => { s.fire += 1; } },
+  beam:     { name: "Rayon rotatif",       desc: "Un rayon laser balaie l'arène autour de toi",              max: 5, apply: (s) => { s.beam += 1; } },
+  hole:     { name: "Singularité",         desc: "Un trou noir aspire et broie les ennemis",                 max: 3, apply: (s) => { s.hole += 1; } }
 };
 // Personnages : unlock = crédits pour le débloquer. apply modifie les statistiques de départ.
 export const CHARACTERS = [
@@ -38,9 +44,9 @@ export const CHARACTERS = [
   { id: "hacker", name: "Hacker",  desc: "−30 PV, +15 % de critiques, commence avec 2 lames orbitales.", unlock: 2500,
     apply: (st, p, owned) => { st.maxHp -= 30; p.hp = st.maxHp; st.crit += 0.15; st.orbit = 2; owned.orbit = 2; } },
   { id: "ghost",  name: "Fantôme", desc: "−40 PV, +25 % de vitesse, les tirs traversent 2 ennemis.", unlock: 6000,
-    apply: (st, p) => { st.maxHp -= 40; p.hp = st.maxHp; st.speed *= 1.25; st.pierce += 2; } },
+    apply: (st, p, owned) => { st.maxHp -= 40; p.hp = st.maxHp; st.speed *= 1.25; st.pierce += 2; owned.pierce = 2; } },
   { id: "gunner", name: "Artilleur", desc: "Tire 2 projectiles par salve, mais 25 % plus lentement.", unlock: 12000,
-    apply: (st) => { st.shots = 2; st.cooldown *= 1.25; } }
+    apply: (st, p, owned) => { st.shots = 2; st.cooldown *= 1.25; owned.multi = 1; } }
 ];
 export const CHARACTER_IDS = CHARACTERS.map((c) => c.id);
 export const FREE_CHARACTER = "runner";
@@ -71,14 +77,15 @@ export function createState(rng = Math.random, characterId = FREE_CHARACTER, siz
   const h = Math.max(240, Math.round(size.h || H));
   const stats = {
     maxHp: 140, speed: 130, damage: 14, cooldown: 0.5, shots: 1, pierce: 0,
-    projSpeed: 340, magnet: 50, regen: 0, crit: 0, orbit: 0, nova: 0, lightning: 0, vampire: 0, armor: 0, xpGain: 0
+    projSpeed: 340, magnet: 50, regen: 0, crit: 0, orbit: 0, nova: 0, lightning: 0, vampire: 0, armor: 0, xpGain: 0,
+    missiles: 0, meteor: 0, fire: 0, beam: 0, hole: 0
   };
   const state = {
     rng,
     w, h,
     time: 0,
     over: false,
-    player: { x: w / 2, y: h / 2, hp: stats.maxHp, inv: 0, cd: 0, nova: 0, spin: 0, bolt: 1 },
+    player: { x: w / 2, y: h / 2, hp: stats.maxHp, inv: 0, cd: 0, nova: 0, spin: 0, bolt: 1, pm: 1, pt: 2, ph: 6, pf: 0, beam: 0 },
     stats,
     level: 1,
     xp: 0,
@@ -87,6 +94,8 @@ export function createState(rng = Math.random, characterId = FREE_CHARACTER, siz
     owned: {},            // id → nombre de fois prise
     enemies: [],
     shots: [],
+    missiles: [],         // missiles chercheurs en vol
+    zones: [],            // effets au sol : météores (alerte), flammes, trous noirs
     gems: [],
     fx: [],
     kills: 0,
@@ -292,6 +301,143 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
       }
     }
   }
+
+  /* Missiles chercheurs */
+  if (stats.missiles > 0) {
+    player.pm -= dt;
+    if (player.pm <= 0) {
+      player.pm = Math.max(1.2, 3.2 - stats.missiles * 0.4);
+      const targets = state.enemies.filter((e) => !e.dead && dist2(player, e) < 460 * 460);
+      for (let i = 0; i < 1 + stats.missiles && targets.length; i++) {
+        const e = targets.splice(Math.floor(state.rng() * targets.length), 1)[0];
+        const a = state.rng() * Math.PI * 2;
+        state.missiles.push({ x: player.x, y: player.y, vx: Math.cos(a) * 140, vy: Math.sin(a) * 140, target: e.id, life: 3, trail: [] });
+      }
+    }
+  }
+  for (const m of state.missiles) {
+    m.life -= dt;
+    let target = state.enemies.find((e) => e.id === m.target && !e.dead);
+    if (!target) { target = nearest(state, m, 300); if (target) m.target = target.id; }
+    if (target) {
+      const a = Math.atan2(target.y - m.y, target.x - m.x);
+      const cur = Math.atan2(m.vy, m.vx);
+      let diff = a - cur;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      const turn = cur + Math.max(-6 * dt, Math.min(6 * dt, diff));
+      m.vx = Math.cos(turn) * 300;
+      m.vy = Math.sin(turn) * 300;
+    }
+    m.x += m.vx * dt;
+    m.y += m.vy * dt;
+    m.trail.push({ x: m.x, y: m.y });
+    if (m.trail.length > 8) m.trail.shift();
+    const hitEnemy = state.enemies.find((e) => !e.dead && dist2(m, e) <= (ENEMY_DEFS[e.type].r + 5) ** 2);
+    if (hitEnemy || m.life <= 0) {
+      m.life = 0;
+      const radius = 46 + stats.missiles * 4;
+      for (const e of state.enemies) {
+        if (!e.dead && dist2(m, e) <= (radius + ENEMY_DEFS[e.type].r) ** 2) damageEnemy(state, e, stats.damage * (1.8 + stats.missiles * 0.3));
+      }
+      state.fx.push({ kind: "blast", x: m.x, y: m.y, r: radius, ttl: 0.3, max: 0.3, color: "#ff8a3d" });
+    }
+  }
+  state.missiles = state.missiles.filter((m) => m.life > 0);
+
+  /* Pluie de météores : un cercle d'alerte, puis l'impact */
+  if (stats.meteor > 0) {
+    player.pt -= dt;
+    if (player.pt <= 0) {
+      player.pt = Math.max(1.8, 5.2 - stats.meteor * 0.6);
+      const near = state.enemies.filter((e) => !e.dead && dist2(player, e) < 440 * 440);
+      for (let i = 0; i < 1 + stats.meteor && near.length; i++) {
+        const e = near.splice(Math.floor(state.rng() * near.length), 1)[0];
+        state.zones.push({ kind: "meteor", x: e.x, y: e.y, delay: 0.9, max: 0.9, r: 56 + stats.meteor * 5 });
+      }
+    }
+  }
+
+  /* Traînée de feu */
+  if (stats.fire > 0 && (dx || dy)) {
+    player.pf -= dt;
+    if (player.pf <= 0 && state.zones.length < 90) {
+      player.pf = 0.22;
+      state.zones.push({ kind: "fire", x: player.x, y: player.y, ttl: 2 + stats.fire * 0.4, max: 2 + stats.fire * 0.4, r: 17 + stats.fire * 2 });
+    }
+  }
+
+  /* Rayon rotatif */
+  if (stats.beam > 0) {
+    player.beam += dt * (1.4 + stats.beam * 0.2);
+    const beams = 1 + Math.floor(stats.beam / 2);
+    const length = 140 + stats.beam * 26;
+    for (let b = 0; b < beams; b++) {
+      const a = player.beam + (b * Math.PI * 2) / beams;
+      const ux = Math.cos(a);
+      const uy = Math.sin(a);
+      for (const e of state.enemies) {
+        if (e.dead || (e.beamCd || 0) > 0) continue;
+        const px = e.x - player.x;
+        const py = e.y - player.y;
+        const along = px * ux + py * uy;
+        const across = Math.abs(px * uy - py * ux);
+        if (along > 0 && along < length && across <= ENEMY_DEFS[e.type].r + 5) {
+          damageEnemy(state, e, stats.damage * 0.9);
+          e.beamCd = 0.25;
+        }
+      }
+    }
+  }
+
+  /* Singularité : trou noir qui aspire */
+  if (stats.hole > 0) {
+    player.ph -= dt;
+    if (player.ph <= 0) {
+      player.ph = Math.max(7, 15 - stats.hole * 2.5);
+      const near = state.enemies.filter((e) => !e.dead && dist2(player, e) < 400 * 400);
+      if (near.length) {
+        const e = near[Math.floor(state.rng() * near.length)];
+        const ttl = 3 + stats.hole;
+        state.zones.push({ kind: "hole", x: e.x, y: e.y, ttl, max: ttl, r: 80 + stats.hole * 12 });
+      }
+    }
+  }
+
+  /* Effets au sol : mise à jour (météores, flammes, trous noirs) */
+  for (const z of state.zones) {
+    if (z.kind === "meteor") {
+      z.delay -= dt;
+      if (z.delay <= 0) {
+        z.done = true;
+        for (const e of state.enemies) {
+          if (!e.dead && dist2(z, e) <= (z.r + ENEMY_DEFS[e.type].r) ** 2) damageEnemy(state, e, stats.damage * (3.5 + stats.meteor * 0.7));
+        }
+        state.fx.push({ kind: "blast", x: z.x, y: z.y, r: z.r, ttl: 0.4, max: 0.4, color: "#fcee0a" });
+      }
+    } else if (z.kind === "fire") {
+      z.ttl -= dt;
+      for (const e of state.enemies) {
+        if (!e.dead && dist2(z, e) <= (z.r + ENEMY_DEFS[e.type].r) ** 2) damageEnemy(state, e, stats.damage * (0.9 + stats.fire * 0.25) * dt);
+      }
+    } else if (z.kind === "hole") {
+      z.ttl -= dt;
+      const pullR = z.r * 1.7;
+      for (const e of state.enemies) {
+        if (e.dead) continue;
+        const d = Math.sqrt(dist2(z, e)) || 1;
+        if (d < pullR) {
+          const boss = e.type === "boss" || e.type === "overlord";
+          const v = (boss ? 25 : 95) * dt;
+          e.x += ((z.x - e.x) / d) * Math.min(v, d);
+          e.y += ((z.y - e.y) / d) * Math.min(v, d);
+        }
+        if (d < z.r) damageEnemy(state, e, stats.damage * (1.2 + stats.hole * 0.3) * dt);
+      }
+    }
+  }
+  state.zones = state.zones.filter((z) => !z.done && (z.kind === "meteor" || z.ttl > 0));
+  for (const e of state.enemies) if (e.beamCd > 0) e.beamCd -= dt;
 
   /* Ennemis : poursuite et contact */
   for (const e of state.enemies) {

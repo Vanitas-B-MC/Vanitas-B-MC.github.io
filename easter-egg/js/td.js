@@ -90,7 +90,9 @@ export const TOWER_DEFS = {
   venin:  { id: "venin",  name: "Injecteur viral", desc: "Empoisonne : dégâts sur la durée, ignore le blindage.", cost: 110, unlock: 1200, range: 2.6, rate: 1.3,  dmg: 6,  color: "#3ddc84", poisonDps: 18, poisonTime: 4 },
   mortier:{ id: "mortier", name: "Mortier",        desc: "Portée énorme, énormes dégâts de zone, très lent.",    cost: 150, unlock: 5000, range: 5,   rate: 0.3,  dmg: 90, color: "#ffb347", splash: 1.7 },
   gatling:{ id: "gatling", name: "Gatling",         desc: "Cadence folle, dégâts minuscules. Achève les essaims.", cost: 130, unlock: 7000, range: 2.4, rate: 6,    dmg: 4,  color: "#e6e6e6" },
-  pulsar: { id: "pulsar", name: "Pulsar",          desc: "Onde qui touche tous les ennemis proches.",            cost: 160, unlock: 3000, range: 2.2, rate: 0.7,  dmg: 24, color: "#ff6bd6", pulse: true }
+  pulsar: { id: "pulsar", name: "Pulsar",          desc: "Onde qui touche tous les ennemis proches.",            cost: 160, unlock: 3000, range: 2.2, rate: 0.7,  dmg: 24, color: "#ff6bd6", pulse: true },
+  beacon: { id: "beacon", name: "Beacon",         desc: "Ne tire pas : booste les tours voisines (dégâts, cadence). Plusieurs beacons se cumulent.", cost: 120, unlock: 9000,  range: 2.2, rate: 0, dmg: 0, color: "#4dffd2", support: true },
+  miner:  { id: "miner",  name: "Data Miner",      desc: "Ne tire pas : produit de l'énergie à la fin de chaque vague.",  cost: 100, unlock: 4000,  range: 0,   rate: 0, dmg: 0, color: "#5b9bff", income: true }
 };
 export const TOWER_IDS = Object.keys(TOWER_DEFS);
 
@@ -106,9 +108,18 @@ export function towerStats(def, level) {
     stun: 0, slow: def.slow || 0, slowTime: def.slowTime || 0, freezeChance: 0, freezeTime: 0,
     poisonDps: def.poisonDps ? def.poisonDps * (1 + 0.35 * level) : 0, poisonTime: def.poisonTime || 0,
     spreadCount: 0, spreadRadius: 0, crit: 0, critMul: 3, pierce: false, execute: 0,
-    pulseSlow: 0, pulseSlowTime: 0
+    pulseSlow: 0, pulseSlowTime: 0,
+    boostDamage: 0, boostRate: 0, boostRange: 0, income: 0
   };
   switch (def.id) {
+    case "beacon":
+      st.boostDamage = (0.2 + 0.08 * level) * (ult ? 1.5 : 1);
+      st.boostRate = (0.15 + 0.05 * level) * (ult ? 1.5 : 1);
+      st.boostRange = ult ? 0.15 : level >= 2 ? 0.07 : 0;
+      break;
+    case "miner":
+      st.income = Math.round(24 * (1 + 0.75 * level) * (ult ? 1.6 : 1));
+      break;
     case "laser":
       if (level >= 2) st.targets = 2;
       if (ult) { st.targets = 3; st.crit = 0.25; st.critMul = 2.5; }
@@ -174,6 +185,8 @@ export const TOWER_PERKS = {
   venin:  [[1, "Poison plus long à chaque niveau"], [3, "Le poison se propage à 1 voisin"], [5, "ULTIME : propagation à 4 voisins, poison 10 s"]],
   mortier:[[1, "Explosion plus large à chaque niveau"], [3, "Étourdit 0,4 s"], [5, "ULTIME : 2 obus par tir, étourdissement 0,8 s"]],
   gatling:[[3, "Balles perforantes : ignore le blindage"], [4, "10 % de critiques"], [5, "ULTIME : cadence +30 %"]],
+  beacon: [[1, "Aura plus forte et plus large à chaque niveau"], [3, "Les tours boostées gagnent +7 % de portée"], [5, "ULTIME : effets ×1,5 et +15 % de portée"]],
+  miner:  [[1, "Production d'énergie accrue à chaque niveau"], [5, "ULTIME : production ×1,6"]],
   pulsar: [[2, "L'onde ralentit de 30 %"], [3, "L'onde étourdit 0,3 s"], [5, "ULTIME : étourdissement 0,6 s"]]
 };
 
@@ -357,9 +370,31 @@ function applyEffects(state, e, st) {
   }
 }
 
+// Bonus apportés à une tour par les Beacons voisins (les effets se cumulent, avec un plafond).
+export function beaconBuff(state, tower) {
+  const buff = { damage: 1, rate: 1, range: 1 };
+  if (TOWER_DEFS[tower.type].support) return buff;
+  let d = 0, r = 0, g = 0;
+  for (const b of state.towers) {
+    if (b.type !== "beacon") continue;
+    const st = towerStats(TOWER_DEFS.beacon, b.level);
+    const reach = st.range;
+    const dx = (b.col - tower.col) * CELL, dy = (b.row - tower.row) * CELL;
+    if (dx * dx + dy * dy > reach * reach) continue;
+    d += st.boostDamage; r += st.boostRate; g = Math.max(g, st.boostRange);
+  }
+  buff.damage += Math.min(1, d);
+  buff.rate += Math.min(0.6, r);
+  buff.range += g;
+  return buff;
+}
+
 function fire(state, tower, events) {
   const def = TOWER_DEFS[tower.type];
   const st = towerStats(def, tower.level);
+  const buff = beaconBuff(state, tower);
+  st.damage *= buff.damage;
+  st.range *= buff.range;
   const range = st.range;
   const cx = (tower.col + 0.5) * CELL;
   const cy = (tower.row + 0.5) * CELL;
@@ -479,7 +514,9 @@ export function update(state, dt) {
   for (const tower of state.towers) {
     tower.cooldown -= dt;
     if (tower.cooldown > 0) continue;
-    if (fire(state, tower, events)) tower.cooldown = 1 / towerStats(TOWER_DEFS[tower.type], tower.level).rate;
+    const tdef = TOWER_DEFS[tower.type];
+    if (tdef.support || tdef.income) continue;   // Beacon et Data Miner ne tirent pas
+    if (fire(state, tower, events)) tower.cooldown = 1 / (towerStats(tdef, tower.level).rate * beaconBuff(state, tower).rate);
     else tower.cooldown = 0;   // rien à portée : elle tirera dès qu'un ennemi arrive
   }
 
@@ -500,7 +537,13 @@ export function update(state, dt) {
   // Vague repoussée
   if (state.phase === "wave" && state.spawnList.length === 0 && state.enemies.length === 0) {
     state.phase = "idle";
-    state.gold += waveBonusGold(state.wave);
+    // Data Miners : de l'énergie en plus à la fin de la vague (les Beacons voisins l'augmentent un peu).
+    let mined = 0;
+    for (const t of state.towers) {
+      if (t.type === "miner") mined += Math.round(towerStats(TOWER_DEFS.miner, t.level).income * (1 + (beaconBuff(state, t).damage - 1) * 0.5));
+    }
+    state.gold += waveBonusGold(state.wave) + mined;
+    events.mined = mined;
     const credits = waveCredits(state.wave, state.map);
     state.creditsEarned += credits;
     events.waveCleared = true;

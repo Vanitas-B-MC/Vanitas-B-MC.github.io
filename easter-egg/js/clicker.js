@@ -1,4 +1,5 @@
 // js/clicker.js — logique pure du Clicker « Mineur de données ». Aucun accès au DOM.
+import { wealthBonus, ACHIEVEMENT_PCT } from "./rewards.js";
 //
 // Trois niveaux de progression :
 //   - en CRÉDITS  (UPGRADES)      : ajoutent des crédits par clic ou par seconde ;
@@ -351,8 +352,9 @@ export function checkAchievements(wallet) {
   for (const a of ACHIEVEMENTS) {
     if (wallet.data.achievements.includes(a.id) || !a.test(stats)) continue;
     if (wallet.unlockAchievement(a.id)) {
-      wallet.addCredits(a.reward);
-      unlocked.push(a);
+      const paid = a.reward + wealthBonus(wallet.credits, ACHIEVEMENT_PCT);   // + 0,5 % de la fortune
+      wallet.addCredits(paid);
+      unlocked.push({ ...a, reward: paid });
     }
   }
   return unlocked;

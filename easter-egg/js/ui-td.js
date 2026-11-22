@@ -5,8 +5,9 @@
 import {
   COLS, ROWS, CELL, MAX_LEVEL, MAPS, FREE_MAP, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
   createState, canPlace, placeTower, upgradeTower, sellTower, startWave, orbitalStrike, update, towerAt,
-  towerRange, towerDamage, upgradeCost, TOWER_PERKS, STRIKE_COST, invested, waveCredits, SELL_RATIO, START_LIVES
+  towerRange, towerDamage, towerStats, upgradeCost, TOWER_PERKS, STRIKE_COST, invested, waveCredits, SELL_RATIO, START_LIVES
 } from "./td.js";
+import { wealthBonus, wavePct } from "./rewards.js";
 import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
 
 const W = COLS * CELL;
@@ -163,11 +164,22 @@ export function createTowerDefenseUI(root, wallet) {
       ctx.strokeStyle = def.color;
       ctx.lineWidth = tower.id === selectedId ? 3 : 1.5;
       ctx.strokeRect(x + 3.5, y + 3.5, CELL - 7, CELL - 7);
+      if (def.support) {
+        // Aura du Beacon : anneau qui pulse doucement autour de la tour
+        ctx.globalAlpha = 0.12 + 0.08 * Math.sin(state.time * 3);
+        ctx.fillStyle = def.color;
+        ctx.beginPath();
+        ctx.arc(x + CELL / 2, y + CELL / 2, towerRange(def, tower.level), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
       ctx.fillStyle = def.color;
       ctx.shadowColor = def.color;
       ctx.shadowBlur = 8;
       ctx.beginPath();
-      ctx.arc(x + CELL / 2, y + CELL / 2, 7 + tower.level, 0, Math.PI * 2);
+      if (def.income) ctx.rect(x + CELL / 2 - 7 - tower.level, y + CELL / 2 - 7 - tower.level, 14 + tower.level * 2, 14 + tower.level * 2);
+      else if (def.support) { ctx.moveTo(x + CELL / 2, y + 6); ctx.lineTo(x + CELL - 8, y + CELL - 8); ctx.lineTo(x + 8, y + CELL - 8); ctx.closePath(); }
+      else ctx.arc(x + CELL / 2, y + CELL / 2, 7 + tower.level, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
       for (let i = 0; i < tower.level; i++) ctx.fillRect(x + 5 + i * 6, y + CELL - 9, 4, 3);
@@ -309,7 +321,13 @@ export function createTowerDefenseUI(root, wallet) {
     if (tower) {
       const def = TOWER_DEFS[tower.type];
       setText(selTitle, `${def.name} — niveau ${tower.level + 1} / ${MAX_LEVEL + 1}`);
-      setText(selStats, `Dégâts ${Math.round(towerDamage(def, tower.level))} · portée ${(towerRange(def, tower.level) / CELL).toFixed(1).replace(".", ",")} cases`);
+      const ts = towerStats(def, tower.level);
+      const pct = (v) => `+${Math.round(v * 100)} %`;
+      setText(selStats, def.support
+        ? `Aura ${(ts.range / CELL).toFixed(1).replace(".", ",")} cases · dégâts ${pct(ts.boostDamage)} · cadence ${pct(ts.boostRate)}`
+        : def.income
+          ? `Produit ${fmt(ts.income)} énergie à la fin de chaque vague`
+          : `Dégâts ${Math.round(towerDamage(def, tower.level))} · portée ${(towerRange(def, tower.level) / CELL).toFixed(1).replace(".", ",")} cases`);
       selPerks.replaceChildren(...(TOWER_PERKS[tower.type] || []).map(([lvl, text]) =>
         h("li", { class: tower.level + 1 >= lvl ? "is-on" : "" }, `Niv. ${lvl} · ${text}`)));
       const price = tower.level >= MAX_LEVEL ? null : upgradeCost(def, tower.level);
@@ -482,8 +500,11 @@ export function createTowerDefenseUI(root, wallet) {
       const events = update(state, STEP);
 
       if (events.credits > 0) {
-        wallet.addCredits(events.credits);
-        say(`Vague ${state.wave} repoussée : +${fmt(events.credits)} crédits, +${fmt(20 + 2 * state.wave)} énergie.`);
+        // Crédits de base + pourcentage de la fortune actuelle.
+        const total = events.credits + wealthBonus(wallet.credits, wavePct(state.map.reward));
+        state.creditsEarned += total - events.credits;
+        wallet.addCredits(total);
+        say(`Vague ${state.wave} repoussée : +${fmt(total)} crédits, +${fmt(20 + 2 * state.wave + (events.mined || 0))} énergie${events.mined ? ` (dont ${fmt(events.mined)} minés)` : ""}.`);
       }
       if (events.over) { finish(); return; }
     }
@@ -570,8 +591,9 @@ export function createTowerDefenseUI(root, wallet) {
       return;
     }
 
-    if (/^[1-9]$/.test(key)) {
-      onPalette(TOWER_IDS[Number(key) - 1]);
+    if (/^[0-9]$/.test(key)) {
+      const id = TOWER_IDS[(key === "0" ? 10 : Number(key)) - 1];
+      if (id) onPalette(id);
       return;
     }
     if (key === " " && !onButton) {

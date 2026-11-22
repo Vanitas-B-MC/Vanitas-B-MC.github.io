@@ -5,6 +5,7 @@ import {
   W, H, PLAYER_R, ENEMY_DEFS, CHARACTERS, FREE_CHARACTER, createState, update, chooseUpgrade, describe, xpNeeded,
   creditsFor, coinsFor, SECONDS_PER_COIN
 } from "./survivors.js";
+import { wealthBonus, survivorPct } from "./rewards.js";
 import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
 
 const STEP = 1 / 60;
@@ -154,12 +155,80 @@ export function createSurvivorsUI(root, wallet) {
         ctx.stroke();
         continue;
       }
+      if (f.kind === "blast") {
+        ctx.globalAlpha = k * 0.6;
+        ctx.fillStyle = f.color;
+        ctx.shadowColor = f.color;
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r * (1 - k * 0.5), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        continue;
+      }
       ctx.globalAlpha = k * 0.8;
       ctx.strokeStyle = "#b58cff";
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(f.x, f.y, f.r * (1 - k * 0.3), 0, Math.PI * 2);
       ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // Effets au sol : alerte des météores, flammes, trous noirs
+    for (const z of state.zones) {
+      if (z.kind === "meteor") {
+        const k = 1 - z.delay / z.max;   // 0 → 1 jusqu'à l'impact
+        ctx.globalAlpha = 0.25 + 0.5 * k;
+        ctx.strokeStyle = "#fcee0a";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(z.x, z.y, z.r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 0.12 + 0.3 * k;
+        ctx.fillStyle = "#ff8a3d";
+        ctx.beginPath();
+        ctx.arc(z.x, z.y, z.r * k, 0, Math.PI * 2);
+        ctx.fill();
+        // le météore qui tombe
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "#ffd27a";
+        ctx.shadowColor = "#ff8a3d";
+        ctx.shadowBlur = 14;
+        const fall = (1 - k) * 160;
+        ctx.beginPath();
+        ctx.arc(z.x - fall * 0.35, z.y - fall, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      } else if (z.kind === "fire") {
+        const k = z.ttl / z.max;
+        ctx.globalAlpha = 0.15 + 0.5 * k;
+        ctx.fillStyle = k > 0.5 ? "#ff8a3d" : "#ff3b5c";
+        ctx.shadowColor = "#ff6a2d";
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(z.x, z.y, z.r * (0.6 + 0.4 * k), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      } else if (z.kind === "hole") {
+        const k = Math.min(1, z.ttl / 0.5, (z.max - z.ttl) / 0.3 + 0.2);
+        ctx.globalAlpha = 0.9 * Math.max(0, Math.min(1, k));
+        ctx.fillStyle = "#05030a";
+        ctx.shadowColor = "#b58cff";
+        ctx.shadowBlur = 24;
+        ctx.beginPath();
+        ctx.arc(z.x, z.y, z.r * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "#b58cff";
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 3; i++) {
+          const a0 = state.time * 3 + (i * Math.PI * 2) / 3;
+          ctx.beginPath();
+          ctx.arc(z.x, z.y, z.r * (0.6 + 0.15 * i), a0, a0 + 1.6);
+          ctx.stroke();
+        }
+      }
     }
     ctx.globalAlpha = 1;
 
@@ -191,6 +260,46 @@ export function createSurvivorsUI(root, wallet) {
       ctx.fill();
     }
     ctx.shadowBlur = 0;
+
+    // Missiles chercheurs (avec leur traînée)
+    for (const m of state.missiles) {
+      ctx.strokeStyle = "#ff8a3d";
+      ctx.shadowColor = "#ff8a3d";
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      m.trail.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+      ctx.stroke();
+      ctx.fillStyle = "#fff4d6";
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+
+    // Rayons rotatifs
+    if (stats.beam > 0) {
+      const beams = 1 + Math.floor(stats.beam / 2);
+      const length = 140 + stats.beam * 26;
+      ctx.strokeStyle = "#ff2a6d";
+      ctx.shadowColor = "#ff2a6d";
+      ctx.shadowBlur = 14;
+      ctx.lineWidth = 3;
+      for (let b = 0; b < beams; b++) {
+        const a = player.beam + (b * Math.PI * 2) / beams;
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x + Math.cos(a) * length, player.y + Math.sin(a) * length);
+        ctx.stroke();
+        ctx.globalAlpha = 0.35;
+        ctx.lineWidth = 8;
+        ctx.stroke();
+        ctx.lineWidth = 3;
+      }
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+    }
 
     // Lames orbitales
     if (stats.orbit > 0) {
@@ -375,7 +484,8 @@ export function createSurvivorsUI(root, wallet) {
     stopLoop();
     setStatus("over");
     const seconds = Math.floor(state.time);
-    const credits = creditsFor(state);
+    // Récompense de base + pourcentage de la fortune actuelle (calculé avant de payer).
+    const credits = creditsFor(state) + wealthBonus(wallet.credits, survivorPct(seconds));
     const coins = coinsFor(state);
     // Valeurs figées avant d'écrire dans le portefeuille (ses écouteurs réagissent tout de suite).
     const record = wallet.setBest("bestSurvivor", seconds);
