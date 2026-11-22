@@ -69,7 +69,7 @@
     <section id="hub" class="hub" aria-labelledby="hub-title">
       <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span>Zone secrète // accès autorisé</p>
       <h1 class="arcade-title glitch" id="hub-title" data-text="Arcade" tabindex="-1">Arcade</h1>
-      <p class="arcade-lead">Tu as trouvé le code. Choisis un jeu : les pièces bleues (Snake, Tetris) se jouent à la Roulette ou boostent le Clicker ; les crédits servent au Blackjack et à débloquer les tours du Tower Defense.</p>
+      <p class="arcade-lead">Tu as trouvé le code. Choisis un jeu : les pièces bleues (Snake, Tetris) se jouent à la Roulette ou boostent le Clicker ; les crédits servent au Blackjack, au Plinko et à débloquer les tours du Tower Defense.</p>
 
       <ul class="game-grid">
         <li>
@@ -152,6 +152,14 @@
             <span class="card-meta" id="meta-dungeon">Étage max : 0 · Âmes : 0</span>
           </a>
         </li>
+        <li>
+          <a class="game-card chamfer" href="#plinko">
+            <span class="card-index">// 11</span>
+            <span class="card-name">Plinko</span>
+            <span class="card-desc">Lâche une bille sur 24 slots. Choisis ta mise et ton niveau de risque : le centre est sûr, les bords paient jusqu'à ×20 000.</span>
+            <span class="card-meta">Mise : crédits</span>
+          </a>
+        </li>
       </ul>
 
       <p class="hub-note">Ta progression est enregistrée dans ce navigateur.
@@ -210,6 +218,13 @@
       <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
       <h2 class="game-title glitch" id="title-roulette" data-text="Roulette" tabindex="-1">Roulette</h2>
       <div class="game-body" id="roulette-root"></div>
+    </section>
+
+    <!-- ============ PLINKO ============ -->
+    <section id="game-plinko" class="game-view" aria-labelledby="title-plinko" hidden>
+      <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
+      <h2 class="game-title glitch" id="title-plinko" data-text="Plinko" tabindex="-1">Plinko</h2>
+      <div class="game-body" id="plinko-root"></div>
     </section>
 
     <!-- ============ CLICKER ============ -->

@@ -2,7 +2,7 @@
 //   « awesome »    ouvre la page cachée (easter-egg/arcade.html)
 //   « edgerunner » active / désactive le style Edgerunners (rouge, vert)
 //   « neon »       active / désactive le style Neon (rose néon, cyan)
-//   « cyberpsycho » / « cyberpsychosis » glitch progressif de la page (easter-egg/js/cyberpsychosis.js)
+//   « cyberpsychosis » glitch progressif de la page pendant quelques secondes (js/cyberpsychosis.js)
 // Chargé sur index.html, veille.html et easter-egg/arcade.html.
 
 import { toggleTheme } from "../../js/theme.js";

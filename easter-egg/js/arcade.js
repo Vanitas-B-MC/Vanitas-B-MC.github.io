@@ -6,6 +6,7 @@ import { idleGain, perSecond, bonusOf } from "./clicker.js";
 import { createSnakeUI } from "./ui-snake.js";
 import { createBlackjackUI } from "./ui-blackjack.js";
 import { createRouletteUI } from "./ui-roulette.js";
+import { createPlinkoUI } from "./ui-plinko.js";
 import { createClickerUI } from "./ui-clicker.js";
 import { createTetrisUI } from "./ui-tetris.js";
 import { createTowerDefenseUI } from "./ui-td.js";
@@ -25,6 +26,7 @@ const GAMES = {
   snake: { title: "Data Snake", ui: createSnakeUI($("#game-snake"), wallet) },
   blackjack: { title: "Blackjack", ui: createBlackjackUI($("#blackjack-root"), wallet) },
   roulette: { title: "Roulette", ui: createRouletteUI($("#roulette-root"), wallet) },
+  plinko: { title: "Plinko", ui: createPlinkoUI($("#plinko-root"), wallet) },
   clicker: { title: "Mineur de données", ui: createClickerUI($("#clicker-root"), wallet) },
   tetris: { title: "Tetris", ui: createTetrisUI($("#tetris-root"), wallet) },
   td: { title: "Pare-feu", ui: createTowerDefenseUI($("#td-root"), wallet) },
@@ -82,6 +84,7 @@ const sections = {
   snake: $("#game-snake"),
   blackjack: $("#game-blackjack"),
   roulette: $("#game-roulette"),
+  plinko: $("#game-plinko"),
   clicker: $("#game-clicker"),
   tetris: $("#game-tetris"),
   td: $("#game-td"),

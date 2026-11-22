@@ -12,7 +12,7 @@ js/main.js, js/veille.js
 easter-egg/arcade.html      page cachée : salle d'arcade (accessible en tapant « awesome »)
 easter-egg/css/arcade.css   style de l'arcade
 easter-egg/js/arcade.js      choix du jeu, portefeuille, gain passif du Clicker
-easter-egg/js/*.js          logique pure des jeux (snake, blackjack, roulette, clicker, tetris, td, survivors, breach, hunt, music) + ui-*.js
+easter-egg/js/*.js          logique pure des jeux (snake, blackjack, roulette, plinko, clicker, tetris, td, survivors, breach, hunt, music) + ui-*.js
 js/ui-*.js                  affichage de chaque jeu ; js/ui.js outils partagés
 js/wallet.js                pièces bleues, crédits et progression (localStorage)
 js/secret-code.js           détecte les codes tapés au clavier
@@ -27,7 +27,7 @@ assets/                     favicon, images
 
 ## Easter eggs
 
-- Taper `awesome` sur le site ouvre l'arcade cachée (`easter-egg/arcade.html`) : Data Snake, Blackjack, Roulette,
+- Taper `awesome` sur le site ouvre l'arcade cachée (`easter-egg/arcade.html`) : Data Snake, Blackjack, Roulette, Plinko (24 slots, mise libre en crédits, 3 niveaux de risque),
   Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena, Breach Protocol, Donjon (action temps réel : étages, boss, coffres, 4 classes, âmes pour les améliorations permanentes) et Chasse aux Titans (RPG au tour par tour : l'équipement se forge avec des trophées ✦, une monnaie propre au RPG, et des matériaux de monstres), avec une musique
   synthwave générée en direct (bouton « Musique », désactivée par défaut).
   Le Clicker a un arbre de compétences (par partie) et un Rebirth (formatage) avec éclats et arbre permanent.
