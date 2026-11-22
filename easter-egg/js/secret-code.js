@@ -2,16 +2,16 @@
 //   « awesome »    ouvre la page cachée (easter-egg/arcade.html)
 //   « edgerunner » active / désactive le style Edgerunners (rouge, vert)
 //   « neon »       active / désactive le style Neon (rose néon, cyan)
-//   « cyberpsychosis » glitch progressif de la page pendant quelques secondes (js/cyberpsychosis.js)
+//   « cyberpsycho » / « cyberpsychosis » glitch progressif de la page (easter-egg/js/cyberpsychosis.js)
 // Chargé sur index.html, veille.html et easter-egg/arcade.html.
 
-import { toggleTheme } from "../js/theme.js";
+import { toggleTheme } from "../../js/theme.js";
 
 export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "easter-egg/arcade.html";
 export const THEME_CODE = "edgerunner";
 export const NEON_CODE = "neon";
-export const PSYCHO_CODE = "cyberpsycho", "cyberpsychosis";
+export const PSYCHO_CODES = ["cyberpsycho", "cyberpsychosis"];
 
 // Un code par thème : `theme` est le nom de la classe sur <html> (voir theme.js).
 export const THEME_CODES = [
@@ -99,8 +99,8 @@ const STYLE = `
 
 function init() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const pushPage = createMatcher(SECRET_CODE);
   const psychoMatchers = PSYCHO_CODES.map((code) => createMatcher(code));
-  const psycho = psychoMatchers.map((push) => push(event.key)).some(Boolean);
   const themeMatchers = THEME_CODES.map((entry) => ({ ...entry, push: createMatcher(entry.code) }));
   const onArcade = document.body.classList.contains("arcade-page");
   let overlay = null;
@@ -158,7 +158,7 @@ function init() {
 
     // On alimente toujours tous les détecteurs : chacun suit sa propre suite de lettres.
     const page = pushPage(event.key);
-    const psycho = pushPsycho(event.key);
+    const psycho = psychoMatchers.map((push) => push(event.key)).some(Boolean);
     const hit = themeMatchers.map((matcher) => matcher.push(event.key) && matcher).find(Boolean);
 
     if (page && !onArcade) unlock();
