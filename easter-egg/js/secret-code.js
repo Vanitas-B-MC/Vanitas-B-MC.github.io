@@ -5,13 +5,13 @@
 //   « cyberpsychosis » glitch progressif de la page pendant quelques secondes (js/cyberpsychosis.js)
 // Chargé sur index.html, veille.html et easter-egg/arcade.html.
 
-import { toggleTheme } from "../../js/theme.js";
+import { toggleTheme } from "../js/theme.js";
 
 export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "easter-egg/arcade.html";
 export const THEME_CODE = "edgerunner";
 export const NEON_CODE = "neon";
-export const PSYCHO_CODE = "cyberpsychosis";
+export const PSYCHO_CODE = "cyberpsycho";
 
 // Un code par thème : `theme` est le nom de la classe sur <html> (voir theme.js).
 export const THEME_CODES = [
