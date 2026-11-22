@@ -9,6 +9,7 @@ import { UPGRADES, BLUE_UPGRADES, SKILLS, CORE } from "./clicker.js";
 import { CHARACTER_IDS, FREE_CHARACTER } from "./survivors.js";
 import { MONSTERS, FAMILIES, FAMILY_IDS, MAX_TIER, freshHunt } from "./hunt.js";
 import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP } from "./td.js";
+import { CLASS_IDS, FREE_CLASS, META, META_IDS, freshRanks, metaCost, classById } from "./dungeon.js";
 
 const KEY = "mc-arcade-wallet-v1";
 const START_CREDITS = 100;
@@ -18,7 +19,7 @@ export const CLICKER_IDS = UPGRADES.map((u) => u.id);
 export const BLUE_IDS = BLUE_UPGRADES.map((u) => u.id);
 export const SKILL_IDS = SKILLS.map((x) => x.id);
 export const CORE_IDS = CORE.map((x) => x.id);
-export const BEST_KEYS = ["bestSnake", "bestTetris", "bestWave", "bestSurvivor", "bestBreach", "bestHunt"];
+export const BEST_KEYS = ["bestSnake", "bestTetris", "bestWave", "bestSurvivor", "bestBreach", "bestHunt", "bestDungeon"];
 
 function freshData() {
   return {
@@ -46,7 +47,9 @@ function freshData() {
     achievements: [],
     hunt: freshHunt(),     // équipement, matériaux et victoires du RPG « Chasse aux Titans »
     trophies: 0,           // monnaie du RPG : gagnée uniquement en chassant
-    bestHunt: 0            // nombre de monstres différents vaincus
+    bestHunt: 0,           // nombre de monstres différents vaincus
+    bestDungeon: 0,        // étage le plus profond atteint dans « Donjon »
+    dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], runs: 0 }   // âmes, améliorations permanentes, classes
   };
 }
 
@@ -83,6 +86,15 @@ export function sanitize(raw) {
     for (const m of MONSTERS) {
       h.parts[m.id] = toCount(raw.hunt.parts?.[m.id]);
       h.kills[m.id] = toCount(raw.hunt.kills?.[m.id]);
+    }
+  }
+  if (raw.dungeon && typeof raw.dungeon === "object") {
+    const d = data.dungeon;
+    d.souls = toCount(raw.dungeon.souls);
+    d.runs = toCount(raw.dungeon.runs);
+    for (const m of META) d.ranks[m.id] = Math.min(toCount(raw.dungeon.ranks?.[m.id]), m.max);
+    if (Array.isArray(raw.dungeon.classes)) {
+      for (const id of raw.dungeon.classes) if (CLASS_IDS.includes(id) && !d.classes.includes(id)) d.classes.push(id);
     }
   }
   if (Array.isArray(raw.chars)) {
@@ -187,6 +199,33 @@ export function createWallet(storage = defaultStorage()) {
       return true;
     },
     setBestSnake(score) { return this.setBest("bestSnake", score); },
+
+    // Donjon : fin de partie (âmes gagnées), améliorations permanentes et classes payées en âmes.
+    dungeonRun(souls) {
+      data.dungeon.souls = addCapped(data.dungeon.souls, toCount(souls));
+      data.dungeon.runs = addCapped(data.dungeon.runs, 1);
+      commit();
+    },
+    dungeonBuyRank(id) {
+      const m = META.find((x) => x.id === id);
+      if (!m) return false;
+      const rank = data.dungeon.ranks[id];
+      const cost = metaCost(id, rank);
+      if (rank >= m.max || data.dungeon.souls < cost) return false;
+      data.dungeon.souls -= cost;
+      data.dungeon.ranks[id] = rank + 1;
+      commit();
+      return true;
+    },
+    dungeonUnlock(classId) {
+      if (!CLASS_IDS.includes(classId) || data.dungeon.classes.includes(classId)) return false;
+      const cost = classById(classId).unlock;
+      if (data.dungeon.souls < cost) return false;
+      data.dungeon.souls -= cost;
+      data.dungeon.classes.push(classId);
+      commit();
+      return true;
+    },
 
     // Améliorations du Clicker : en crédits (levelUp) ou en pièces bleues (blueLevelUp).
     levelUp(id) {

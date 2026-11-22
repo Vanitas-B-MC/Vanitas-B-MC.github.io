@@ -16,3 +16,6 @@ export const breachPct = (difficulty, hacked, total) => (BREACH_PCT[difficulty] 
 
 // Succès du Clicker : +0,5 % du solde.
 export const ACHIEVEMENT_PCT = 0.005;
+
+// Donjon : 0,3 % du solde par étage atteint (5 % maximum).
+export const dungeonPct = (floor) => Math.min(0.05, Math.max(0, floor) * 0.003);

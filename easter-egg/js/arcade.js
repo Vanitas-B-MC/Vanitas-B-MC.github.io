@@ -12,6 +12,7 @@ import { createTowerDefenseUI } from "./ui-td.js";
 import { createSurvivorsUI } from "./ui-survivors.js";
 import { createBreachUI } from "./ui-breach.js";
 import { createHuntUI } from "./ui-hunt.js";
+import { createDungeonUI } from "./ui-dungeon.js";
 import { createMusic } from "./music.js";
 import { fmt, fmtShort, fmtRate } from "./ui.js";
 
@@ -29,7 +30,8 @@ const GAMES = {
   td: { title: "Pare-feu", ui: createTowerDefenseUI($("#td-root"), wallet) },
   survivors: { title: "Survivor Arena", ui: createSurvivorsUI($("#survivors-root"), wallet) },
   breach: { title: "Breach Protocol", ui: createBreachUI($("#breach-root"), wallet) },
-  hunt: { title: "Chasse aux Titans", ui: createHuntUI($("#hunt-root"), wallet) }
+  hunt: { title: "Chasse aux Titans", ui: createHuntUI($("#hunt-root"), wallet) },
+  dungeon: { title: "Donjon", ui: createDungeonUI($("#dungeon-root"), wallet) }
 };
 
 /* ---------- Portefeuille et infos du hub ---------- */
@@ -63,6 +65,7 @@ function renderWallet() {
   $("#meta-tetris").textContent = `Record : ${fmt(wallet.data.bestTetris)}`;
   const best = wallet.data.bestSurvivor;
   $("#meta-survivors").textContent = `Record : ${Math.floor(best / 60)}:${String(best % 60).padStart(2, "0")}`;
+  $("#meta-dungeon").textContent = `Étage max : ${wallet.data.bestDungeon} · Âmes : ${fmt(wallet.data.dungeon.souls)}`;
   $("#meta-hunt").textContent = `Monstres vaincus : ${wallet.data.bestHunt} / 8`;
   $("#meta-breach").textContent = `Meilleur gain : ${fmt(wallet.data.bestBreach)} ¤`;
   const towers = wallet.data.towers.length;
@@ -84,7 +87,8 @@ const sections = {
   td: $("#game-td"),
   survivors: $("#game-survivors"),
   breach: $("#game-breach"),
-  hunt: $("#game-hunt")
+  hunt: $("#game-hunt"),
+  dungeon: $("#game-dungeon")
 };
 let current = null;
 

@@ -7,7 +7,7 @@
 const RAMP_MS = 6000;    // montée en intensité
 const OUTRO_MS = 1500;   // message « synchronisation rétablie » puis fondu
 const TICK_MS = 90;      // fréquence des secousses
-const TITLE = "CYBERPSYCHOSIS";
+const TITLE = "CYBERPSYCHOSE";
 const GLYPHS = "█▓▒░#%&@$?!/\\";
 
 const STAGES = [

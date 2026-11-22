@@ -38,6 +38,7 @@
 
 /* Survivor Arena : sur grand écran la page s'élargit pour offrir une vraie grande arène */
 .arcade:has(#game-survivors:not([hidden])) { width: min(100% - 36px, 1480px); }
+.arcade:has(#game-dungeon:not([hidden])) { width: min(100% - 36px, 1200px); }
 .arcade:has(#game-td:not([hidden])) { width: min(100% - 36px, 1360px); }
 
 .arcade .eyebrow { margin-bottom: 20px; }
@@ -1443,3 +1444,21 @@ kbd {
 @media (min-width: 901px) {
   .td-side { position: sticky; top: 140px; max-height: calc(100vh - 156px); overflow-y: auto; scrollbar-width: thin; }
 }
+
+/* =========================
+   6f. DONJON
+========================= */
+
+.dg-stage { aspect-ratio: 3 / 2; width: min(100%, calc((100vh - 120px) * 1.5)); min-width: min(100%, 420px); margin: 0 auto; }
+.dg-stage canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+.dg-skill { width: 100%; margin-top: 10px; }
+.dg-forge { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; text-align: left; }
+.dg-upgrade {
+  display: grid; gap: 3px; padding: 10px 12px; text-align: left; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line-strong); border-left: 4px solid var(--yellow); color: var(--text);
+}
+.dg-upgrade strong { font-family: var(--font-display); letter-spacing: .04em; text-transform: uppercase; font-size: 13px; }
+.dg-upgrade span { color: var(--muted); font-size: 12px; }
+.dg-upgrade em { color: var(--yellow); font-family: var(--font-mono); font-size: 12px; font-style: normal; }
+.dg-upgrade:hover:not(:disabled) { border-color: var(--yellow); }
+.dg-upgrade:disabled { opacity: .5; cursor: not-allowed; }
