@@ -1,17 +1,17 @@
-// js/secret-code.js — codes secrets tapés au clavier. Rien n'est visible tant qu'on n'en tape pas.
+// easter-egg/js/secret-code.js — codes secrets tapés au clavier. Rien n'est visible tant qu'on n'en tape pas.
 //   « awesome »    ouvre la page cachée (easter-egg/arcade.html)
 //   « edgerunner » active / désactive le style Edgerunners (rouge, vert)
 //   « neon »       active / désactive le style Neon (rose néon, cyan)
 //   « cyberpsychosis » glitch progressif de la page pendant quelques secondes (js/cyberpsychosis.js)
 // Chargé sur index.html, veille.html et easter-egg/arcade.html.
 
-import { toggleTheme } from "./theme.js";
+import { toggleTheme } from "../../js/theme.js";
 
 export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "easter-egg/arcade.html";
 export const THEME_CODE = "edgerunner";
 export const NEON_CODE = "neon";
-export const PSYCHO_CODE = "cyberpsycho";
+export const PSYCHO_CODE = "cyberpsychosis";
 
 // Un code par thème : `theme` est le nom de la classe sur <html> (voir theme.js).
 export const THEME_CODES = [
@@ -165,6 +165,7 @@ function init() {
     if (hit) themeToast(hit.label, toggleTheme(hit.theme));
     if (psycho) {
       // Chargé seulement quand on en a besoin.
+      // Chemin relatif à ce fichier (easter-egg/js/secret-code.js), donc valable depuis toutes les pages.
       import("./cyberpsychosis.js")
         .then((module) => module.startCyberpsychosis())
         .catch((error) => console.error("[cyberpsychosis]", error));
