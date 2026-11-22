@@ -11,7 +11,7 @@ export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "easter-egg/arcade.html";
 export const THEME_CODE = "edgerunner";
 export const NEON_CODE = "neon";
-export const PSYCHO_CODE = "cyberpsycho", "cyberpsychosis";
+export const PSYCHO_CODE = ["cyberpsycho", "cyberpsychosis"];
 
 // Un code par thème : `theme` est le nom de la classe sur <html> (voir theme.js).
 export const THEME_CODES = [
