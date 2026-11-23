@@ -10,11 +10,12 @@ import {
 import { describe, metaCost } from "./dungeon.js";
 import { wealthBonus, dungeonPct } from "./rewards.js";
 import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
+import { createHubUI } from "./ui-hub.js";
 
 const STEP = 1 / 60;
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
-export function createDungeonUI(root, wallet) {
+function createRunUI(root, wallet) {
   let active = false;
   let status = "idle";                 // idle | running | paused | over
   const OPT_KEY = "mc-dungeon-opts-v1";
@@ -78,6 +79,7 @@ export function createDungeonUI(root, wallet) {
   const weaponInfo = h("p", { class: "dg-weapon-info" });
   const optionBar = h("div", { class: "dg-options", role: "group", "aria-label": "Commandes" });
   const weaponEl = h("strong", {}, "—");
+  const heroStats = h("dl", { class: "td-stats dg-hero-stats" });
   const forge = h("div", { class: "dg-forge" });
 
   root.replaceChildren(
@@ -99,6 +101,8 @@ export function createDungeonUI(root, wallet) {
           stat("Étage", floorEl), stat("Salle", roomEl), stat("Éliminés", killsEl), stat("Pièces", coinsEl),
           stat("Record", bestEl), stat("Âmes", soulsEl), stat("Arme", weaponEl)),
         stateEl,
+        h("h3", { class: "subhead" }, "Statistiques du héros"),
+        heroStats,
         h("h3", { class: "subhead" }, "Objets"),
         ownedList,
         h("ul", { class: "game-help" },
@@ -921,11 +925,46 @@ export function createDungeonUI(root, wallet) {
     bestEl.textContent = String(wallet.data.bestDungeon);
     soulsEl.textContent = fmt(wallet.data.dungeon.souls);
     weaponEl.textContent = state.weapon.name;
+    renderHeroStats();
     const sk = state.cls.skill;
     const ready = p.skillCd <= 0;
     skillButton.textContent = ready ? `${sk.name} (Espace)` : `${sk.name} : ${Math.ceil(p.skillCd)} s`;
     skillButton.disabled = status !== "running" || !ready;
     renderOwned();
+  }
+
+  // Statistiques détaillées du héros (classe, arme, forge d'âmes et objets cumulés).
+  let heroKey = "";
+  function renderHeroStats() {
+    const st = state.stats, w = state.weapon;
+    const key = [...Object.values(st).map((v) => Math.round(v * 100)), w.id, state.player.hp > 0 ? Math.round(state.player.hp / 10) : 0].join(",");
+    if (key === heroKey) return;
+    heroKey = key;
+    const pct = (v) => `${Math.round(v * 100)} %`;
+    const melee = w.type === "melee";
+    const rows = [
+      ["PV max", Math.round(st.maxHp)],
+      ["Dégâts", st.damage.toFixed(1)],
+      ["Cadence", `${st.rate.toFixed(2)} /s`],
+      ["DPS estimé", (st.damage * st.rate).toFixed(1)],
+      ["Vitesse", Math.round(st.speed)],
+      ["Critiques", pct(st.crit)],
+      melee ? ["Portée", Math.round(st.range)] : ["Projectiles", st.shots],
+      melee ? ["Arc", `${Math.round((st.arc * 180) / Math.PI)}°`] : ["Perforation", st.pierce],
+      ["Vol de vie", st.vampire ? `+${st.vampire} PV / kill` : "—"],
+      ["Régénération", st.regen ? `${st.regen.toFixed(1)} PV/s` : "—"],
+      ["Brûlure", st.burn ? `niv. ${st.burn}` : "—"],
+      ["Givre", st.frost ? "actif" : "—"],
+      ["Bouclier", st.shieldMax ? `${st.shieldMax} (${st.shieldCd.toFixed(0)} s)` : "—"],
+      ["Orbes", st.orbs || "—"],
+      ["Épines", st.thorns || "—"],
+      ["Détonateur", st.bomb ? `niv. ${st.bomb}` : "—"],
+      ["Sang chaud", st.berserk ? `+${st.berserk * 13} % max` : "—"],
+      ["Aimant", Math.round(st.magnet)],
+      ["Pièces", `×${st.coinMul.toFixed(1)}`],
+      ["Compétence", `${st.skillCd.toFixed(1)} s`]
+    ];
+    heroStats.replaceChildren(...rows.map(([k, v]) => h("div", {}, h("dt", {}, k), h("dd", {}, h("strong", {}, String(v))))));
   }
 
   let ownedKey = "";
@@ -1093,7 +1132,7 @@ export function createDungeonUI(root, wallet) {
     // Valeurs figées avant d'écrire dans le portefeuille (ses écouteurs réagissent tout de suite).
     const credits = rw.credits + wealthBonus(wallet.credits, dungeonPct(rw.floor));
     const record = wallet.setBest("bestDungeon", rw.floor);
-    wallet.dungeonRun(rw.souls);
+    wallet.dungeonRun(rw.souls, rw);
     if (credits > 0) wallet.addCredits(credits);
     if (rw.coins > 0) wallet.addBlue(rw.coins);
     showChoices();
@@ -1288,5 +1327,35 @@ export function createDungeonUI(root, wallet) {
       keys.clear();
       if (status === "running") pauseGame();
     }
+  };
+}
+
+// Page « Donjon » : deux onglets — le Hub (carte, PNJ, quêtes) et l'expédition (le donjon lui-même).
+export function createDungeonUI(root, wallet) {
+  let tab = "hub", running = false;
+  const hubRoot = h("div", { id: "dg-hub", class: "dg-pane" });
+  const runRoot = h("div", { id: "dg-run", class: "dg-pane", hidden: true });
+  const hubTab = h("button", { class: "map-button is-active", type: "button", id: "dg-tab-hub", role: "tab", onclick: () => show("hub") }, "🏰 Hub");
+  const runTab = h("button", { class: "map-button", type: "button", id: "dg-tab-run", role: "tab", onclick: () => show("run") }, "⚔ Expédition");
+  root.replaceChildren(h("div", { class: "td-maps dg-tabs", role: "tablist", "aria-label": "Donjon" }, hubTab, runTab), hubRoot, runRoot);
+  const run = createRunUI(runRoot, wallet);
+  const hub = createHubUI(hubRoot, wallet, { onEnter: () => show("run") });
+
+  function show(next) {
+    tab = next;
+    hubRoot.hidden = next !== "hub";
+    runRoot.hidden = next !== "run";
+    hubTab.classList.toggle("is-active", next === "hub");
+    runTab.classList.toggle("is-active", next === "run");
+    hubTab.setAttribute("aria-selected", String(next === "hub"));
+    runTab.setAttribute("aria-selected", String(next === "run"));
+    if (!running) return;
+    if (next === "hub") { run.deactivate(); hub.activate(); } else { hub.deactivate(); run.activate(); }
+    root.scrollIntoView?.({ block: "start", behavior: "auto" });
+  }
+
+  return {
+    activate() { running = true; show(tab); },
+    deactivate() { running = false; run.deactivate(); hub.deactivate(); }
   };
 }

@@ -7,6 +7,8 @@
 // Quelle que soit la stratégie (viser ×1,5, ×2 ou ×50), le retour moyen est donc d'environ 95 à 96 %
 // (les multiplicateurs sont arrondis vers le bas au centième).
 
+import { MAX_CREDITS } from "./limits.js";
+
 export const MIN_BET = 10;
 export const HOUSE_RTP = 0.96;
 export const MAX_MULT = 10000;                 // point de crash maximal
@@ -26,7 +28,7 @@ export const multiplierAt = (t) => Math.floor(Math.exp(RATE * Math.max(0, t)) * 
 export const timeAt = (m) => Math.log(Math.max(1, m)) / RATE;
 
 // Gain total rendu (mise comprise) quand on encaisse à ×mult.
-export const payout = (bet, mult) => Math.min(Math.floor(bet * mult + 1e-9), Number.MAX_SAFE_INTEGER);
+export const payout = (bet, mult) => Math.min(Math.floor(bet * mult + 1e-9), MAX_CREDITS);
 
 // Lit un multiplicateur saisi (« 2 », « 2,5 », « 2.50 »). Renvoie null s'il est vide ou invalide.
 export function parseTarget(text) {

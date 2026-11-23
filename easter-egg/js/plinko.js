@@ -4,6 +4,8 @@
 // Le slot d'arrivée est le nombre de « droite » (0 à 23), donc la répartition suit une loi binomiale :
 // le centre est très fréquent, les bords rarissimes (et très bien payés).
 
+import { MAX_CREDITS } from "./limits.js";
+
 export const SLOTS = 24;
 export const ROWS = SLOTS - 1;       // 23 rangées → 24 slots possibles
 export const MIN_BET = 10;
@@ -34,7 +36,7 @@ export const dropPath = (rng = Math.random) => Array.from({ length: ROWS }, () =
 export const slotOf = (path) => path.reduce((sum, step) => sum + step, 0);
 
 // Gain total rendu au joueur (mise comprise) pour une mise et un multiplicateur.
-export const payout = (bet, mult) => Math.min(Math.floor(bet * mult + 1e-9), Number.MAX_SAFE_INTEGER);
+export const payout = (bet, mult) => Math.min(Math.floor(bet * mult + 1e-9), MAX_CREDITS);
 
 // Probabilité de chaque slot (loi binomiale B(23 ; 1/2)).
 export function probabilities() {

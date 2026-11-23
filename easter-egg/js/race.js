@@ -4,6 +4,8 @@
 // Les cotes viennent de milliers de courses simulées avec exactement le même moteur que la vraie course :
 // elles reflètent donc les vraies chances de chaque robot, moins 10 % de commission pour la maison.
 
+import { MAX_CREDITS } from "./limits.js";
+
 export const LANES = 6;
 export const TRACK = 100;                 // longueur de la piste
 export const DT = 0.1;                    // pas de simulation, en secondes
@@ -98,7 +100,7 @@ export function oddsFor(roster, rng = Math.random, runs = 3000) {
 }
 
 // Gain rendu pour une mise (mise comprise).
-export const payout = (amount, odds) => Math.min(Math.floor(amount * odds + 1e-9), Number.MAX_SAFE_INTEGER);
+export const payout = (amount, odds) => Math.min(Math.floor(amount * odds + 1e-9), MAX_CREDITS);
 
 // Résout tous les paris : bets = [{ racer, kind, amount, odds }]. `order` : indices du 1er au dernier.
 export function resolve(bets, order) {

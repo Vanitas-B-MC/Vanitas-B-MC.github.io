@@ -1,5 +1,6 @@
 // js/clicker.js — logique pure du Clicker « Mineur de données ». Aucun accès au DOM.
 import { wealthBonus, ACHIEVEMENT_PCT } from "./rewards.js";
+import { MAX_CREDITS } from "./limits.js";
 //
 // Trois niveaux de progression :
 //   - en CRÉDITS  (UPGRADES)      : ajoutent des crédits par clic ou par seconde ;
@@ -14,6 +15,20 @@ export const UPGRADES = [
   { id: "click2",  kind: "click", name: "Gants haptiques",         desc: "+6 crédits par clic",        base: 450,     growth: 1.19, value: 6 },
   { id: "click3",  kind: "click", name: "Interface neuro-directe", desc: "+45 crédits par clic",       base: 8000,    growth: 1.20, value: 45 },
   { id: "click4",  kind: "click", name: "Symbiose neuronale",     desc: "+400 crédits par clic",      base: 150000,  growth: 1.21, value: 400 },
+
+  // ----- Paliers « cosmiques » : très chers, pour les grosses fortunes -----
+  { id: "click5",  kind: "click", name: "Poing de plasma",            desc: "+3 500 crédits par clic",   base: 2.5e6,  growth: 1.21, value: 3500 },
+  { id: "click6",  kind: "click", name: "Frappe orbitale",            desc: "+40 000 crédits par clic",  base: 3e7,    growth: 1.21, value: 40000 },
+  { id: "click7",  kind: "click", name: "Gantelet gravitationnel",    desc: "+500 000 crédits par clic", base: 4e8,    growth: 1.22, value: 500000 },
+  { id: "click8",  kind: "click", name: "Main du temps",              desc: "+8 M crédits par clic",     base: 6e9,    growth: 1.22, value: 8e6 },
+  { id: "click9",  kind: "click", name: "Toucher de Midas quantique", desc: "+150 M crédits par clic",   base: 1e11,   growth: 1.22, value: 1.5e8 },
+  { id: "click10", kind: "click", name: "Doigt de l'infini",          desc: "+4 B crédits par clic",     base: 3e12,   growth: 1.23, value: 4e9 },
+  { id: "click11", kind: "click", name: "Clic cosmique",              desc: "+120 B crédits par clic",   base: 1e14,   growth: 1.23, value: 1.2e11 },
+  { id: "click12", kind: "click", name: "Impact stellaire",           desc: "+5 T crédits par clic",     base: 6e15,   growth: 1.23, value: 5e12 },
+  { id: "click13", kind: "click", name: "Pression galactique",        desc: "+300 T crédits par clic",   base: 4e17,   growth: 1.24, value: 3e14 },
+  { id: "click14", kind: "click", name: "Clic du Big Bang",           desc: "+20 Qa crédits par clic",   base: 5e19,   growth: 1.24, value: 2e16 },
+  { id: "click15", kind: "click", name: "Singularité tactile",        desc: "+2 Qi crédits par clic",    base: 8e22,   growth: 1.25, value: 2e18 },
+  { id: "click16", kind: "click", name: "Pouvoir du créateur",        desc: "+500 Qi crédits par clic",  base: 3e26,   growth: 1.25, value: 5e20 },
   { id: "script",  kind: "auto",  name: "Script automatique",      desc: "+1 crédit / seconde",        base: 60,      growth: 1.15, value: 1 },
   { id: "botnet",  kind: "auto",  name: "Réseau de bots",          desc: "+8 crédits / seconde",       base: 650,     growth: 1.15, value: 8 },
   { id: "farm",    kind: "auto",  name: "Ferme de serveurs",       desc: "+50 crédits / seconde",      base: 6000,    growth: 1.15, value: 50 },
@@ -21,8 +36,27 @@ export const UPGRADES = [
   { id: "quantum", kind: "auto",  name: "Ordinateur quantique",    desc: "+2 200 crédits / seconde",   base: 800000,  growth: 1.15, value: 2200 },
   { id: "ai",      kind: "auto",  name: "IA autonome",             desc: "+16 000 crédits / seconde",  base: 9500000, growth: 1.16, value: 16000 },
   { id: "sim",     kind: "auto",  name: "Simulation d'univers",    desc: "+120 000 crédits / seconde", base: 120000000,  growth: 1.16, value: 120000 },
-  { id: "singu",   kind: "auto",  name: "Singularité",             desc: "+900 000 crédits / seconde", base: 1500000000, growth: 1.17, value: 900000 }
+  { id: "singu",   kind: "auto",  name: "Singularité",             desc: "+900 000 crédits / seconde", base: 1500000000, growth: 1.17, value: 900000 },
+
+  // ----- Paliers « cosmiques » : très chers, pour les grosses fortunes -----
+  { id: "dyson",      kind: "auto", name: "Sphère de Dyson",       desc: "+7 M crédits / seconde",    base: 3e10,   growth: 1.17, value: 7e6 },
+  { id: "matriochka", kind: "auto", name: "Cerveau Matriochka",    desc: "+65 M crédits / seconde",   base: 4e11,   growth: 1.17, value: 6.5e7 },
+  { id: "planck",     kind: "auto", name: "Horloge de Planck",     desc: "+600 M crédits / seconde",  base: 5e12,   growth: 1.18, value: 6e8 },
+  { id: "blackhole",  kind: "auto", name: "Trou noir minier",      desc: "+6 B crédits / seconde",    base: 6e13,   growth: 1.18, value: 6e9 },
+  { id: "harvester",  kind: "auto", name: "Moissonneuse stellaire", desc: "+70 B crédits / seconde",  base: 8e14,   growth: 1.18, value: 7e10 },
+  { id: "pocketverse", kind: "auto", name: "Univers de poche",     desc: "+800 B crédits / seconde",  base: 1e16,   growth: 1.19, value: 8e11 },
+  { id: "multiverse", kind: "auto", name: "Multivers",             desc: "+9 T crédits / seconde",    base: 1.4e17, growth: 1.19, value: 9e12 },
+  { id: "cosmicmind", kind: "auto", name: "Conscience cosmique",   desc: "+100 T crédits / seconde",  base: 2e18,   growth: 1.19, value: 1e14 },
+  { id: "entropy",    kind: "auto", name: "Entropie inversée",     desc: "+1,2 Qa crédits / seconde", base: 3e19,   growth: 1.20, value: 1.2e15 },
+  { id: "equation",   kind: "auto", name: "Équation finale",       desc: "+15 Qa crédits / seconde",  base: 5e20,   growth: 1.20, value: 1.5e16 },
+  { id: "omega",      kind: "auto", name: "Moteur Oméga",          desc: "+200 Qa crédits / seconde", base: 8e21,   growth: 1.21, value: 2e17 },
+  { id: "lastbit",    kind: "auto", name: "Le Dernier Bit",        desc: "+3 Qi crédits / seconde",   base: 2e23,   growth: 1.22, value: 3e18 },
+  { id: "godmode",    kind: "auto", name: "Mode dieu",             desc: "+50 Qi crédits / seconde",  base: 5e24,   growth: 1.23, value: 5e19 },
+  { id: "paradox",    kind: "auto", name: "Paradoxe du créateur",  desc: "+1 Sx crédits / seconde",   base: 2e26,   growth: 1.25, value: 1e21 }
 ];
+
+// Les 12 améliorations d'origine (le succès « Panoplie complète » ne demande que celles-là).
+const CLASSIC_IDS = ["click", "click2", "click3", "click4", "script", "botnet", "farm", "dc", "quantum", "ai", "sim", "singu"];
 
 // effect : "click" (gains par clic), "auto" (gains par seconde), "all" (les deux), "discount" (prix des améliorations).
 export const BLUE_UPGRADES = [
@@ -104,7 +138,7 @@ export function discountFactor(blueLevels = {}, bonus = NO_BONUS) {
 
 // Prix de la prochaine amélioration en crédits, quand on en possède déjà `owned`.
 export function costOf(upgrade, owned, blueLevels = {}, bonus = NO_BONUS) {
-  return Math.max(1, Math.ceil(upgrade.base * upgrade.growth ** owned * discountFactor(blueLevels, bonus)));
+  return Math.min(MAX_CREDITS, Math.max(1, Math.ceil(upgrade.base * upgrade.growth ** owned * discountFactor(blueLevels, bonus))));
 }
 
 // Prix en pièces bleues du prochain palier, ou null quand le palier maximum est atteint.
@@ -308,7 +342,7 @@ export const ACHIEVEMENTS = [
   { id: "mined_1b",     name: "Empire des données",    desc: "1 milliard de crédits minés",                reward: 5000000, test: (s) => s.mined >= 1000000000 },
   { id: "scripts_10",   name: "Automatisation",        desc: "10 scripts automatiques",                    reward: 300,     test: (s) => (s.levels.script || 0) >= 10 },
   { id: "farm_5",       name: "Salle des machines",    desc: "5 fermes de serveurs",                       reward: 5000,    test: (s) => (s.levels.farm || 0) >= 5 },
-  { id: "every_tier",   name: "Panoplie complète",     desc: "Au moins 1 de chaque amélioration",          reward: 50000,   test: (s) => UPGRADES.every((u) => (s.levels[u.id] || 0) >= 1) },
+  { id: "every_tier",   name: "Panoplie complète",     desc: "Au moins 1 de chaque amélioration",          reward: 50000,   test: (s) => CLASSIC_IDS.every((id) => (s.levels[id] || 0) >= 1) },
   { id: "blue_first",   name: "Premier bleu",          desc: "Première amélioration en pièces bleues",     reward: 100,     test: (s) => s.blueTotal >= 1 },
   { id: "blue_10",      name: "Collectionneur",        desc: "10 paliers en pièces bleues",                reward: 2000,    test: (s) => s.blueTotal >= 10 },
   { id: "skill_first",  name: "Spécialisation",        desc: "Prends une première compétence",             reward: 500,     test: (s) => s.skillRanks >= 1 },
@@ -329,7 +363,21 @@ export const ACHIEVEMENTS = [
   { id: "skill_20",     name: "Grand maître",          desc: "20 rangs de compétence dans une partie",     reward: 500000,   test: (s) => s.skillRanks >= 20 },
   { id: "rebirth_10",   name: "Boucle infinie",        desc: "10 formatages",                              reward: 5000000,  test: (s) => s.rebirths >= 10 },
   { id: "core_30",      name: "Cœur de diamant",       desc: "30 rangs dans l'arbre du Rebirth",           reward: 2000000,  test: (s) => s.coreRanks >= 30 },
-  { id: "core_10",      name: "Cœur de silicium",      desc: "10 rangs dans l'arbre du Rebirth",           reward: 100000,  test: (s) => s.coreRanks >= 10 }
+  { id: "core_10",      name: "Cœur de silicium",      desc: "10 rangs dans l'arbre du Rebirth",           reward: 100000,  test: (s) => s.coreRanks >= 10 },
+  { id: "clicks_1m",    name: "Un million de clics",   desc: "1 000 000 de clics",                         reward: 5e9,     test: (s) => s.clicks >= 1000000 },
+  { id: "mined_1t",     name: "Mille milliards",       desc: "1 T de crédits minés",                       reward: 1e10,    test: (s) => s.mined >= 1e12 },
+  { id: "mined_1qa",    name: "Quadrillionnaire",      desc: "1 Qa de crédits minés",                      reward: 1e13,    test: (s) => s.mined >= 1e15 },
+  { id: "mined_1qi",    name: "Au-delà du réel",       desc: "1 Qi de crédits minés",                      reward: 1e16,    test: (s) => s.mined >= 1e18 },
+  { id: "mined_1sx",    name: "Économie galactique",   desc: "1 Sx de crédits minés",                      reward: 1e19,    test: (s) => s.mined >= 1e21 },
+  { id: "mined_1sp",    name: "Économie universelle",  desc: "1 Sp de crédits minés",                      reward: 1e22,    test: (s) => s.mined >= 1e24 },
+  { id: "mined_1oc",    name: "Fortune absurde",       desc: "1 Oc de crédits minés",                      reward: 1e25,    test: (s) => s.mined >= 1e27 },
+  { id: "dyson_1",      name: "Bâtisseur d'étoiles",   desc: "Une sphère de Dyson",                        reward: 1e11,    test: (s) => (s.levels.dyson || 0) >= 1 },
+  { id: "blackhole_1",  name: "Horizon des événements", desc: "Un trou noir minier",                       reward: 1e13,    test: (s) => (s.levels.blackhole || 0) >= 1 },
+  { id: "multiverse_1", name: "Voyageur du multivers", desc: "Un multivers",                               reward: 1e16,    test: (s) => (s.levels.multiverse || 0) >= 1 },
+  { id: "omega_1",      name: "Alpha et Oméga",        desc: "Un moteur Oméga",                            reward: 1e19,    test: (s) => (s.levels.omega || 0) >= 1 },
+  { id: "lastbit_1",    name: "Plus rien à miner",     desc: "Le Dernier Bit",                             reward: 1e21,    test: (s) => (s.levels.lastbit || 0) >= 1 },
+  { id: "paradox_1",    name: "Créateur",              desc: "Un paradoxe du créateur",                    reward: 1e24,    test: (s) => (s.levels.paradox || 0) >= 1 },
+  { id: "every_cosmic", name: "Panoplie cosmique",     desc: "Au moins 1 de chaque amélioration, nouvelles comprises", reward: 1e22, test: (s) => UPGRADES.every((u) => (s.levels[u.id] || 0) >= 1) }
 ];
 
 export function statsOf(data) {

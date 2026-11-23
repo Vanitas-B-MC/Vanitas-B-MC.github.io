@@ -11,6 +11,7 @@ import { MONSTERS, FAMILIES, FAMILY_IDS, MAX_TIER, freshHunt } from "./hunt.js";
 import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP } from "./td.js";
 import { freshFarm, sanitizeFarm } from "./farm.js";
 import { LEVEL_IDS } from "./mines.js";
+import { QUEST_IDS, questById, applyRunToQuests } from "./hub.js";
 import { CLASS_IDS, FREE_CLASS, META, META_IDS, freshRanks, metaCost, classById, WEAPONS, WEAPON_IDS, FREE_WEAPONS, weaponById } from "./dungeon.js";
 
 const KEY = "mc-arcade-wallet-v1";
@@ -51,7 +52,8 @@ function freshData() {
     trophies: 0,           // monnaie du RPG : gagnée uniquement en chassant
     bestHunt: 0,           // nombre de monstres différents vaincus
     bestDungeon: 0,        // étage le plus profond atteint dans « Donjon »
-    dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], weapons: FREE_WEAPONS.slice(), runs: 0 },   // âmes, améliorations permanentes, classes
+    dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], weapons: FREE_WEAPONS.slice(), runs: 0,
+      stats: { kills: 0, bosses: 0, rooms: 0, gold: 0, elite: 0, deepest: 0 }, quests: {} },   // âmes, améliorations permanentes, classes
     farm: freshFarm(),     // « Pêche & Ferme » : parcelles, améliorations, carnet de pêche
     mines: Object.fromEntries(LEVEL_IDS.map((id) => [id, 0]))   // Démineur : meilleur temps (secondes) par niveau, 0 = aucun
   };
@@ -99,6 +101,13 @@ export function sanitize(raw) {
     for (const m of META) d.ranks[m.id] = Math.min(toCount(raw.dungeon.ranks?.[m.id]), m.max);
     if (Array.isArray(raw.dungeon.classes)) {
       for (const id of raw.dungeon.classes) if (CLASS_IDS.includes(id) && !d.classes.includes(id)) d.classes.push(id);
+    }
+    for (const k of Object.keys(d.stats)) d.stats[k] = toCount(raw.dungeon.stats?.[k]);
+    if (raw.dungeon.quests && typeof raw.dungeon.quests === "object") {
+      for (const id of QUEST_IDS) {
+        const q = raw.dungeon.quests[id];
+        if (q && typeof q === "object") d.quests[id] = { p: Math.min(toCount(q.p), questById(id).target), claimed: !!q.claimed };
+      }
     }
     if (Array.isArray(raw.dungeon.weapons)) {
       for (const id of raw.dungeon.weapons) if (WEAPON_IDS.includes(id) && !d.weapons.includes(id)) d.weapons.push(id);
@@ -223,7 +232,15 @@ export function createWallet(storage = defaultStorage()) {
     },
 
     // Donjon : fin de partie (âmes gagnées), améliorations permanentes et classes payées en âmes.
-    dungeonRun(souls) {
+    dungeonRun(souls, sum = {}) {
+      const st = data.dungeon.stats;
+      st.kills = addCapped(st.kills, toCount(sum.kills));
+      st.bosses = addCapped(st.bosses, toCount(sum.bossKills));
+      st.rooms = addCapped(st.rooms, toCount(sum.rooms));
+      st.gold = addCapped(st.gold, toCount(sum.gold));
+      st.elite = addCapped(st.elite, toCount(sum.elite));
+      st.deepest = Math.max(st.deepest, toCount(sum.floor));
+      applyRunToQuests(data.dungeon.quests, sum);
       data.dungeon.souls = addCapped(data.dungeon.souls, toCount(souls));
       data.dungeon.runs = addCapped(data.dungeon.runs, 1);
       commit();
@@ -247,6 +264,25 @@ export function createWallet(storage = defaultStorage()) {
       data.dungeon.classes.push(classId);
       commit();
       return true;
+    },
+
+    // Quêtes du hub : accepter, puis réclamer la récompense (pièces bleues) une fois l'objectif atteint.
+    questAccept(id) {
+      const def = questById(id);
+      if (!def || data.dungeon.quests[id]) return false;
+      if (def.requires && !data.dungeon.quests[def.requires]?.claimed) return false;
+      data.dungeon.quests[id] = { p: 0, claimed: false };
+      commit();
+      return true;
+    },
+    questClaim(id) {
+      const def = questById(id);
+      const q = data.dungeon.quests[id];
+      if (!def || !q || q.claimed || q.p < def.target) return 0;
+      q.claimed = true;
+      const reward = def.reward;
+      this.addBlue(reward);   // (commit inclus)
+      return reward;
     },
 
     dungeonUnlockWeapon(weaponId) {

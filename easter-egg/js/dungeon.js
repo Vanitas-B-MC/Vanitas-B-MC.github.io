@@ -146,8 +146,9 @@ export const THEMES = [
 ];
 export const themeFor = (floor) => THEMES[(floor - 1 + THEMES.length * 100) % THEMES.length];
 
-const hpMul = (floor) => 1 + 0.2 * (floor - 1);
-const dmgMul = (floor) => 1 + 0.07 * (floor - 1);
+// Difficulté : plus coriace et plus mordant à chaque étage (v13).
+const hpMul = (floor) => 1.2 + 0.3 * (floor - 1);
+const dmgMul = (floor) => 1.12 + 0.1 * (floor - 1);
 
 /* ---------- Dispositions de salle (20 × 12 cases) : . vide · # rocher · o trou · x piques ---------- */
 
@@ -267,7 +268,7 @@ export function generateFloor(rng, floor) {
   if (shop) shop.type = "shop";
   // quelques salles d'élite parmi les salles de combat éloignées
   const combats = [...rooms.values()].filter((r) => r.type === "combat" && r.depth >= 2);
-  for (const r of combats) if (rng() < 0.25 + 0.03 * floor) r.type = "elite";
+  for (const r of combats) if (rng() < 0.3 + 0.04 * floor) r.type = "elite";
   for (const r of rooms.values()) {
     r.seed = 1 + Math.floor(rng() * 1e9);
     const fight = r.type === "combat" || r.type === "elite" || r.type === "boss";
@@ -304,7 +305,7 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
     player: { x: (X0 + X1) / 2, y: Y1 - 40, hp: stats.maxHp, inv: 0, cd: 0, skillCd: 0, shield: 0, shieldT: 0, facing: -Math.PI / 2, ghost: 0, crit100: 0, spikeT: 0 },
     enemies: [], shots: [], bullets: [], pickups: [], fx: [], spawnList: [], spawnClock: 0, wavesLeft: 0,
     cleared: true, chest: null, trapdoor: null, choices: null, owned: {}, boss: null,
-    kills: 0, coins: 0, coinsEarned: 0, bossKills: 0, roomsCleared: 0, nextId: 1, banner: null, orbAngle: 0, rain: 0
+    kills: 0, coins: 0, coinsEarned: 0, bossKills: 0, eliteKills: 0, roomsCleared: 0, nextId: 1, banner: null, orbAngle: 0, rain: 0
   };
   startFloor(state);
   return state;
@@ -347,7 +348,7 @@ function makeEnemy(state, type, x, y, opts = {}) {
 function planWave(state, isFirst) {
   const room = state.room;
   const depth = room.depth;
-  let budget = ((2.5 + state.floor * 0.9 + depth * 0.35) / (room.waves > 1 ? 1.4 : 1)) * Math.pow((COLS * ROWS) / 240, 0.75);
+  let budget = ((3 + state.floor * 1.1 + depth * 0.4) / (room.waves > 1 ? 1.4 : 1)) * Math.pow((COLS * ROWS) / 240, 0.75);
   const count = Math.min(state.theme.pool.length, 2 + state.floor);
   const pool = state.theme.pool.slice(0, count);
   let at = 0;
@@ -402,7 +403,7 @@ function enterRoom(state, room, fromDir) {
     state.cleared = false;
     state.wavesLeft = 0;
     const def = bossFor(state.floor);
-    const mul = 0.75 + 0.2 * (state.floor - 1);
+    const mul = 1.1 + 0.35 * (state.floor - 1);
     const b = makeEnemy(state, def.id, (X0 + X1) / 2, Y0 + 110, { def, hpMul: mul, boss: true, spawn: 1.4 });
     b.name = def.name;
     b.marks = [0.75, 0.5, 0.25];
@@ -472,6 +473,7 @@ function killEnemy(state, e, depth = 0) {
   if (e.dead) return;
   e.dead = true;
   state.kills += 1;
+  if (e.elite) state.eliteKills += 1;
   const def = e.boss ? null : ENEMIES[e.type];
   const worth = Math.round((1 + Math.floor(state.floor / 3)) * state.stats.coinMul);
   if (e.type !== "slimelet") drop(state, e.x, e.y, "coin", e.elite ? worth * 4 : e.boss ? worth * 6 : worth);
@@ -1481,5 +1483,5 @@ export function runRewards(state) {
   const greed = 1 + 0.15 * (state.ranks.greed || 0);
   const souls = Math.floor(((state.floor - 1) * 14 + state.roomsCleared * 2 + state.kills / 4 + state.bossKills * 30 + state.coinsEarned / 3) * greed);
   const credits = Math.floor(state.floor * 8 + state.roomsCleared * 2 + state.kills / 3);
-  return { souls, credits, coins: state.bossKills, floor: state.floor };
+  return { souls, credits, coins: state.bossKills, floor: state.floor, kills: state.kills, bossKills: state.bossKills, rooms: state.roomsCleared, gold: state.coinsEarned, elite: state.eliteKills };
 }

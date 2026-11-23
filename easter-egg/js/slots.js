@@ -7,6 +7,8 @@
 // ✸ Scatter : 3 ou plus n'importe où paient la mise totale × un multiplicateur ET lancent des tours gratuits
 //   (gains doublés, et les tours gratuits peuvent se relancer).
 
+import { MAX_CREDITS } from "./limits.js";
+
 export const REEL_COUNT = 5;
 export const ROW_COUNT = 3;
 export const MIN_BET = 10;                     // 1 par ligne
@@ -158,7 +160,7 @@ export function evaluate(grid) {
 // Gain total (mise non comprise dans le calcul : c'est ce qui est rendu au joueur).
 export function winAmount(bet, result, free = false) {
   const units = (bet * result.lineMult) / LINE_COUNT + bet * result.scatterMult;
-  return Math.min(Math.floor(units * (free ? FREE_MULT : 1) + 1e-9), Number.MAX_SAFE_INTEGER);
+  return Math.min(Math.floor(units * (free ? FREE_MULT : 1) + 1e-9), MAX_CREDITS);
 }
 
 // Un tour : tire les positions d'arrêt et évalue la grille.

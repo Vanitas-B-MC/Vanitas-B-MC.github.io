@@ -1781,3 +1781,37 @@ kbd {
   .sl-cell.is-win { animation: none; }
   .sl-cell.is-spinning { filter: none; }
 }
+
+/* 6h. Donjon : Hub, onglets, dialogues et quêtes */
+.dg-tabs { margin-bottom: 14px; }
+.hub-stage canvas { cursor: grab; }
+.hub-action { width: 100%; margin-top: 10px; }
+.hub-dialog {
+  margin-top: 12px; padding: 14px 16px; text-align: left; background: var(--surface);
+  border: 1px solid var(--line-strong); border-left: 4px solid var(--kc, var(--yellow));
+}
+.hub-dialog[hidden] { display: none; }
+.hub-dialog-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.hub-dialog-head strong { display: block; font-family: var(--font-display); letter-spacing: .05em; text-transform: uppercase; color: var(--kc, var(--yellow)); }
+.hub-dialog-head span { color: var(--muted); font-size: 12px; }
+.hub-line { margin: 10px 0; font-style: italic; }
+.hub-quests { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.hub-quest { display: grid; gap: 6px; padding: 10px 12px; background: rgba(255,255,255,.03); border: 1px solid var(--line-strong); }
+.hub-quest p { margin: 0; color: var(--muted); font-size: 12px; }
+.hub-quest-head { display: flex; justify-content: space-between; gap: 8px; }
+.hub-quest-head strong { font-family: var(--font-display); font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+.hub-quest-head em { color: var(--cyan); font-family: var(--font-mono); font-size: 12px; font-style: normal; white-space: nowrap; }
+.hub-quest.is-claimed { opacity: .55; }
+.hub-quest.is-locked { opacity: .5; }
+.hub-quest.is-ready { border-color: var(--green, #3ddc84); }
+.hub-quest-done, .hub-quest-lock { color: var(--muted); font-size: 12px; font-family: var(--font-mono); }
+.hub-quest-bar { position: relative; height: 14px; background: rgba(0,0,0,.5); border: 1px solid var(--line-strong); }
+.hub-quest-bar span { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--cyan), var(--yellow)); }
+.hub-quest-bar b { position: relative; display: block; text-align: center; font: 700 10px/12px var(--font-mono); color: #fff; mix-blend-mode: normal; text-shadow: 0 0 3px #000; }
+.hub-journal { display: grid; gap: 8px; margin-bottom: 12px; text-align: left; }
+.hub-journal-item { display: grid; gap: 3px; padding: 8px 10px; background: rgba(255,255,255,.03); border-left: 3px solid var(--yellow); font-size: 12px; }
+.hub-journal-item strong { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; font-size: 12px; }
+.hub-journal-item span { color: var(--muted); }
+.hub-journal-item.is-ready { border-left-color: var(--green, #3ddc84); }
+.dg-hero-stats { gap: 6px 10px; }
+.dg-hero-stats strong { font-size: 15px; }

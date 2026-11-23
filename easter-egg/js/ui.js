@@ -23,7 +23,7 @@ export const fmt = (n) => Number(n).toLocaleString("fr-FR");
 
 // Nombre compact pour les gros chiffres : 1 234 → 1,23 K · 4 500 000 → 4,5 M · 7e9 → 7 B …
 // En dessous de 1 000 le nombre reste exact (avec au plus `maxDecimals` décimales).
-const SUFFIXES = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+const SUFFIXES = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", "Vg"];   // jusqu'à 1e63
 export function fmtShort(n, maxDecimals = 0) {
   const value = Number(n);
   if (!Number.isFinite(value)) return "∞";

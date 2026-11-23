@@ -30,7 +30,7 @@ assets/                     favicon, images
 - Taper `awesome` sur le site ouvre l'arcade cachée (`easter-egg/arcade.html`) : Data Snake, Blackjack, Roulette, Plinko (24 slots, mise libre en crédits, 3 niveaux de risque),
   Crash (multiplicateur à encaisser avant l'effondrement, encaissement automatique), Machine à sous (5 rouleaux, 10 lignes, wilds, scatters, tours gratuits),
   Pêche & Ferme (idle : pêche, cultures qui poussent même page fermée, fermier-bot, filet automatique), Courses d'IA (paris sur 6 robots, cotes calculées par simulation), Démineur (3 difficultés, records),
-  Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena, Breach Protocol, Donjon (action temps réel : étages, boss, coffres, 4 classes, âmes pour les améliorations permanentes) et Chasse aux Titans (RPG au tour par tour : l'équipement se forge avec des trophées ✦, une monnaie propre au RPG, et des matériaux de monstres), avec une musique
+  Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena, Breach Protocol, Donjon (hub à deux royaumes avec PNJ et quêtes en pièces bleues, puis action temps réel : étages en carte de salles, 34 armes, boss, coffres, 4 classes, âmes pour les améliorations permanentes) et Chasse aux Titans (RPG au tour par tour : l'équipement se forge avec des trophées ✦, une monnaie propre au RPG, et des matériaux de monstres), avec une musique
   synthwave générée en direct (bouton « Musique », désactivée par défaut).
   Le Clicker a un arbre de compétences (par partie) et un Rebirth (formatage) avec éclats et arbre permanent.
   Pare-feu : 3 cartes et 7 tours (déblocage en crédits). Survivor Arena : 3 personnages (déblocage en crédits), foudre, vol de vie, élites et boss.
