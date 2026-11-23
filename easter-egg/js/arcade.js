@@ -10,6 +10,8 @@ import { createPlinkoUI } from "./ui-plinko.js";
 import { createFarmUI } from "./ui-farm.js";
 import { createRaceUI } from "./ui-race.js";
 import { createMinesUI, fmtTime } from "./ui-mines.js";
+import { createCrashUI } from "./ui-crash.js";
+import { createSlotsUI } from "./ui-slots.js";
 import { createClickerUI } from "./ui-clicker.js";
 import { createTetrisUI } from "./ui-tetris.js";
 import { createTowerDefenseUI } from "./ui-td.js";
@@ -33,6 +35,8 @@ const GAMES = {
   farm: { title: "Pêche & Ferme", ui: createFarmUI($("#farm-root"), wallet) },
   race: { title: "Courses d'IA", ui: createRaceUI($("#race-root"), wallet) },
   mines: { title: "Démineur", ui: createMinesUI($("#mines-root"), wallet) },
+  crash: { title: "Crash", ui: createCrashUI($("#crash-root"), wallet) },
+  slots: { title: "Machine à sous", ui: createSlotsUI($("#slots-root"), wallet) },
   clicker: { title: "Mineur de données", ui: createClickerUI($("#clicker-root"), wallet) },
   tetris: { title: "Tetris", ui: createTetrisUI($("#tetris-root"), wallet) },
   td: { title: "Pare-feu", ui: createTowerDefenseUI($("#td-root"), wallet) },
@@ -97,6 +101,8 @@ const sections = {
   farm: $("#game-farm"),
   race: $("#game-race"),
   mines: $("#game-mines"),
+  crash: $("#game-crash"),
+  slots: $("#game-slots"),
   clicker: $("#game-clicker"),
   tetris: $("#game-tetris"),
   td: $("#game-td"),

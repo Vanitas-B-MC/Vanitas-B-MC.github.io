@@ -98,7 +98,7 @@ export function oddsFor(roster, rng = Math.random, runs = 3000) {
 }
 
 // Gain rendu pour une mise (mise comprise).
-export const payout = (amount, odds) => Math.min(Math.floor(amount * odds), Number.MAX_SAFE_INTEGER);
+export const payout = (amount, odds) => Math.min(Math.floor(amount * odds + 1e-9), Number.MAX_SAFE_INTEGER);
 
 // Résout tous les paris : bets = [{ racer, kind, amount, odds }]. `order` : indices du 1er au dernier.
 export function resolve(bets, order) {

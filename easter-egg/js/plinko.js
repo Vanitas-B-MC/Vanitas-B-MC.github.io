@@ -34,7 +34,7 @@ export const dropPath = (rng = Math.random) => Array.from({ length: ROWS }, () =
 export const slotOf = (path) => path.reduce((sum, step) => sum + step, 0);
 
 // Gain total rendu au joueur (mise comprise) pour une mise et un multiplicateur.
-export const payout = (bet, mult) => Math.min(Math.floor(bet * mult), Number.MAX_SAFE_INTEGER);
+export const payout = (bet, mult) => Math.min(Math.floor(bet * mult + 1e-9), Number.MAX_SAFE_INTEGER);
 
 // Probabilité de chaque slot (loi binomiale B(23 ; 1/2)).
 export function probabilities() {
