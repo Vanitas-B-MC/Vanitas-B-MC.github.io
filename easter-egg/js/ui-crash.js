@@ -202,7 +202,7 @@ export function createCrashUI(root, wallet) {
 
   function renderStats() {
     statsEl.textContent = stats.rounds
-      ? `${stats.rounds} manche${stats.rounds > 1 ? "s" : ""} · misé ${fmt(stats.staked)} · net ${stats.net > 0 ? "+" : ""}${fmt(stats.net)} · meilleur encaissement ${fmtMult(stats.best)}`
+      ? `${stats.rounds} manche${stats.rounds > 1 ? "s" : ""} · misé ${fmt(stats.staked)} · net ${stats.net > 0 ? "+" : ""}${fmt(stats.net)}${stats.best ? ` · meilleur encaissement ${fmtMult(stats.best)}` : ""}`
       : "";
     historyEl.replaceChildren(...history.map((p) => h("li", { class: `cr-pill is-${tier(p)}` }, fmtMult(p))));
   }

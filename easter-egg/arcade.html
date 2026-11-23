@@ -69,7 +69,7 @@
     <section id="hub" class="hub" aria-labelledby="hub-title">
       <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span>Zone secrète // accès autorisé</p>
       <h1 class="arcade-title glitch" id="hub-title" data-text="Arcade" tabindex="-1">Arcade</h1>
-      <p class="arcade-lead">Tu as trouvé le code. Choisis un jeu : les pièces bleues (Snake, Tetris) se jouent à la Roulette ou boostent le Clicker ; les crédits servent au Blackjack, au Plinko, aux Courses d'IA, à la Pêche &amp; Ferme et à débloquer les tours du Tower Defense.</p>
+      <p class="arcade-lead">Tu as trouvé le code. Choisis un jeu : les pièces bleues (Snake, Tetris) se jouent à la Roulette ou boostent le Clicker ; les crédits servent au Blackjack, au Plinko, au Crash, à la Machine à sous, aux Courses d'IA, à la Pêche &amp; Ferme et à débloquer les tours du Tower Defense.</p>
 
       <ul class="game-grid">
         <li>
@@ -184,6 +184,22 @@
             <span class="card-meta" id="meta-mines">Records : —</span>
           </a>
         </li>
+        <li>
+          <a class="game-card chamfer" href="#crash">
+            <span class="card-index">// 15</span>
+            <span class="card-name">Crash</span>
+            <span class="card-desc">Un multiplicateur grimpe puis s'effondre. Encaisse au bon moment, ou fixe un encaissement automatique.</span>
+            <span class="card-meta">Mise : crédits</span>
+          </a>
+        </li>
+        <li>
+          <a class="game-card chamfer" href="#slots">
+            <span class="card-index">// 16</span>
+            <span class="card-name">Machine à sous</span>
+            <span class="card-desc">5 rouleaux, 10 lignes, wilds et scatters. Trois ✸ déclenchent des tours gratuits à gains doublés.</span>
+            <span class="card-meta">Mise : crédits</span>
+          </a>
+        </li>
       </ul>
 
       <p class="hub-note">Ta progression est enregistrée dans ce navigateur.
@@ -270,6 +286,20 @@
       <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
       <h2 class="game-title glitch" id="title-mines" data-text="Démineur" tabindex="-1">Démineur</h2>
       <div class="game-body" id="mines-root"></div>
+    </section>
+
+    <!-- ============ CRASH ============ -->
+    <section id="game-crash" class="game-view" aria-labelledby="title-crash" hidden>
+      <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
+      <h2 class="game-title glitch" id="title-crash" data-text="Crash" tabindex="-1">Crash</h2>
+      <div class="game-body" id="crash-root"></div>
+    </section>
+
+    <!-- ============ MACHINE À SOUS ============ -->
+    <section id="game-slots" class="game-view" aria-labelledby="title-slots" hidden>
+      <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
+      <h2 class="game-title glitch" id="title-slots" data-text="Machine à sous" tabindex="-1">Machine à sous</h2>
+      <div class="game-body" id="slots-root"></div>
     </section>
 
     <!-- ============ CLICKER ============ -->

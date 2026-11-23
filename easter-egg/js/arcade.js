@@ -25,25 +25,38 @@ import { fmt, fmtShort, fmtRate } from "./ui.js";
 const $ = (selector) => document.querySelector(selector);
 const wallet = createWallet();
 
+// Crée l'interface d'un jeu. Si elle échoue (élément manquant dans arcade.html, erreur de code…), ce jeu est désactivé
+// et les autres continuent de fonctionner ; l'erreur est affichée dans la console du navigateur (F12).
+function mount(create, selector) {
+  try {
+    const root = $(selector);
+    if (!root) throw new Error(`élément ${selector} introuvable dans arcade.html`);
+    return create(root, wallet);
+  } catch (error) {
+    console.error(`[arcade] ${selector} : jeu désactivé`, error);
+    return { activate() {}, deactivate() {} };
+  }
+}
+
 const HUB_TITLE = "ARCADE // zone secrète — Mathieu Contamin";
 
 const GAMES = {
-  snake: { title: "Data Snake", ui: createSnakeUI($("#game-snake"), wallet) },
-  blackjack: { title: "Blackjack", ui: createBlackjackUI($("#blackjack-root"), wallet) },
-  roulette: { title: "Roulette", ui: createRouletteUI($("#roulette-root"), wallet) },
-  plinko: { title: "Plinko", ui: createPlinkoUI($("#plinko-root"), wallet) },
-  farm: { title: "Pêche & Ferme", ui: createFarmUI($("#farm-root"), wallet) },
-  race: { title: "Courses d'IA", ui: createRaceUI($("#race-root"), wallet) },
-  mines: { title: "Démineur", ui: createMinesUI($("#mines-root"), wallet) },
-  crash: { title: "Crash", ui: createCrashUI($("#crash-root"), wallet) },
-  slots: { title: "Machine à sous", ui: createSlotsUI($("#slots-root"), wallet) },
-  clicker: { title: "Mineur de données", ui: createClickerUI($("#clicker-root"), wallet) },
-  tetris: { title: "Tetris", ui: createTetrisUI($("#tetris-root"), wallet) },
-  td: { title: "Pare-feu", ui: createTowerDefenseUI($("#td-root"), wallet) },
-  survivors: { title: "Survivor Arena", ui: createSurvivorsUI($("#survivors-root"), wallet) },
-  breach: { title: "Breach Protocol", ui: createBreachUI($("#breach-root"), wallet) },
-  hunt: { title: "Chasse aux Titans", ui: createHuntUI($("#hunt-root"), wallet) },
-  dungeon: { title: "Donjon", ui: createDungeonUI($("#dungeon-root"), wallet) }
+  snake: { title: "Data Snake", ui: mount(createSnakeUI, "#game-snake") },
+  blackjack: { title: "Blackjack", ui: mount(createBlackjackUI, "#blackjack-root") },
+  roulette: { title: "Roulette", ui: mount(createRouletteUI, "#roulette-root") },
+  plinko: { title: "Plinko", ui: mount(createPlinkoUI, "#plinko-root") },
+  farm: { title: "Pêche & Ferme", ui: mount(createFarmUI, "#farm-root") },
+  race: { title: "Courses d'IA", ui: mount(createRaceUI, "#race-root") },
+  mines: { title: "Démineur", ui: mount(createMinesUI, "#mines-root") },
+  crash: { title: "Crash", ui: mount(createCrashUI, "#crash-root") },
+  slots: { title: "Machine à sous", ui: mount(createSlotsUI, "#slots-root") },
+  clicker: { title: "Mineur de données", ui: mount(createClickerUI, "#clicker-root") },
+  tetris: { title: "Tetris", ui: mount(createTetrisUI, "#tetris-root") },
+  td: { title: "Pare-feu", ui: mount(createTowerDefenseUI, "#td-root") },
+  survivors: { title: "Survivor Arena", ui: mount(createSurvivorsUI, "#survivors-root") },
+  breach: { title: "Breach Protocol", ui: mount(createBreachUI, "#breach-root") },
+  hunt: { title: "Chasse aux Titans", ui: mount(createHuntUI, "#hunt-root") },
+  dungeon: { title: "Donjon", ui: mount(createDungeonUI, "#dungeon-root") }
 };
 
 /* ---------- Portefeuille et infos du hub ---------- */
@@ -119,6 +132,7 @@ function show(id) {
 
   hub.hidden = id !== null;
   for (const [name, section] of Object.entries(sections)) {
+    if (!section) continue;                      // section absente du HTML : jeu ignoré
     section.hidden = name !== id;
     if (name === id) GAMES[name].ui.activate();
     else GAMES[name].ui.deactivate();
