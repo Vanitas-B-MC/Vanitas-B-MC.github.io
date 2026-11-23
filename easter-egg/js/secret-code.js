@@ -2,25 +2,21 @@
 //   « awesome »    ouvre la page cachée (easter-egg/arcade.html)
 //   « edgerunner » active / désactive le style Edgerunners (rouge, vert)
 //   « neon »       active / désactive le style Neon (rose néon, cyan)
-//   « blackwall »  active / désactive le style Blackwall (rouge sang, orange, noir) et lance son morceau de musique
 //   « cyberpsychosis » glitch progressif de la page pendant quelques secondes (js/cyberpsychosis.js)
 // Chargé sur index.html, veille.html et easter-egg/arcade.html.
 
-import { toggleTheme, currentTheme } from "../../js/theme.js";
-import { sharedMusic } from "./music.js";
+import { toggleTheme } from "../../js/theme.js";
 
 export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "easter-egg/arcade.html";
 export const THEME_CODE = "edgerunner";
 export const NEON_CODE = "neon";
-export const BLACKWALL_CODE = "blackwall";
 export const PSYCHO_CODES = ["cyberpsycho", "cyberpsychosis"];
 
 // Un code par thème : `theme` est le nom de la classe sur <html> (voir theme.js).
 export const THEME_CODES = [
   { code: THEME_CODE, theme: "edgerunners", label: "edgerunner" },
   { code: NEON_CODE, theme: "neon", label: "neon" },
-  { code: BLACKWALL_CODE, theme: "blackwall", label: "blackwall" },
 ];
 
 // Garde les dernières lettres tapées ; renvoie true quand elles forment le code.
@@ -110,7 +106,6 @@ function init() {
   let overlay = null;
   let timer = 0;
   let toastTimer = 0;
-  let wallStartedMusic = false;   // la musique a été lancée par le code « blackwall » (et pas par le joueur)
 
   function addStyle() {
     if (document.getElementById("secret-style")) return;
@@ -155,26 +150,6 @@ function init() {
     toastTimer = window.setTimeout(() => toast.remove(), 2200);
   }
 
-  // Le morceau Blackwall démarre avec le thème. Appelé pendant l'événement clavier : le navigateur autorise alors le son.
-  // Si le joueur écoutait déjà de la musique, on ne touche à rien : le morceau change tout seul avec le thème.
-  function startWallMusic() {
-    try {
-      const music = sharedMusic();
-      if (music.on) return;
-      music.start();
-      wallStartedMusic = music.on;
-    } catch (error) {
-      console.error("[blackwall]", error);
-    }
-  }
-
-  // Quand on quitte le thème (même en tapant un autre code), on coupe la musique qu'on avait lancée.
-  window.addEventListener("mc-theme", () => {
-    if (!wallStartedMusic || currentTheme() === "blackwall") return;
-    wallStartedMusic = false;
-    try { sharedMusic().stop(); } catch { /* rien à couper */ }
-  });
-
   document.addEventListener("keydown", (event) => {
     if (event.isComposing || event.repeat) return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
@@ -187,11 +162,7 @@ function init() {
     const hit = themeMatchers.map((matcher) => matcher.push(event.key) && matcher).find(Boolean);
 
     if (page && !onArcade) unlock();
-    if (hit) {
-      const on = toggleTheme(hit.theme);
-      themeToast(hit.label, on);
-      if (on && hit.theme === "blackwall") startWallMusic();
-    }
+    if (hit) themeToast(hit.label, toggleTheme(hit.theme));
     if (psycho) {
       // Chargé seulement quand on en a besoin.
       // Chemin relatif à ce fichier (easter-egg/js/secret-code.js), donc valable depuis toutes les pages.

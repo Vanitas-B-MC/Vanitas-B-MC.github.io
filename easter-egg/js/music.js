@@ -6,18 +6,13 @@
 // Quand le mode Edgerunners est actif (code « edgerunner »), la boucle change : morceau original de 16 mesures (~1 min),
 // lent et mélancolique, dans l'ambiance d'« I Really Want to Stay at Your House » (aucune mélodie n'est reprise).
 // Structure : intro (mesures 1-4), couplet (5-8), refrain (9-12), fin qui s'éteint (13-16). Le changement est immédiat.
-// Quand le mode Blackwall est actif (code « blackwall »), morceau original de 16 mesures (~50 s), sombre et industriel :
-// bourdon grave, accords diminués, pouls de basse, saturation, nappes de bruit et glitchs. Il démarre tout seul à la saisie du code.
-// Structure : intro (1-4) le mur apparaît, pouls (5-8), brèche (9-12), effondrement (13-16) puis la boucle reprend.
 
 const BPM = 96;
 const BPM_EDGE = 62;                  // tempo du morceau Edgerunners
 const BPM_NEON = 118;                 // tempo du morceau Neon
-const BPM_WALL = 78;                  // tempo du morceau Blackwall
 const isEdge = () => document.documentElement.classList.contains("edgerunners");
 const isNeon = () => document.documentElement.classList.contains("neon");
-const isWall = () => document.documentElement.classList.contains("blackwall");
-const stepSeconds = () => 60 / (isEdge() ? BPM_EDGE : isNeon() ? BPM_NEON : isWall() ? BPM_WALL : BPM) / 4;   // une double-croche, en secondes
+const stepSeconds = () => 60 / (isEdge() ? BPM_EDGE : isNeon() ? BPM_NEON : BPM) / 4;   // une double-croche, en secondes
 const LOOKAHEAD = 0.25;               // on programme les notes 250 ms à l'avance
 const KEY = "mc-music";
 
@@ -77,23 +72,9 @@ const NEON_CHORUS = [
   [[0, 78, 4], [4, 81, 4], [8, 83, 4], [12, 81, 4]],
   [[0, 79, 6], [6, 78, 2], [8, 74, 4], [12, 71, 4]]
 ];
-// Morceau Blackwall : accords diminués sur Ré, Mi bémol, Ré, La bémol (2 mesures chacun), répétés 2 fois = 16 mesures.
-const WALL_CHORDS = [
-  { root: 26, notes: [50, 53, 56] },  // Ré dim (Ré, Fa, La♭)
-  { root: 27, notes: [51, 54, 57] },  // Mi♭ dim
-  { root: 26, notes: [50, 53, 56] },  // Ré dim
-  { root: 32, notes: [56, 59, 62] }   // La♭ dim (triton de Ré : la tension monte)
-];
-const WALL_BARS = 16;
-const WALL_ARP = [0, 2, 1, 2, 0, 1, 2, 1];
-// Voix de l'IA : [pas dans les 2 mesures de l'accord, numéro de la note de l'accord, durée en pas].
-const WALL_MOTIF = [[0, 0, 10], [12, 1, 6], [20, 2, 10], [30, 1, 2]];
-// Petit hasard reproductible (pour les « trous » du flux de données) : toujours le même à chaque tour.
-const rnd = (n) => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
-
 const STEPS_PER_BAR = 16;
 const BARS = 8;
-const loopSteps = () => STEPS_PER_BAR * (isEdge() ? EDGE_BARS : isNeon() ? NEON_BARS : isWall() ? WALL_BARS : BARS);
+const loopSteps = () => STEPS_PER_BAR * (isEdge() ? EDGE_BARS : isNeon() ? NEON_BARS : BARS);
 
 function readPref() {
   try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
@@ -109,8 +90,6 @@ export function createMusic() {
   let ctx = null;
   let master = null;
   let leadBus = null;                 // mélodie du morceau Edgerunners : filtre passe-bas + écho
-  let driveBus = null;               // basse du morceau Blackwall : saturation + filtre passe-bas
-  let longNoise = null;
   let echo = null;
   let feedback = null;
   let wet = null;
@@ -169,54 +148,6 @@ export function createMusic() {
   function bright(freq, time, length, gain, dest = leadBus) {
     note(freq * 0.997, time, length, "sawtooth", gain, dest, 0.015);
     note(freq * 1.003, time, length, "sawtooth", gain, dest, 0.015);
-  }
-
-  // Bourdon du morceau Blackwall : deux dents de scie désaccordées + sinus grave, filtre passe-bas qui respire.
-  function drone(freq, time, length, gain) {
-    const lp = ctx.createBiquadFilter();
-    const amp = ctx.createGain();
-    lp.type = "lowpass";
-    lp.Q.value = 4;
-    lp.frequency.setValueAtTime(160, time);
-    lp.frequency.exponentialRampToValueAtTime(620, time + length * 0.5);
-    lp.frequency.exponentialRampToValueAtTime(160, time + length);
-    amp.gain.setValueAtTime(0.0001, time);
-    amp.gain.exponentialRampToValueAtTime(gain, time + Math.min(2, length * 0.3));
-    amp.gain.exponentialRampToValueAtTime(0.0001, time + length);
-    lp.connect(amp).connect(master);
-    for (const [type, f, detune] of [["sawtooth", freq * 2, -9], ["sawtooth", freq * 2, 9], ["sine", freq, 0]]) {
-      const osc = ctx.createOscillator();
-      osc.type = type;
-      osc.frequency.setValueAtTime(f, time);
-      osc.detune.value = detune;
-      osc.connect(lp);
-      osc.start(time);
-      osc.stop(time + length + 0.05);
-    }
-  }
-
-  // Montée de bruit (le mur qui approche) : bruit filtré dont la fréquence grimpe, passe par l'écho et la réverbération.
-  function swell(time, length, gain) {
-    if (!longNoise) {
-      longNoise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
-      const data = longNoise.getChannelData(0);
-      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-    }
-    const src = ctx.createBufferSource();
-    const filter = ctx.createBiquadFilter();
-    const amp = ctx.createGain();
-    src.buffer = longNoise;
-    src.loop = true;
-    filter.type = "bandpass";
-    filter.Q.value = 2.5;
-    filter.frequency.setValueAtTime(300, time);
-    filter.frequency.exponentialRampToValueAtTime(5000, time + length);
-    amp.gain.setValueAtTime(0.0001, time);
-    amp.gain.exponentialRampToValueAtTime(gain, time + length * 0.9);
-    amp.gain.exponentialRampToValueAtTime(0.0001, time + length);
-    src.connect(filter).connect(amp).connect(leadBus);
-    src.start(time);
-    src.stop(time + length + 0.05);
   }
 
   function kick(time, level = 0.9) {
@@ -344,77 +275,7 @@ export function createMusic() {
     }
   }
 
-  // Morceau Blackwall (16 mesures) : intro (1-4) le mur apparaît, pouls (5-8), brèche (9-12), effondrement (13-16).
-  function playWallStep(index, time) {
-    const STEP = stepSeconds();
-    const bar = Math.floor(index / STEPS_PER_BAR) % WALL_BARS;
-    const inBar = index % STEPS_PER_BAR;
-    const chord = WALL_CHORDS[Math.floor(bar / 2) % 4];
-    const section = Math.floor(bar / 4);          // 0 intro, 1 pouls, 2 brèche, 3 effondrement
-    const local = (bar % 2) * STEPS_PER_BAR + inBar;   // pas dans les 2 mesures de l'accord
-
-    // Bourdon et nappe d'accord diminué, renouvelés toutes les 2 mesures ; le bruit monte dès la première mesure.
-    if (local === 0) {
-      drone(midi(chord.root), time, STEP * 32, section === 2 ? 0.1 : 0.075);
-      for (const n of chord.notes) note(midi(n), time, STEP * 32, "sine", 0.02, leadBus, 1.8);
-    }
-    if (bar === 0 && inBar === 0) swell(time, STEP * 64, 0.14);
-
-    // Intro : un « ping » de données, très loin.
-    if (section === 0 && bar % 2 === 1 && inBar === 10) note(midi(chord.notes[2] + 24), time, STEP * 4, "sine", 0.035, leadBus, 0.005);
-
-    // Pouls : « battement de cœur » sourd, puis basse sinusoïdale à partir de la mesure 5.
-    if (section === 1) {
-      if (inBar === 0) kick(time, 0.5);
-      if (inBar === 3) kick(time, 0.28);
-      if (inBar % 4 === 2) hat(time, 0.05, 9000, 0.03);
-    }
-    if (section >= 1 && inBar === 0) note(midi(chord.root), time, STEP * 14, "sine", 0.2, master, 0.05);
-
-    // Flux de données : arpège aigu et carré, avec des trous pour le côté glitch.
-    if ((section === 1 || section === 2) && inBar % 2 === 0 && rnd(index) > (section === 1 ? 0.45 : 0.25)) {
-      const n = chord.notes[WALL_ARP[(inBar / 2) % WALL_ARP.length]] + 24;
-      note(midi(n), time, STEP * 1.2, "square", section === 1 ? 0.014 : 0.02, leadBus, 0.004);
-    }
-
-    // Brèche : grosse caisse à 4 temps, claque métallique, basse saturée, accord d'alarme en triton.
-    if (section === 2) {
-      if (inBar % 4 === 0) kick(time, 0.85);
-      if (inBar === 4 || inBar === 12) hat(time, 0.22, 1200, 0.14, "bandpass");
-      if (inBar % 2 === 1) hat(time, 0.06, 9000, 0.03);
-      if (inBar % 2 === 0) note(midi(chord.root + (inBar === 14 ? 12 : inBar === 10 ? 7 : 0)), time, STEP * 1.8, "sawtooth", 0.13, driveBus, 0.008);
-      if (local === 0 || local === 22) {
-        bright(midi(chord.notes[0] + 12), time, STEP * 3, 0.03);
-        bright(midi(chord.notes[0] + 18), time, STEP * 3, 0.03);   // triton
-      }
-    }
-
-    // Effondrement : le rythme se vide, puis une montée de bruit et des rafales avant la reprise de la boucle.
-    if (section === 3) {
-      if (bar < 14) {
-        if (inBar === 0 || inBar === 8) kick(time, 0.7);
-        if (inBar === 4 || inBar === 12) hat(time, 0.12, 1200, 0.12, "bandpass");
-        if (inBar % 4 === 0) note(midi(chord.root), time, STEP * 3, "sawtooth", 0.12, driveBus, 0.008);
-      } else if (bar === 14) {
-        if (inBar % 4 === 0) kick(time, 0.6 - inBar * 0.02);
-        if (inBar >= 8 && inBar % 2 === 0) hat(time, 0.06, 7000, 0.04);
-      } else {
-        if (inBar % 2 === 0) hat(time, 0.05 + inBar * 0.012, 1600 + inBar * 250, 0.06, "bandpass");
-        if (inBar >= 12) hat(time, 0.09, 3000 + inBar * 500, 0.02, "bandpass");
-      }
-    }
-
-    // Voix de l'IA (mélodie longue et plaintive) : de la mesure 7 à la mesure 14.
-    if ((section === 1 && bar >= 6) || section === 2 || (section === 3 && bar < 14)) {
-      const gain = section === 2 ? 0.075 : section === 3 ? 0.05 : 0.04;
-      for (const [at, idx, len] of WALL_MOTIF) {
-        if (at === local) lead(midi(chord.notes[idx] + 24), time, STEP * len, gain);
-      }
-    }
-  }
-
   function playStep(index, time) {
-    if (isWall()) return playWallStep(index, time);
     if (isEdge()) return playEdgeStep(index, time);
     if (isNeon()) return playNeonStep(index, time);
     const STEP = stepSeconds();
@@ -451,10 +312,9 @@ export function createMusic() {
   function tune() {
     echo.delayTime.value = stepSeconds() * 3;
     const neon = isNeon();
-    const wall = isWall();
-    feedback.gain.value = wall ? 0.5 : neon ? 0.32 : 0.45;
-    wet.gain.value = wall ? 0.38 : neon ? 0.32 : 0.5;
-    reverbLevel.gain.value = wall ? 0.6 : neon ? 0.12 : 0.45;
+    feedback.gain.value = neon ? 0.32 : 0.45;
+    wet.gain.value = neon ? 0.32 : 0.5;
+    reverbLevel.gain.value = neon ? 0.12 : 0.45;
   }
 
   function start() {
@@ -490,18 +350,6 @@ export function createMusic() {
         echo.connect(feedback).connect(echo);
         echo.connect(wet).connect(master);
         lowpass.connect(reverb).connect(reverbLevel).connect(master);
-
-        // Basse du morceau Blackwall : saturation (tanh) puis filtre passe-bas.
-        driveBus = ctx.createGain();
-        const shaper = ctx.createWaveShaper();
-        const curve = new Float32Array(256);
-        for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh(((i / 255) * 2 - 1) * 4);
-        shaper.curve = curve;
-        shaper.oversample = "2x";
-        const drive = ctx.createBiquadFilter();
-        drive.type = "lowpass";
-        drive.frequency.value = 1100;
-        driveBus.connect(shaper).connect(drive).connect(master);
       }
       tune();
       master.gain.value = volume * 0.6;
@@ -526,7 +374,7 @@ export function createMusic() {
     emit();
   }
 
-  // Les codes « edgerunner », « neon » et « blackwall » (ou le retour au style normal) changent de morceau tout de suite, sans couper la musique.
+  // Les codes « edgerunner » et « neon » (ou le retour au style normal) changent de morceau tout de suite, sans couper la musique.
   window.addEventListener("mc-theme", () => {
     if (!ctx) return;
     tune();
@@ -556,11 +404,4 @@ export function createMusic() {
     },
     subscribe(fn) { listeners.add(fn); }
   };
-}
-
-// Instance unique, partagée par l'arcade et par secret-code.js (le code « blackwall » lance la musique depuis n'importe quelle page).
-let shared = null;
-export function sharedMusic() {
-  shared ??= createMusic();
-  return shared;
 }
