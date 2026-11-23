@@ -98,8 +98,28 @@ export const SKILL_THRESHOLDS = Array.from({ length: 20 }, (_, n) => Math.round(
 
 /* ---------- Arbre du Rebirth (permanent, acheté avec des éclats) ---------- */
 
-export const REBIRTH_MIN = 50000;        // crédits minés dans la partie pour pouvoir formater
-export const SHARD_BONUS = 0.02;         // +2 % à tous les gains par éclat gagné, à vie
+export const REBIRTH_MIN = 50000;
+export const REBIRTH_GROWTH = 2.5;
+
+export function rebirthCost(data) {
+  return Math.ceil(
+    REBIRTH_MIN * REBIRTH_GROWTH ** (data.rebirths || 0)
+  );
+}
+
+export function shardsFor(data) {
+  const run = data.minedRun || 0;
+  const cost = rebirthCost(data);
+
+  if (run < cost) return 0;
+
+  const bonus = bonusOf(data);
+
+  return Math.floor(
+    Math.sqrt(run / cost) *
+    (1 + 0.10 * coreRank(bonus, "k3"))
+  );
+}
 
 export const CORE = [
   { id: "k1", name: "Noyau d'énergie",   desc: "+15 % à tous les gains",                            max: 20, base: 2,  growth: 1.45 },
