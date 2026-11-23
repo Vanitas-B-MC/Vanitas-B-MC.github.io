@@ -12,11 +12,12 @@ import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP } from "./td.js";
 import { freshFarm, sanitizeFarm } from "./farm.js";
 import { LEVEL_IDS } from "./mines.js";
 import { QUEST_IDS, questById, applyRunToQuests } from "./hub.js";
+import { MAX_CREDITS } from "./limits.js";
 import { CLASS_IDS, FREE_CLASS, META, META_IDS, freshRanks, metaCost, classById, WEAPONS, WEAPON_IDS, FREE_WEAPONS, weaponById } from "./dungeon.js";
 
 const KEY = "mc-arcade-wallet-v1";
 const START_CREDITS = 100;
-const MAX = Number.MAX_SAFE_INTEGER;
+const MAX = MAX_CREDITS;
 
 export const CLICKER_IDS = UPGRADES.map((u) => u.id);
 export const BLUE_IDS = BLUE_UPGRADES.map((u) => u.id);
