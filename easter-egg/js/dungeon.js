@@ -7,13 +7,29 @@
 export const W = 720;
 export const H = 480;
 export const TILE = 32;
-export const COLS = 20;
-export const ROWS = 12;
 export const X0 = 40;                 // coin haut-gauche de l'aire de jeu
 export const Y0 = 48;
-export const X1 = X0 + COLS * TILE;   // 680
-export const Y1 = Y0 + ROWS * TILE;   // 432
 export const PLAYER_R = 9;
+
+// Les salles ont des tailles différentes : les dimensions courantes sont des liaisons « live »
+// (ré-assignées à chaque entrée de salle). W × H reste la taille de la fenêtre de jeu (la caméra défile).
+export const ROOM_SIZES = { normal: [20, 12], wide: [32, 12], tall: [20, 20], large: [32, 20] };
+export let COLS = 20;
+export let ROWS = 12;
+export let X1 = X0 + COLS * TILE;     // 680 pour une salle normale
+export let Y1 = Y0 + ROWS * TILE;     // 432
+export let WORLD_W = X1 + X0;
+export let WORLD_H = Y1 + (H - 12 * TILE - Y0);
+export function setRoomSize(size) {
+  const [c, r] = ROOM_SIZES[size] || ROOM_SIZES.normal;
+  COLS = c; ROWS = r;
+  X1 = X0 + COLS * TILE; Y1 = Y0 + ROWS * TILE;
+  WORLD_W = X1 + X0; WORLD_H = Y1 + (H - 12 * TILE - Y0);
+  DOORS.u.x = DOORS.d.x = (X0 + X1) / 2; DOORS.u.y = Y0; DOORS.d.y = Y1;
+  DOORS.l.x = X0; DOORS.r.x = X1; DOORS.l.y = DOORS.r.y = (Y0 + Y1) / 2;
+}
+export { WEAPONS, WEAPON_IDS, FREE_WEAPONS, weaponById } from "./weapons.js";
+import { weaponById } from "./weapons.js";
 
 const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -24,19 +40,19 @@ const angleTo = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
 export const CLASSES = [
   { id: "knight", name: "Chevalier", unlock: 0, color: "#00f0ff",
     desc: "Robuste. Frappe en arc devant lui. Compétence : Tourbillon.",
-    hp: 120, speed: 120, attack: { type: "melee", dmg: 16, rate: 1.6, range: 48, arc: 1.7 },
+    hp: 120, speed: 120, weapon: "sword",
     skill: { name: "Tourbillon", cd: 7, desc: "Frappe tout autour de toi" } },
   { id: "ranger", name: "Rôdeur", unlock: 400, color: "#4d9bff",
     desc: "Tire à distance. Compétence : Pluie de flèches.",
-    hp: 90, speed: 135, attack: { type: "shot", dmg: 9, rate: 2.6, speed: 400, pierce: 0 },
+    hp: 90, speed: 135, weapon: "bow",
     skill: { name: "Pluie de flèches", cd: 6, desc: "12 flèches dans toutes les directions" } },
   { id: "mage", name: "Mage", unlock: 900, color: "#b58cff",
     desc: "Projectiles magiques perforants. Compétence : Nova.",
-    hp: 80, speed: 118, attack: { type: "shot", dmg: 15, rate: 1.5, speed: 310, pierce: 2 },
+    hp: 80, speed: 118, weapon: "wand",
     skill: { name: "Nova", cd: 8, desc: "Onde qui blesse, ralentit et efface les tirs ennemis" } },
   { id: "rogue", name: "Voleur", unlock: 1600, color: "#ff2a6d",
     desc: "Très rapide, coups courts et fréquents. Compétence : Ombre.",
-    hp: 95, speed: 150, attack: { type: "melee", dmg: 9, rate: 3.2, range: 36, arc: 1.3 },
+    hp: 95, speed: 150, weapon: "dagger",
     skill: { name: "Ombre", cd: 5, desc: "Bond invulnérable, puis 4 s de coups critiques" } }
 ];
 export const CLASS_IDS = CLASSES.map((c) => c.id);
@@ -68,9 +84,9 @@ export const ITEMS = {
   lynx:   { name: "Œil de lynx",      desc: "+10 % de coups critiques (×2)",                     max: 5, apply: (s) => { s.crit += 0.1; } },
   vamp:   { name: "Croc de vampire",  desc: "+1 PV par ennemi vaincu",                           max: 5, apply: (s) => { s.vampire += 1; } },
   multi:  { name: "Multi-tir",        desc: "+1 projectile (distance) · portée et arc accrus (mêlée)", max: 3,
-            apply: (s, p, cls) => { if (cls.attack.type === "shot") s.shots += 1; else { s.range *= 1.18; s.arc *= 1.15; } } },
+            apply: (s, p, cls) => { if (cls.type === "shot") s.shots += 1; else { s.range *= 1.18; s.arc *= 1.15; } } },
   pierce: { name: "Perforation",      desc: "Les tirs traversent +1 ennemi (distance) · +10 % de dégâts (mêlée)", max: 3,
-            apply: (s, p, cls) => { if (cls.attack.type === "shot") s.pierce += 1; else s.damage *= 1.1; } },
+            apply: (s, p, cls) => { if (cls.type === "shot") s.pierce += 1; else s.damage *= 1.1; } },
   fire:   { name: "Flammes",          desc: "Tes coups enflamment les ennemis",                  max: 3, apply: (s) => { s.burn += 1; } },
   frost:  { name: "Givre",            desc: "Tes coups ralentissent les ennemis",                max: 1, apply: (s) => { s.frost = 1; } },
   shield: { name: "Bouclier d'énergie", desc: "Absorbe un coup, se recharge (−2 s par niveau)",  max: 3, apply: (s, p) => { s.shieldMax += 1; p.shield = Math.min(s.shieldMax, p.shield + 1); s.shieldCd = Math.max(5, 15 - 2 * (s.shieldMax - 1)); } },
@@ -154,33 +170,71 @@ export const LAYOUTS = [
   { id: "islands",  build: () => { const g = blank(); box(g, 4, 3, 3, 2, "o"); box(g, 13, 3, 3, 2, "o"); box(g, 4, 7, 3, 2, "o"); box(g, 13, 7, 3, 2, "o"); box(g, 9, 5, 2, 2, "#"); return g; } }
 ];
 
+// Grandes salles : générées selon COLS × ROWS (passages toujours garantis, voir dg3.mjs).
+const bigLayouts = [
+  { id: "scatter", big: true, build: (rnd, g = blank()) => { for (let r = 3; r < ROWS - 3; r += 5) for (let c = 4; c < COLS - 4; c += 6) box(g, c + (r % 2), r, 2, 2, "#"); return g; } },
+  { id: "partitions", big: true, build: (rnd, g = blank()) => {
+      const c1 = Math.floor(COLS / 3), c2 = Math.floor((2 * COLS) / 3), m = Math.floor(ROWS / 2);
+      box(g, c1, 1, 1, ROWS - 2, "#"); box(g, c2, 1, 1, ROWS - 2, "#");
+      box(g, c1, m - 2, 1, 4, "."); box(g, c2, 1, 1, 4, "."); box(g, c2, ROWS - 5, 1, 4, ".");
+      box(g, c1 - 3, 3, 2, 2, "o"); box(g, c2 + 3, ROWS - 5, 2, 2, "o");
+      return g; } },
+  { id: "moat", big: true, build: (rnd, g = blank()) => {
+      const cx = Math.floor(COLS / 2), cy = Math.floor(ROWS / 2);
+      box(g, cx - 7, cy - 4, 14, 8, "o");
+      box(g, cx - 8, cy - 1, 16, 2, "."); box(g, cx - 1, cy - 5, 2, 10, ".");
+      box(g, cx - 4, cy - 2, 2, 1, "#"); box(g, cx + 2, cy + 1, 2, 1, "#");
+      return g; } },
+  { id: "spikefield", big: true, build: (rnd, g = blank()) => {
+      for (let i = 0; i < Math.floor((COLS * ROWS) / 40); i++) box(g, 3 + Math.floor(rnd() * (COLS - 8)), 2 + Math.floor(rnd() * (ROWS - 5)), 3, 2, "x");
+      for (let r = 4; r < ROWS - 3; r += 6) box(g, Math.floor(COLS / 2) - 2, r, 4, 1, "#");
+      return g; } },
+  { id: "archipelago", big: true, build: (rnd, g = blank()) => {
+      for (let r = 1; r + 5 < ROWS; r += 6) for (let c = 2; c + 5 < COLS; c += 6) {
+        if (rnd() < 0.6) box(g, c + 1 + Math.floor(rnd() * 3), r + 1 + Math.floor(rnd() * 3), 2, 2, rnd() < 0.5 ? "o" : "#");
+      }
+      return g; } },
+  { id: "cathedral", big: true, build: (rnd, g = blank()) => {
+      for (let c = 4; c < COLS - 3; c += 4) { box(g, c, 3, 1, 2, "#"); box(g, c, ROWS - 5, 1, 2, "#"); }
+      const m = Math.floor(ROWS / 2); for (let c = 6; c < COLS - 5; c += 8) box(g, c, m - 1, 2, 2, "#");
+      return g; } }
+];
+for (const l of bigLayouts) LAYOUTS.push(l);
+export const NORMAL_LAYOUTS = LAYOUTS.map((l, i) => (l.big ? -1 : i)).filter((i) => i >= 0);
+export const BIG_LAYOUTS = LAYOUTS.map((l, i) => (l.big ? i : -1)).filter((i) => i >= 0);
+
+function mulberry(seed) {
+  let a = seed >>> 0;
+  return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+
 function clearDoorways(g) {
-  box(g, 8, 0, 4, 2, "."); box(g, 8, 10, 4, 2, ".");
-  box(g, 0, 4, 2, 4, "."); box(g, 18, 4, 2, 4, ".");
-  box(g, 8, 4, 4, 4, g[5][9] === "#" ? "#" : g[5][9] === "o" ? "o" : "."); // garde le centre tel quel s'il est plein
+  const mc = Math.floor(COLS / 2), mr = Math.floor(ROWS / 2);
+  box(g, mc - 2, 0, 4, 2, "."); box(g, mc - 2, ROWS - 2, 4, 2, ".");
+  box(g, 0, mr - 2, 2, 4, "."); box(g, COLS - 2, mr - 2, 2, 4, ".");
+  const centre = g[mr - 1][mc - 1];
+  if (COLS === 20 && ROWS === 12) box(g, mc - 2, mr - 2, 4, 4, centre === "#" ? "#" : centre === "o" ? "o" : "."); // garde le centre tel quel s'il est plein
+  else { box(g, mc - 2, 2, 4, ROWS - 4, "."); box(g, 2, mr - 2, COLS - 4, 4, "."); }
   return g;
 }
 
-export const buildLayout = (i) => clearDoorways(LAYOUTS[i].build());
+// Construit la grille d'une salle (après setRoomSize).
+export const buildLayout = (room) => clearDoorways(LAYOUTS[room.layout].build(mulberry(room.seed || 1)));
 
 /* ---------- Carte d'étage ---------- */
 
 const DIRS = { u: { dx: 0, dy: -1, opp: "d" }, d: { dx: 0, dy: 1, opp: "u" }, l: { dx: -1, dy: 0, opp: "r" }, r: { dx: 1, dy: 0, opp: "l" } };
 
 // Position des portes dans le mur et point d'arrivée quand on entre par la porte opposée.
-export const DOORS = {
-  u: { x: (X0 + X1) / 2, y: Y0 },
-  d: { x: (X0 + X1) / 2, y: Y1 },
-  l: { x: X0, y: (Y0 + Y1) / 2 },
-  r: { x: X1, y: (Y0 + Y1) / 2 }
-};
-const ARRIVE = { u: { x: DOORS.u.x, y: Y0 + 30 }, d: { x: DOORS.d.x, y: Y1 - 30 }, l: { x: X0 + 30, y: DOORS.l.y }, r: { x: X1 - 30, y: DOORS.r.y } };
+export const DOORS = { u: { x: 0, y: 0 }, d: { x: 0, y: 0 }, l: { x: 0, y: 0 }, r: { x: 0, y: 0 } };
+setRoomSize("normal");
+const arrive = (d) => ({ u: { x: DOORS.u.x, y: Y0 + 30 }, d: { x: DOORS.d.x, y: Y1 - 30 }, l: { x: X0 + 30, y: DOORS.l.y }, r: { x: X1 - 30, y: DOORS.r.y } }[d]);
 
 export function generateFloor(rng, floor) {
   const count = Math.min(12, 6 + floor);
   const rooms = new Map();
   const key = (x, y) => `${x},${y}`;
-  const add = (x, y, type) => { const r = { gx: x, gy: y, type, doors: {}, visited: false, cleared: false, depth: 0, layout: null, waves: 0, taken: false, stands: null }; rooms.set(key(x, y), r); return r; };
+  const add = (x, y, type) => { const r = { gx: x, gy: y, type, doors: {}, visited: false, cleared: false, depth: 0, layout: null, waves: 0, taken: false, stands: null, size: "normal", seed: 0, trap: false, bossChest: false }; rooms.set(key(x, y), r); return r; };
   add(0, 0, "start");
   let guard = 0;
   while (rooms.size < count && guard++ < 500) {
@@ -215,7 +269,11 @@ export function generateFloor(rng, floor) {
   const combats = [...rooms.values()].filter((r) => r.type === "combat" && r.depth >= 2);
   for (const r of combats) if (rng() < 0.25 + 0.03 * floor) r.type = "elite";
   for (const r of rooms.values()) {
-    const choices = r.type === "boss" ? [0, 1, 11, 12] : r.type === "start" || r.type === "treasure" || r.type === "shop" ? [0] : LAYOUTS.map((_, i) => i);
+    r.seed = 1 + Math.floor(rng() * 1e9);
+    const fight = r.type === "combat" || r.type === "elite" || r.type === "boss";
+    const roll = rng();
+    r.size = !fight ? "normal" : r.type === "boss" ? (roll < 0.5 ? "large" : roll < 0.75 ? "wide" : "normal") : roll < 0.14 ? "large" : roll < 0.26 ? "wide" : roll < 0.38 ? "tall" : "normal";
+    const choices = r.size !== "normal" ? BIG_LAYOUTS : r.type === "boss" ? [0, 1, 11, 12] : r.type === "start" || r.type === "treasure" || r.type === "shop" ? [0] : NORMAL_LAYOUTS;
     r.layout = choices[Math.floor(rng() * choices.length)];
     r.waves = r.type === "combat" || r.type === "elite" ? (floor >= 3 && rng() < 0.5 ? 2 : 1) : 0;
   }
@@ -224,9 +282,9 @@ export function generateFloor(rng, floor) {
 
 /* ---------- Création de la partie ---------- */
 
-export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {} } = {}) {
+export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {}, weaponId = null } = {}) {
   const cls = classById(classId);
-  const a = cls.attack;
+  const a = weaponById(weaponId || cls.weapon);
   const stats = {
     maxHp: cls.hp, speed: cls.speed, damage: a.dmg, rate: a.rate,
     range: a.range || 0, arc: a.arc || 0, projSpeed: a.speed || 0, pierce: a.pierce || 0, shots: 1,
@@ -240,10 +298,10 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
   stats.crit += 0.04 * r("crit");
 
   const state = {
-    rng, cls, stats, ranks: { ...ranks },
+    rng, cls, weapon: a, stats, ranks: { ...ranks }, zones: [], delayed: [], spin: 0,
     time: 0, over: false, revived: false,
     floor: 1, map: null, room: null, theme: themeFor(1), grid: blank(),
-    player: { x: W / 2, y: Y1 - 40, hp: stats.maxHp, inv: 0, cd: 0, skillCd: 0, shield: 0, shieldT: 0, facing: -Math.PI / 2, ghost: 0, crit100: 0, spikeT: 0 },
+    player: { x: (X0 + X1) / 2, y: Y1 - 40, hp: stats.maxHp, inv: 0, cd: 0, skillCd: 0, shield: 0, shieldT: 0, facing: -Math.PI / 2, ghost: 0, crit100: 0, spikeT: 0 },
     enemies: [], shots: [], bullets: [], pickups: [], fx: [], spawnList: [], spawnClock: 0, wavesLeft: 0,
     cleared: true, chest: null, trapdoor: null, choices: null, owned: {}, boss: null,
     kills: 0, coins: 0, coinsEarned: 0, bossKills: 0, roomsCleared: 0, nextId: 1, banner: null, orbAngle: 0, rain: 0
@@ -272,7 +330,7 @@ function spawnPoint(state, minFromPlayer = 160) {
     if (dist2({ x, y }, state.player) < minFromPlayer ** 2) continue;
     return { x, y };
   }
-  return { x: W / 2, y: Y0 + 90 };
+  return { x: (X0 + X1) / 2, y: Y0 + 90 };
 }
 
 function makeEnemy(state, type, x, y, opts = {}) {
@@ -289,7 +347,7 @@ function makeEnemy(state, type, x, y, opts = {}) {
 function planWave(state, isFirst) {
   const room = state.room;
   const depth = room.depth;
-  let budget = (2.5 + state.floor * 0.9 + depth * 0.35) / (room.waves > 1 ? 1.4 : 1);
+  let budget = ((2.5 + state.floor * 0.9 + depth * 0.35) / (room.waves > 1 ? 1.4 : 1)) * Math.pow((COLS * ROWS) / 240, 0.75);
   const count = Math.min(state.theme.pool.length, 2 + state.floor);
   const pool = state.theme.pool.slice(0, count);
   let at = 0;
@@ -309,7 +367,11 @@ function planWave(state, isFirst) {
 }
 
 function enterRoom(state, room, fromDir) {
+  setRoomSize(room.size);
   state.room = room;
+  state.zones = [];
+  state.delayed = [];
+  state.trapdoor = null;
   room.visited = true;
   state.enemies = [];
   state.shots = [];
@@ -321,10 +383,10 @@ function enterRoom(state, room, fromDir) {
   state.chest = null;
   state.boss = null;
   state.rain = 0;
-  const g = buildLayout(room.layout);
+  const g = buildLayout(room);
   state.grid = g;
   const p = state.player;
-  const at = fromDir ? ARRIVE[fromDir] : { x: W / 2, y: (Y0 + Y1) / 2 + 40 };
+  const at = fromDir ? arrive(fromDir) : { x: (X0 + X1) / 2, y: (Y0 + Y1) / 2 + 40 };
   p.x = at.x;
   p.y = at.y;
   p.inv = Math.max(p.inv, 0.8);
@@ -332,12 +394,16 @@ function enterRoom(state, room, fromDir) {
   if (room.cleared) {
     state.cleared = true;
     state.wavesLeft = 0;
+    if (room.type === "boss") {   // la trappe et le coffre restent dans la salle du boss
+      if (room.trap) state.trapdoor = { x: (X0 + X1) / 2 + 60, y: (Y0 + Y1) / 2 + 30 };
+      if (room.bossChest) state.chest = { x: (X0 + X1) / 2 - 60, y: (Y0 + Y1) / 2 + 30, opened: false, kind: "boss" };
+    }
   } else if (room.type === "boss") {
     state.cleared = false;
     state.wavesLeft = 0;
     const def = bossFor(state.floor);
     const mul = 0.75 + 0.2 * (state.floor - 1);
-    const b = makeEnemy(state, def.id, W / 2, Y0 + 110, { def, hpMul: mul, boss: true, spawn: 1.4 });
+    const b = makeEnemy(state, def.id, (X0 + X1) / 2, Y0 + 110, { def, hpMul: mul, boss: true, spawn: 1.4 });
     b.name = def.name;
     b.marks = [0.75, 0.5, 0.25];
     state.enemies.push(b);
@@ -350,16 +416,16 @@ function enterRoom(state, room, fromDir) {
   } else {
     state.cleared = true;
     room.cleared = true;
-    if (room.type === "treasure" && !room.taken) state.chest = { x: W / 2, y: (Y0 + Y1) / 2, opened: false, kind: "treasure" };
+    if (room.type === "treasure" && !room.taken) state.chest = { x: (X0 + X1) / 2, y: (Y0 + Y1) / 2, opened: false, kind: "treasure" };
     if (room.type === "shop") {
       if (!room.stands) {
         const pool = ITEM_IDS.filter((id) => (state.owned[id] || 0) < ITEMS[id].max);
         const pick = () => pool.splice(Math.floor(state.rng() * pool.length), 1)[0];
         const price = 10 + 2 * state.floor;
         room.stands = [
-          { x: W / 2 - 100, y: (Y0 + Y1) / 2, kind: "heart", price: 4 + state.floor, sold: false },
-          { x: W / 2, y: (Y0 + Y1) / 2, kind: "item", id: pick() || "blade", price, sold: false },
-          { x: W / 2 + 100, y: (Y0 + Y1) / 2, kind: "item", id: pick() || "haste", price: price + 4, sold: false }
+          { x: (X0 + X1) / 2 - 100, y: (Y0 + Y1) / 2, kind: "heart", price: 4 + state.floor, sold: false },
+          { x: (X0 + X1) / 2, y: (Y0 + Y1) / 2, kind: "item", id: pick() || "blade", price, sold: false },
+          { x: (X0 + X1) / 2 + 100, y: (Y0 + Y1) / 2, kind: "item", id: pick() || "haste", price: price + 4, sold: false }
         ];
       }
     }
@@ -452,11 +518,12 @@ export function damageEnemy(state, e, amount, { silent = false, depth = 0, noCri
   if (e.hp <= 0) killEnemy(state, e, depth);
 }
 
-function applyHitEffects(state, e) {
+function applyHitEffects(state, e, extra = null) {
   const s = state.stats;
   if (e.dead) return;
-  if (s.burn) { e.burn = 3; e.burnDps = 4 * s.burn * (s.damage / 12); }
+  if (s.burn || extra?.burn) { e.burn = 3; e.burnDps = 4 * Math.max(s.burn, 1) * (s.damage / 12); }
   if (s.frost) e.slow = 1.6;
+  if (extra?.slow) e.slow = Math.max(e.slow, extra.slow);
 }
 
 /* ---------- Collisions avec les cases ---------- */
@@ -519,33 +586,319 @@ function nearestEnemy(state, from, maxDist) {
   return best;
 }
 
-function playerAttack(state) {
-  const { player, stats, cls } = state;
-  const a = cls.attack;
-  const reach = a.type === "melee" ? stats.range + 30 : 380;
-  const target = nearestEnemy(state, player, reach);
-  if (!target) return false;
-  const ang = angleTo(player, target);
-  player.facing = ang;
-  if (a.type === "melee") {
-    const range = stats.range;
-    state.fx.push({ kind: "slash", x: player.x, y: player.y, angle: ang, arc: stats.arc, r: range, ttl: 0.16, max: 0.16, color: cls.color });
+/* ---------- Armes : une trentaine de comportements d'attaque ---------- */
+
+const rndSign = (state) => state.rng() * 2 - 1;
+
+function newShot(state, x, y, ang, speed, extra = {}) {
+  const st = state.stats, w = state.weapon;
+  const s = { x, y, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, dmg: st.damage, pierce: st.pierce, life: 1.2, hit: new Set(), color: w.color, r: 3.5, shape: "dot", age: 0, ...extra };
+  if (s.trail) s.tr = [];
+  if (state.shots.length < 260) state.shots.push(s);
+  return s;
+}
+
+function blastAt(state, x, y, r, dmg, opts = {}) {
+  state.fx.push({ kind: "blast", x, y, r, ttl: 0.32, max: 0.32, color: opts.color || state.weapon.color });
+  if (opts.sky) state.fx.push({ kind: "ring", x, y, r: r * 1.15, ttl: 0.4, max: 0.4, color: "#ffffff" });
+  for (const e of state.enemies) {
+    if (e.dead || e.spawn > 0 || dist2({ x, y }, e) > (r + e.r) ** 2) continue;
+    damageEnemy(state, e, dmg, { knock: opts.knock ?? 14, from: { x, y }, silent: opts.silent });
+    applyHitEffects(state, e, opts);
+  }
+}
+
+function hitSegment(state, x1, y1, x2, y2, width, dmg, opts = {}) {
+  const dx = x2 - x1, dy = y2 - y1, l2 = dx * dx + dy * dy || 1;
+  for (const e of state.enemies) {
+    if (e.dead || e.spawn > 0) continue;
+    const t = clamp(((e.x - x1) * dx + (e.y - y1) * dy) / l2, 0, 1);
+    const px = x1 + dx * t, py = y1 + dy * t;
+    if ((e.x - px) ** 2 + (e.y - py) ** 2 <= (width / 2 + e.r) ** 2) {
+      damageEnemy(state, e, dmg, { knock: opts.knock || 0, from: { x: x1, y: y1 }, silent: opts.silent });
+      applyHitEffects(state, e, opts);
+    }
+  }
+}
+
+function meleeArc(state, ang, range, arc, dmg, knock = 10) {
+  const p = state.player;
+  for (const e of state.enemies) {
+    if (e.dead || e.spawn > 0 || dist2(p, e) > (range + e.r) ** 2) continue;
+    let diff = Math.abs(angleTo(p, e) - ang);
+    if (diff > Math.PI) diff = Math.PI * 2 - diff;
+    if (diff <= arc / 2 + 0.15) { damageEnemy(state, e, dmg, { knock, from: p }); applyHitEffects(state, e); }
+  }
+}
+
+function beamEnd(state, x, y, ang, len) {
+  const cx = Math.cos(ang), cy = Math.sin(ang);
+  let d = 0;
+  while (d < len) {
+    const nx = x + cx * (d + 8), ny = y + cy * (d + 8);
+    if (nx < X0 || nx > X1 || ny < Y0 || ny > Y1 || rockAt(state, nx, ny)) break;
+    d += 8;
+  }
+  return { x: x + cx * d, y: y + cy * d };
+}
+
+function chainLightning(state, first, jumps, dmg, range = 120) {
+  const p = state.player, pts = [{ x: p.x, y: p.y }], seen = new Set();
+  let cur = first, d = dmg;
+  for (let i = 0; i <= jumps && cur; i++) {
+    pts.push({ x: cur.x, y: cur.y });
+    seen.add(cur.id);
+    damageEnemy(state, cur, d, { knock: 4, from: pts[pts.length - 2] });
+    applyHitEffects(state, cur);
+    d *= 0.88;
+    let best = null, bd = range * range;
     for (const e of state.enemies) {
-      if (e.dead || e.spawn > 0) continue;
-      if (dist2(player, e) > (range + e.r) ** 2) continue;
-      let diff = Math.abs(angleTo(player, e) - ang);
-      if (diff > Math.PI) diff = Math.PI * 2 - diff;
-      if (diff <= stats.arc / 2 + 0.15) { damageEnemy(state, e, stats.damage, { knock: 10, from: player }); applyHitEffects(state, e); }
+      if (e.dead || e.spawn > 0 || seen.has(e.id)) continue;
+      const q = dist2(cur, e);
+      if (q < bd) { bd = q; best = e; }
     }
-  } else {
-    const n = stats.shots;
-    for (let i = 0; i < n; i++) {
-      const dir = ang + (i - (n - 1) / 2) * 0.16;
-      state.shots.push({ x: player.x, y: player.y, vx: Math.cos(dir) * stats.projSpeed, vy: Math.sin(dir) * stats.projSpeed, dmg: stats.damage, pierce: stats.pierce, life: 1.2, hit: new Set(), color: cls.color });
+    cur = best;
+  }
+  state.fx.push({ kind: "bolt", pts, ttl: 0.24, max: 0.24, color: state.weapon.color, seed: state.rng() * 1000 });
+}
+
+function dropZone(state, z) {
+  if (state.zones.length >= 24) state.zones.shift();
+  state.zones.push({ tick: 0, max: z.ttl, ...z });
+}
+
+function aimPoint(state, tp, ang, reach) {
+  const p = state.player;
+  const t = tp || { x: p.x + Math.cos(ang) * reach * 0.7, y: p.y + Math.sin(ang) * reach * 0.7 };
+  const d = Math.sqrt(dist2(p, t)) || 1;
+  const k = Math.min(1, reach / d);
+  return { x: clamp(p.x + (t.x - p.x) * k, X0 + 8, X1 - 8), y: clamp(p.y + (t.y - p.y) * k, Y0 + 8, Y1 - 8) };
+}
+
+// Renvoie false si l'arme n'a rien à viser (le cooldown est alors court).
+function fireWeapon(state, ang, target, pt) {
+  const { player: p, stats: st, weapon: w } = state;
+  const n = st.shots, D = st.damage, c = w.color;
+  const fan = (base, spread, make) => { for (let i = 0; i < base + n - 1; i++) make(ang + (i - (base + n - 2) / 2) * spread, i); };
+  const speed = st.projSpeed;
+  switch (w.kind) {
+    case "arc":
+      state.fx.push({ kind: "slash", x: p.x, y: p.y, angle: ang, arc: st.arc, r: st.range, ttl: 0.16, max: 0.16, color: c });
+      meleeArc(state, ang, st.range, st.arc, D);
+      break;
+    case "whip":
+      state.fx.push({ kind: "whip", x: p.x, y: p.y, angle: ang, r: st.range, ttl: 0.2, max: 0.2, color: c, seed: state.rng() * 100 });
+      meleeArc(state, ang, st.range, st.arc, D, 6);
+      break;
+    case "thrust": {
+      const x2 = p.x + Math.cos(ang) * st.range, y2 = p.y + Math.sin(ang) * st.range;
+      state.fx.push({ kind: "thrust", x: p.x, y: p.y, x2, y2, ttl: 0.18, max: 0.18, color: c });
+      hitSegment(state, p.x, p.y, x2, y2, 14 + (st.arc - 0.4) * 30, D, { knock: 14 });
+      break;
     }
+    case "slam": {
+      const x = p.x + Math.cos(ang) * 34, y = p.y + Math.sin(ang) * 34;
+      const r = st.range * (1 + (n - 1) * 0.1);
+      state.fx.push({ kind: "slam", x, y, r, ttl: 0.38, max: 0.38, color: c });
+      blastAt(state, x, y, r, D, { knock: 26, slow: 1.3, color: c, silent: false });
+      break;
+    }
+    case "dash": {
+      const ox = p.x, oy = p.y;
+      p.x += Math.cos(ang) * st.range; p.y += Math.sin(ang) * st.range;
+      pushOut(state, p, PLAYER_R);
+      p.inv = Math.max(p.inv, 0.3);
+      state.fx.push({ kind: "dash", x: ox, y: oy, x2: p.x, y2: p.y, ttl: 0.3, max: 0.3, color: c });
+      hitSegment(state, ox, oy, p.x, p.y, 34, D, { knock: 12 });
+      break;
+    }
+    case "flurry":
+      for (let i = 0; i < 3; i++) {
+        const a = ang + (i - 1) * 1.15;
+        state.fx.push({ kind: "slash", x: p.x, y: p.y, angle: a, arc: st.arc, r: st.range, ttl: 0.12 + i * 0.05, max: 0.12 + i * 0.05, color: c });
+        meleeArc(state, a, st.range, st.arc, D, 6);
+      }
+      break;
+    case "shot": case "frost": case "fireball": case "homing": case "boomerang": {
+      const base = w.fan || 1;
+      fan(base, w.kind === "frost" ? 0.3 : 0.16, (a) => {
+        const ex = { shape: w.shape || "dot" };
+        if (w.kind === "frost") Object.assign(ex, { slow: 2, trail: true, life: 0.95 });
+        if (w.kind === "fireball") Object.assign(ex, { explode: 62, burn: true, trail: true, r: 6, life: 1.3 });
+        if (w.kind === "homing") Object.assign(ex, { homing: 5, trail: true, explode: 26, life: 2.2, r: 4 });
+        if (w.kind === "boomerang") Object.assign(ex, { boom: 0.45, ghost: true, life: 2.2, r: 6, rehit: 0, spin: true });
+        if (w.shape === "bolt") ex.trail = true;
+        if (w.shape === "orb") { ex.trail = true; ex.r = 5; }
+        newShot(state, p.x, p.y, a, speed, ex);
+      });
+      break;
+    }
+    case "spread": {
+      const count = w.pellets + (n - 1) * 2;
+      for (let i = 0; i < count; i++) {
+        const a = ang + rndSign(state) * (w.spread / 2);
+        newShot(state, p.x, p.y, a, speed * (0.8 + state.rng() * 0.4), { life: 0.36, r: 2.6, shape: "pellet", trail: true });
+      }
+      state.fx.push({ kind: "ring", x: p.x + Math.cos(ang) * 14, y: p.y + Math.sin(ang) * 14, r: 22, ttl: 0.12, max: 0.12, color: c });
+      break;
+    }
+    case "burst":
+      fan(1, 0.16, (a) => newShot(state, p.x, p.y, a + rndSign(state) * 0.1, speed, { life: 0.9, r: 2.6, trail: true, quiet: true }));
+      break;
+    case "bounce":
+      fan(1, 0.3, (a) => newShot(state, p.x, p.y, a, speed, { bounce: w.bounces, life: w.life || 2.6, r: w.shape === "saw" ? 11 : 7, shape: w.shape, rehit: w.rehit || 0, spin: true, quiet: !!w.rehit }));
+      break;
+    case "chain": {
+      if (!target) return false;
+      chainLightning(state, target, w.jumps + st.pierce + (n - 1), D);
+      break;
+    }
+    case "tesla": {
+      const list = state.enemies.filter((e) => !e.dead && e.spawn <= 0 && dist2(p, e) <= (w.reach + e.r) ** 2).sort((a, b) => dist2(p, a) - dist2(p, b)).slice(0, w.targets + n - 1);
+      if (!list.length) return false;
+      for (const e of list) {
+        damageEnemy(state, e, D, { knock: 3, from: p });
+        applyHitEffects(state, e);
+        state.fx.push({ kind: "bolt", pts: [{ x: p.x, y: p.y }, { x: e.x, y: e.y }], ttl: 0.2, max: 0.2, color: c, seed: state.rng() * 1000 });
+      }
+      state.fx.push({ kind: "ring", x: p.x, y: p.y, r: 30, ttl: 0.2, max: 0.2, color: c });
+      break;
+    }
+    case "beam":
+      fan(1, 0.2, (a) => {
+        const end = beamEnd(state, p.x, p.y, a, w.len);
+        state.fx.push({ kind: "beam", x: p.x, y: p.y, x2: end.x, y2: end.y, width: w.width, ttl: 0.18, max: 0.18, color: c });
+        hitSegment(state, p.x, p.y, end.x, end.y, w.width, D, { knock: w.knock || 0, silent: false });
+      });
+      break;
+    case "spiral": {
+      state.spin += 0.55;
+      const arms = 2 + (n - 1);
+      for (let i = 0; i < arms; i++) newShot(state, p.x, p.y, state.spin + (i * Math.PI * 2) / arms, speed, { life: 1.5, r: 3, trail: true, quiet: true });
+      break;
+    }
+    case "nova": {
+      const k = 8 + (n - 1) * 2;
+      for (let i = 0; i < k; i++) newShot(state, p.x, p.y, (i * Math.PI * 2) / k + state.spin, speed, { life: 0.6, r: 3.5, trail: true });
+      state.spin += 0.2;
+      state.fx.push({ kind: "ring", x: p.x, y: p.y, r: 40, ttl: 0.25, max: 0.25, color: c });
+      break;
+    }
+    case "mine":
+      for (let i = 0; i < n; i++) dropZone(state, { kind: "mine", x: p.x + Math.cos(ang) * 14 + i * 14, y: p.y + Math.sin(ang) * 14, r: w.radius, ttl: 5, arm: 0.5, dmg: D, color: c });
+      break;
+    case "grenade":
+      for (let i = 0; i < n; i++) {
+        const q = aimPoint(state, pt, ang, w.reach);
+        q.x += (i ? rndSign(state) * 28 : 0); q.y += (i ? rndSign(state) * 28 : 0);
+        state.delayed.push({ t: 0.65, max: 0.65, kind: "blast", x: q.x, y: q.y, r: w.radius, dmg: D, ox: p.x, oy: p.y, shape: "grenade", color: c, knock: 20 });
+      }
+      break;
+    case "poison": {
+      const q = aimPoint(state, pt, ang, w.reach);
+      state.delayed.push({ t: 0.5, max: 0.5, kind: "zone", x: q.x, y: q.y, r: 10, ox: p.x, oy: p.y, shape: "grenade", color: c,
+        zone: { kind: "poison", x: q.x, y: q.y, r: w.radius, ttl: 3.4, dps: D * 1.4, color: c } });
+      break;
+    }
+    case "meteor": {
+      const pool = state.enemies.filter((e) => !e.dead && e.spawn <= 0 && dist2(p, e) <= w.reach ** 2);
+      const picks = [];
+      if (pt && !target) picks.push({ x: pt.x, y: pt.y });
+      while (picks.length < n && pool.length) picks.push(pool.splice(Math.floor(state.rng() * pool.length), 1)[0]);
+      if (!picks.length) return false;
+      for (const e of picks) state.delayed.push({ t: 0.85, max: 0.85, kind: "blast", x: e.x, y: e.y, r: w.radius, dmg: D, shape: "meteor", color: c, burn: true, knock: 18, sky: true });
+      break;
+    }
+    case "hole":
+      fan(1, 0.3, (a) => newShot(state, p.x, p.y, a, speed, { life: 0.95, r: 9, shape: "hole", pierce: 99, endZone: { kind: "hole", r: w.radius, ttl: 2.4, dps: D * 1.1, color: c }, ghost: false }));
+      break;
+    case "turret": {
+      const mine = state.zones.filter((z) => z.kind === "turret");
+      if (mine.length >= 3 + (n - 1)) mine[0].ttl = 0;
+      dropZone(state, { kind: "turret", x: p.x + rndSign(state) * 26, y: p.y + rndSign(state) * 26, r: 10, ttl: 6, dmg: D * 0.8, color: c });
+      break;
+    }
+    case "flame":
+      fan(1, 0.22, (a) => newShot(state, p.x, p.y, a + rndSign(state) * 0.22, speed * (0.8 + state.rng() * 0.4), { life: 0.3, r: 5, shape: "flame", burn: true, quiet: true, pierce: st.pierce + 2 }));
+      break;
+    case "echo":
+      fan(1, 0.16, (a) => {
+        newShot(state, p.x, p.y, a, speed, { shape: "echo", r: 5, trail: true });
+        for (const [t, k] of [[0.14, 0.8], [0.28, 0.6]]) state.delayed.push({ t, max: t, kind: "shot", ang: a, speed, extra: { shape: "echo", r: 5, trail: true, dmg: D * k } });
+      });
+      break;
+    default: return false;
   }
   return true;
 }
+
+function playerAttack(state, manual) {
+  const { player, stats, weapon: w } = state;
+  const reach = w.reach ?? (w.type === "melee" ? stats.range + 30 : 380);
+  let ang, target, pt;
+  if (manual) {
+    pt = manual;
+    ang = angleTo(player, pt);
+    target = nearestEnemy(state, pt, 150) || nearestEnemy(state, player, reach);
+  } else {
+    target = nearestEnemy(state, player, reach);
+    if (!target) return false;
+    pt = target;
+    ang = angleTo(player, target);
+  }
+  player.facing = ang;
+  return fireWeapon(state, ang, target, pt);
+}
+
+// Zones (poison, vortex, mines, tourelles) et frappes retardées (grenades, météores, échos).
+function updateAux(state, dt) {
+  const { player } = state;
+  for (const d of state.delayed) {
+    d.t -= dt;
+    if (d.t > 0) continue;
+    d.done = true;
+    if (d.kind === "blast") blastAt(state, d.x, d.y, d.r, d.dmg, { burn: d.burn, knock: d.knock, sky: d.sky, color: d.color });
+    else if (d.kind === "zone") dropZone(state, d.zone);
+    else if (d.kind === "shot") newShot(state, player.x, player.y, d.ang, d.speed, d.extra);
+  }
+  state.delayed = state.delayed.filter((d) => !d.done);
+
+  for (const z of state.zones) {
+    z.ttl -= dt;
+    z.tick -= dt;
+    if (z.kind === "poison" || z.kind === "hole") {
+      for (const e of state.enemies) {
+        if (e.dead || e.spawn > 0 || dist2(z, e) > (z.r + e.r) ** 2) continue;
+        if (z.kind === "hole" && !e.boss && !ENEMIES[e.type]?.still) {
+          const d = Math.sqrt(dist2(z, e)) || 1;
+          e.x += ((z.x - e.x) / d) * 90 * dt; e.y += ((z.y - e.y) / d) * 90 * dt;
+          pushOut(state, e, e.r, e.flying);
+        }
+        if (z.kind === "poison") e.slow = Math.max(e.slow, 0.3);
+        if (z.tick <= 0) damageEnemy(state, e, z.dps * 0.25, { silent: true, noCrit: true });
+      }
+      if (z.tick <= 0) z.tick = 0.25;
+    } else if (z.kind === "mine") {
+      z.arm -= dt;
+      if (z.arm <= 0) for (const e of state.enemies) if (!e.dead && e.spawn <= 0 && dist2(z, e) <= (28 + e.r) ** 2) { z.ttl = 0; break; }
+      if (z.ttl <= 0) blastAt(state, z.x, z.y, z.r, z.dmg, { knock: 22, color: z.color });
+    } else if (z.kind === "turret" && z.tick <= 0) {
+      const t = nearestEnemy(state, z, 340);
+      if (t) { z.tick = 0.4; newShot(state, z.x, z.y, angleTo(z, t), 430, { dmg: z.dmg, pierce: 0, life: 0.9, r: 3, trail: true, quiet: true, color: z.color }); }
+      else z.tick = 0.1;
+    }
+  }
+  state.zones = state.zones.filter((z) => z.ttl > 0);
+}
+
+// Fin de vie d'un projectile : explosion ou vortex éventuels.
+function endShot(state, s) {
+  if (s.done) return;
+  s.done = true;
+  if (s.endZone) dropZone(state, { ...s.endZone, x: s.x, y: s.y });
+  else if (s.explode) blastAt(state, s.x, s.y, s.explode, s.dmg * 0.7, { burn: s.burn, color: s.color, knock: 10 });
+}
+
 
 function useSkill(state, input) {
   const { player, stats, cls } = state;
@@ -864,6 +1217,7 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
   player.y += dy * stats.speed * dt;
   pushOut(state, player, PLAYER_R);
   if (dx || dy) player.facing = Math.atan2(dy, dx);
+  if (input.manual && input.aim) player.facing = angleTo(player, input.aim);
   player.inv = Math.max(0, player.inv - dt);
   player.ghost = Math.max(0, player.ghost - dt);
   player.crit100 = Math.max(0, player.crit100 - dt);
@@ -882,7 +1236,13 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
   /* Compétence et attaque automatique */
   if (input.skill && player.skillCd <= 0) useSkill(state, input);
   player.cd -= dt;
-  if (player.cd <= 0) player.cd = playerAttack(state) ? 1 / stats.rate : 0.05;
+  if (player.cd <= 0) {
+    if (input.manual) {
+      if (input.fire) player.cd = playerAttack(state, input.aim || { x: player.x + Math.cos(player.facing) * 120, y: player.y + Math.sin(player.facing) * 120 }) ? 1 / stats.rate : 0.04;
+      else player.cd = 0;
+    } else player.cd = playerAttack(state, null) ? 1 / stats.rate : 0.05;
+  }
+  updateAux(state, dt);
 
   /* Apparition des ennemis de la vague */
   state.spawnClock += dt;
@@ -933,18 +1293,49 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
 
   /* Projectiles du joueur */
   for (const s of state.shots) {
+    s.age += dt;
+    if (s.homing) {
+      const t = nearestEnemy(state, s, 280);
+      if (t) {
+        const cur = Math.atan2(s.vy, s.vx);
+        let diff = angleTo(s, t) - cur;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        const sp = Math.hypot(s.vx, s.vy), a = cur + clamp(diff, -s.homing * dt, s.homing * dt);
+        s.vx = Math.cos(a) * sp; s.vy = Math.sin(a) * sp;
+      }
+    }
+    if (s.boom && s.age > s.boom) {
+      if (!s.back) { s.back = true; s.hit.clear(); }
+      const sp = Math.max(Math.hypot(s.vx, s.vy), 300), a = angleTo(s, player);
+      s.vx = Math.cos(a) * sp * 1.1; s.vy = Math.sin(a) * sp * 1.1;
+      if (dist2(s, player) < 16 * 16) { s.life = 0; s.done = true; }
+    }
+    if (s.rehit) { s.rt = (s.rt || 0) + dt; if (s.rt > s.rehit) { s.rt = 0; s.hit.clear(); } }
+    const ox = s.x, oy = s.y;
     s.x += s.vx * dt;
     s.y += s.vy * dt;
     s.life -= dt;
-    if (s.x < X0 || s.x > X1 || s.y < Y0 || s.y > Y1 || rockAt(state, s.x, s.y)) s.life = 0;
-    if (s.life <= 0) continue;
+    if (s.trail) { s.tr.push({ x: ox, y: oy }); if (s.tr.length > 7) s.tr.shift(); }
+    const outX = s.x < X0 || s.x > X1, outY = s.y < Y0 || s.y > Y1;
+    if (outX || outY || rockAt(state, s.x, s.y)) {
+      if (s.ghost) { s.x = clamp(s.x, X0, X1); s.y = clamp(s.y, Y0, Y1); }
+      else if (s.bounce > 0) {
+        const hx = outX || rockAt(state, s.x, oy), hy = outY || rockAt(state, ox, s.y);
+        if (hx || !hy) s.vx *= -1;
+        if (hy || !hx) s.vy *= -1;
+        s.x = ox; s.y = oy; s.bounce -= 1;
+        state.fx.push({ kind: "ring", x: s.x, y: s.y, r: 12, ttl: 0.15, max: 0.15, color: s.color });
+      } else s.life = 0;
+    }
+    if (s.life <= 0) { endShot(state, s); continue; }
     for (const e of state.enemies) {
       if (e.dead || e.spawn > 0 || s.hit.has(e.id)) continue;
-      if (dist2(s, e) <= (e.r + 3) ** 2) {
+      if (dist2(s, e) <= (e.r + s.r) ** 2) {
         s.hit.add(e.id);
-        damageEnemy(state, e, s.dmg, { knock: 6, from: s });
-        applyHitEffects(state, e);
-        if (s.pierce <= 0) { s.life = 0; break; }
+        damageEnemy(state, e, s.dmg, { knock: s.explode ? 0 : 6, from: s, silent: !!s.quiet });
+        applyHitEffects(state, e, s);
+        if (s.pierce <= 0) { s.life = 0; endShot(state, s); break; }
         s.pierce -= 1;
       }
     }
@@ -1004,10 +1395,12 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
       events.roomCleared = true;
       state.bullets = [];
       if (state.room.type === "boss") {
-        state.chest = { x: W / 2 - 60, y: (Y0 + Y1) / 2 + 30, opened: false, kind: "boss" };
-        state.trapdoor = { x: W / 2 + 60, y: (Y0 + Y1) / 2 + 30 };
+        state.chest = { x: (X0 + X1) / 2 - 60, y: (Y0 + Y1) / 2 + 30, opened: false, kind: "boss" };
+        state.trapdoor = { x: (X0 + X1) / 2 + 60, y: (Y0 + Y1) / 2 + 30 };
+        state.room.trap = true;
+        state.room.bossChest = true;
       } else if (state.rng() < 0.5) {
-        drop(state, W / 2, (Y0 + Y1) / 2, state.rng() < 0.5 ? "heart" : "coin", state.rng() < 0.5 ? 0.2 : 3);
+        drop(state, (X0 + X1) / 2, (Y0 + Y1) / 2, state.rng() < 0.5 ? "heart" : "coin", state.rng() < 0.5 ? 0.2 : 3);
       }
     }
   }
@@ -1016,6 +1409,7 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
   if (state.chest && !state.chest.opened && dist2(state.chest, player) < 26 * 26) {
     state.chest.opened = true;
     if (state.room.type === "treasure") state.room.taken = true;
+    if (state.room.type === "boss") state.room.bossChest = false;
     state.choices = rollChoices(state);
     events.choices = true;
   }
@@ -1025,7 +1419,7 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
       state.coins -= s.price;
       s.sold = true;
       if (s.kind === "heart") player.hp = Math.min(stats.maxHp, player.hp + stats.maxHp * 0.4);
-      else { ITEMS[s.id].apply(stats, player, state.cls); state.owned[s.id] = (state.owned[s.id] || 0) + 1; }
+      else { ITEMS[s.id].apply(stats, player, state.weapon); state.owned[s.id] = (state.owned[s.id] || 0) + 1; }
       state.fx.push({ kind: "ring", x: s.x, y: s.y, r: 30, ttl: 0.3, max: 0.3, color: "#fcee0a" });
       events.bought = true;
     }
@@ -1073,7 +1467,7 @@ export function chooseItem(state, id) {
   if (id === "heal") {
     state.player.hp = Math.min(state.stats.maxHp, state.player.hp + state.stats.maxHp * 0.4);
   } else {
-    ITEMS[id].apply(state.stats, state.player, state.cls);
+    ITEMS[id].apply(state.stats, state.player, state.weapon);
     state.owned[id] = (state.owned[id] || 0) + 1;
   }
   state.choices = null;

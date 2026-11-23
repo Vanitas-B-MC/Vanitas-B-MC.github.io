@@ -1672,3 +1672,22 @@ kbd {
   .fm-pond::after, .fm-pond[data-state] .fm-bobber { animation: none; }
   .fm-bar span { transition: none; }
 }
+
+/* 6g. Donjon : choix de l'arme et commandes */
+.dg-weapons { display: grid; grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: 6px; max-height: 190px; overflow-y: auto; padding: 2px; margin-bottom: 6px; text-align: left; }
+.dg-weapon {
+  display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 8px; padding: 6px 8px;
+  background: rgba(255, 255, 255, .03); border: 1px solid var(--line-strong); color: var(--text, #e8ebff);
+  font-family: var(--font-mono); font-size: 11px; cursor: pointer; text-align: left; min-height: 40px;
+}
+.dg-weapon-icon { font-size: 18px; color: var(--wc, var(--cyan)); text-shadow: 0 0 8px var(--wc, var(--cyan)); line-height: 1; }
+.dg-weapon-name { line-height: 1.15; }
+.dg-weapon em { grid-column: 1 / -1; color: var(--yellow); font-style: normal; font-size: 10px; margin-top: 2px; }
+.dg-weapon.is-active { border-color: var(--wc, var(--yellow)); box-shadow: inset 0 0 0 1px var(--wc, var(--yellow)); }
+.dg-weapon.is-locked { opacity: .75; }
+.dg-weapon:hover:not(:disabled) { border-color: var(--wc, var(--yellow)); }
+.dg-weapon:disabled { opacity: .4; cursor: not-allowed; }
+.dg-weapon-info { margin: 0 0 8px; color: var(--muted); font-size: 12px; min-height: 1.4em; }
+.dg-options { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 10px; align-items: center; }
+.dg-option { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.dg-option-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }

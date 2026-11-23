@@ -11,7 +11,7 @@ import { MONSTERS, FAMILIES, FAMILY_IDS, MAX_TIER, freshHunt } from "./hunt.js";
 import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP } from "./td.js";
 import { freshFarm, sanitizeFarm } from "./farm.js";
 import { LEVEL_IDS } from "./mines.js";
-import { CLASS_IDS, FREE_CLASS, META, META_IDS, freshRanks, metaCost, classById } from "./dungeon.js";
+import { CLASS_IDS, FREE_CLASS, META, META_IDS, freshRanks, metaCost, classById, WEAPONS, WEAPON_IDS, FREE_WEAPONS, weaponById } from "./dungeon.js";
 
 const KEY = "mc-arcade-wallet-v1";
 const START_CREDITS = 100;
@@ -51,7 +51,7 @@ function freshData() {
     trophies: 0,           // monnaie du RPG : gagnée uniquement en chassant
     bestHunt: 0,           // nombre de monstres différents vaincus
     bestDungeon: 0,        // étage le plus profond atteint dans « Donjon »
-    dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], runs: 0 },   // âmes, améliorations permanentes, classes
+    dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], weapons: FREE_WEAPONS.slice(), runs: 0 },   // âmes, améliorations permanentes, classes
     farm: freshFarm(),     // « Pêche & Ferme » : parcelles, améliorations, carnet de pêche
     mines: Object.fromEntries(LEVEL_IDS.map((id) => [id, 0]))   // Démineur : meilleur temps (secondes) par niveau, 0 = aucun
   };
@@ -99,6 +99,9 @@ export function sanitize(raw) {
     for (const m of META) d.ranks[m.id] = Math.min(toCount(raw.dungeon.ranks?.[m.id]), m.max);
     if (Array.isArray(raw.dungeon.classes)) {
       for (const id of raw.dungeon.classes) if (CLASS_IDS.includes(id) && !d.classes.includes(id)) d.classes.push(id);
+    }
+    if (Array.isArray(raw.dungeon.weapons)) {
+      for (const id of raw.dungeon.weapons) if (WEAPON_IDS.includes(id) && !d.weapons.includes(id)) d.weapons.push(id);
     }
   }
   data.farm = sanitizeFarm(raw.farm);
@@ -242,6 +245,16 @@ export function createWallet(storage = defaultStorage()) {
       if (data.dungeon.souls < cost) return false;
       data.dungeon.souls -= cost;
       data.dungeon.classes.push(classId);
+      commit();
+      return true;
+    },
+
+    dungeonUnlockWeapon(weaponId) {
+      if (!WEAPON_IDS.includes(weaponId) || data.dungeon.weapons.includes(weaponId)) return false;
+      const cost = weaponById(weaponId).unlock;
+      if (data.dungeon.souls < cost) return false;
+      data.dungeon.souls -= cost;
+      data.dungeon.weapons.push(weaponId);
       commit();
       return true;
     },

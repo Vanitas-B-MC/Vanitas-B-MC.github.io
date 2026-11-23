@@ -1,9 +1,10 @@
 // js/ui-dungeon.js — affichage et commandes de « Donjon » (logique dans dungeon.js).
-// Déplacement : flèches, ZQSD/WASD, ou glisser le doigt sur l'arène. Attaque automatique.
+// Déplacement : flèches, ZQSD/WASD, ou glisser (doigt, ou souris si l'option est activée). Attaque automatique
+// ou manuelle (maintenir le clic : on vise le curseur). Les grandes salles défilent avec la caméra.
 // Compétence : Espace / Maj / E, ou le bouton à l'écran. Pause : P.
 
 import {
-  W, H, X0, Y0, X1, Y1, TILE, COLS, ROWS, DOORS, PLAYER_R, CLASSES, FREE_CLASS, META, ITEMS, ENEMIES, BOSSES, roomLabel,
+  W, H, X0, Y0, X1, Y1, TILE, COLS, ROWS, WORLD_W, WORLD_H, DOORS, PLAYER_R, CLASSES, FREE_CLASS, META, ITEMS, ENEMIES, BOSSES, WEAPONS, weaponById, roomLabel,
   createState, update, chooseItem, runRewards
 } from "./dungeon.js";
 import { describe, metaCost } from "./dungeon.js";
@@ -11,12 +12,28 @@ import { wealthBonus, dungeonPct } from "./rewards.js";
 import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
 
 const STEP = 1 / 60;
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
 export function createDungeonUI(root, wallet) {
   let active = false;
   let status = "idle";                 // idle | running | paused | over
+  const OPT_KEY = "mc-dungeon-opts-v1";
+  const opts = { move: "keys", attack: "auto", weapon: null };
+  try { Object.assign(opts, JSON.parse(localStorage.getItem(OPT_KEY) || "{}")); } catch { /* stockage indisponible */ }
+  if (!["keys", "mouse"].includes(opts.move)) opts.move = "keys";
+  if (!["auto", "manual"].includes(opts.attack)) opts.attack = "auto";
+  const saveOpts = () => { try { localStorage.setItem(OPT_KEY, JSON.stringify(opts)); } catch { /* ignoré */ } };
   let classId = FREE_CLASS;
-  let state = createState(Math.random, { classId, ranks: wallet.data.dungeon.ranks });
+  const currentWeapon = () => {
+    const unlocked = wallet.data.dungeon.weapons || [];
+    return opts.weapon && unlocked.includes(opts.weapon) ? opts.weapon : CLASSES.find((c) => c.id === classId).weapon;
+  };
+  const newState = () => createState(Math.random, { classId, ranks: wallet.data.dungeon.ranks, weaponId: currentWeapon() });
+  let state = newState();
+  const cam = { x: 0, y: 0, room: null };
+  let aim = null;                      // curseur en coordonnées « monde » (visée manuelle)
+  let firing = false;
+  let touchOnly = false;               // dernier contact = doigt : visée manuelle indisponible
   let rafId = 0;
   let lastTime = 0;
   let acc = 0;
@@ -57,14 +74,22 @@ export function createDungeonUI(root, wallet) {
   const skillButton = h("button", { class: "button button-secondary dg-skill", id: "dg-skill", type: "button", onclick: () => { skillQueued = true; } });
 
   const charBar = h("div", { class: "td-maps", role: "group", "aria-label": "Classe" });
+  const weaponBar = h("div", { class: "dg-weapons", role: "group", "aria-label": "Arme de départ" });
+  const weaponInfo = h("p", { class: "dg-weapon-info" });
+  const optionBar = h("div", { class: "dg-options", role: "group", "aria-label": "Commandes" });
+  const weaponEl = h("strong", {}, "—");
   const forge = h("div", { class: "dg-forge" });
 
   root.replaceChildren(
     h("p", { class: "game-rules" },
-      "Explore la carte de chaque étage salle par salle (minimap en haut à droite) : combats, salles d'élite, trésor, boutique, puis le boss et sa trappe vers l'étage suivant. Les portes se verrouillent tant qu'il reste des ennemis. Ton héros attaque tout seul, à toi d'esquiver et d'utiliser ta compétence. Les âmes gagnées financent des améliorations permanentes et de nouvelles classes."),
+      "Explore la carte de chaque étage salle par salle (minimap en haut à droite) : combats, salles d'élite, trésor, boutique, puis le boss et sa trappe vers l'étage suivant. Les portes se verrouillent tant qu'il reste des ennemis. Choisis ton arme de départ (34 armes, à débloquer avec les âmes) : le héros attaque tout seul, ou à la main si tu préfères viser. Certaines salles sont plus grandes et la caméra défile. Les âmes gagnées financent des améliorations permanentes et de nouvelles classes."),
     h("div", { class: "sv-layout" },
       h("div", { class: "sv-main" },
         charBar,
+        h("h3", { class: "subhead" }, "Arme de départ"),
+        weaponBar,
+        weaponInfo,
+        optionBar,
         h("div", { class: "sv-board-wrap chamfer" }, stage),
         h("div", { class: "sv-bars" },
           h("div", { class: "sv-bar", role: "img", "aria-label": "Points de vie" }, hpBar, hpText)),
@@ -72,12 +97,13 @@ export function createDungeonUI(root, wallet) {
       h("aside", { class: "sv-side" },
         h("dl", { class: "td-stats" },
           stat("Étage", floorEl), stat("Salle", roomEl), stat("Éliminés", killsEl), stat("Pièces", coinsEl),
-          stat("Record", bestEl), stat("Âmes", soulsEl)),
+          stat("Record", bestEl), stat("Âmes", soulsEl), stat("Arme", weaponEl)),
         stateEl,
         h("h3", { class: "subhead" }, "Objets"),
         ownedList,
         h("ul", { class: "game-help" },
-          h("li", {}, h("kbd", {}, "←↑↓→"), " ou ", h("kbd", {}, "ZQSD"), " : se déplacer"),
+          h("li", {}, h("kbd", {}, "←↑↓→"), " ou ", h("kbd", {}, "ZQSD"), " : se déplacer (ou souris, voir options)"),
+          h("li", {}, "Attaque manuelle : maintiens le clic gauche (clic droit si le déplacement est à la souris), tu vises le curseur"),
           h("li", {}, h("kbd", {}, "Espace"), " : compétence · ", h("kbd", {}, "P"), " pause"),
           h("li", {}, "Mobile : glisse le doigt, bouton de compétence sous l'arène")))),
     h("h3", { class: "subhead" }, "Forge d'âmes"),
@@ -104,10 +130,12 @@ export function createDungeonUI(root, wallet) {
   function drawRoom() {
     const th = state.theme;
     ctx.fillStyle = "#050409";
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, WORLD_W, WORLD_H);
     // sol
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
+    const rA = Math.max(0, Math.floor((cam.y - Y0) / TILE)), rB = Math.min(ROWS, Math.ceil((cam.y + H - Y0) / TILE) + 1);
+    const cA = Math.max(0, Math.floor((cam.x - X0) / TILE)), cB = Math.min(COLS, Math.ceil((cam.x + W - X0) / TILE) + 1);
+    for (let r = rA; r < rB; r++) {
+      for (let c = cA; c < cB; c++) {
         const x = X0 + c * TILE, y = Y0 + r * TILE;
         ctx.fillStyle = (r + c) % 2 === 0 ? th.a : th.b;
         ctx.fillRect(x, y, TILE, TILE);
@@ -152,10 +180,10 @@ export function createDungeonUI(root, wallet) {
     ctx.strokeRect(X0, Y0, X1 - X0, Y1 - Y0);
     noGlow();
     ctx.fillStyle = "rgba(255,255,255,.035)";
-    ctx.fillRect(0, 0, W, Y0);
-    ctx.fillRect(0, Y1, W, H - Y1);
+    ctx.fillRect(0, 0, WORLD_W, Y0);
+    ctx.fillRect(0, Y1, WORLD_W, WORLD_H - Y1);
     ctx.fillRect(0, Y0, X0, Y1 - Y0);
-    ctx.fillRect(X1, Y0, W - X1, Y1 - Y0);
+    ctx.fillRect(X1, Y0, WORLD_W - X1, Y1 - Y0);
     // portes : ouverte (lumineuse) ou verrouillée (barres)
     for (const [d, door] of Object.entries(DOORS)) {
       if (!state.room.doors[d]) continue;
@@ -478,6 +506,7 @@ export function createDungeonUI(root, wallet) {
   function drawFx() {
     for (const f of state.fx) {
       const k = Math.max(0, f.ttl / f.max);
+      if (drawExtraFx(f, k)) { ctx.globalAlpha = 1; continue; }
       if (f.kind === "slash") {
         ctx.globalAlpha = k;
         ctx.strokeStyle = f.color;
@@ -511,8 +540,296 @@ export function createDungeonUI(root, wallet) {
     }
   }
 
+  /* ---------- Armes : effets visuels ---------- */
+
+  const TAU = Math.PI * 2;
+  const fract = (v) => v - Math.floor(v);
+
+  // Effets propres aux armes. Renvoie true si l'effet a été dessiné.
+  function drawExtraFx(f, k) {
+    const t = 1 - k;
+    switch (f.kind) {
+      case "beam": {
+        ctx.globalAlpha = Math.min(1, k * 1.5);
+        glow(f.color, 22);
+        ctx.strokeStyle = f.color;
+        ctx.lineWidth = f.width * (0.5 + k);
+        ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x2, f.y2); ctx.stroke();
+        noGlow();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = Math.max(1.5, f.width * 0.35 * k);
+        ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x2, f.y2); ctx.stroke();
+        ctx.lineCap = "butt";
+        ctx.fillStyle = f.color;
+        ctx.beginPath(); ctx.arc(f.x2, f.y2, f.width * 0.8 * k + 2, 0, TAU); ctx.fill();
+        return true;
+      }
+      case "bolt": {
+        ctx.globalAlpha = Math.min(1, k * 1.6);
+        const draw1 = (w, color) => {
+          ctx.strokeStyle = color; ctx.lineWidth = w;
+          ctx.beginPath();
+          for (let i = 1; i < f.pts.length; i++) {
+            const a = f.pts[i - 1], b = f.pts[i];
+            const segs = Math.max(2, Math.floor(Math.hypot(b.x - a.x, b.y - a.y) / 16));
+            ctx.moveTo(a.x, a.y);
+            for (let j = 1; j <= segs; j++) {
+              const u = j / segs;
+              const jit = j === segs ? 0 : (Math.sin(f.seed * 7.3 + j * 12.9 + i * 3.1 + t * 40) * 9);
+              const nx = -(b.y - a.y), ny = b.x - a.x, nl = Math.hypot(nx, ny) || 1;
+              ctx.lineTo(a.x + (b.x - a.x) * u + (nx / nl) * jit, a.y + (b.y - a.y) * u + (ny / nl) * jit);
+            }
+          }
+          ctx.stroke();
+        };
+        glow(f.color, 16);
+        draw1(3.5, f.color);
+        noGlow();
+        draw1(1.4, "#ffffff");
+        return true;
+      }
+      case "slam": {
+        ctx.globalAlpha = k * 0.7;
+        ctx.strokeStyle = f.color; ctx.lineWidth = 4;
+        glow(f.color, 14);
+        ctx.beginPath(); ctx.arc(f.x, f.y, f.r * (0.3 + t * 0.8), 0, TAU); ctx.stroke();
+        noGlow();
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 9; i++) {
+          const a = (i * TAU) / 9 + 0.3;
+          ctx.beginPath();
+          ctx.moveTo(f.x + Math.cos(a) * f.r * 0.25, f.y + Math.sin(a) * f.r * 0.25);
+          ctx.lineTo(f.x + Math.cos(a + 0.12) * f.r * (0.55 + t * 0.4), f.y + Math.sin(a + 0.12) * f.r * (0.55 + t * 0.4));
+          ctx.stroke();
+        }
+        ctx.globalAlpha = k * 0.25; ctx.fillStyle = f.color;
+        ctx.beginPath(); ctx.arc(f.x, f.y, f.r * (0.2 + t * 0.7), 0, TAU); ctx.fill();
+        return true;
+      }
+      case "dash": {
+        for (let i = 0; i < 5; i++) {
+          const u = i / 4;
+          ctx.globalAlpha = k * (1 - u) * 0.7;
+          ctx.fillStyle = f.color;
+          ctx.beginPath(); ctx.arc(f.x + (f.x2 - f.x) * u, f.y + (f.y2 - f.y) * u, PLAYER_R * (1 - u * 0.4), 0, TAU); ctx.fill();
+        }
+        ctx.globalAlpha = k;
+        glow(f.color, 14); ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x2, f.y2); ctx.stroke();
+        noGlow();
+        return true;
+      }
+      case "thrust": {
+        ctx.globalAlpha = k;
+        const a = Math.atan2(f.y2 - f.y, f.x2 - f.x), len = Math.hypot(f.x2 - f.x, f.y2 - f.y);
+        const reach = len * (0.4 + t * 0.6);
+        ctx.fillStyle = f.color; glow(f.color, 14);
+        ctx.beginPath();
+        ctx.moveTo(f.x + Math.cos(a) * reach, f.y + Math.sin(a) * reach);
+        ctx.lineTo(f.x + Math.cos(a + 1.6) * 6 + Math.cos(a) * len * 0.25 * t, f.y + Math.sin(a + 1.6) * 6 + Math.sin(a) * len * 0.25 * t);
+        ctx.lineTo(f.x + Math.cos(a - 1.6) * 6 + Math.cos(a) * len * 0.25 * t, f.y + Math.sin(a - 1.6) * 6 + Math.sin(a) * len * 0.25 * t);
+        ctx.closePath(); ctx.fill(); noGlow();
+        return true;
+      }
+      case "whip": {
+        ctx.globalAlpha = k;
+        ctx.strokeStyle = f.color; ctx.lineWidth = 3; glow(f.color, 12);
+        ctx.beginPath();
+        const reach = f.r * Math.min(1, 0.3 + t * 3);
+        for (let i = 0; i <= 18; i++) {
+          const u = i / 18, d = reach * u;
+          const wob = Math.sin(u * 9 + f.seed + t * 30) * 9 * u * k;
+          const px = f.x + Math.cos(f.angle) * d - Math.sin(f.angle) * wob;
+          const py = f.y + Math.sin(f.angle) * d + Math.cos(f.angle) * wob;
+          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke(); noGlow();
+        return true;
+      }
+      default: return false;
+    }
+  }
+
+  function drawShot(s) {
+    if (s.tr && s.tr.length) {
+      ctx.strokeStyle = s.color; ctx.lineCap = "round";
+      for (let i = 1; i < s.tr.length; i++) {
+        ctx.globalAlpha = (i / s.tr.length) * 0.55;
+        ctx.lineWidth = Math.max(1, s.r * 1.4 * (i / s.tr.length));
+        ctx.beginPath(); ctx.moveTo(s.tr[i - 1].x, s.tr[i - 1].y); ctx.lineTo(s.tr[i].x, s.tr[i].y); ctx.stroke();
+      }
+      ctx.lineCap = "butt"; ctx.globalAlpha = 1;
+    }
+    const a = Math.atan2(s.vy, s.vx), t = s.age;
+    ctx.fillStyle = s.color; ctx.strokeStyle = s.color;
+    glow(s.color, 10);
+    switch (s.shape) {
+      case "arrow":
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(s.x - Math.cos(a) * 9, s.y - Math.sin(a) * 9); ctx.lineTo(s.x + Math.cos(a) * 6, s.y + Math.sin(a) * 6); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(s.x + Math.cos(a) * 9, s.y + Math.sin(a) * 9); ctx.lineTo(s.x + Math.cos(a + 2.5) * 5, s.y + Math.sin(a + 2.5) * 5); ctx.lineTo(s.x + Math.cos(a - 2.5) * 5, s.y + Math.sin(a - 2.5) * 5); ctx.fill();
+        break;
+      case "bolt":
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(s.x - Math.cos(a) * 12, s.y - Math.sin(a) * 12); ctx.lineTo(s.x + Math.cos(a) * 10, s.y + Math.sin(a) * 10); ctx.stroke();
+        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(s.x + Math.cos(a) * 10, s.y + Math.sin(a) * 10, 2, 0, TAU); ctx.fill();
+        break;
+      case "orb":
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r + Math.sin(t * 18) * 0.8, 0, TAU); ctx.fill();
+        noGlow(); ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(s.x, s.y, 2, 0, TAU); ctx.fill();
+        break;
+      case "pellet":
+        ctx.beginPath(); ctx.arc(s.x, s.y, 2.4, 0, TAU); ctx.fill();
+        break;
+      case "blade": {   // boomerang : croissant qui tourne
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(s.x, s.y, 9, t * 22, t * 22 + 2.3); ctx.stroke();
+        ctx.beginPath(); ctx.arc(s.x, s.y, 9, t * 22 + Math.PI, t * 22 + Math.PI + 2.3); ctx.stroke();
+        break;
+      }
+      case "ring": {   // chakram
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.stroke();
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 4; i++) { const b = t * 14 + (i * TAU) / 4; ctx.beginPath(); ctx.moveTo(s.x + Math.cos(b) * s.r, s.y + Math.sin(b) * s.r); ctx.lineTo(s.x + Math.cos(b) * (s.r + 4), s.y + Math.sin(b) * (s.r + 4)); ctx.stroke(); }
+        break;
+      }
+      case "saw": {
+        ctx.beginPath();
+        for (let i = 0; i < 16; i++) { const b = t * 16 + (i * TAU) / 16, rr = i % 2 ? s.r - 3 : s.r + 2; ctx.lineTo(s.x + Math.cos(b) * rr, s.y + Math.sin(b) * rr); }
+        ctx.closePath(); ctx.fill();
+        noGlow(); ctx.fillStyle = "#07060c"; ctx.beginPath(); ctx.arc(s.x, s.y, 3, 0, TAU); ctx.fill();
+        break;
+      }
+      case "missile":
+        ctx.beginPath(); ctx.moveTo(s.x + Math.cos(a) * 8, s.y + Math.sin(a) * 8); ctx.lineTo(s.x + Math.cos(a + 2.5) * 5, s.y + Math.sin(a + 2.5) * 5); ctx.lineTo(s.x + Math.cos(a - 2.5) * 5, s.y + Math.sin(a - 2.5) * 5); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#ffd166"; ctx.beginPath(); ctx.arc(s.x - Math.cos(a) * 6, s.y - Math.sin(a) * 6, 2.5 + Math.sin(t * 40), 0, TAU); ctx.fill();
+        break;
+      case "fire": {
+        const rr = s.r + Math.sin(t * 25) * 1.5;
+        ctx.fillStyle = "#ff8a3d"; ctx.beginPath(); ctx.arc(s.x, s.y, rr + 2, 0, TAU); ctx.fill();
+        ctx.fillStyle = "#ffd166"; ctx.beginPath(); ctx.arc(s.x, s.y, rr - 1, 0, TAU); ctx.fill();
+        break;
+      }
+      case "shard":
+        ctx.beginPath(); ctx.moveTo(s.x + Math.cos(a) * 8, s.y + Math.sin(a) * 8); ctx.lineTo(s.x + Math.cos(a + 1.57) * 3, s.y + Math.sin(a + 1.57) * 3); ctx.lineTo(s.x - Math.cos(a) * 6, s.y - Math.sin(a) * 6); ctx.lineTo(s.x + Math.cos(a - 1.57) * 3, s.y + Math.sin(a - 1.57) * 3); ctx.closePath(); ctx.fill();
+        break;
+      case "hole": {
+        noGlow();
+        ctx.fillStyle = "#07060c"; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.fill();
+        glow(s.color, 16); ctx.lineWidth = 2; ctx.strokeStyle = s.color;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r + 2, t * 6, t * 6 + 4.2); ctx.stroke();
+        break;
+      }
+      case "flame": {
+        const k = Math.max(0, s.life / 0.3);
+        ctx.globalAlpha = 0.25 + k * 0.6;
+        ctx.fillStyle = k > 0.5 ? "#ffd166" : "#ff4a1a";
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r * (1.6 - k * 0.6), 0, TAU); ctx.fill();
+        ctx.globalAlpha = 1;
+        break;
+      }
+      case "echo": {
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r + 1, 0, TAU); ctx.stroke();
+        ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.arc(s.x - Math.cos(a) * 7, s.y - Math.sin(a) * 7, s.r - 1, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
+        break;
+      }
+      default:
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.fill();
+    }
+    noGlow();
+  }
+
+  function drawAux() {
+    const t = state.time;
+    for (const z of state.zones) {
+      const life = Math.min(1, z.ttl / 0.6);
+      if (z.kind === "poison") {
+        ctx.globalAlpha = 0.22 * life; ctx.fillStyle = z.color;
+        ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill();
+        ctx.globalAlpha = 0.7 * life; ctx.strokeStyle = z.color; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.stroke();
+        for (let i = 0; i < 6; i++) {
+          const ph = fract(t * 0.7 + i / 6), a = i * 2.1;
+          ctx.beginPath(); ctx.arc(z.x + Math.cos(a) * z.r * 0.6 * ((i % 3) / 3 + 0.3), z.y + Math.sin(a) * z.r * 0.6 - ph * 18, 2 + ph * 3, 0, TAU); ctx.stroke();
+        }
+      } else if (z.kind === "hole") {
+        ctx.globalAlpha = life;
+        ctx.fillStyle = "#07060c"; ctx.beginPath(); ctx.arc(z.x, z.y, z.r * 0.35, 0, TAU); ctx.fill();
+        ctx.strokeStyle = z.color; ctx.lineWidth = 2; glow(z.color, 14);
+        for (let i = 0; i < 4; i++) {
+          const rr = z.r * (0.3 + fract(t * 0.8 + i / 4) * 0.7);
+          ctx.globalAlpha = life * (1 - (rr / z.r) * 0.8);
+          ctx.beginPath(); ctx.arc(z.x, z.y, rr, t * 5 + i, t * 5 + i + 3.6); ctx.stroke();
+        }
+        noGlow();
+      } else if (z.kind === "mine") {
+        const armed = z.arm <= 0, pulse = 0.5 + 0.5 * Math.sin(t * (armed ? 14 : 5));
+        ctx.globalAlpha = 0.9; ctx.fillStyle = armed ? "#ff3b5c" : z.color; glow(armed ? "#ff3b5c" : z.color, 8 + pulse * 8);
+        ctx.beginPath(); ctx.arc(z.x, z.y, 6, 0, TAU); ctx.fill(); noGlow();
+        ctx.globalAlpha = 0.18 + pulse * 0.1; ctx.strokeStyle = armed ? "#ff3b5c" : z.color; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.stroke();
+      } else if (z.kind === "turret") {
+        ctx.globalAlpha = Math.min(1, z.ttl); ctx.strokeStyle = z.color; ctx.fillStyle = "#07060c"; ctx.lineWidth = 2; glow(z.color, 10);
+        ctx.beginPath(); ctx.moveTo(z.x, z.y - 9); ctx.lineTo(z.x + 8, z.y); ctx.lineTo(z.x, z.y + 9); ctx.lineTo(z.x - 8, z.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+        noGlow();
+        ctx.beginPath(); ctx.arc(z.x, z.y, 3, 0, TAU); ctx.fillStyle = z.color; ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+    for (const d of state.delayed) {
+      const u = 1 - d.t / d.max;
+      if (d.kind === "shot") continue;
+      if (d.shape === "grenade") {
+        const px = d.ox + (d.x - d.ox) * Math.min(1, u * 1.3), py = d.oy + (d.y - d.oy) * Math.min(1, u * 1.3) - Math.sin(Math.min(1, u * 1.3) * Math.PI) * 40;
+        ctx.fillStyle = d.color; glow(d.color, 8);
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, TAU); ctx.fill(); noGlow();
+      }
+      if (d.r > 12) {
+        ctx.globalAlpha = 0.15 + u * 0.25; ctx.fillStyle = d.shape === "meteor" ? "#ff3b5c" : d.color;
+        ctx.beginPath(); ctx.arc(d.x, d.y, d.r * u, 0, TAU); ctx.fill();
+        ctx.globalAlpha = 0.7; ctx.strokeStyle = d.shape === "meteor" ? "#ff3b5c" : d.color; ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+      }
+      if (d.shape === "meteor") {
+        const k = 1 - u;
+        const mx = d.x + 90 * k, my = d.y - 340 * k;
+        ctx.strokeStyle = "#ffb347"; ctx.lineWidth = 5; ctx.globalAlpha = 0.6; glow("#ff6a1a", 18);
+        ctx.beginPath(); ctx.moveTo(mx + 36 * k, my - 120 * k); ctx.lineTo(mx, my); ctx.stroke();
+        ctx.globalAlpha = 1; ctx.fillStyle = "#ffe08a";
+        ctx.beginPath(); ctx.arc(mx, my, 8, 0, TAU); ctx.fill(); noGlow();
+      }
+    }
+  }
+
+  function updateCamera() {
+    const maxX = Math.max(0, WORLD_W - W), maxY = Math.max(0, WORLD_H - H);
+    const p = state.player;
+    const tx = clamp(p.x - W / 2, 0, maxX), ty = clamp(p.y - H / 2, 0, maxY);
+    if (cam.room !== state.room || reduced) { cam.x = tx; cam.y = ty; cam.room = state.room; }
+    else { cam.x += (tx - cam.x) * 0.14; cam.y += (ty - cam.y) * 0.14; }
+    cam.x = clamp(cam.x, 0, maxX); cam.y = clamp(cam.y, 0, maxY);
+  }
+
+  function drawAimMark() {
+    if (opts.attack !== "manual" || !aim || status !== "running") return;
+    ctx.strokeStyle = "#ffffff"; ctx.globalAlpha = 0.8; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(aim.x, aim.y, 9, 0, TAU); ctx.moveTo(aim.x - 14, aim.y); ctx.lineTo(aim.x - 5, aim.y); ctx.moveTo(aim.x + 5, aim.y); ctx.lineTo(aim.x + 14, aim.y);
+    ctx.moveTo(aim.x, aim.y - 14); ctx.lineTo(aim.x, aim.y - 5); ctx.moveTo(aim.x, aim.y + 5); ctx.lineTo(aim.x, aim.y + 14); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
   function draw() {
+    updateCamera();
+    ctx.fillStyle = "#050409";
+    ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.translate(-Math.round(cam.x), -Math.round(cam.y));
     drawRoom();
+    drawAux();
     for (const pk of state.pickups) {
       if (pk.kind === "coin") {
         ctx.fillStyle = "#fcee0a";
@@ -529,13 +846,7 @@ export function createDungeonUI(root, wallet) {
     }
     for (const e of state.enemies) drawEnemy(e);
     drawPlayer();
-    for (const s of state.shots) {
-      ctx.fillStyle = s.color;
-      glow(s.color, 10);
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    for (const s of state.shots) drawShot(s);
     for (const b of state.bullets) {
       ctx.fillStyle = b.color;
       glow(b.color, 10);
@@ -545,6 +856,8 @@ export function createDungeonUI(root, wallet) {
     }
     noGlow();
     drawFx();
+    drawAimMark();
+    ctx.restore();
     drawMinimap();
     if (state.boss && !state.boss.dead && state.boss.spawn <= 0) {
       const b = state.boss;
@@ -607,6 +920,7 @@ export function createDungeonUI(root, wallet) {
     coinsEl.textContent = fmt(state.coins);
     bestEl.textContent = String(wallet.data.bestDungeon);
     soulsEl.textContent = fmt(wallet.data.dungeon.souls);
+    weaponEl.textContent = state.weapon.name;
     const sk = state.cls.skill;
     const ready = p.skillCd <= 0;
     skillButton.textContent = ready ? `${sk.name} (Espace)` : `${sk.name} : ${Math.ceil(p.skillCd)} s`;
@@ -666,6 +980,8 @@ export function createDungeonUI(root, wallet) {
         onclick: () => onClass(c.id)
       }, label);
     }));
+    renderWeapons();
+    renderOptions();
     forge.replaceChildren(...META.map((m) => {
       const rank = d.ranks[m.id];
       const maxed = rank >= m.max;
@@ -677,13 +993,60 @@ export function createDungeonUI(root, wallet) {
     }));
   }
 
+  function renderWeapons() {
+    const d = wallet.data.dungeon;
+    const have = d.weapons || [];
+    const sel = currentWeapon();
+    weaponBar.replaceChildren(...WEAPONS.map((w) => {
+      const unlocked = have.includes(w.id);
+      return h("button", {
+        class: `dg-weapon${sel === w.id ? " is-active" : ""}${unlocked ? "" : " is-locked"}`, type: "button", "data-weapon": w.id,
+        title: `${w.name} — ${w.desc}`,
+        disabled: status === "running" || (!unlocked && d.souls < w.unlock),
+        style: `--wc:${w.color}`,
+        onclick: () => onWeapon(w.id)
+      }, h("span", { class: "dg-weapon-icon", "aria-hidden": "true" }, w.icon),
+        h("span", { class: "dg-weapon-name" }, w.name),
+        unlocked ? null : h("em", {}, `${fmt(w.unlock)} âmes`));
+    }));
+    const w = weaponById(sel);
+    weaponInfo.textContent = `${w.name} — ${w.desc}`;
+  }
+
+  function renderOptions() {
+    const group = (label, key, choices) => h("div", { class: "dg-option" },
+      h("span", { class: "dg-option-label" }, label),
+      ...choices.map(([value, text, title]) => h("button", {
+        class: `map-button${opts[key] === value ? " is-active" : ""}`, type: "button", title, "data-opt": `${key}:${value}`,
+        onclick: () => { opts[key] = value; saveOpts(); renderOptions(); }
+      }, text)));
+    optionBar.replaceChildren(
+      group("Déplacement", "move", [["keys", "Clavier", "Flèches / ZQSD"], ["mouse", "Souris", "Maintiens le clic gauche et glisse, comme le joystick du téléphone"]]),
+      group("Attaque", "attack", [["auto", "Automatique", "Le héros vise l'ennemi le plus proche"], ["manual", "Manuelle", "Maintiens le clic (ou F) : tu vises le curseur"]]));
+  }
+
+  function onWeapon(id) {
+    if (status === "running") return;
+    if (!(wallet.data.dungeon.weapons || []).includes(id)) {
+      if (!wallet.dungeonUnlockWeapon(id)) return;
+    }
+    opts.weapon = id;
+    saveOpts();
+    state = newState();
+    renderMeta();
+    updateHud();
+    draw();
+  }
+
   function onClass(id) {
     if (status === "running") return;
     if (!wallet.data.dungeon.classes.includes(id)) {
       if (!wallet.dungeonUnlock(id)) return;
     }
     classId = id;
-    state = createState(Math.random, { classId, ranks: wallet.data.dungeon.ranks });
+    opts.weapon = null;
+    saveOpts();
+    state = newState();
     renderMeta();
     updateHud();
     draw();
@@ -693,10 +1056,11 @@ export function createDungeonUI(root, wallet) {
 
   function startGame() {
     scrollToPlay(root.querySelector(".sv-board-wrap"));
-    state = createState(Math.random, { classId, ranks: wallet.data.dungeon.ranks });
+    state = newState();
     shownChoices = null;
     ownedKey = "";
     keys.clear();
+    firing = false;
     skillQueued = false;
     setStatus("running");
     overlay.hidden = true;
@@ -750,7 +1114,8 @@ export function createDungeonUI(root, wallet) {
     if (keys.has("down")) dy += 1;
     if (!dx && !dy) ({ dx, dy } = dragVec);
     const skill = skillQueued || keys.has("skill");
-    return { dx, dy, skill };
+    const manual = opts.attack === "manual" && !touchOnly;
+    return { dx, dy, skill, manual, aim: manual ? aim : null, fire: manual && (firing || keys.has("fire")) };
   }
 
   function frame(time) {
@@ -822,6 +1187,11 @@ export function createDungeonUI(root, wallet) {
       keys.add("skill");
       return;
     }
+    if (key === "f" && status === "running" && opts.attack === "manual") {
+      event.preventDefault();
+      keys.add("fire");
+      return;
+    }
     if (KEYMAP[key] && status === "running") {
       event.preventDefault();
       keys.add(KEYMAP[key]);
@@ -831,6 +1201,7 @@ export function createDungeonUI(root, wallet) {
   document.addEventListener("keyup", (event) => {
     const key = event.key.toLowerCase();
     if (key === " " || key === "shift" || key === "e") keys.delete("skill");
+    if (key === "f") keys.delete("fire");
     const dir = KEYMAP[key];
     if (dir) keys.delete(dir);
   });
@@ -839,20 +1210,33 @@ export function createDungeonUI(root, wallet) {
     const rect = board.getBoundingClientRect();
     return { x: ((event.clientX - rect.left) / rect.width) * W, y: ((event.clientY - rect.top) / rect.height) * H };
   }
+  const toWorld = (c) => ({ x: c.x + cam.x, y: c.y + cam.y });
 
+  board.addEventListener("contextmenu", (event) => { if (status === "running") event.preventDefault(); });
   board.addEventListener("pointerdown", (event) => {
     if (status !== "running") return;
+    touchOnly = event.pointerType === "touch" || event.pointerType === "pen";
+    const c0 = toCanvas(event);
+    aim = toWorld(c0);
+    const moveMouse = opts.move === "mouse";
+    // Souris : clic gauche = déplacement (si option) sinon tir manuel ; clic droit = tir manuel.
+    if (event.pointerType === "mouse" && (event.button === 2 || (event.button === 0 && !moveMouse && opts.attack === "manual"))) {
+      firing = true;
+      board.setPointerCapture?.(event.pointerId);
+      return;
+    }
+    if (event.pointerType === "mouse" && !moveMouse) return;
     drag = { x: event.clientX, y: event.clientY };
-    const p0 = toCanvas(event);
-    stick = { x0: p0.x, y0: p0.y, x1: p0.x, y1: p0.y };
+    stick = { x0: c0.x, y0: c0.y, x1: c0.x, y1: c0.y };
     board.setPointerCapture?.(event.pointerId);
   });
   board.addEventListener("pointermove", (event) => {
+    const p1 = toCanvas(event);
+    aim = toWorld(p1);
     if (!drag) return;
     const dx = event.clientX - drag.x;
     const dy = event.clientY - drag.y;
     const len = Math.hypot(dx, dy);
-    const p1 = toCanvas(event);
     if (stick) {
       const k = Math.min(1, 40 / Math.max(1, Math.hypot(p1.x - stick.x0, p1.y - stick.y0)));
       stick.x1 = stick.x0 + (p1.x - stick.x0) * k;
@@ -860,13 +1244,19 @@ export function createDungeonUI(root, wallet) {
     }
     dragVec = len < 8 ? { dx: 0, dy: 0 } : { dx: dx / Math.max(len, 40), dy: dy / Math.max(len, 40) };
   });
-  const endDrag = () => { drag = null; stick = null; dragVec = { dx: 0, dy: 0 }; };
+  const endDrag = (event) => {
+    if (event.type === "pointercancel") { firing = false; drag = null; stick = null; dragVec = { dx: 0, dy: 0 }; return; }
+    if (event.pointerType === "mouse" && event.button === 2) { firing = false; return; }
+    if (!drag) firing = false;
+    drag = null; stick = null; dragVec = { dx: 0, dy: 0 };
+  };
   board.addEventListener("pointerup", endDrag);
   board.addEventListener("pointercancel", endDrag);
+  board.addEventListener("pointerleave", (event) => { if (event.pointerType === "mouse") firing = false; });
 
   startButton.addEventListener("click", () => (status === "paused" ? resumeGame() : startGame()));
   document.addEventListener("visibilitychange", () => { if (document.hidden) pauseGame(); });
-  window.addEventListener("blur", () => keys.clear());
+  window.addEventListener("blur", () => { keys.clear(); firing = false; });
 
   // Le portefeuille notifie chaque seconde (revenu passif du Clicker) : on ne reconstruit la forge
   // que si les données du Donjon ont réellement changé.
@@ -880,6 +1270,7 @@ export function createDungeonUI(root, wallet) {
 
   /* ---------- Démarrage ---------- */
 
+  root.dgState = () => state;   // lecture seule : utile aux tests
   renderMeta();
   updateHud();
   draw();
