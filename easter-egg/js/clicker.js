@@ -98,7 +98,14 @@ export const SKILL_THRESHOLDS = Array.from({ length: 20 }, (_, n) => Math.round(
 
 /* ---------- Arbre du Rebirth (permanent, acheté avec des éclats) ---------- */
 
-export const REBIRTH_MIN = 50000;        // crédits minés dans la partie pour pouvoir formater
+export const REBIRTH_MIN = 50000;
+export const REBIRTH_GROWTH = 5.5;
+
+export function rebirthRequirement(data) {
+  return Math.floor(
+    REBIRTH_MIN * REBIRTH_GROWTH ** (data.rebirths || 0)
+  );
+}
 export const SHARD_BONUS = 0.02;         // +2 % à tous les gains par éclat gagné, à vie
 
 export const CORE = [
@@ -277,10 +284,14 @@ export function skillUp(wallet, id) {
 
 export function shardsFor(data) {
   const run = data.minedRun || 0;
-  if (run < REBIRTH_MIN) return 0;
+  const required = rebirthRequirement(data);
+
+  if (run < required) return 0;
+
   const bonus = bonusOf(data);
+
   return Math.floor(
-    Math.sqrt(run / REBIRTH_MIN) *
+    Math.sqrt(run / required) *
     (1 + 0.10 * coreRank(bonus, "k3"))
   );
 }
