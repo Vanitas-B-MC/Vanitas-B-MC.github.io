@@ -279,7 +279,10 @@ export function shardsFor(data) {
   const run = data.minedRun || 0;
   if (run < REBIRTH_MIN) return 0;
   const bonus = bonusOf(data);
-  return Math.floor(Math.sqrt(run / REBIRTH_MIN) * (1 + 0.10 * coreRank(bonus, "k3")));
+  return Math.floor(
+    Math.sqrt(run / REBIRTH_MIN) *
+    (1 + 0.10 * coreRank(bonus, "k3"))
+  );
 }
 
 export const canRebirth = (data) => shardsFor(data) >= 1;
