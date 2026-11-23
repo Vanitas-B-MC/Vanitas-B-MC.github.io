@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-23T01:49:02Z",
+ "updated": "2026-11-23T13:06:16Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,196 @@
   }
  },
  "items": [
+  {
+   "id": "https://droit.developpez.com/actu/389352/Un-reseau-social-ne-peut-etre-qualifie-de-gratuit-si-les-utilisateurs-doivent-fournir-leurs-donnees-personnelles-pour-l-utiliser-selon-l-avocate-generale-aupres-de-la-CJUE-Laila-Medina/",
+   "title": "Un réseau social ne peut être qualifié de gratuit si les utilisateurs doivent fournir leurs données personnelles pour l'utiliser, selon l'avocate générale auprès de la CJUE, Laila Medina",
+   "link": "https://droit.developpez.com/actu/389352/Un-reseau-social-ne-peut-etre-qualifie-de-gratuit-si-les-utilisateurs-doivent-fournir-leurs-donnees-personnelles-pour-l-utiliser-selon-l-avocate-generale-aupres-de-la-CJUE-Laila-Medina/",
+   "summary": "Un réseau social ne peut être qualifié de gratuit si les utilisateurs doivent fournir leurs données personnelles pour l'utiliser, selon l'avocate générale auprès de la CJUE, Laila Medina Un réseau social ne peut être qualifié de « gratuit…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-23T13:01:00Z"
+  },
+  {
+   "id": "https://windows.developpez.com/actu/389353/Microsoft-annonce-l-arrivee-de-PowerShell-7-dans-la-prochaine-version-de-Windows-tandis-que-PowerShell-5-1-restera-disponible-pour-assurer-la-compatibilite-avec-les-automatisations-existantes/",
+   "title": "Microsoft annonce l'arrivée de PowerShell 7 dans la prochaine version de Windows, tandis que PowerShell 5.1 restera disponible pour assurer la compatibilité avec les automatisations existantes",
+   "link": "https://windows.developpez.com/actu/389353/Microsoft-annonce-l-arrivee-de-PowerShell-7-dans-la-prochaine-version-de-Windows-tandis-que-PowerShell-5-1-restera-disponible-pour-assurer-la-compatibilite-avec-les-automatisations-existantes/",
+   "summary": "Microsoft annonce l'arrivée de PowerShell 7 dans la prochaine version de Windows, tandis que PowerShell 5.1 restera disponible pour assurer la compatibilité avec les automatisations existantes Microsoft a annoncé que PowerShell 7 serait…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-23T12:59:00Z"
+  },
+  {
+   "id": "https://cloud-computing.developpez.com/actu/389355/Donald-Trump-menace-d-imposer-une-taxe-colossale-sur-les-centres-de-donnees-d-IA-situes-a-l-etranger-il-affirme-vouloir-que-ces-entreprises-construisent-leurs-centres-de-donnees-d-IA-aux-USA/",
+   "title": "Donald Trump menace d'imposer une « taxe colossale » sur les centres de données d'IA situés à l'étranger, il affirme vouloir que ces entreprises construisent leurs centres de données d'IA aux USA",
+   "link": "https://cloud-computing.developpez.com/actu/389355/Donald-Trump-menace-d-imposer-une-taxe-colossale-sur-les-centres-de-donnees-d-IA-situes-a-l-etranger-il-affirme-vouloir-que-ces-entreprises-construisent-leurs-centres-de-donnees-d-IA-aux-USA/",
+   "summary": "Donald Trump menace d'imposer une « taxe colossale » sur les centres de données d'IA situés à l'étranger, il affirme vouloir que ces entreprises construisent leurs centres de données d'IA aux USA Le président américain Donald Trump vient…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-23T12:58:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/hackers-exploit-critical-screenconnect.html",
+   "title": "Hackers Exploit Critical ScreenConnect Flaw to Hijack MSP Technician PCs Without Warning",
+   "link": "https://thehackernews.com/2026/11/hackers-exploit-critical-screenconnect.html",
+   "summary": "Threat actors are exploiting a now-patched security flaw in ConnectWise ScreenConnect to target managed service provider (MSP) servers. The activity revolves around CVE-2026-84869 (CVSS score: 9.9), a critical ScreenConnect client flaw…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-23T12:41:04Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/n-able-discloses-critical-mail-assure.html",
+   "title": "N-able Discloses Critical Mail Assure Vulnerability Found During Breach Investigation",
+   "link": "https://thehackernews.com/2026/11/n-able-discloses-critical-mail-assure.html",
+   "summary": "N-able yesterday disclosed a critical flaw it found while investigating the breach of its Mail Assure and SpamExperts Hosted Cloud, an email filtering service it runs for managed service providers. The bug, tracked as CVE-2026-134624, is a…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-23T12:28:09Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/call-center-operator-gets-8-years-for-helping-scam-30-000-americans/",
+   "title": "Call center operator gets 8 years for helping scam 30,000 Americans",
+   "link": "https://www.bleepingcomputer.com/news/security/call-center-operator-gets-8-years-for-helping-scam-30-000-americans/",
+   "summary": "A Peruvian call center operator was sentenced to eight years in prison for stealing millions of dollars from over 30,000 Spanish-speaking US residents in a years-long government-impersonation fraud scheme.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-23T12:02:23Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389356/Dario-Amodei-aurait-laisse-entendre-que-les-jeux-video-pourraient-apaiser-la-colere-des-masses-une-fois-que-l-IA-leur-aura-pris-leurs-emplois-sans-preciser-avec-quel-argent-les-gens-acheteraient-ces-jeux/",
+   "title": "Dario Amodei aurait laissé entendre que les jeux vidéo pourraient apaiser la colère des masses une fois que l'IA leur aura pris leurs emplois, sans préciser avec quel argent les gens achèteraient ces jeux",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389356/Dario-Amodei-aurait-laisse-entendre-que-les-jeux-video-pourraient-apaiser-la-colere-des-masses-une-fois-que-l-IA-leur-aura-pris-leurs-emplois-sans-preciser-avec-quel-argent-les-gens-acheteraient-ces-jeux/",
+   "summary": "Dario Amodei aurait laissé entendre que les jeux vidéo pourraient apaiser la colère des masses une fois que l'IA leur aura pris leurs emplois sans préciser avec quel argent les gens achèteraient ces jeux Durant son passage chez OpenAI…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-23T11:29:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311349",
+   "title": "Old-school Linux desktops find fresh routes to Wayland",
+   "link": "https://www.theregister.com/os-platforms/2026/11/23/old-school-linux-desktops-find-fresh-routes-to-wayland/5311349",
+   "summary": "Xfce lines up 4.22 for 2027, while MATE gains an Ubuntu-based distro and a compositor of its own",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-23T10:17:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311325",
+   "title": "Airbus may be leaving Microsoft Office, but for its 36,000 defense staff, Office isn't leaving them",
+   "link": "https://www.theregister.com/applications/2026/11/23/airbus-may-be-leaving-microsoft-office-but-for-its-36000-defense-staff-office-isnt-leaving-them/5311325",
+   "summary": "Planemaker's 2-to-3-year plan to ditch Redmond's suite stops short of the 22% who can't go near the cloud",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-23T09:32:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/hackers-exploit-critical-aspnet-anti.html",
+   "title": "Hackers Exploit Critical ASP.NET Anti-CSRF Library Flaw Allowing Unauthenticated RCE",
+   "link": "https://thehackernews.com/2026/11/hackers-exploit-critical-aspnet-anti.html",
+   "summary": "Cybersecurity researchers have urged users to discontinue using a legacy ASP.NET anti-CSRF library named Idunno.AntiCsrf (\"Idunno.AntiCsrf.dll\") following the discovery of a critical vulnerability that has been exploited in the wild. The…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-23T09:11:56Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-confirms-printing-issues-after-kb5132043-windows-hotpatch/",
+   "title": "Microsoft confirms Windows printing issues affecting Forcepoint users",
+   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-confirms-printing-issues-after-kb5132043-windows-hotpatch/",
+   "summary": "Microsoft confirmed printing issues on systems running Forcepoint DLP software after installing the KB5132043 November 2026 Windows 11 hotpatch.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-23T09:11:15Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/hackers-exploited-glinet-cloud-flaw-to.html",
+   "title": "Hackers Exploited GL.iNet Cloud Flaw to Install Malware on Routers and KVM Devices",
+   "link": "https://thehackernews.com/2026/11/hackers-exploited-glinet-cloud-flaw-to.html",
+   "summary": "Hackers exploited a vulnerability in GL.iNet's GoodCloud remote management service to install malware on some customer routers and KVM devices, the maker of travel routers and remote-access KVM hardware said in a security notice updated…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-23T09:04:08Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311363",
+   "title": "When Microsoft, Apple, and the FAA can't keep it up, it's a system of a down",
+   "link": "https://www.theregister.com/columnists/2026/11/23/when-microsoft-apple-and-the-faa-cant-keep-it-up-its-a-system-of-a-down/5311363",
+   "summary": "Outage after outage after outage is a syndrome that needs radical treatment",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-23T08:42:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/ai-assisted-cyberattacks-trigger.html",
+   "title": "AI-Assisted Cyber Attacks Trigger Unauthorized Payments at Indian Banks and Fintech Firms",
+   "link": "https://thehackernews.com/2026/11/ai-assisted-cyberattacks-trigger.html",
+   "summary": "The Indian Computer Emergency Response Team (CERT-In) has warned that threat actors are carrying out artificial intelligence (AI)-assisted cyber attacks targeting information and communication technology (ICT) assets in the country. This…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-23T08:24:15Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/cisa-flags-critical-cisco-expressway-rce-flaw-as-actively-exploited/",
+   "title": "CISA flags critical Cisco RCE flaw as actively exploited in attacks",
+   "link": "https://www.bleepingcomputer.com/news/security/cisa-flags-critical-cisco-expressway-rce-flaw-as-actively-exploited/",
+   "summary": "The US Cybersecurity and Infrastructure Security Agency (CISA) warned federal agencies that attackers are now exploiting a recently patched critical Cisco Expressway vulnerability in the wild.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-23T07:44:19Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311554",
+   "title": "Software issues have even reached Mercury as BepiColombo probe arrives in uncertain state",
+   "link": "https://www.theregister.com/science/2026/11/23/software-issues-have-even-reached-mercury-as-bepicolombo-probe-arrives-in-uncertain-state/5311554",
+   "summary": "Spacecraft enters orbit after epic journey but something shortened a burn",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-23T07:24:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311213",
+   "title": "Techie turned his too-easy job interview into a trap",
+   "link": "https://www.theregister.com/personal-tech/2026/11/23/techie-turned-his-too-easy-job-interview-into-a-trap/5311213",
+   "summary": "With the flick of a switch, he smoked out competent PC maintenance skills",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-23T06:35:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311547",
+   "title": "Google claims last week’s critical VMware bug was under attack in September",
+   "link": "https://www.theregister.com/virtualization/2026/11/23/google-claims-last-weeks-critical-vmware-bug-was-under-attack-in-september/5311547",
+   "summary": "China-linked ARMORY CASTLE knew about it weeks before it unleashed five custom malware tools targeting vCenter",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-23T04:39:19Z"
+  },
+  {
+   "id": "https://green-it.developpez.com/actu/389348/-L-homme-aux-ordures-Bill-Gates-a-gagne-des-milliards-en-investissant-dans-des-decharges-qui-rejettent-des-quantites-alarmantes-de-methane-un-gaz-qui-aggrave-le-rechauffement-climatique/",
+   "title": "« L'homme aux ordures » : Bill Gates a gagné des milliards en investissant dans des décharges qui rejettent des quantités alarmantes de méthane, un gaz qui aggrave le réchauffement climatique",
+   "link": "https://green-it.developpez.com/actu/389348/-L-homme-aux-ordures-Bill-Gates-a-gagne-des-milliards-en-investissant-dans-des-decharges-qui-rejettent-des-quantites-alarmantes-de-methane-un-gaz-qui-aggrave-le-rechauffement-climatique/",
+   "summary": "« L'homme aux ordures » : Bill Gates a gagné des milliards en investissant dans des décharges qui rejettent des quantités alarmantes de méthane un gaz qui aggrave le réchauffement climatique Bill Gates est le principal actionnaire de…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-23T02:19:00Z"
+  },
   {
    "id": "https://www.theregister.com/a/5311532",
    "title": "$1 of GPT-5.1 tokens finds new ways around China’s Great Firewall",
@@ -177,16 +367,6 @@
    "published": "2026-11-21T15:17:27Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311511",
-   "title": "AWS got hit by an outage too. Here's why you didn't hear about it",
-   "link": "https://www.theregister.com/columnists/2026/11/21/aws-got-hit-by-an-outage-too-heres-why-you-didnt-hear-about-it/5311511",
-   "summary": "If a service falls in the forest and nobody hears it...",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-21T14:35:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/fbi-reportedly-hacked-again-this-time-targeting-nationwide-police-database/",
    "title": "FBI reportedly hacked again, this time targeting nationwide police database",
    "link": "https://www.bleepingcomputer.com/news/security/fbi-reportedly-hacked-again-this-time-targeting-nationwide-police-database/",
@@ -217,16 +397,6 @@
    "published": "2026-11-21T11:53:07Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311418",
-   "title": "ChatGPT shrunk down to run on a Super Nintendo",
-   "link": "https://www.theregister.com/offbeat/2026/11/21/chatgpt-shrunk-down-to-run-on-a-super-nintendo/5311418",
-   "summary": "Just don't expect complex, coherent, or always correct answers",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-21T11:46:00Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/gnupg-warns-critical-gpgme-flaw-could.html",
    "title": "GnuPG Warns Critical GPGME Flaw Could Expose App Data via Malicious OpenPGP Keys",
    "link": "https://thehackernews.com/2026/11/gnupg-warns-critical-gpgme-flaw-could.html",
@@ -247,56 +417,6 @@
    "published": "2026-11-21T11:03:17Z"
   },
   {
-   "id": "https://thehackernews.com/2026/11/signal-blocks-ai-agents-from-reading.html",
-   "title": "Signal Blocks AI Agents From Reading Private Chats via Screenshots on Android and iOS",
-   "link": "https://thehackernews.com/2026/11/signal-blocks-ai-agents-from-reading.html",
-   "summary": "Signal has announced that it will restrict screenshots by default to stop artificial intelligence (AI) agents from reading private chats on Android and iOS devices, but conceded that the protection is \"incomplete.\" The feature applies to…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-21T08:49:20Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/hackers-exploit-critical-vmware-cisco.html",
-   "title": "Hackers Exploit Critical VMware, Cisco, and Apache Flaws as Espionage Attacks Emerge",
-   "link": "https://thehackernews.com/2026/11/hackers-exploit-critical-vmware-cisco.html",
-   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) on Friday added four flaws impacting Apache Roller, Cisco Expressway, SAP NetWeaver, and Broadcom VMware vCenter to its Known Exploited Vulnerabilities (KEV), citing evidence…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-21T08:49:13Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311360",
-   "title": "NASA Mars rover and orbiter suffer glitches",
-   "link": "https://www.theregister.com/science/2026/11/21/nasa-mars-rover-and-orbiter-suffer-glitches/5311360",
-   "summary": "It isn't only systems on Earth suffering technical problems",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-21T07:47:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311493",
-   "title": "Amazon's split personality: AWS embraces bot commerce while main site enforces bans",
-   "link": "https://www.theregister.com/ai-and-ml/2026/11/20/amazons-split-personality-aws-embraces-bot-commerce-while-main-site-enforces-bans/5311493",
-   "summary": "Bot-based buying is here or not, depending on where you stand in the Amazon empire",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T23:41:14Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311486",
-   "title": "PHP 8.6: Things are gonna get a lot more strict around here",
-   "link": "https://www.theregister.com/devops/2026/11/20/php-86-things-are-gonna-get-a-lot-more-strict-around-here/5311486",
-   "summary": "Like a parent disciplining a misbehaving child, PHP’s annual update clamps down on loose default behaviors to curb malicious hacker horseplay.",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T23:28:47Z"
-  },
-  {
    "id": "https://intelligence-artificielle.developpez.com/actu/389341/Google-vient-de-lancer-Gemini-Tasks-un-agent-IA-autonome-fonctionnant-en-arriere-plan-et-alimente-par-Gemini-4-Hydrogen-permettant-d-effectuer-des-taches-de-la-vie-quotidienne-gratuitement/",
    "title": "Google vient de lancer « Gemini Tasks », un agent IA autonome fonctionnant en arrière-plan et alimenté par Gemini 4 Hydrogen, permettant d'effectuer des tâches de la vie quotidienne, gratuitement",
    "link": "https://intelligence-artificielle.developpez.com/actu/389341/Google-vient-de-lancer-Gemini-Tasks-un-agent-IA-autonome-fonctionnant-en-arriere-plan-et-alimente-par-Gemini-4-Hydrogen-permettant-d-effectuer-des-taches-de-la-vie-quotidienne-gratuitement/",
@@ -305,66 +425,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-20T22:46:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311478",
-   "title": "Visa, Mastercard theft included info useful for phishing, but not draining bank accounts, say researchers",
-   "link": "https://www.theregister.com/cyber-crime/2026/11/20/visa-mastercard-theft-included-info-useful-for-phishing-but-not-draining-bank-accounts-say-researchers/5311478",
-   "summary": "No financial details, but plenty of other clues",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T21:27:56Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/bell-canada-says-agentic-hacker-stole-enterprise-customer-data/",
-   "title": "Bell Canada says 'agentic' hacker stole enterprise customer data",
-   "link": "https://www.bleepingcomputer.com/news/security/bell-canada-says-agentic-hacker-stole-enterprise-customer-data/",
-   "summary": "Bell Canada has confirmed that an \"agentic\" threat actor breached its systems on November 17, 2026, and stole enterprise customer data, including information from a system used to order and provision telecommunications circuits.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T18:51:43Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/whatsapp-patches-3-security-flaws.html",
-   "title": "WhatsApp Patches 3 Security Flaws, Including Android Bug Suspected of Use in Scams",
-   "link": "https://thehackernews.com/2026/11/whatsapp-patches-3-security-flaws.html",
-   "summary": "Meta-owned WhatsApp has addressed security vulnerabilities, including one impacting its Android app that it suspects may have been exploited in connection with scam messages. The vulnerability, tracked as CVE-2026-23871 (CVSS score: 3.5)…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T17:57:20Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/hackers-use-autonomous-ai-tool-cairn-to-find-zero-day-take-over-server/",
-   "title": "Hackers use autonomous AI tool Cairn to find zero-day, take over server",
-   "link": "https://www.bleepingcomputer.com/news/security/hackers-use-autonomous-ai-tool-cairn-to-find-zero-day-take-over-server/",
-   "summary": "Threat actors used the open-source AI penetration-testing framework Cairn to find a previously unknown vulnerability in a medical imaging application.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T17:30:00Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/bazuka-android-malware-uses-fake-screen.html",
-   "title": "Bazuka Android Malware Uses Fake Screen Overlays to Hide Credential Theft and Device Control",
-   "link": "https://thehackernews.com/2026/11/bazuka-android-malware-uses-fake-screen.html",
-   "summary": "Cybersecurity researchers have disclosed details of a previously unknown Android malware framework called Bazuka that offers large language model (LLM) integration for victim management and control at scale. Dutch mobile security company…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T16:58:16Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/vendor-data-breach-exposes-chase-visa-mastercard-customer-info/",
-   "title": "Vendor data breach exposes Chase, Visa, Mastercard customer info",
-   "link": "https://www.bleepingcomputer.com/news/security/vendor-data-breach-exposes-chase-visa-mastercard-customer-info/",
-   "summary": "J.P. Morgan Chase warned it suffered a data breach after a cyberattack at a third-party service provider exposed customers' personal information and marketing data.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T15:58:06Z"
   },
   {
    "id": "https://java.developpez.com/actu/389338/Java-frappe-par-une-faille-de-securite-majeure-la-vulnerabilite-critique-Java4Shell-notee-9-2-10-expose-de-nombreuses-applications-Java-a-l-execution-de-code-a-distance/",
@@ -385,66 +445,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-20T12:24:00Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/new-linux-kvm-flaw-cve-2026-99312-lets.html",
-   "title": "Linux KVM Flaw CVE-2026-99312 Lets Guest VMs Access Host Memory on AMD Hosts",
-   "link": "https://thehackernews.com/2026/11/new-linux-kvm-flaw-cve-2026-99312-lets.html",
-   "summary": "A flaw in KVM, the hypervisor built into the Linux kernel, let researchers read about 127 GB of a cloud server's memory from inside a virtual machine of their own on DigitalOcean. On a shared server, that memory can include other…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-20T12:20:00Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389332/Uber-DoorDash-et-Airbnb-affirment-que-presque-personne-n-utilise-les-agents-d-IA-d-apres-leurs-resultats-financiers-du-3e-trimestre-Les-chiffres-questionnent-la-pertinence-de-l-utilisation-de-ces-outils/",
-   "title": "Uber, DoorDash et Airbnb affirment que presque personne n'utilise les agents d'IA, d'après leurs résultats financiers du 3e trimestre. Les chiffres questionnent la pertinence de l'utilisation de ces outils",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389332/Uber-DoorDash-et-Airbnb-affirment-que-presque-personne-n-utilise-les-agents-d-IA-d-apres-leurs-resultats-financiers-du-3e-trimestre-Les-chiffres-questionnent-la-pertinence-de-l-utilisation-de-ces-outils/",
-   "summary": "Uber, DoorDash et Airbnb affirment que presque personne n'utilise les agents d'IA, d'après leurs résultats financiers du 3e trimestre. Les chiffres questionnent la pertinence de l'utilisation de ces outils Les données officielles y…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-20T12:14:00Z"
-  },
-  {
-   "id": "https://microsoft.developpez.com/actu/389313/Microsoft-aurait-du-detecter-le-bug-logiciel-qui-a-mis-Outlook-hors-service-et-mettre-en-place-des-mesures-de-securite-pour-limiter-les-perturbations-selon-Satya-Nadella-PDG-de-Microsoft/",
-   "title": "Microsoft aurait dû détecter le bug logiciel qui a mis Outlook hors service et mettre en place des mesures de sécurité pour limiter les perturbations, selon Satya Nadella, PDG de Microsoft",
-   "link": "https://microsoft.developpez.com/actu/389313/Microsoft-aurait-du-detecter-le-bug-logiciel-qui-a-mis-Outlook-hors-service-et-mettre-en-place-des-mesures-de-securite-pour-limiter-les-perturbations-selon-Satya-Nadella-PDG-de-Microsoft/",
-   "summary": "Microsoft aurait dû détecter le bug logiciel qui a mis Outlook hors service et mettre en place des mesures de sécurité pour limiter les perturbations, admet Satya Nadella, PDG de Microsoft Microsoft aurait dû détecter le bug logiciel qui a…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-20T11:51:00Z"
-  },
-  {
-   "id": "https://php.developpez.com/actu/389311/Le-langage-de-programmation-PHP-8-6-est-disponible-avec-de-nouvelles-fonctionnalites-incluant-l-application-partielle-de-fonction-une-nouvelle-classe-Duration-et-une-API-de-polling/",
-   "title": "Le langage de programmation PHP 8.6 est disponible, avec de nouvelles fonctionnalités incluant l'application partielle de fonction, une nouvelle classe Duration, et une API de polling",
-   "link": "https://php.developpez.com/actu/389311/Le-langage-de-programmation-PHP-8-6-est-disponible-avec-de-nouvelles-fonctionnalites-incluant-l-application-partielle-de-fonction-une-nouvelle-classe-Duration-et-une-API-de-polling/",
-   "summary": "Le langage de programmation PHP 8.6 est disponible, avec de nouvelles fonctionnalités incluant l'application partielle de fonction, une nouvelle classe Duration, et une API de polling Le langage de programmation PHP 8.6 est disponible…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-20T11:48:00Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389309/Les-actions-d-Anthropic-s-echangent-a-environ-111-5-par-action-soit-34-pourcent-au-dessus-de-leur-prix-d-IPO-de-83-conferant-a-l-entreprise-une-capitalisation-boursiere-de-2-000-milliards/",
-   "title": "Les actions d'Anthropic s'échangent à environ 111,5 $ par action, soit 34 % au-dessus de leur prix d'IPO de 83 $, conférant à l'entreprise une capitalisation boursière de 2 000 milliards $",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389309/Les-actions-d-Anthropic-s-echangent-a-environ-111-5-par-action-soit-34-pourcent-au-dessus-de-leur-prix-d-IPO-de-83-conferant-a-l-entreprise-une-capitalisation-boursiere-de-2-000-milliards/",
-   "summary": "Les actions d'Anthropic s'échangent à environ 111,5 $ par action, soit 34 % au-dessus de leur prix d'IPO de 83 $, conférant à l'entreprise une capitalisation boursière de 2 000 milliards $ Anthropic a atteint une valorisation d'environ 2…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-20T11:43:00Z"
-  },
-  {
-   "id": "https://microsoft.developpez.com/actu/389310/Le-PDG-de-Microsoft-Satya-Nadella-explique-pourquoi-il-a-demande-a-60-000-employes-de-partir-chaque-collaborateur-doit-desormais-utiliser-l-IA-et-son-travail-consiste-surtout-a-la-gerer/",
-   "title": "Le PDG de Microsoft, Satya Nadella, explique pourquoi il a demandé à 60 000 employés de partir, chaque collaborateur doit désormais utiliser l'IA et son travail consiste surtout à la gérer",
-   "link": "https://microsoft.developpez.com/actu/389310/Le-PDG-de-Microsoft-Satya-Nadella-explique-pourquoi-il-a-demande-a-60-000-employes-de-partir-chaque-collaborateur-doit-desormais-utiliser-l-IA-et-son-travail-consiste-surtout-a-la-gerer/",
-   "summary": "Le PDG de Microsoft, Satya Nadella, explique pourquoi il a demandé à 60 000 employés de partir, chaque collaborateur doit désormais utiliser l'IA et son travail consiste surtout à la gérer Le PDG de Microsoft, Satya Nadella, a expliqué…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-20T11:34:00Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/43326",
