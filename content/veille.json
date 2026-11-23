@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-22T19:48:19Z",
+ "updated": "2026-11-23T01:49:02Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,16 @@
   }
  },
  "items": [
+  {
+   "id": "https://www.theregister.com/a/5311532",
+   "title": "$1 of GPT-5.1 tokens finds new ways around China’s Great Firewall",
+   "link": "https://www.theregister.com/security/2026/11/23/1-of-gpt-51-tokens-finds-new-ways-around-chinas-great-firewall/5311532",
+   "summary": "PLUS: Lenovo's infra group finally makes big profit; Indonesia’s glaciers are gone; Australian bank releases its AI bug-finder; and more!",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-23T00:23:31Z"
+  },
   {
    "id": "https://www.bleepingcomputer.com/news/security/hackers-exploit-glinet-cloud-flaw-to-infect-routers-kvm-devices/",
    "title": "Hackers exploit GL.iNet cloud flaw to infect routers, KVM devices",
@@ -305,16 +315,6 @@
    "category": "Infrastructure",
    "lang": "en",
    "published": "2026-11-20T21:27:56Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311466",
-   "title": "Signal slams door on prying AI agents to protect privacy",
-   "link": "https://www.theregister.com/security/2026/11/20/signal-slams-door-on-prying-ai-agents-to-protect-privacy/5311466",
-   "summary": "Apple, Google, and Microsoft called out for failing to provide developers with adequate AI agent controls",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-20T20:42:04Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/bell-canada-says-agentic-hacker-stole-enterprise-customer-data/",
