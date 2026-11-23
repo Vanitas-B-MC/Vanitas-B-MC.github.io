@@ -19,7 +19,7 @@ import { createSurvivorsUI } from "./ui-survivors.js";
 import { createBreachUI } from "./ui-breach.js";
 import { createHuntUI } from "./ui-hunt.js";
 import { createDungeonUI } from "./ui-dungeon.js";
-import { createMusic } from "./music.js";
+import { sharedMusic } from "./music.js";
 import { fmt, fmtShort, fmtRate } from "./ui.js";
 
 const $ = (selector) => document.querySelector(selector);
@@ -170,7 +170,7 @@ setInterval(() => {
 
 /* ---------- Musique (désactivée au départ : le navigateur exige un clic pour lancer le son) ---------- */
 
-const music = createMusic();
+const music = sharedMusic();   // même instance que secret-code.js (code « blackwall »)
 const musicButton = $("#music-toggle");
 const volumeInput = $("#music-volume");
 
