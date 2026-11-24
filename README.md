@@ -47,3 +47,4 @@ assets/                     favicon, images
 
 - Donjon v14 : 11 nouveaux ennemis pour les étages élevés (Ombre, Tireur d'élite, Prêtre, Colosse, Ver fouisseur, Drones, Ardent, Nécromancien, Magnétar, Berserker + Squelettes invoqués), dangers au sol et nouveaux designs.
 - Donjon v15 : salles retravaillées (couloirs, carrefour, gouffre à pont, galerie de piques, serpentin), butin/coffres/trappe toujours sur une case libre, panneau classe/arme repliable, pièces dans les stats, bouton plein écran (PC).
+- Donjon v19 : grands boss tous les 10 étages (10 boss à 4 phases, ordre aléatoire par partie, arène dédiée de 32×20 chacun : Hydre des marais, Titan de forge, Architecte, Seigneur des tempêtes, Gardien du Néant, Reine des ruches, Chevalier maudit, Colosse sismique, Nécroroi, Overmind).

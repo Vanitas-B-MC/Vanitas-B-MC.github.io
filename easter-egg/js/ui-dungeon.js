@@ -4,7 +4,7 @@
 // Compétence : Espace / Maj / E, ou le bouton à l'écran. Pause : P.
 
 import {
-  W, H, X0, Y0, X1, Y1, TILE, COLS, ROWS, WORLD_W, WORLD_H, DOORS, PLAYER_R, CLASSES, FREE_CLASS, META, ITEMS, ENEMIES, BOSSES, WEAPONS, weaponById, roomLabel,
+  W, H, X0, Y0, X1, Y1, TILE, COLS, ROWS, WORLD_W, WORLD_H, DOORS, PLAYER_R, CLASSES, FREE_CLASS, META, ITEMS, ENEMIES, BOSSES, MEGAS, WEAPONS, weaponById, roomLabel,
   createState, update, chooseItem, runRewards
 } from "./dungeon.js";
 import { describe, metaCost } from "./dungeon.js";
@@ -319,9 +319,10 @@ function createRunUI(root, wallet) {
   }
 
   const angleBetween = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
+  const base0 = (e) => Math.atan2(state.player.y - e.y, state.player.x - e.x);
   function drawEnemy(e) {
     const isBoss = e.boss;
-    const def = isBoss ? BOSSES.find((b) => b.id === e.type) : ENEMIES[e.type];
+    const def = isBoss ? (BOSSES.find((b) => b.id === e.type) || MEGAS.find((b) => b.id === e.type)) : ENEMIES[e.type];
     const color = def.color;
     if (e.spawn > 0) {
       ctx.globalAlpha = 0.3 + 0.4 * (1 - Math.min(1, e.spawn / 0.7));
@@ -335,7 +336,7 @@ function createRunUI(root, wallet) {
     }
     const t = state.time;
     // avertissements (ligne de charge, mèche de kamikaze)
-    if (e.st === "windup" && (e.type === "charger" || e.type === "reaper" || e.type === "golem")) {
+    if (e.st === "windup" && (e.type === "charger" || e.type === "reaper" || e.type === "golem" || e.mega)) {
       ctx.globalAlpha = 0.35;
       ctx.strokeStyle = "#ff3b5c";
       ctx.lineWidth = e.r * 1.6;
@@ -541,6 +542,97 @@ function createRunUI(root, wallet) {
         ctx.fillStyle = "#fff"; ctx.fillRect(e.x - 5, e.y - 3, 4, 2); ctx.fillRect(e.x + 1, e.y - 3, 4, 2);
         break;
       }
+      case "hydra": {
+        ctx.beginPath(); ctx.ellipse(e.x, e.y + 4, r * 1.05, r * 0.8, 0, 0, Math.PI * 2); ctx.fill();
+        for (let i = 0; i < 3; i++) {
+          const a = t * 1.3 + (i * Math.PI * 2) / 3, hx = e.x + Math.cos(a) * r * 1.6, hy = e.y - 6 + Math.sin(a) * r * 1.1;
+          ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.quadraticCurveTo(e.x + Math.cos(a + 0.5) * r, e.y + Math.sin(a + 0.5) * r * 0.5 - 8, hx, hy); ctx.stroke();
+          ctx.beginPath(); ctx.ellipse(hx, hy, 9, 7, a, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "#fcee0a"; ctx.fillRect(hx - 2, hy - 3, 3, 3); ctx.fillStyle = fill;
+        }
+        break;
+      }
+      case "titan": {
+        const wind = e.st === "windup" || (e.act && e.act.k === "slam");
+        const sh = wind ? Math.sin(t * 60) * 1.5 : 0;
+        ctx.fillRect(e.x - r * 0.8 + sh, e.y - r * 0.6, r * 1.6, r * 1.5);
+        ctx.fillRect(e.x - r * 1.5 + sh, e.y - r * 0.9, r * 0.7, r * 1.0); ctx.fillRect(e.x + r * 0.8 + sh, e.y - r * 0.9, r * 0.7, r * 1.0);
+        ctx.fillRect(e.x - r * 0.45 + sh, e.y - r * 1.15, r * 0.9, r * 0.6);
+        ctx.fillStyle = "#07060c"; ctx.fillRect(e.x - r * 0.4, e.y - r * 0.2, r * 0.8, r * 0.7);
+        ctx.fillStyle = wind ? "#ffffff" : "#ffd84a"; ctx.beginPath(); ctx.arc(e.x, e.y + r * 0.15, r * (0.28 + Math.sin(t * 6) * 0.04), 0, Math.PI * 2); ctx.fill();
+        ctx.fillRect(e.x - 5, e.y - r * 1.0, 3, 3); ctx.fillRect(e.x + 3, e.y - r * 1.0, 3, 3);
+        break;
+      }
+      case "architect": {
+        ctx.beginPath(); ctx.moveTo(e.x, e.y - r * 1.2); ctx.lineTo(e.x + r * 0.8, e.y); ctx.lineTo(e.x, e.y + r * 1.2); ctx.lineTo(e.x - r * 0.8, e.y); ctx.closePath(); ctx.fill();
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 2; i++) { ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(t * (i ? -1 : 1) * 0.9); ctx.strokeRect(-r * 1.3, -r * 1.3, r * 2.6, r * 2.6); ctx.restore(); }
+        ctx.fillStyle = "#07060c"; ctx.fillRect(e.x - 6, e.y - 3, 12, 4); ctx.fillStyle = "#e8fffa"; ctx.fillRect(e.x - 1, e.y - 3, 3, 4);
+        break;
+      }
+      case "storm": {
+        for (const [dx, dy, rr] of [[-0.9, 0.2, 0.7], [0, -0.3, 0.95], [0.9, 0.2, 0.7], [0, 0.35, 0.8]]) { ctx.beginPath(); ctx.arc(e.x + dx * r, e.y + dy * r, rr * r, 0, Math.PI * 2); ctx.fill(); }
+        ctx.strokeStyle = Math.floor(t * 12) % 2 ? "#fff27a" : "#ffffff"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(e.x + 2, e.y + r * 0.4); ctx.lineTo(e.x - 5, e.y + r * 1.0); ctx.lineTo(e.x + 3, e.y + r * 1.0); ctx.lineTo(e.x - 3, e.y + r * 1.7); ctx.stroke();
+        ctx.fillStyle = "#07060c"; ctx.fillRect(e.x - 7, e.y - 4, 4, 4); ctx.fillRect(e.x + 3, e.y - 4, 4, 4);
+        break;
+      }
+      case "warden": {
+        ctx.fillStyle = "#07060c"; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = fill; ctx.lineWidth = 3;
+        for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(e.x, e.y, r + 8 + i * 6, (r + 8 + i * 6) * 0.35, t * (1 + i * 0.5) + i, 0, Math.PI * 2); ctx.globalAlpha = 0.85 - i * 0.2; ctx.stroke(); }
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = fill; ctx.beginPath(); ctx.ellipse(e.x, e.y, r * 0.55, r * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#07060c"; ctx.fillRect(e.x - 1.5, e.y - r * 0.3, 3, r * 0.6);
+        break;
+      }
+      case "hive": {
+        const fl = Math.sin(t * 30) * 0.35;
+        ctx.globalAlpha = 0.45; ctx.fillStyle = "#e8fffa";
+        ctx.beginPath(); ctx.ellipse(e.x - r * 0.9, e.y - r * 0.5, r * 1.1, r * 0.45, -0.5 + fl, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(e.x + r * 0.9, e.y - r * 0.5, r * 1.1, r * 0.45, 0.5 - fl, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1; ctx.fillStyle = fill;
+        ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = (i * Math.PI) / 3 + Math.PI / 6; ctx.lineTo(e.x + Math.cos(a) * r, e.y + Math.sin(a) * r); } ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#3a2a00"; ctx.fillRect(e.x - r * 0.8, e.y - 2, r * 1.6, 4); ctx.fillRect(e.x - r * 0.6, e.y + 6, r * 1.2, 3);
+        ctx.beginPath(); ctx.moveTo(e.x - 4, e.y + r); ctx.lineTo(e.x, e.y + r + 10); ctx.lineTo(e.x + 4, e.y + r); ctx.fill();
+        ctx.fillStyle = "#ff2a6d"; ctx.fillRect(e.x - 6, e.y - r * 0.5, 4, 4); ctx.fillRect(e.x + 2, e.y - r * 0.5, 4, 4);
+        break;
+      }
+      case "dread": {
+        ctx.beginPath(); ctx.moveTo(e.x, e.y - r * 0.5); ctx.lineTo(e.x + r * 1.1, e.y + r * 1.3); ctx.lineTo(e.x - r * 1.1, e.y + r * 1.3); ctx.closePath(); ctx.globalAlpha = 0.6; ctx.fillStyle = "#3a2a5a"; ctx.fill(); ctx.globalAlpha = 1; ctx.fillStyle = fill;
+        ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#07060c"; ctx.fillRect(e.x - r * 0.7, e.y - 3, r * 1.4, 6);
+        ctx.fillStyle = "#ff2a6d"; ctx.fillRect(e.x - r * 0.5, e.y - 1, r, 2);
+        const sa = e.dir ?? Math.atan2(state.player.y - e.y, state.player.x - e.x);
+        ctx.strokeStyle = "#e8f1ff"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(e.x + Math.cos(sa) * r * 0.6, e.y + Math.sin(sa) * r * 0.6); ctx.lineTo(e.x + Math.cos(sa) * r * 2.4, e.y + Math.sin(sa) * r * 2.4); ctx.stroke();
+        ctx.fillStyle = "#c9a227"; ctx.fillRect(e.x - 1, e.y - r - 8, 2, 8);
+        break;
+      }
+      case "quake": {
+        ctx.fillRect(e.x - r * 0.8, e.y - r * 0.5, r * 1.6, r * 1.5);
+        ctx.fillRect(e.x - r * 0.5, e.y - r * 1.1, r, r * 0.7);
+        ctx.fillRect(e.x - r * 1.6, e.y - r * 0.4, r * 0.8, r * 1.3); ctx.fillRect(e.x + r * 0.8, e.y - r * 0.4, r * 0.8, r * 1.3);
+        ctx.strokeStyle = "#ffd24a"; ctx.lineWidth = 2; ctx.globalAlpha = 0.6 + 0.3 * Math.sin(t * 5);
+        ctx.beginPath(); ctx.moveTo(e.x - 6, e.y - r * 0.5); ctx.lineTo(e.x, e.y + 2); ctx.lineTo(e.x - 5, e.y + r * 0.9); ctx.moveTo(e.x + 8, e.y); ctx.lineTo(e.x + 4, e.y + 9); ctx.stroke();
+        ctx.globalAlpha = 1; ctx.fillStyle = "#ffd24a"; ctx.fillRect(e.x - 6, e.y - r * 0.85, 4, 4); ctx.fillRect(e.x + 3, e.y - r * 0.85, 4, 4);
+        break;
+      }
+      case "necrolord": {
+        ctx.beginPath(); ctx.moveTo(e.x, e.y - r * 1.1); ctx.lineTo(e.x + r * 1.1, e.y + r * 1.1); ctx.lineTo(e.x - r * 1.1, e.y + r * 1.1); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#0a1a10"; ctx.beginPath(); ctx.arc(e.x, e.y - r * 0.4, r * 0.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#6bffb0"; ctx.fillRect(e.x - 4, e.y - r * 0.5, 3, 3); ctx.fillRect(e.x + 1, e.y - r * 0.5, 3, 3);
+        ctx.fillStyle = "#fcee0a"; for (let i = -2; i <= 2; i++) ctx.fillRect(e.x + i * 5 - 1, e.y - r * 1.0 - (i % 2 ? 4 : 8), 3, i % 2 ? 4 : 8);
+        for (let i = 0; i < 4; i++) { const a = t * 1.8 + (i * Math.PI) / 2; ctx.fillStyle = "#d9ffe9"; ctx.beginPath(); ctx.arc(e.x + Math.cos(a) * (r + 14), e.y + Math.sin(a) * (r + 14) * 0.6, 4, 0, Math.PI * 2); ctx.fill(); }
+        break;
+      }
+      case "overmind": {
+        ctx.fillStyle = "#0d0612"; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = fill; ctx.lineWidth = 3;
+        for (let i = 0; i < 6; i++) { const a = t * 0.8 + (i * Math.PI) / 3; ctx.beginPath(); ctx.arc(e.x, e.y, r + 7, a, a + 0.7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(e.x + Math.cos(a) * (r + 7), e.y + Math.sin(a) * (r + 7)); ctx.lineTo(e.x + Math.cos(a) * (r + 16), e.y + Math.sin(a) * (r + 16)); ctx.stroke(); }
+        ctx.fillStyle = fill; ctx.beginPath(); ctx.arc(e.x, e.y, r * 0.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#ffffff"; const ex = Math.cos(base0(e)) * 3, ey = Math.sin(base0(e)) * 3; ctx.fillRect(e.x + ex - 2, e.y + ey - 2, 4, 4);
+        break;
+      }
       case "knight":
         ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = "#cfd6ff"; ctx.lineWidth = 3;
@@ -590,10 +682,14 @@ function createRunUI(root, wallet) {
       ctx.arc(e.x, e.y, e.r + 4, 0, Math.PI * 2);
       ctx.stroke();
     }
-    if (!["bat", "wisp", "turret", "sentinel", "spider", "reaper", "orbiter", "lich", "shade", "sniper", "priest", "colossus", "burrower", "drone", "ember", "necro", "skeleton", "magnetar", "berserker"].includes(e.type)) {
+    if (!["bat", "wisp", "turret", "sentinel", "spider", "reaper", "orbiter", "lich", "hydra", "titan", "architect", "storm", "warden", "hive", "dread", "quake", "necrolord", "overmind", "shade", "sniper", "priest", "colossus", "burrower", "drone", "ember", "necro", "skeleton", "magnetar", "berserker"].includes(e.type)) {
       ctx.fillStyle = "#07060c";
       ctx.fillRect(e.x - e.r * 0.45, e.y - e.r * 0.25, 3, 3);
       ctx.fillRect(e.x + e.r * 0.45 - 3, e.y - e.r * 0.25, 3, 3);
+    }
+    if (e.mega && e.untouchable) {
+      ctx.strokeStyle = "#ffffff"; ctx.globalAlpha = 0.5 + 0.3 * Math.sin(t * 30); ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(e.x, e.y, e.r + 10, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
     }
     if (!isBoss && e.hp < e.maxHp) {
       ctx.fillStyle = "rgba(0,0,0,.6)";
@@ -996,6 +1092,16 @@ function createRunUI(root, wallet) {
         ctx.beginPath(); ctx.arc(h.x, h.y, h.r * (0.8 + 0.15 * Math.sin(state.time * 14 + h.x)), 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#ffd24a"; ctx.beginPath(); ctx.arc(h.x, h.y, h.r * 0.45, 0, Math.PI * 2); ctx.fill();
         noGlow(); ctx.globalAlpha = 1;
+      } else if (h.kind === "beam") {
+        const live = h.t < h.max - h.warn;
+        ctx.globalAlpha = live ? 0.95 : 0.3; ctx.strokeStyle = live ? "#ff2a6d" : "#ff7a7a"; ctx.lineWidth = live ? h.w * 2 : 2;
+        glow("#ff2a6d", live ? 16 : 0);
+        ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.lineTo(h.x + Math.cos(h.ang) * h.len, h.y + Math.sin(h.ang) * h.len); ctx.stroke();
+        if (live) { ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3; ctx.stroke(); }
+        noGlow(); ctx.globalAlpha = 1;
+      } else if (h.dmg === 0) {
+        ctx.globalAlpha = 0.25 + 0.4 * (1 - h.t / h.max); ctx.strokeStyle = "#4dffd2"; ctx.lineWidth = 2;
+        ctx.strokeRect(h.x - 14, h.y - 14, 28, 28); ctx.globalAlpha = 1;
       } else {
         const k = 1 - h.t / h.max;
         ctx.globalAlpha = 0.18 + 0.2 * k; ctx.fillStyle = "#ff2a2a";
@@ -1024,12 +1130,13 @@ function createRunUI(root, wallet) {
       const b = state.boss;
       ctx.fillStyle = "rgba(0,0,0,.65)";
       ctx.fillRect(W / 2 - 150, 22, 300, 10);
-      ctx.fillStyle = "#ff2a6d";
+      ctx.fillStyle = b.mega ? "#ff8a3d" : "#ff2a6d";
       ctx.fillRect(W / 2 - 150, 22, 300 * Math.max(0, b.hp / b.maxHp), 10);
+      if (b.mega) { ctx.fillStyle = "#ffffff"; for (const m of b.marks) ctx.fillRect(W / 2 - 150 + 300 * m - 1, 20, 2, 14); }
       ctx.fillStyle = "#fff";
       ctx.font = "bold 11px monospace";
       ctx.textAlign = "center";
-      ctx.fillText(b.name || "BOSS", W / 2, 18);
+      ctx.fillText(b.mega ? `${b.name} — PHASE ${b.phase}/4` : b.name || "BOSS", W / 2, 18);
     }
     if (state.banner) {
       ctx.globalAlpha = Math.min(1, state.banner.ttl);

@@ -147,6 +147,49 @@ export const BOSSES = [
 ];
 export const bossFor = (floor) => BOSSES[(floor - 1 + BOSSES.length * 100) % BOSSES.length];
 
+/* ---------- Grands boss (tous les 10 étages) : 10 boss à phases, chacun avec son arène dédiée ---------- */
+
+// kit : attaques dans l'ordre de déblocage (2 au début, une de plus à chaque phase). gap : pause entre deux attaques.
+export const MEGAS = [
+  { id: "hydra",     name: "Hydre des marais",     hp: 1150, speed: 34, r: 30, dmg: 15, color: "#3ddc84", flying: true, mv: "orbit", arena: "marsh", gap: 1.5,
+    desc: "Marécages : des mares l'entourent, ses têtes crachent des nappes toxiques.", adds: ["slime", 2],
+    kit: [["fan", { n: 5, spread: 0.24, sp: 170, rep: 3, gap: 0.35 }], ["ring", { n: 14, sp: 120 }], ["pools", { n: 5 }], ["summon", { type: "slime", n: 2 }], ["spiral", { dur: 3, gap: 0.08, arms: 3, sp: 130 }]] },
+  { id: "titan",     name: "Titan de forge",       hp: 1300, speed: 40, r: 34, dmg: 20, color: "#ff8a3d", mv: "chase", arena: "forge", gap: 1.7,
+    desc: "Forge : des rigoles de lave (piques) coupent l'arène, il frappe le sol.", adds: ["bomber", 2],
+    kit: [["slam", { r: 120, n: 18, sp: 120 }], ["lanes", { n: 1 }], ["dash", { sp: 380 }], ["rain", { n: 8, r: 46 }], ["lanes", { n: 2 }]] },
+  { id: "architect", name: "L'Architecte",         hp: 1050, speed: 30, r: 24, dmg: 15, color: "#4dffd2", flying: true, mv: "hover", arena: "grid", gap: 1.5,
+    desc: "Damier : il dresse des murs temporaires pour te piéger.", phaseAct: ["walls", { n: 2 }],
+    kit: [["walls", { n: 1 }], ["fan", { n: 7, spread: 0.18, sp: 180, rep: 2, gap: 0.4 }], ["beam", { n: 1, spin: 0.55, dur: 4 }], ["blink", {}], ["rain", { n: 9, r: 44 }]] },
+  { id: "storm",     name: "Seigneur des tempêtes", hp: 1100, speed: 55, r: 24, dmg: 16, color: "#9ad1ff", flying: true, mv: "orbit", arena: "storm", gap: 1.3,
+    desc: "Colonnes : la foudre s'abat sur toi sans cesse.", adds: ["wisp", 3],
+    kit: [["rain", { n: 10, r: 42, gap: 0.2, jit: 20 }], ["lanes", { n: 1, axis: "v" }], ["spiral", { dur: 3, gap: 0.09, arms: 4, sp: 140 }], ["blink", {}], ["ring", { n: 22, sp: 135 }]] },
+  { id: "warden",    name: "Gardien du Néant",     hp: 1200, speed: 38, r: 28, dmg: 17, color: "#8e6bff", flying: true, mv: "orbit", arena: "void", gap: 1.6,
+    desc: "Abîme central : un vortex t'attire vers lui.", adds: ["wisp", 3],
+    kit: [["pull", { dur: 3 }], ["ring", { n: 16, sp: 125 }], ["fan", { n: 5, spread: 0.3, sp: 190, rep: 3, gap: 0.3 }], ["summon", { type: "wisp", n: 3 }], ["beam", { n: 2, spin: 0.6, dur: 4 }]] },
+  { id: "hive",      name: "Reine des ruches",     hp: 1000, speed: 60, r: 24, dmg: 13, color: "#ffd84a", flying: true, mv: "orbit", arena: "hive", gap: 1.4,
+    desc: "Ruche : nuées de drones et nappes de miel brûlant.", adds: ["drone", 1],
+    kit: [["summon", { type: "drone", n: 1 }], ["fan", { n: 5, spread: 0.25, sp: 175, rep: 3, gap: 0.3 }], ["dash", { sp: 440 }], ["pools", { n: 6 }], ["spiral", { dur: 3, gap: 0.08, arms: 3, sp: 150 }]] },
+  { id: "dread",     name: "Chevalier maudit",     hp: 1150, speed: 78, r: 20, dmg: 18, color: "#c9d1ff", mv: "chase", arena: "duel", gap: 1.1,
+    desc: "Arène de duel : il fonce, disparaît et frappe dans ton dos.", adds: ["shade", 1],
+    kit: [["dash", { sp: 460 }], ["fan", { n: 3, spread: 0.2, sp: 210, rep: 3, gap: 0.25 }], ["blink", {}], ["slam", { r: 90, n: 10, sp: 150 }], ["dash", { sp: 540 }]] },
+  { id: "quake",     name: "Colosse sismique",     hp: 1400, speed: 32, r: 36, dmg: 22, color: "#c58a4a", mv: "chase", arena: "quake", gap: 1.8,
+    desc: "Éboulis : chaque coup au sol fait pleuvoir des rochers.", adds: ["brute", 2],
+    kit: [["slam", { r: 140, n: 24, sp: 115 }], ["rain", { n: 10, r: 52, jit: 90 }], ["lanes", { n: 1 }], ["summon", { type: "brute", n: 1 }], ["dash", { sp: 360 }]] },
+  { id: "necrolord", name: "Nécroroi",             hp: 1100, speed: 36, r: 26, dmg: 15, color: "#6bffb0", flying: true, mv: "hover", arena: "crypt", gap: 1.5,
+    desc: "Crypte : il relève des légions de squelettes et tire à travers les murs.", adds: ["skeleton", 4],
+    kit: [["summon", { type: "skeleton", n: 3 }], ["fan", { n: 5, spread: 0.26, sp: 170, rep: 3, gap: 0.35 }], ["pools", { n: 5 }], ["blink", {}], ["beam", { n: 1, spin: 0.8, dur: 4 }]] },
+  { id: "overmind",  name: "Overmind",             hp: 1250, speed: 30, r: 28, dmg: 18, color: "#ff2a6d", flying: true, mv: "hover", arena: "server", gap: 1.3,
+    desc: "Salle serveur : lasers rotatifs, quadrillage de tirs, drones de défense.", adds: ["drone", 1],
+    kit: [["beam", { n: 2, spin: 0.7, dur: 4 }], ["lanes", { n: 1 }], ["spiral", { dur: 3, gap: 0.08, arms: 4, sp: 140 }], ["summon", { type: "drone", n: 1 }], ["beam", { n: 3, spin: 0.9, dur: 4.5 }]] }
+];
+const PHASE_AT = [0.7, 0.4, 0.15];
+export const isMegaFloor = (floor) => floor % 10 === 0;
+export function megaFor(state, floor = state.floor) {
+  if (state.forceMega) return MEGAS.find((m) => m.id === state.forceMega) || MEGAS[0];
+  const k = Math.floor(floor / 10) - 1;
+  return MEGAS.find((m) => m.id === state.megaOrder[((k % MEGAS.length) + MEGAS.length) % MEGAS.length]);
+}
+
 // Un thème par étage : couleurs et ennemis propres, pour que les étages ne se ressemblent pas.
 export const THEMES = [
   { id: "cave",   name: "Caverne",  wall: "#3ddc84", a: "#0c1611", b: "#09120d", rock: "#1c3326", pool: ["slime", "bat", "splitter", "hopper", "archer", "brute", "bomber"], late: ["burrower", "drone", "berserker", "colossus"] },
@@ -241,8 +284,28 @@ function clearDoorways(g) {
   return g;
 }
 
+
+// Arènes des grands boss (32 × 20) : seules les zones de porte sont dégagées.
+const ARENAS = {
+  marsh: (g) => { box(g, 4, 3, 7, 5, "o"); box(g, 21, 3, 7, 5, "o"); box(g, 12, 12, 8, 5, "o"); box(g, 2, 12, 2, 2, "#"); box(g, 28, 12, 2, 2, "#"); box(g, 15, 6, 2, 2, "#"); return g; },
+  forge: (g) => { box(g, 3, 5, 26, 1, "x"); box(g, 3, 14, 26, 1, "x"); box(g, 8, 5, 2, 1, "."); box(g, 22, 5, 2, 1, "."); box(g, 8, 14, 2, 1, "."); box(g, 22, 14, 2, 1, "."); box(g, 14, 8, 4, 4, "#"); return g; },
+  grid: (g) => { for (let r = 3; r < 17; r += 4) for (let c = 4; c < 29; c += 4) { if (c >= 12 && c <= 18 && r >= 7 && r <= 11) continue; box(g, c, r, 2, 2, "#"); } return g; },
+  storm: (g) => { for (let k = 0; k < 8; k++) { const a = (k * Math.PI) / 4 + Math.PI / 8; box(g, Math.round(15 + Math.cos(a) * 11), Math.round(9 + Math.sin(a) * 6.5), 2, 2, "#"); } return g; },
+  void: (g) => { box(g, 10, 6, 12, 8, "o"); box(g, 14, 6, 4, 8, "."); box(g, 10, 8, 12, 4, "."); box(g, 13, 9, 6, 2, "o"); for (const [c, r] of [[3, 3], [27, 3], [3, 15], [27, 15]]) box(g, c, r, 2, 2, "#"); return g; },
+  hive: (g) => { for (const [c, r] of [[6, 4], [24, 4], [6, 14], [24, 14], [15, 3], [15, 15], [10, 9], [20, 9]]) box(g, c, r, 2, 2, "#"); return g; },
+  duel: (g) => { box(g, 2, 2, 5, 1, "x"); box(g, 2, 2, 1, 4, "x"); box(g, 25, 2, 5, 1, "x"); box(g, 29, 2, 1, 4, "x"); box(g, 2, 17, 5, 1, "x"); box(g, 2, 14, 1, 4, "x"); box(g, 25, 17, 5, 1, "x"); box(g, 29, 14, 1, 4, "x"); return g; },
+  quake: (g) => { for (const [c, r] of [[5, 4], [14, 4], [23, 4], [5, 13], [14, 13], [23, 13]]) box(g, c, r, 3, 3, "#"); return g; },
+  crypt: (g) => { box(g, 0, 0, 6, 4, "#"); box(g, 26, 0, 6, 4, "#"); box(g, 0, 16, 6, 4, "#"); box(g, 26, 16, 6, 4, "#"); box(g, 10, 9, 2, 2, "#"); box(g, 20, 9, 2, 2, "#"); return g; },
+  server: (g) => { for (const [c, r] of [[4, 3], [26, 3], [4, 15], [26, 15]]) box(g, c, r, 2, 2, "#"); box(g, 14, 8, 4, 4, "#"); box(g, 8, 9, 3, 2, "o"); box(g, 21, 9, 3, 2, "o"); return g; }
+};
+function clearDoorsOnly(g) {
+  const mc = Math.floor(COLS / 2), mr = Math.floor(ROWS / 2);
+  box(g, mc - 2, 0, 4, 3, "."); box(g, mc - 2, ROWS - 3, 4, 3, ".");
+  box(g, 0, mr - 2, 3, 4, "."); box(g, COLS - 3, mr - 2, 3, 4, ".");
+  return g;
+}
 // Construit la grille d'une salle (après setRoomSize).
-export const buildLayout = (room) => clearDoorways(LAYOUTS[room.layout].build(mulberry(room.seed || 1)));
+export const buildLayout = (room) => (room.arena ? clearDoorsOnly(ARENAS[room.arena](blank())) : clearDoorways(LAYOUTS[room.layout].build(mulberry(room.seed || 1))));
 
 /* ---------- Carte d'étage ---------- */
 
@@ -305,6 +368,12 @@ export function generateFloor(rng, floor) {
 
 /* ---------- Création de la partie ---------- */
 
+export function gotoFloor(state, floor) {
+  state.floor = floor;
+  state.bullets = []; state.pickups = [];
+  startFloor(state);
+}
+
 export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {}, weaponId = null } = {}) {
   const cls = classById(classId);
   const a = weaponById(weaponId || cls.weapon);
@@ -321,7 +390,7 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
   stats.crit += 0.04 * r("crit");
 
   const state = {
-    rng, cls, weapon: a, stats, ranks: { ...ranks }, zones: [], delayed: [], hazards: [], spin: 0,
+    rng, cls, weapon: a, stats, ranks: { ...ranks }, zones: [], delayed: [], hazards: [], tempWalls: [], megaKills: 0, spin: 0,
     time: 0, over: false, revived: false,
     floor: 1, map: null, room: null, theme: themeFor(1), grid: blank(),
     player: { x: (X0 + X1) / 2, y: Y1 - 40, hp: stats.maxHp, inv: 0, cd: 0, skillCd: 0, shield: 0, shieldT: 0, facing: -Math.PI / 2, ghost: 0, crit100: 0, spikeT: 0 },
@@ -329,6 +398,8 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
     cleared: true, chest: null, trapdoor: null, choices: null, owned: {}, boss: null,
     kills: 0, coins: 0, coinsEarned: 0, bossKills: 0, eliteKills: 0, roomsCleared: 0, nextId: 1, banner: null, orbAngle: 0, rain: 0
   };
+  state.megaOrder = MEGAS.map((m) => m.id);
+  for (let i = state.megaOrder.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [state.megaOrder[i], state.megaOrder[j]] = [state.megaOrder[j], state.megaOrder[i]]; }
   startFloor(state);
   return state;
 }
@@ -336,6 +407,10 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
 function startFloor(state) {
   state.theme = themeFor(state.floor);
   state.map = generateFloor(state.rng, state.floor);
+  if (isMegaFloor(state.floor) || state.forceMega) {
+    const br = state.map.rooms.find((r) => r.type === "boss");
+    if (br) { br.size = "large"; br.arena = megaFor(state).arena; br.layout = 0; br.mega = megaFor(state).id; }
+  }
   state.trapdoor = null;
   enterRoom(state, state.map.start, null);
   state.banner = { text: `Étage ${state.floor} — ${state.theme.name}`, ttl: 2.4 };
@@ -396,6 +471,7 @@ function enterRoom(state, room, fromDir) {
   state.zones = [];
   state.delayed = [];
   state.hazards = [];
+  state.tempWalls = [];
   state.trapdoor = null;
   room.visited = true;
   state.enemies = [];
@@ -426,14 +502,17 @@ function enterRoom(state, room, fromDir) {
   } else if (room.type === "boss") {
     state.cleared = false;
     state.wavesLeft = 0;
-    const def = bossFor(state.floor);
+    const mega = room.mega ? MEGAS.find((m) => m.id === room.mega) : null;
+    const def = mega || bossFor(state.floor);
     const mul = 1.1 + 0.35 * (state.floor - 1);
-    const b = makeEnemy(state, def.id, (X0 + X1) / 2, Y0 + 110, { def, hpMul: mul, boss: true, spawn: 1.4 });
+    const sp = mega ? freeSpot(state, (X0 + X1) / 2, Y0 + 5 * TILE) : { x: (X0 + X1) / 2, y: Y0 + 110 };
+    const b = makeEnemy(state, def.id, sp.x, sp.y, { def, hpMul: mul, boss: true, spawn: 1.4 });
     b.name = def.name;
-    b.marks = [0.75, 0.5, 0.25];
+    b.marks = mega ? [...PHASE_AT] : [0.75, 0.5, 0.25];
+    if (mega) { b.mega = true; b.phase = 1; b.cd = 2; b.orb = 0; b.invT = 0; }
     state.enemies.push(b);
     state.boss = b;
-    state.banner = { text: `BOSS — ${def.name}`, ttl: 2.4 };
+    state.banner = { text: mega ? `GRAND BOSS — ${def.name}` : `BOSS — ${def.name}`, ttl: 2.8 };
   } else if (room.type === "combat" || room.type === "elite") {
     state.cleared = false;
     state.wavesLeft = room.waves - 1;
@@ -522,6 +601,8 @@ function killEnemy(state, e, depth = 0) {
   if (e.type !== "slimelet") drop(state, e.x, e.y, "coin", e.elite ? worth * 4 : e.boss ? worth * 6 : worth);
   if (e.boss) {
     state.bossKills += 1;
+    if (e.mega) { state.megaKills += 1; for (let i = 0; i < 8; i++) drop(state, e.x + (i - 3.5) * 14, e.y - 12, "coin", worth * 4); drop(state, e.x + 20, e.y + 24, "heart", 0.5); }
+    state.hazards = [];
     for (let i = 0; i < 6; i++) drop(state, e.x + (i - 2.5) * 12, e.y + 10, "coin", worth * 3);
     drop(state, e.x, e.y + 24, "heart", 0.5);
     state.player.hp = state.stats.maxHp;
@@ -1000,7 +1081,209 @@ function summon(state, type, x, y, parent = 0) {
   state.enemies.push(makeEnemy(state, type, x, y, { spawn: 0.5, parent }));
 }
 
+/* ----- IA des grands boss : un kit d'attaques (ACTS) qui s'enrichit à chaque phase ----- */
+
+function segDist(px, py, x, y, ang, len) {
+  const dx = Math.cos(ang), dy = Math.sin(ang);
+  const t = clamp((px - x) * dx + (py - y) * dy, 0, len);
+  return Math.hypot(px - (x + dx * t), py - (y + dy * t));
+}
+
+const ACTS = {
+  ring(s, e, dt, a, p) {
+    if (!a.init) { a.init = 1; const n = p.n || 16, off = s.rng() * 6; for (let i = 0; i < n; i++) enemyShoot(s, e, off + (i * Math.PI * 2) / n, p.sp || 130, p.dm || 0.6, { color: e.color }); }
+    return a.t > 0.5;
+  },
+  fan(s, e, dt, a, p) {
+    if (!a.init) { a.init = 1; a.c = 0; a.next = 0; }
+    const rep = p.rep || 3;
+    if (a.c < rep && a.t >= a.next) {
+      const n = p.n || 5, b = angleTo(e, s.player);
+      for (let i = 0; i < n; i++) enemyShoot(s, e, b + (i - (n - 1) / 2) * (p.spread || 0.22), p.sp || 170, p.dm || 0.7, { color: e.color });
+      a.c++; a.next += p.gap || 0.35;
+    }
+    return a.c >= rep && a.t > a.next;
+  },
+  spiral(s, e, dt, a, p) {
+    a.next = a.next || 0;
+    if (a.t >= a.next) {
+      a.next += p.gap || 0.1; a.ang = (a.ang || 0) + 0.35;
+      const arms = p.arms || 3;
+      for (let i = 0; i < arms; i++) enemyShoot(s, e, a.ang + (i * Math.PI * 2) / arms, p.sp || 130, p.dm || 0.55, { color: e.color });
+    }
+    return a.t > (p.dur || 3);
+  },
+  slam(s, e, dt, a, p) {
+    if (!a.init) { a.init = 1; a.pos = p.at === "player" ? { x: s.player.x, y: s.player.y } : { x: e.x, y: e.y }; a.still = true; s.hazards.push({ kind: "warn", x: a.pos.x, y: a.pos.y, r: p.r || 110, t: 0.9, max: 0.9, dmg: e.dmg * 1.2 }); }
+    if (!a.fired && a.t > 0.9) { a.fired = 1; const n = p.n || 0; for (let i = 0; i < n; i++) enemyShoot(s, e, (i * Math.PI * 2) / n, p.sp || 120, 0.55, { x: a.pos.x, y: a.pos.y, color: e.color }); }
+    return a.t > 1.3;
+  },
+  dash(s, e, dt, a, p) {
+    if (!a.init) { a.init = 1; e.st = "windup"; e.dir = angleTo(e, s.player); a.still = true; }
+    if (a.t < 0.75) { if (a.t < 0.5) e.dir = angleTo(e, s.player); }
+    else if (a.t < 1.25) { e.st = "dash"; moveEnemy(s, e, Math.cos(e.dir) * (p.sp || 420), Math.sin(e.dir) * (p.sp || 420), dt); }
+    else { e.st = "idle"; for (let i = -1; i <= 1; i++) enemyShoot(s, e, angleTo(e, s.player) + i * 0.3, 190, 0.6, { color: e.color }); return true; }
+    return false;
+  },
+  rain(s, e, dt, a, p) {
+    a.next = a.next || 0; a.c = a.c || 0;
+    const n = p.n || 8;
+    if (a.c < n && a.t >= a.next) {
+      a.next += p.gap || 0.22; a.c++;
+      const j = p.jit ?? 40, pl = s.player;
+      s.hazards.push({ kind: "warn", x: clamp(pl.x + (s.rng() - 0.5) * 2 * j, X0 + 10, X1 - 10), y: clamp(pl.y + (s.rng() - 0.5) * 2 * j, Y0 + 10, Y1 - 10), r: p.r || 48, t: 0.85, max: 0.85, dmg: e.dmg });
+    }
+    return a.c >= n && a.t > a.next + 0.9;
+  },
+  lanes(s, e, dt, a, p) {
+    if (!a.init) {
+      a.init = 1;
+      for (let k = 0; k < (p.n || 1); k++) {
+        const horiz = p.axis ? p.axis === "h" : s.rng() < 0.5;
+        const pos = horiz ? clamp(s.player.y + (s.rng() - 0.5) * 120 + k * 90, Y0 + 30, Y1 - 30) : clamp(s.player.x + (s.rng() - 0.5) * 120 + k * 90, X0 + 30, X1 - 30);
+        const lo = horiz ? X0 + 20 : Y0 + 20, hi = horiz ? X1 - 20 : Y1 - 20;
+        const gap = lo + s.rng() * (hi - lo);
+        for (let v = lo; v <= hi; v += 40) {
+          if (Math.abs(v - gap) < 50) continue;
+          s.hazards.push({ kind: "warn", x: horiz ? v : pos, y: horiz ? pos : v, r: 26, t: 1.1, max: 1.1, dmg: e.dmg * 0.9 });
+        }
+      }
+    }
+    return a.t > 1.4;
+  },
+  pools(s, e, dt, a, p) {
+    if (!a.init) {
+      a.init = 1;
+      for (let i = 0; i < (p.n || 5); i++) {
+        const ang = s.rng() * Math.PI * 2, rr = 40 + s.rng() * 170;
+        s.hazards.push({ kind: "fire", x: clamp(s.player.x + Math.cos(ang) * rr, X0 + 16, X1 - 16), y: clamp(s.player.y + Math.sin(ang) * rr, Y0 + 16, Y1 - 16), r: 17, t: 5, max: 5, dmg: e.dmg * 0.5, tick: 0 });
+      }
+    }
+    return a.t > 0.8;
+  },
+  summon(s, e, dt, a, p) {
+    if (!a.init) { a.init = 1; const n = p.n || 2; for (let i = 0; i < n; i++) summon(s, p.type, e.x + (i - (n - 1) / 2) * 34, e.y + 34, e.id); s.fx.push({ kind: "ring", x: e.x, y: e.y, r: 60, ttl: 0.4, max: 0.4, color: e.color }); }
+    return a.t > 0.8;
+  },
+  blink(s, e, dt, a) {
+    if (!a.init) { a.init = 1; e.hidden = true; s.fx.push({ kind: "ring", x: e.x, y: e.y, r: 40, ttl: 0.4, max: 0.4, color: e.color }); }
+    if (!a.moved && a.t > 0.6) {
+      a.moved = 1; e.hidden = false;
+      const pt = spawnPoint(s, 200); e.x = pt.x; e.y = pt.y;
+      s.fx.push({ kind: "ring", x: e.x, y: e.y, r: 50, ttl: 0.4, max: 0.4, color: e.color });
+      for (let i = -2; i <= 2; i++) enemyShoot(s, e, angleTo(e, s.player) + i * 0.22, 190, 0.7, { color: e.color });
+    }
+    return a.t > 1.0;
+  },
+  beam(s, e, dt, a, p) {
+    if (!a.init) {
+      a.init = 1;
+      const n = p.n || 1, dir = s.rng() < 0.5 ? -1 : 1, b = angleTo(e, s.player);
+      for (let i = 0; i < n; i++) s.hazards.push({ kind: "beam", x: e.x, y: e.y, ang: b + (i * Math.PI * 2) / n, spin: (p.spin || 0.7) * dir, len: 1000, w: 11, t: p.dur || 4, max: p.dur || 4, warn: 1, dmg: e.dmg * 0.8, own: e.id });
+    }
+    return a.t > (p.dur || 4) - 0.1;
+  },
+  pull(s, e, dt, a, p) {
+    const pl = s.player, dur = p.dur || 3;
+    if (a.t < dur) {
+      const b = angleTo(pl, e);
+      pl.x += Math.cos(b) * 75 * dt; pl.y += Math.sin(b) * 75 * dt;
+      pushOut(s, pl, PLAYER_R);
+      if (!a.init) { a.init = 1; s.fx.push({ kind: "ring", x: e.x, y: e.y, r: 200, ttl: 0.8, max: 0.8, color: e.color }); }
+    } else if (!a.fired) { a.fired = 1; for (let i = 0; i < 20; i++) enemyShoot(s, e, (i * Math.PI * 2) / 20, 135, 0.6, { color: e.color }); }
+    return a.t > dur + 0.5;
+  },
+  walls(s, e, dt, a, p) {
+    if (!a.init) {
+      a.init = 1; a.tiles = [];
+      const pc = Math.floor((s.player.x - X0) / TILE), pr = Math.floor((s.player.y - Y0) / TILE);
+      for (let k = 0; k < (p.n || 1); k++) {
+        const horiz = s.rng() < 0.5, line = 3 + Math.floor(s.rng() * ((horiz ? ROWS : COLS) - 6)), len = horiz ? COLS : ROWS, gap = 2 + Math.floor(s.rng() * (len - 6));
+        for (let v = 2; v < len - 2; v++) {
+          if (v >= gap && v < gap + 3) continue;
+          const c = horiz ? v : line, r = horiz ? line : v;
+          if (Math.max(Math.abs(c - pc), Math.abs(r - pr)) < 3) continue;
+          a.tiles.push({ c, r });
+          s.hazards.push({ kind: "warn", x: X0 + c * TILE + TILE / 2, y: Y0 + r * TILE + TILE / 2, r: 16, t: 1, max: 1, dmg: 0 });
+        }
+      }
+    }
+    if (!a.built && a.t > 1) {
+      a.built = 1;
+      const pc = Math.floor((s.player.x - X0) / TILE), pr = Math.floor((s.player.y - Y0) / TILE);
+      for (const { c, r } of a.tiles) {
+        if (s.grid[r]?.[c] !== "." || Math.max(Math.abs(c - pc), Math.abs(r - pr)) < 2) continue;
+        s.grid[r][c] = "#"; s.tempWalls.push({ c, r, t: 7 });
+      }
+    }
+    return a.t > 1.2;
+  }
+};
+
+function megaAI(state, e, dt) {
+  const def = MEGAS.find((m) => m.id === e.type);
+  const p = state.player;
+  const base = angleTo(e, p);
+  const d = Math.sqrt(dist2(e, p));
+  // phases : à chaque palier de vie, bouclier bref, nettoyage des tirs, renforts et déblocage d'une attaque
+  let ph = 1;
+  for (const t of PHASE_AT) if (e.hp <= e.maxHp * t) ph++;
+  if (ph > e.phase) {
+    e.phase = ph; e.invT = 1.4; e.untouchable = true; e.act = null; e.hidden = false; e.st = "idle";
+    state.bullets = [];
+    state.banner = { text: `${def.name} — PHASE ${ph}`, ttl: 2 };
+    state.fx.push({ kind: "ring", x: e.x, y: e.y, r: 140, ttl: 0.7, max: 0.7, color: def.color });
+    if (def.adds) for (let i = 0; i < def.adds[1]; i++) summon(state, def.adds[0], e.x + (i - (def.adds[1] - 1) / 2) * 40, e.y + 40, e.id);
+    if (def.phaseAct) e.queued = def.phaseAct;
+  }
+  if (e.invT > 0) {
+    e.invT -= dt;
+    if (e.invT <= 0) e.untouchable = false;
+    return;
+  }
+  const act = e.act;
+  const sp = e.speedBase * (1 + 0.14 * (ph - 1));
+  if (!act?.still) {
+    const cx = (X0 + X1) / 2, cy = (Y0 + Y1) / 2;
+    switch (def.mv) {
+      case "chase": moveEnemy(state, e, Math.cos(base) * sp, Math.sin(base) * sp, dt); break;
+      case "orbit": {
+        e.orb += dt * (0.45 + 0.1 * ph);
+        const tx = cx + Math.cos(e.orb) * (X1 - X0) * 0.3, ty = cy + Math.sin(e.orb) * (Y1 - Y0) * 0.3;
+        const a2 = Math.atan2(ty - e.y, tx - e.x);
+        moveEnemy(state, e, Math.cos(a2) * sp * 2.2, Math.sin(a2) * sp * 2.2, dt);
+        break;
+      }
+      case "hover": {
+        const dir = d > 280 ? 1 : d < 190 ? -1 : 0;
+        moveEnemy(state, e, Math.cos(base) * sp * dir + Math.cos(base + Math.PI / 2) * sp * 0.6, Math.sin(base) * sp * dir + Math.sin(base + Math.PI / 2) * sp * 0.6, dt);
+        break;
+      }
+    }
+  }
+  if (e.hidden) { /* invisible pendant un blink : on ne bouge plus */ }
+  if (!e.act) {
+    e.cd -= dt;
+    if (e.cd <= 0) {
+      let k, params;
+      if (e.queued) { [k, params] = e.queued; e.queued = null; }
+      else {
+        const unlocked = Math.min(def.kit.length, ph + 1);
+        let i = Math.floor(state.rng() * unlocked);
+        if (i === e.last) i = (i + 1) % unlocked;
+        e.last = i;
+        [k, params] = def.kit[i];
+      }
+      e.act = { k, p: params, t: 0 };
+    }
+  } else {
+    e.act.t += dt;
+    if (ACTS[e.act.k](state, e, dt, e.act, e.act.p)) { e.act = null; e.hidden = false; e.cd = def.gap * (1 - 0.14 * (ph - 1)); }
+  }
+}
+
 function bossAI(state, e, dt) {
+  if (e.mega) return megaAI(state, e, dt);
   const p = state.player;
   const enraged = e.hp < e.maxHp * 0.5;
   const base = angleTo(e, p);
@@ -1507,15 +1790,22 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
   /* Dangers au sol (flaques de feu, zones d'impact annoncées) */
   for (const h of state.hazards) {
     h.t -= dt;
-    if (h.kind === "fire") {
+    if (h.kind === "beam") {
+      const o = state.enemies.find((x) => x.id === h.own && !x.dead);
+      if (!o) { h.t = 0; continue; }
+      h.x = o.x; h.y = o.y; h.ang += h.spin * dt;
+      if (h.t < h.max - h.warn && segDist(player.x, player.y, h.x, h.y, h.ang, h.len) < h.w + PLAYER_R) hurtPlayer(state, h.dmg);
+    } else if (h.kind === "fire") {
       h.tick -= dt;
       if (h.tick <= 0 && dist2(h, player) < (h.r + PLAYER_R) ** 2) { hurtPlayer(state, h.dmg); h.tick = 0.5; }
-    } else if (h.t <= 0) {
+    } else if (h.t <= 0 && h.dmg > 0) {
       if (dist2(h, player) < (h.r + PLAYER_R) ** 2) hurtPlayer(state, h.dmg);
       state.fx.push({ kind: "ring", x: h.x, y: h.y, r: h.r, ttl: 0.35, max: 0.35, color: "#ff7a3d" });
     }
   }
   state.hazards = state.hazards.filter((h) => h.t > 0);
+  for (const w of state.tempWalls) { w.t -= dt; if (w.t <= 0 && state.grid[w.r]?.[w.c] === "#") state.grid[w.r][w.c] = "."; }
+  state.tempWalls = state.tempWalls.filter((w) => w.t > 0);
   state.enemies = state.enemies.filter((e) => !e.dead);
 
   /* Butin au sol */
@@ -1631,7 +1921,9 @@ export function chooseItem(state, id) {
 // Âmes : monnaie permanente (classes, améliorations). Crédits et pièces bleues : monnaies de l'arcade.
 export function runRewards(state) {
   const greed = 1 + 0.15 * (state.ranks.greed || 0);
-  const souls = Math.floor(((state.floor - 1) * 14 + state.roomsCleared * 2 + state.kills / 4 + state.bossKills * 30 + state.coinsEarned / 3) * greed);
+  const souls = Math.floor(((state.floor - 1) * 14 + state.roomsCleared * 2 + state.kills / 4 + state.bossKills * 30 + state.megaKills * 120 + state.coinsEarned / 3) * greed);
   const credits = Math.floor(state.floor * 8 + state.roomsCleared * 2 + state.kills / 3);
-  return { souls, credits, coins: state.bossKills, floor: state.floor, kills: state.kills, bossKills: state.bossKills, rooms: state.roomsCleared, gold: state.coinsEarned, elite: state.eliteKills };
+  return { souls, credits, coins: state.bossKills + 3 * state.megaKills, floor: state.floor, kills: state.kills, bossKills: state.bossKills, rooms: state.roomsCleared, gold: state.coinsEarned, elite: state.eliteKills };
 }
+
+export const enterRoomDebug = (state, room) => enterRoom(state, room, null);
