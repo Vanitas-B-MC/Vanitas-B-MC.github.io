@@ -1,0 +1,259 @@
+/* =========================================================
+   MODE BLACKWALL — easter egg (taper « blackwall » sur le site)
+   Inspiré de la Blackwall de Cyberpunk 2077 : la barrière numérique de NetWatch qui isole
+   le Net sauvage. Noir de vide, rouge sang, lueur d'ambre, signal qui se déchire.
+
+   Tout est limité à html.blackwall : sans cette classe, rien ne change.
+   Même principe que neon.css : on remplace les variables de couleur du site,
+   puis on corrige les couleurs écrites en dur dans style.css et veille.css.
+========================================================= */
+
+html.blackwall {
+  --bg: #050102;
+  --surface: #0e0407;
+  --surface-2: #19080d;
+  --line: #3a0f17;
+  --line-strong: #8a1424;
+
+  --text: #f6ebe8;
+  --muted: #c4a29d;
+
+  /* rôles repris des deux thèmes (index : yellow/cyan/pink, veille : hot/blue/violet) */
+  --yellow: #ff2a2a;   /* rouge d'alerte : l'accent principal */
+  --cyan: #ff9a1f;     /* ambre : les étincelles de données */
+  --pink: #ff5a4d;
+  --hot: #ff1f2f;
+  --blue: #ff9a1f;
+  --violet: #c4162f;   /* cramoisi profond */
+
+  --bw-red-rgb: 255, 42, 42;
+  --bw-amber-rgb: 255, 154, 31;
+  --bw-crimson-rgb: 160, 14, 36;
+  --bw-bone-rgb: 246, 235, 232;
+
+  scrollbar-color: var(--line-strong) var(--bg);
+}
+
+/* Fond : le mur qui monte du bas (rouge qui vacille), lueur cramoisie en haut, colonnes de données */
+html.blackwall body::before {
+  background:
+    radial-gradient(90vw 46vh at 50% 112%, rgba(var(--bw-red-rgb), .34), transparent 72%),
+    radial-gradient(55vw 45vh at 96% -10%, rgba(var(--bw-crimson-rgb), .32), transparent 70%),
+    radial-gradient(40vw 40vh at 4% 40%, rgba(var(--bw-amber-rgb), .07), transparent 70%),
+    repeating-linear-gradient(90deg, rgba(var(--bw-red-rgb), .05) 0 1px, transparent 1px 44px),
+    linear-gradient(rgba(var(--bw-red-rgb), .04) 1px, transparent 1px) 0 0 / 100% 44px;
+  animation: bw-wall 7s ease-in-out infinite;
+}
+
+/* Écran : vignette rouge sombre, lignes de balayage plus marquées et une bande de brouillage qui descend */
+html.blackwall body::after {
+  background:
+    linear-gradient(180deg, transparent 0 46%, rgba(var(--bw-red-rgb), .07) 50%, transparent 54% 100%) 0 0 / 100% 220%,
+    radial-gradient(ellipse at center, transparent 48%, rgba(40, 0, 6, .6) 100%),
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .26) 2px 3px);
+  animation: bw-sweep 9s linear infinite;
+}
+
+/* Étiquette fixe : l'avertissement de NetWatch */
+html.blackwall::after {
+  content: "NETWATCH // BLACKWALL — ZONE INTERDITE";
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  pointer-events: none;
+  padding: 4px 12px 4px 14px;
+  background: rgba(5, 1, 2, .92);
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+  color: var(--yellow);
+  font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+  font-size: 10px;
+  letter-spacing: .22em;
+  opacity: .8;
+  animation: bw-blink 2.4s steps(1, end) infinite;
+}
+
+@keyframes bw-wall { 0%, 100% { opacity: 1; } 47% { opacity: .82; } 50% { opacity: .95; } 53% { opacity: .78; } }
+@keyframes bw-sweep { from { background-position-y: -110%, 0, 0; } to { background-position-y: 110%, 0, 0; } }
+@keyframes bw-blink { 0%, 86% { opacity: .8; } 90%, 94% { opacity: .2; } 97% { opacity: .8; } }
+
+/* Titres : rouge d'alerte avec décalage ambre / cramoisi, et un tressautement bref de temps en temps */
+html.blackwall .hero-name,
+html.blackwall .arcade-title,
+html.blackwall .vtitle {
+  text-shadow:
+    -3px 0 rgba(var(--bw-amber-rgb), .55),
+    3px 0 rgba(var(--bw-crimson-rgb), .85),
+    0 0 26px rgba(var(--bw-red-rgb), .55);
+}
+
+html.blackwall .hero-name,
+html.blackwall .vtitle { animation: bw-glitch 6.5s steps(1, end) infinite; }
+
+@keyframes bw-glitch {
+  0%, 92%, 100% { transform: none; }
+  93% { transform: translate(-4px, 0) skewX(-4deg); }
+  95% { transform: translate(5px, 1px) skewX(3deg); }
+  97% { transform: translate(-2px, -1px); }
+}
+
+html.blackwall .game-title,
+html.blackwall .overlay-title {
+  text-shadow:
+    -2px 0 rgba(var(--bw-amber-rgb), .5),
+    2px 0 rgba(var(--bw-crimson-rgb), .8),
+    0 0 18px rgba(var(--bw-red-rgb), .5);
+}
+
+/* Texte d'introduction de la page Veille : écrit en lavande dans veille.css */
+html.blackwall .banner-lead { color: #ead6d2; }
+
+html.blackwall .section-heading h2 {
+  text-shadow: 0 0 18px rgba(var(--bw-red-rgb), .4);
+}
+
+html.blackwall ::selection {
+  background: var(--yellow);
+  color: #090002;
+}
+
+/* ---------- Couleurs écrites en dur dans style.css ---------- */
+
+html.blackwall .site-header.is-scrolled {
+  border-bottom-color: rgba(var(--bw-red-rgb), .6);
+  box-shadow: 0 6px 28px -10px rgba(var(--bw-red-rgb), .6);
+}
+
+/* Logo (une image jaune et cyan) : passé en monochrome rouge, avec un halo */
+html.blackwall .logo img,
+html.blackwall .brand img,
+html.blackwall .card-head img {
+  filter: grayscale(1) sepia(1) hue-rotate(-38deg) saturate(4.5) brightness(.95) drop-shadow(0 0 6px rgba(var(--bw-red-rgb), .5));
+}
+
+html.blackwall .logo:hover img,
+html.blackwall .brand:hover img {
+  filter: grayscale(1) sepia(1) hue-rotate(-38deg) saturate(4.5) brightness(1.05) drop-shadow(0 0 12px rgba(var(--bw-red-rgb), .9));
+}
+
+html.blackwall .github-link:hover {
+  background: rgba(var(--bw-amber-rgb), .1);
+}
+
+html.blackwall .about-seeking {
+  background: rgba(var(--bw-red-rgb), .08);
+}
+
+html.blackwall .timeline li:first-child::before {
+  box-shadow: 0 0 14px rgba(var(--bw-red-rgb), .9);
+}
+
+/* Cartes à coins coupés : un filter suit la forme, un box-shadow serait coupé */
+html.blackwall .profile-card,
+html.blackwall .terminal {
+  filter: drop-shadow(0 0 14px rgba(var(--bw-red-rgb), .26));
+}
+
+html.blackwall .project:hover {
+  filter: drop-shadow(0 0 18px rgba(var(--bw-red-rgb), .55));
+}
+
+html.blackwall .button-primary {
+  color: #090002;
+  box-shadow: 0 0 18px -2px rgba(var(--bw-red-rgb), .7);
+}
+
+html.blackwall .contact-list a {
+  border-bottom-color: rgba(var(--bw-red-rgb), .5);
+}
+
+html.blackwall .status-dot {
+  box-shadow: 0 0 0 0 rgba(var(--bw-red-rgb), .7);
+  animation-name: pulse-blackwall;
+}
+
+@keyframes pulse-blackwall {
+  0% { box-shadow: 0 0 0 0 rgba(var(--bw-red-rgb), .7); }
+  70%, 100% { box-shadow: 0 0 0 10px rgba(var(--bw-red-rgb), 0); }
+}
+
+/* ---------- veille.css ---------- */
+
+html.blackwall .hud > div:nth-child(3) { border-left-color: var(--violet); }
+html.blackwall .hud > div:nth-child(3) dd { color: var(--violet); }
+
+html.blackwall .banner {
+  background:
+    radial-gradient(60% 90% at 88% 15%, rgba(var(--bw-red-rgb), .3), transparent 70%),
+    radial-gradient(50% 80% at 8% 100%, rgba(var(--bw-amber-rgb), .14), transparent 70%);
+}
+
+html.blackwall .field select:focus,
+html.blackwall .field input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--bw-amber-rgb), .4);
+}
+
+html.blackwall .step-num {
+  -webkit-text-stroke-color: rgba(var(--bw-red-rgb), .75);
+}
+
+/* Couleur d'accent des articles et des sources, par catégorie.
+   (Les règles de veille.css sont moins précises : on les redéfinit toutes ici.) */
+html.blackwall .shard,
+html.blackwall .source-token { --accent-rgb: var(--bw-amber-rgb); }
+
+html.blackwall .shard[data-cat="cybersecurite"],
+html.blackwall .source-token[data-cat="cybersecurite"] { --accent-rgb: var(--bw-red-rgb); }
+
+html.blackwall .shard[data-cat="developpement"],
+html.blackwall .source-token[data-cat="developpement"] { --accent-rgb: 196, 22, 47; }
+
+html.blackwall .shard[data-cat="infrastructure"],
+html.blackwall .source-token[data-cat="infrastructure"] { --accent-rgb: var(--bw-bone-rgb); }
+
+/* ---------- Arcade ---------- */
+
+html.blackwall .game-stage {
+  box-shadow: inset 0 0 40px rgba(var(--bw-red-rgb), .08), 0 0 30px -8px rgba(var(--bw-red-rgb), .6);
+}
+
+/* ---------- Alerte plein écran quand on franchit la Blackwall (easter-egg/js/secret-code.js) ---------- */
+
+html.blackwall .secret-blackwall {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .35) 2px 3px),
+    radial-gradient(70% 60% at 50% 55%, rgba(var(--bw-crimson-rgb), .5), rgba(5, 1, 2, .96) 75%);
+  animation: bw-alert 1.9s steps(1, end) both;
+}
+
+html.blackwall .secret-blackwall .secret-unlock-title {
+  color: var(--yellow);
+  text-shadow: -4px 0 rgba(var(--bw-amber-rgb), .7), 4px 0 rgba(var(--bw-crimson-rgb), .9), 0 0 32px rgba(var(--bw-red-rgb), .8);
+  animation: bw-glitch 1s steps(1, end) infinite;
+}
+
+@keyframes bw-alert {
+  0% { opacity: 0; }
+  6%, 14% { opacity: 1; }
+  10% { opacity: .35; }
+  18%, 78% { opacity: 1; }
+  82% { opacity: .5; }
+  86%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  html.blackwall::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.blackwall body::before,
+  html.blackwall body::after,
+  html.blackwall::after,
+  html.blackwall .hero-name,
+  html.blackwall .vtitle,
+  html.blackwall .status-dot,
+  html.blackwall .secret-blackwall,
+  html.blackwall .secret-blackwall .secret-unlock-title { animation: none; }
+}

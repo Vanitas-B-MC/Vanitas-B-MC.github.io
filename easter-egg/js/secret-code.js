@@ -2,6 +2,7 @@
 //   « awesome »    ouvre la page cachée (easter-egg/arcade.html)
 //   « edgerunner » active / désactive le style Edgerunners (rouge, vert)
 //   « neon »       active / désactive le style Neon (rose néon, cyan)
+//   « blackwall »  active / désactive le style Blackwall (noir, rouge sang, ambre) avec une brève alerte NetWatch
 //   « cyberpsychosis » glitch progressif de la page pendant quelques secondes (js/cyberpsychosis.js)
 // Chargé sur index.html, veille.html et easter-egg/arcade.html.
 
@@ -11,12 +12,15 @@ export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "easter-egg/arcade.html";
 export const THEME_CODE = "edgerunner";
 export const NEON_CODE = "neon";
+export const BLACKWALL_CODE = "blackwall";
 export const PSYCHO_CODES = ["cyberpsycho", "cyberpsychosis"];
 
 // Un code par thème : `theme` est le nom de la classe sur <html> (voir theme.js).
 export const THEME_CODES = [
   { code: THEME_CODE, theme: "edgerunners", label: "edgerunner" },
   { code: NEON_CODE, theme: "neon", label: "neon" },
+  { code: BLACKWALL_CODE, theme: "blackwall", label: "blackwall",
+    messages: { on: "> blackwall franchie : signal corrompu", off: "> blackwall rétablie : réseau isolé" } },
 ];
 
 // Garde les dernières lettres tapées ; renvoie true quand elles forment le code.
@@ -136,18 +140,36 @@ function init() {
     timer = window.setTimeout(() => { window.location.href = SECRET_PAGE; }, reduceMotion ? 300 : 900);
   }
 
-  function themeToast(label, on) {
+  function themeToast(entry, on) {
     addStyle();
     document.querySelector(".secret-toast")?.remove();
 
     const toast = document.createElement("p");
     toast.className = "secret-toast";
     toast.setAttribute("role", "status");
-    toast.textContent = `> mode ${label} : ${on ? "activé" : "désactivé"}`;
+    toast.textContent = entry.messages?.[on ? "on" : "off"] ?? `> mode ${entry.label} : ${on ? "activé" : "désactivé"}`;
     document.body.append(toast);
 
     window.clearTimeout(toastTimer);
     toastTimer = window.setTimeout(() => toast.remove(), 2200);
+  }
+
+  // Brève alerte plein écran quand on franchit la Blackwall (les couleurs viennent du thème qui vient de s'activer).
+  function blackwallAlert() {
+    if (document.querySelector(".secret-unlock")) return;
+    addStyle();
+    const lines = [["> netwatch : brèche détectée", "secret-unlock-line"], ["Blackwall", "secret-unlock-title"], ["> accès non autorisé · les IA rebelles vous observent", "secret-unlock-line"]];
+    const alert = document.createElement("div");
+    alert.className = "secret-unlock secret-blackwall";
+    alert.setAttribute("role", "status");
+    for (const [text, cls] of lines) {
+      const p = document.createElement("p");
+      p.className = cls;
+      p.textContent = text;
+      alert.append(p);
+    }
+    document.body.append(alert);
+    window.setTimeout(() => alert.remove(), reduceMotion ? 900 : 1900);
   }
 
   document.addEventListener("keydown", (event) => {
@@ -162,7 +184,11 @@ function init() {
     const hit = themeMatchers.map((matcher) => matcher.push(event.key) && matcher).find(Boolean);
 
     if (page && !onArcade) unlock();
-    if (hit) themeToast(hit.label, toggleTheme(hit.theme));
+    if (hit) {
+      const on = toggleTheme(hit.theme);
+      themeToast(hit, on);
+      if (on && hit.theme === "blackwall") blackwallAlert();
+    }
     if (psycho) {
       // Chargé seulement quand on en a besoin.
       // Chemin relatif à ce fichier (easter-egg/js/secret-code.js), donc valable depuis toutes les pages.

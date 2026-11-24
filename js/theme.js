@@ -1,4 +1,4 @@
-// js/theme.js — thèmes secrets (Edgerunners : rouge, vert, violet ; Neon : rose, cyan), activés par des easter eggs.
+// js/theme.js — thèmes secrets (Edgerunners : rouge, vert, violet ; Neon : rose, cyan ; Blackwall : noir, rouge sang, ambre), activés par des easter eggs.
 // Un seul thème est actif à la fois. Il est mémorisé dans le navigateur. Les pages le remettent
 // au chargement grâce à une petite ligne dans leur <head> (pour qu'il n'y ait pas de flash de l'ancien style).
 //
@@ -6,7 +6,7 @@
 // le lier dans les pages, ajouter son nom dans la ligne du <head>, puis lui donner un code dans secret-code.js.
 
 const KEY = "mc-theme";
-export const THEMES = ["edgerunners", "neon"];
+export const THEMES = ["edgerunners", "neon", "blackwall"];
 
 // Nom du thème actif, ou null si le site a son style normal.
 export const currentTheme = () =>
@@ -44,3 +44,5 @@ export function setEdgerunners(on) {
 
 export const toggleEdgerunners = () => toggleTheme("edgerunners");
 export const toggleNeon = () => toggleTheme("neon");
+export const isBlackwall = () => currentTheme() === "blackwall";
+export const toggleBlackwall = () => toggleTheme("blackwall");

@@ -6,13 +6,18 @@
 // Quand le mode Edgerunners est actif (code « edgerunner »), la boucle change : morceau original de 16 mesures (~1 min),
 // lent et mélancolique, dans l'ambiance d'« I Really Want to Stay at Your House » (aucune mélodie n'est reprise).
 // Structure : intro (mesures 1-4), couplet (5-8), refrain (9-12), fin qui s'éteint (13-16). Le changement est immédiat.
+// Quand le mode Blackwall est actif (code « blackwall »), morceau original de 24 mesures (~1 min 05) sombre et tendu :
+// drones qui grondent, flux de données en arpège, grosse caisse industrielle, pulsations de basse, mélodie glaciale,
+// puis une brèche où la musique se déchire (bégaiements, montée) avant le retour du mur.
 
 const BPM = 96;
 const BPM_EDGE = 62;                  // tempo du morceau Edgerunners
 const BPM_NEON = 118;                 // tempo du morceau Neon
+const BPM_BLACKWALL = 88;             // tempo du morceau Blackwall
 const isEdge = () => document.documentElement.classList.contains("edgerunners");
 const isNeon = () => document.documentElement.classList.contains("neon");
-const stepSeconds = () => 60 / (isEdge() ? BPM_EDGE : isNeon() ? BPM_NEON : BPM) / 4;   // une double-croche, en secondes
+const isBlackwall = () => document.documentElement.classList.contains("blackwall");
+const stepSeconds = () => 60 / (isEdge() ? BPM_EDGE : isNeon() ? BPM_NEON : isBlackwall() ? BPM_BLACKWALL : BPM) / 4;   // une double-croche, en secondes
 const LOOKAHEAD = 0.25;               // on programme les notes 250 ms à l'avance
 const KEY = "mc-music";
 
@@ -50,6 +55,24 @@ const EDGE_CHORUS = [
 ];
 const EDGE_ARP = [0, 1, 2, 1];
 
+// Morceau Blackwall : Fa mineur – Ré♭ – Si♭ mineur – Do (2 mesures chacun, 8 mesures), joué 3 fois = 24 mesures.
+// Le dernier accord (Do avec une neuvième mineure) laisse une tension qui retombe sur Fa mineur.
+const BW_CHORDS = [
+  { root: 41, notes: [65, 68, 72, 77] },  // Fa mineur
+  { root: 37, notes: [61, 65, 68, 73] },  // Ré♭
+  { root: 34, notes: [58, 61, 65, 70] },  // Si♭ mineur
+  { root: 36, notes: [60, 64, 67, 61] }   // Do (+ ré♭ : neuvième mineure)
+];
+const BW_BARS = 24;
+const BW_ARP = [0, 1, 2, 3, 2, 1, 3, 2, 0, 2, 1, 3, 1, 2, 3, 2];     // « flux de données » : 1 note par double-croche
+// Mélodie glaciale, très espacée : [pas dans les 2 mesures, note MIDI, durée en pas].
+const BW_LEAD = [
+  [[0, 77, 10], [12, 80, 6], [20, 79, 4], [24, 77, 8]],
+  [[0, 73, 10], [12, 77, 6], [20, 75, 4], [24, 73, 8]],
+  [[0, 70, 10], [12, 73, 6], [20, 72, 4], [24, 70, 8]],
+  [[0, 72, 6], [8, 73, 6], [16, 76, 8], [24, 73, 8]]
+];
+
 // Morceau Neon : Ré maj7 – La – Si m7 – Sol (1 mesure chacun), répété 4 fois = 16 mesures.
 const NEON_CHORDS = [
   { root: 38, notes: [62, 66, 69, 73] },  // Ré maj7
@@ -74,7 +97,7 @@ const NEON_CHORUS = [
 ];
 const STEPS_PER_BAR = 16;
 const BARS = 8;
-const loopSteps = () => STEPS_PER_BAR * (isEdge() ? EDGE_BARS : isNeon() ? NEON_BARS : BARS);
+const loopSteps = () => STEPS_PER_BAR * (isEdge() ? EDGE_BARS : isNeon() ? NEON_BARS : isBlackwall() ? BW_BARS : BARS);
 
 function readPref() {
   try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
@@ -89,6 +112,7 @@ export function createMusic() {
   let on = false;
   let ctx = null;
   let master = null;
+  let trim = null;                    // niveau du morceau en cours (le Blackwall est mixé plus fort : on le ramène au niveau des autres)
   let leadBus = null;                 // mélodie du morceau Edgerunners : filtre passe-bas + écho
   let echo = null;
   let feedback = null;
@@ -112,6 +136,79 @@ export function createMusic() {
     osc.connect(amp).connect(dest);
     osc.start(time);
     osc.stop(time + length + 0.05);
+  }
+
+  // --- Outils du morceau Blackwall ---
+
+  let loopNoise = null;               // 2 s de bruit en boucle, pour les montées et les chocs
+  function noiseSource() {
+    if (!loopNoise) {
+      loopNoise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const data = loopNoise.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = loopNoise;
+    src.loop = true;
+    return src;
+  }
+
+  // Drone : deux dents de scie légèrement désaccordées + un sinus grave, dans un filtre qui s'ouvre puis se referme.
+  function drone(freq, time, length, gain) {
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.Q.value = 5;
+    filter.frequency.setValueAtTime(150, time);
+    filter.frequency.linearRampToValueAtTime(950, time + length * 0.55);
+    filter.frequency.linearRampToValueAtTime(200, time + length);
+    const amp = ctx.createGain();
+    amp.gain.setValueAtTime(0.0001, time);
+    amp.gain.exponentialRampToValueAtTime(gain, time + length * 0.25);
+    amp.gain.setValueAtTime(gain, time + length * 0.7);
+    amp.gain.exponentialRampToValueAtTime(0.0001, time + length);
+    for (const [type, detune, mult] of [["sawtooth", -9, 1], ["sawtooth", 9, 1], ["sine", 0, 0.5]]) {
+      const osc = ctx.createOscillator();
+      osc.type = type;
+      osc.frequency.value = freq * mult;
+      osc.detune.value = detune;
+      osc.connect(filter);
+      osc.start(time);
+      osc.stop(time + length + 0.05);
+    }
+    filter.connect(amp).connect(master);
+  }
+
+  // Montée : un souffle de bruit dont le filtre grimpe, dans la réverbération.
+  function riser(time, length) {
+    const src = noiseSource();
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.Q.value = 1.2;
+    filter.frequency.setValueAtTime(300, time);
+    filter.frequency.exponentialRampToValueAtTime(7000, time + length);
+    const amp = ctx.createGain();
+    amp.gain.setValueAtTime(0.0001, time);
+    amp.gain.exponentialRampToValueAtTime(0.16, time + length * 0.97);
+    amp.gain.exponentialRampToValueAtTime(0.0001, time + length + 0.06);
+    src.connect(filter).connect(amp).connect(leadBus);
+    src.start(time);
+    src.stop(time + length + 0.1);
+  }
+
+  // Choc : grosse caisse à fond + un grondement de bruit qui s'éteint lentement.
+  function impact(time) {
+    kick(time, 1);
+    const src = noiseSource();
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(900, time);
+    filter.frequency.exponentialRampToValueAtTime(70, time + 1.4);
+    const amp = ctx.createGain();
+    amp.gain.setValueAtTime(0.32, time);
+    amp.gain.exponentialRampToValueAtTime(0.0001, time + 1.5);
+    src.connect(filter).connect(amp).connect(master);
+    src.start(time);
+    src.stop(time + 1.6);
   }
 
   // Voix de mélodie : sinus doux + triangle, attaque lente, vibrato qui s'installe après la note.
@@ -275,8 +372,70 @@ export function createMusic() {
     }
   }
 
+  // Morceau Blackwall (24 mesures) : intro (1-4), montée (5-8), le mur (9-16), la brèche (17-20), le mur final (21-24).
+  function playBlackwallStep(index, time) {
+    const STEP = stepSeconds();
+    const bar = Math.floor(index / STEPS_PER_BAR) % BW_BARS;
+    const inBar = index % STEPS_PER_BAR;
+    const pair = Math.floor((bar % 8) / 2);
+    const chord = BW_CHORDS[pair];
+    const section = bar < 4 ? 0 : bar < 8 ? 1 : bar < 16 ? 2 : bar < 20 ? 3 : 4;
+    const wall = section === 2 || section === 4;
+
+    // Drone : un accord grave qui respire sur 2 mesures.
+    if (bar % 2 === 0 && inBar === 0) {
+      const gain = section <= 1 ? 0.065 : 0.085;
+      drone(midi(chord.root + 12), time, STEP * 32, gain);
+      drone(midi(chord.root + 19), time, STEP * 32, gain * 0.55);
+    }
+
+    // Flux de données : arpège de carrés très fins (moitié moins dense à l'intro et dans la brèche).
+    if (section === 1 || wall || inBar % 2 === 0) {
+      const n = chord.notes[BW_ARP[inBar]] + 12;
+      note(midi(n), time, STEP * 0.85, "square", wall ? 0.02 : 0.015);
+    }
+
+    // Tic-tac glacial à l'intro, craquements aléatoires partout.
+    if (section === 0 && inBar % 4 === 0) hat(time, 0.05, 3200, 0.03);
+    if (inBar % 2 === 1 && Math.random() < 0.07) hat(time, 0.035, 2600, 0.02);
+
+    // Rythme industriel : grosse caisse sur 1 et 3 (+ ghost), caisse claire et claquement métallique sur 2 et 4.
+    const drums = section === 1 || wall;
+    if (drums && (inBar === 0 || inBar === 8)) kick(time, 0.8);
+    if (wall && inBar === 11) kick(time, 0.35);
+    if ((wall && (inBar === 4 || inBar === 12)) || (section === 1 && inBar === 12)) {
+      hat(time, 0.17, 1700, 0.14, "bandpass");
+      hat(time, 0.09, 6200, 0.07);
+    }
+    if (wall && inBar % 2 === 1) hat(time, 0.028);
+
+    // Basse : sous-grave sinusoïdal + pulsations syncopées en dents de scie.
+    if (drums && inBar === 0) note(midi(chord.root), time, STEP * 14, "sine", 0.22, master, 0.03);
+    if (drums && (inBar === 3 || inBar === 6 || inBar === 10)) note(midi(chord.root), time, STEP * 2.5, "sawtooth", 0.05);
+    if (section === 4 && inBar === 14) note(midi(chord.root + 12), time, STEP * 2, "sawtooth", 0.05);
+
+    // Mélodie glaciale, une octave plus haut dans le mur final.
+    if (wall) {
+      const local = (bar % 2) * STEPS_PER_BAR + inBar;
+      const up = section === 4 ? 12 : 0;
+      for (const [at, n, len] of BW_LEAD[pair]) {
+        if (at === local) lead(midi(n + up), time, STEP * len, section === 4 ? 0.1 : 0.08);
+      }
+    }
+
+    // La brèche : la musique bégaie sur le dernier temps des mesures 18 et 20.
+    if (section === 3 && (bar === 17 || bar === 19) && inBar >= 12) {
+      note(midi(chord.notes[inBar % 4] + 24 - (inBar - 12)), time, STEP * 0.45, "square", 0.045, leadBus, 0.003);
+    }
+
+    // Montées avant les deux entrées du mur, chocs sur le premier temps du mur.
+    if ((bar === 7 || bar === 19) && inBar === 0) riser(time, STEP * 16);
+    if ((bar === 8 || bar === 20) && inBar === 0) impact(time);
+  }
+
   function playStep(index, time) {
     if (isEdge()) return playEdgeStep(index, time);
+    if (isBlackwall()) return playBlackwallStep(index, time);
     if (isNeon()) return playNeonStep(index, time);
     const STEP = stepSeconds();
     const bar = Math.floor(index / STEPS_PER_BAR) % BARS;
@@ -312,9 +471,11 @@ export function createMusic() {
   function tune() {
     echo.delayTime.value = stepSeconds() * 3;
     const neon = isNeon();
-    feedback.gain.value = neon ? 0.32 : 0.45;
-    wet.gain.value = neon ? 0.32 : 0.5;
-    reverbLevel.gain.value = neon ? 0.12 : 0.45;
+    const dark = isBlackwall();
+    trim.gain.value = dark ? 0.42 : 1;
+    feedback.gain.value = neon ? 0.32 : dark ? 0.52 : 0.45;
+    wet.gain.value = neon ? 0.32 : dark ? 0.4 : 0.5;
+    reverbLevel.gain.value = neon ? 0.12 : dark ? 0.6 : 0.45;
   }
 
   function start() {
@@ -326,7 +487,8 @@ export function createMusic() {
         ctx = new AudioCtx();
         master = ctx.createGain();
         const compressor = ctx.createDynamicsCompressor();
-        master.connect(compressor).connect(ctx.destination);
+        trim = ctx.createGain();                       // réglage de niveau propre à chaque morceau (voir tune)
+        master.connect(trim).connect(compressor).connect(ctx.destination);
 
         leadBus = ctx.createGain();
         const lowpass = ctx.createBiquadFilter();
