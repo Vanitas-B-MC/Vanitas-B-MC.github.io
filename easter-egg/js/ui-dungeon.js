@@ -4,7 +4,7 @@
 // Compétence : Espace / Maj / E, ou le bouton à l'écran. Pause : P.
 
 import {
-  W, H, X0, Y0, X1, Y1, TILE, COLS, ROWS, WORLD_W, WORLD_H, DOORS, PLAYER_R, CLASSES, FREE_CLASS, META, ITEMS, ENEMIES, BOSSES, MEGAS, WEAPONS, weaponById, roomLabel,
+  W, H, X0, Y0, X1, Y1, TILE, COLS, ROWS, WORLD_W, WORLD_H, DOORS, PLAYER_R, CLASSES, FREE_CLASS, META, ULTS, ultsOf, ultFor, ITEMS, ENEMIES, BOSSES, MEGAS, WEAPONS, weaponById, roomLabel,
   createState, update, chooseItem, runRewards
 } from "./dungeon.js";
 import { describe, metaCost } from "./dungeon.js";
@@ -19,7 +19,7 @@ function createRunUI(root, wallet) {
   let active = false;
   let status = "idle";                 // idle | running | paused | over
   const OPT_KEY = "mc-dungeon-opts-v1";
-  const opts = { move: "keys", attack: "auto", weapon: null };
+  const opts = { move: "keys", attack: "auto", weapon: null, ults: {} };
   try { Object.assign(opts, JSON.parse(localStorage.getItem(OPT_KEY) || "{}")); } catch { /* stockage indisponible */ }
   if (!["keys", "mouse"].includes(opts.move)) opts.move = "keys";
   if (!["auto", "manual"].includes(opts.attack)) opts.attack = "auto";
@@ -29,7 +29,12 @@ function createRunUI(root, wallet) {
     const unlocked = wallet.data.dungeon.weapons || [];
     return opts.weapon && unlocked.includes(opts.weapon) ? opts.weapon : CLASSES.find((c) => c.id === classId).weapon;
   };
-  const newState = () => createState(Math.random, { classId, ranks: wallet.data.dungeon.ranks, weaponId: currentWeapon() });
+  const currentUlt = () => {
+    const have = wallet.data.dungeon.ults || [];
+    const id = opts.ults?.[classId];
+    return id && have.includes(id) ? ultFor(classId, id).id : ultsOf(classId)[0].id;
+  };
+  const newState = () => createState(Math.random, { classId, ranks: wallet.data.dungeon.ranks, weaponId: currentWeapon(), ultId: currentUlt() });
   let state = newState();
   const cam = { x: 0, y: 0, room: null };
   let aim = null;                      // curseur en coordonnées « monde » (visée manuelle)
@@ -77,6 +82,8 @@ function createRunUI(root, wallet) {
   const charBar = h("div", { class: "td-maps", role: "group", "aria-label": "Classe" });
   const weaponBar = h("div", { class: "dg-weapons", role: "group", "aria-label": "Arme de départ" });
   const weaponInfo = h("p", { class: "dg-weapon-info" });
+  const ultBar = h("div", { class: "td-maps dg-ults", role: "group", "aria-label": "Ultime" });
+  const ultInfo = h("p", { class: "dg-weapon-info" });
   const optionBar = h("div", { class: "dg-options", role: "group", "aria-label": "Commandes" });
   const weaponEl = h("strong", {}, "—");
   const heroStats = h("dl", { class: "td-stats dg-hero-stats" });
@@ -87,6 +94,9 @@ function createRunUI(root, wallet) {
     h("h3", { class: "subhead" }, "Arme de départ"),
     weaponBar,
     weaponInfo,
+    h("h3", { class: "subhead" }, "Ultime (Espace)"),
+    ultBar,
+    ultInfo,
     optionBar);
   const setupToggle = h("button", { class: "map-button dg-setup-toggle", id: "dg-setup-toggle", type: "button", "aria-expanded": "true", onclick: () => setSetupOpen(setupPanel.hidden) }, "▾ Classe, arme et commandes");
   function setSetupOpen(open) {
@@ -153,7 +163,81 @@ function createRunUI(root, wallet) {
 
   const glow = (color, blur = 10) => { ctx.shadowColor = color; ctx.shadowBlur = reduced ? 0 : blur; };
   const noGlow = () => { ctx.shadowBlur = 0; };
-  const TYPE_COLOR = { boss: "#ff2a6d", treasure: "#fcee0a", shop: "#3ddc84", elite: "#ff8a3d", start: "#9aa4c7", combat: "#5b5a7a" };
+  const TYPE_COLOR = { boss: "#ff2a6d", treasure: "#fcee0a", shop: "#3ddc84", elite: "#ff8a3d", start: "#9aa4c7", combat: "#5b5a7a", secret: "#b020ff", secretboss: "#b020ff" };
+
+  // Décors : accessoires posés sur certaines cases libres (choisis de façon déterministe selon la salle).
+  const hash2 = (a, b, c) => { let x = (a * 374761393 + b * 668265263 + c * 2147483647) | 0; x = Math.imul(x ^ (x >>> 13), 1274126177); return ((x ^ (x >>> 16)) >>> 0) / 4294967296; };
+  function drawDeco(th, rA, rB, cA, cB) {
+    const kinds = th.deco || [];
+    if (!kinds.length) return;
+    const seed = state.room?.seed || 1;
+    ctx.save();
+    for (let r = rA; r < rB; r++) for (let c = cA; c < cB; c++) {
+      if (state.grid[r][c] !== ".") continue;
+      const v = hash2(c, r, seed);
+      if (v > 0.1) continue;
+      const kind = kinds[Math.floor(hash2(r, c, seed + 7) * kinds.length)];
+      const x = X0 + c * TILE + TILE / 2 + (hash2(c, r, seed + 3) - 0.5) * 12, y = Y0 + r * TILE + TILE / 2 + (hash2(c, r, seed + 5) - 0.5) * 12;
+      drawProp(kind, x, y, th, hash2(c, r, seed + 11));
+    }
+    ctx.restore();
+  }
+  function drawProp(kind, x, y, th, k) {
+    ctx.globalAlpha = 0.85;
+    ctx.strokeStyle = th.wall; ctx.fillStyle = th.wall; ctx.lineWidth = 1.5;
+    const t = performance.now() / 1000;
+    switch (kind) {
+      case "mushroom": ctx.globalAlpha = 0.7; ctx.fillRect(x - 1, y, 2, 6); ctx.beginPath(); ctx.arc(x, y, 5, Math.PI, 0); ctx.fill(); break;
+      case "pebbles": ctx.globalAlpha = 0.35; ctx.fillRect(x - 6, y, 4, 3); ctx.fillRect(x, y + 2, 5, 3); ctx.fillRect(x - 2, y - 3, 3, 3); break;
+      case "moss": ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.ellipse(x, y, 9, 4, k, 0, Math.PI * 2); ctx.fill(); break;
+      case "bones": ctx.globalAlpha = 0.5; ctx.strokeStyle = "#cfc9b8"; ctx.beginPath(); ctx.moveTo(x - 6, y - 3); ctx.lineTo(x + 6, y + 3); ctx.moveTo(x - 6, y + 3); ctx.lineTo(x + 6, y - 3); ctx.stroke(); ctx.beginPath(); ctx.arc(x + 7, y - 6, 3, 0, Math.PI * 2); ctx.stroke(); break;
+      case "candle": ctx.fillStyle = "#e8e0c0"; ctx.fillRect(x - 2, y - 2, 4, 8); ctx.fillStyle = "#ffb347"; ctx.globalAlpha = 0.7 + 0.3 * Math.sin(t * 9 + k * 20); ctx.beginPath(); ctx.arc(x, y - 5, 2.5, 0, Math.PI * 2); ctx.fill(); break;
+      case "cobweb": ctx.globalAlpha = 0.3; ctx.strokeStyle = "#e8e8f0"; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(i * 0.5) * 12, y + Math.sin(i * 0.5) * 12); ctx.stroke(); } break;
+      case "vent": ctx.globalAlpha = 0.5; ctx.fillStyle = "#07060c"; ctx.fillRect(x - 7, y - 4, 14, 8); ctx.fillStyle = th.wall; for (let i = 0; i < 3; i++) ctx.fillRect(x - 5 + i * 4, y - 3, 2, 6); break;
+      case "cinders": ctx.globalAlpha = 0.35 + 0.3 * Math.sin(t * 4 + k * 30); ctx.fillStyle = "#ff8a3d"; ctx.fillRect(x - 4, y, 2, 2); ctx.fillRect(x + 2, y - 3, 2, 2); ctx.fillRect(x, y + 3, 2, 2); break;
+      case "gear": ctx.globalAlpha = 0.4; ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.stroke(); for (let i = 0; i < 6; i++) { const a = i * 1.047 + t * 0.4; ctx.fillRect(x + Math.cos(a) * 7 - 1, y + Math.sin(a) * 7 - 1, 3, 3); } break;
+      case "crystal": ctx.globalAlpha = 0.65; ctx.beginPath(); ctx.moveTo(x, y - 9); ctx.lineTo(x + 4, y + 3); ctx.lineTo(x - 4, y + 3); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 0.35; ctx.fillRect(x + 4, y - 3, 3, 8); break;
+      case "frostpatch": ctx.globalAlpha = 0.25; ctx.fillStyle = "#e8f8ff"; ctx.beginPath(); ctx.ellipse(x, y, 10, 5, k, 0, Math.PI * 2); ctx.fill(); break;
+      case "rift": ctx.globalAlpha = 0.6; ctx.strokeStyle = th.wall; ctx.beginPath(); ctx.moveTo(x - 8, y + 4); ctx.lineTo(x - 2, y - 2); ctx.lineTo(x + 2, y + 3); ctx.lineTo(x + 9, y - 5); ctx.stroke(); break;
+      case "eye": ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.ellipse(x, y, 7, 3.5, 0, 0, Math.PI * 2); ctx.stroke(); ctx.fillRect(x - 1.5, y - 1.5, 3, 3); break;
+      case "fern": ctx.globalAlpha = 0.55; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(x, y + 4); ctx.quadraticCurveTo(x + i * 4, y - 4, x + i * 6, y - 6 + Math.abs(i) * 2); ctx.stroke(); } break;
+      case "flower": ctx.fillStyle = k < 0.5 ? "#ff6bd6" : "#fcee0a"; ctx.globalAlpha = 0.8; for (let i = 0; i < 5; i++) { const a = i * 1.257; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 3, y + Math.sin(a) * 3, 2, 0, Math.PI * 2); ctx.fill(); } break;
+      case "vine": ctx.globalAlpha = 0.4; ctx.beginPath(); ctx.moveTo(x - 8, y - 4); ctx.bezierCurveTo(x - 2, y + 6, x + 2, y - 6, x + 8, y + 3); ctx.stroke(); break;
+      case "sandrune": ctx.globalAlpha = 0.4; ctx.strokeRect(x - 5, y - 5, 10, 10); ctx.beginPath(); ctx.moveTo(x - 5, y); ctx.lineTo(x + 5, y); ctx.moveTo(x, y - 5); ctx.lineTo(x, y + 5); ctx.stroke(); break;
+      case "cactus": ctx.globalAlpha = 0.6; ctx.fillStyle = "#4a8a3a"; ctx.fillRect(x - 2, y - 8, 4, 14); ctx.fillRect(x - 7, y - 4, 3, 6); ctx.fillRect(x - 7, y - 4, 7, 2); ctx.fillRect(x + 4, y - 6, 3, 6); break;
+      case "neonline": ctx.globalAlpha = 0.5 + 0.3 * Math.sin(t * 2 + k * 10); glow(th.wall, 6); ctx.beginPath(); ctx.moveTo(x - 10, y); ctx.lineTo(x + 10, y); ctx.stroke(); noGlow(); break;
+      case "chip": ctx.globalAlpha = 0.4; ctx.strokeRect(x - 5, y - 5, 10, 10); for (let i = 0; i < 3; i++) { ctx.fillRect(x - 7, y - 4 + i * 4, 2, 2); ctx.fillRect(x + 5, y - 4 + i * 4, 2, 2); } break;
+      case "coral": ctx.globalAlpha = 0.55; ctx.strokeStyle = k < 0.5 ? "#ff6bd6" : "#ff8a6d"; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(x, y + 5); ctx.lineTo(x + i * 5, y - 4 - Math.abs(i)); ctx.stroke(); } break;
+      case "bubble": ctx.globalAlpha = 0.4; ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(x + 5, y - 5, 2, 0, Math.PI * 2); ctx.stroke(); break;
+      case "kelp": ctx.globalAlpha = 0.45; ctx.strokeStyle = "#2f9d6a"; ctx.beginPath(); ctx.moveTo(x, y + 7); ctx.quadraticCurveTo(x + 5 * Math.sin(t + k * 9), y, x, y - 8); ctx.stroke(); break;
+      case "spikebone": ctx.globalAlpha = 0.5; ctx.strokeStyle = "#e8d8c0"; ctx.beginPath(); ctx.moveTo(x - 4, y + 5); ctx.lineTo(x, y - 7); ctx.lineTo(x + 4, y + 5); ctx.stroke(); break;
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // Ambiance : particules selon le thème (spores, braises, neige, pluie néon...).
+  function drawAmbient() {
+    const kind = state.theme?.amb;
+    if (!kind) return;
+    const t = performance.now() / 1000;
+    ctx.save();
+    for (let i = 0; i < 26; i++) {
+      const sx = hash2(i, 1, 99) * W, sy = hash2(i, 2, 99) * H, spd = 0.4 + hash2(i, 3, 99);
+      let x = sx, y = sy;
+      switch (kind) {
+        case "spores": y = ((sy - t * 14 * spd) % H + H) % H; x += Math.sin(t + i) * 8; ctx.fillStyle = "#9cff7a"; ctx.globalAlpha = 0.35; ctx.fillRect(x, y, 2, 2); break;
+        case "dust": x += Math.sin(t * 0.5 + i) * 20; y = ((sy - t * 6 * spd) % H + H) % H; ctx.fillStyle = "#cfc9ff"; ctx.globalAlpha = 0.18; ctx.fillRect(x, y, 2, 2); break;
+        case "embers": y = ((sy - t * 40 * spd) % H + H) % H; x += Math.sin(t * 2 + i) * 10; ctx.fillStyle = "#ff8a3d"; ctx.globalAlpha = 0.6; ctx.fillRect(x, y, 2, 2); break;
+        case "snow": y = ((sy + t * 26 * spd) % H + H) % H; x += Math.sin(t + i) * 12; ctx.fillStyle = "#ffffff"; ctx.globalAlpha = 0.5; ctx.fillRect(x, y, 2, 2); break;
+        case "motes": x += Math.sin(t * 0.7 + i) * 24; y += Math.cos(t * 0.6 + i) * 24; ctx.fillStyle = "#ff6bd6"; ctx.globalAlpha = 0.35; ctx.fillRect(x, y, 2, 2); break;
+        case "fireflies": x += Math.sin(t * 0.8 + i) * 30; y += Math.cos(t * 0.9 + i * 2) * 20; ctx.fillStyle = "#e6ff5a"; ctx.globalAlpha = 0.2 + 0.6 * Math.max(0, Math.sin(t * 3 + i * 5)); ctx.fillRect(x, y, 3, 3); break;
+        case "sand": x = ((sx + t * 60 * spd) % W + W) % W; ctx.fillStyle = "#e8c070"; ctx.globalAlpha = 0.3; ctx.fillRect(x, y, 3, 1); break;
+        case "rain": y = ((sy + t * 220 * spd) % H + H) % H; ctx.strokeStyle = "#00f0ff"; ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 3, y + 10); ctx.stroke(); break;
+        case "bubbles": y = ((sy - t * 22 * spd) % H + H) % H; x += Math.sin(t + i) * 6; ctx.strokeStyle = "#8ec8ff"; ctx.globalAlpha = 0.35; ctx.beginPath(); ctx.arc(x, y, 2 + spd * 2, 0, Math.PI * 2); ctx.stroke(); break;
+      }
+    }
+    ctx.restore();
+  }
 
   function drawRoom() {
     const th = state.theme;
@@ -201,6 +285,7 @@ function createRunUI(root, wallet) {
         }
       }
     }
+    drawDeco(th, rA, rB, cA, cB);
     // murs
     ctx.strokeStyle = state.room.type === "boss" ? "#ff2a6d" : state.room.type === "treasure" ? "#fcee0a" : state.room.type === "shop" ? "#3ddc84" : th.wall;
     ctx.lineWidth = 3;
@@ -212,6 +297,27 @@ function createRunUI(root, wallet) {
     ctx.fillRect(0, Y1, WORLD_W, WORLD_H - Y1);
     ctx.fillRect(0, Y0, X0, Y1 - Y0);
     ctx.fillRect(X1, Y0, WORLD_W - X1, Y1 - Y0);
+    // mur fissuré (passage secret) : discret, devient lumineux quand on s'en approche
+    const sc = state.room.secret;
+    if (sc && !sc.found) {
+      const door = DOORS[sc.dir], horiz = sc.dir === "u" || sc.dir === "d";
+      const prog = state.secretProg || 0;
+      ctx.save();
+      ctx.translate(door.x, door.y);
+      ctx.strokeStyle = prog > 0 ? "#d58cff" : "rgba(180,140,255,.45)"; ctx.lineWidth = 2;
+      glow("#b020ff", 4 + prog * 20);
+      ctx.beginPath();
+      const L = 26;
+      const pts = [[-L, 0], [-L * 0.5, 5], [-4, -4], [3, 5], [L * 0.45, -3], [L, 2]];
+      pts.forEach(([a, b], i) => { const px = horiz ? a : b, py = horiz ? b : a; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+      ctx.stroke(); noGlow();
+      if (prog > 0) {
+        ctx.fillStyle = "#d58cff";
+        if (horiz) ctx.fillRect(-20, sc.dir === "u" ? 14 : -18, 40 * prog, 4);
+        else ctx.fillRect(sc.dir === "l" ? 14 : -18, -20, 4, 40 * prog);
+      }
+      ctx.restore();
+    }
     // portes : ouverte (lumineuse) ou verrouillée (barres)
     for (const [d, door] of Object.entries(DOORS)) {
       if (!state.room.doors[d]) continue;
@@ -220,9 +326,10 @@ function createRunUI(root, wallet) {
       const w = horizontal ? 56 : 12, hgt = horizontal ? 12 : 56;
       const x = d === "l" ? door.x - 14 : d === "r" ? door.x + 2 : door.x - w / 2;
       const y = d === "u" ? door.y - 14 : d === "d" ? door.y + 2 : door.y - hgt / 2;
+      const secretDoor = state.room.secret?.found && state.room.secret.dir === d;
       ctx.fillStyle = open ? "#0a0a12" : "#2a1620";
       ctx.fillRect(x, y, w, hgt);
-      ctx.strokeStyle = open ? "#00f0ff" : "#ff3b5c";
+      ctx.strokeStyle = secretDoor ? "#b020ff" : open ? "#00f0ff" : "#ff3b5c";
       ctx.lineWidth = 2;
       glow(ctx.strokeStyle, open ? 12 : 4);
       ctx.strokeRect(x, y, w, hgt);
@@ -292,9 +399,10 @@ function createRunUI(root, wallet) {
 
   function drawMinimap() {
     const rooms = state.map.rooms;
-    const known = (r) => r.visited || rooms.some((o) => o.visited && Math.abs(o.gx - r.gx) + Math.abs(o.gy - r.gy) === 1 && o.doors[(r.gx - o.gx === 1 ? "r" : r.gx - o.gx === -1 ? "l" : r.gy - o.gy === 1 ? "d" : "u")]);
+    const known = (r) => !r.hidden && (r.visited || rooms.some((o) => o.visited && Math.abs(o.gx - r.gx) + Math.abs(o.gy - r.gy) === 1 && o.doors[(r.gx - o.gx === 1 ? "r" : r.gx - o.gx === -1 ? "l" : r.gy - o.gy === 1 ? "d" : "u")]));
     const cell = 15;
-    const xs = rooms.map((r) => r.gx), ys = rooms.map((r) => r.gy);
+    const shown = rooms.filter((r) => !r.hidden);
+    const xs = shown.map((r) => r.gx), ys = shown.map((r) => r.gy);
     const ox = W - 14 - (Math.max(...xs) - Math.min(...xs) + 1) * cell - 4;
     const oy = 8;
     ctx.globalAlpha = 0.9;
@@ -542,6 +650,19 @@ function createRunUI(root, wallet) {
         ctx.fillStyle = "#fff"; ctx.fillRect(e.x - 5, e.y - 3, 4, 2); ctx.fillRect(e.x + 1, e.y - 3, 4, 2);
         break;
       }
+      case "eclipse": {
+        const ph = e.phase || 1;
+        ctx.globalAlpha = 0.5;
+        for (let i = 0; i < 12; i++) { const a = t * 0.6 + (i * Math.PI) / 6, l = r * (1.5 + 0.5 * Math.sin(t * 3 + i * 2)); ctx.strokeStyle = fill; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(e.x + Math.cos(a) * r, e.y + Math.sin(a) * r); ctx.lineTo(e.x + Math.cos(a) * (r + l * 0.6), e.y + Math.sin(a) * (r + l * 0.6)); ctx.stroke(); }
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = fill; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = ["#b020ff", "#ff2a6d", "#ff8a3d", "#fcee0a", "#ffffff", "#4dffd2"][ph - 1] || "#fff";
+        ctx.beginPath(); ctx.ellipse(e.x, e.y, r * 0.6, r * 0.28, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#000"; const pe = base0(e); ctx.fillRect(e.x + Math.cos(pe) * 4 - 2, e.y + Math.sin(pe) * 3 - 5, 4, 10);
+        for (let i = 0; i < ph; i++) { const a = -t * 1.3 + (i * Math.PI * 2) / ph; ctx.fillStyle = fill; ctx.beginPath(); ctx.moveTo(e.x + Math.cos(a) * (r + 16), e.y + Math.sin(a) * (r + 16)); ctx.lineTo(e.x + Math.cos(a + 0.12) * (r + 26), e.y + Math.sin(a + 0.12) * (r + 26)); ctx.lineTo(e.x + Math.cos(a - 0.12) * (r + 26), e.y + Math.sin(a - 0.12) * (r + 26)); ctx.fill(); }
+        break;
+      }
       case "hydra": {
         ctx.beginPath(); ctx.ellipse(e.x, e.y + 4, r * 1.05, r * 0.8, 0, 0, Math.PI * 2); ctx.fill();
         for (let i = 0; i < 3; i++) {
@@ -682,7 +803,7 @@ function createRunUI(root, wallet) {
       ctx.arc(e.x, e.y, e.r + 4, 0, Math.PI * 2);
       ctx.stroke();
     }
-    if (!["bat", "wisp", "turret", "sentinel", "spider", "reaper", "orbiter", "lich", "hydra", "titan", "architect", "storm", "warden", "hive", "dread", "quake", "necrolord", "overmind", "shade", "sniper", "priest", "colossus", "burrower", "drone", "ember", "necro", "skeleton", "magnetar", "berserker"].includes(e.type)) {
+    if (!["bat", "wisp", "turret", "sentinel", "spider", "reaper", "orbiter", "lich", "eclipse", "hydra", "titan", "architect", "storm", "warden", "hive", "dread", "quake", "necrolord", "overmind", "shade", "sniper", "priest", "colossus", "burrower", "drone", "ember", "necro", "skeleton", "magnetar", "berserker"].includes(e.type)) {
       ctx.fillStyle = "#07060c";
       ctx.fillRect(e.x - e.r * 0.45, e.y - e.r * 0.25, 3, 3);
       ctx.fillRect(e.x + e.r * 0.45 - 3, e.y - e.r * 0.25, 3, 3);
@@ -1125,6 +1246,7 @@ function createRunUI(root, wallet) {
     drawFx();
     drawAimMark();
     ctx.restore();
+    drawAmbient();
     drawMinimap();
     if (state.boss && !state.boss.dead && state.boss.spawn <= 0) {
       const b = state.boss;
@@ -1136,7 +1258,7 @@ function createRunUI(root, wallet) {
       ctx.fillStyle = "#fff";
       ctx.font = "bold 11px monospace";
       ctx.textAlign = "center";
-      ctx.fillText(b.mega ? `${b.name} — PHASE ${b.phase}/4` : b.name || "BOSS", W / 2, 18);
+      ctx.fillText(b.mega ? `${b.name} — PHASE ${b.phase}/${b.marks.length + 1}` : b.name || "BOSS", W / 2, 18);
     }
     if (state.banner) {
       ctx.globalAlpha = Math.min(1, state.banner.ttl);
@@ -1190,7 +1312,7 @@ function createRunUI(root, wallet) {
     soulsEl.textContent = fmt(wallet.data.dungeon.souls);
     weaponEl.textContent = state.weapon.name;
     renderHeroStats();
-    const sk = state.cls.skill;
+    const sk = state.ult;
     const ready = p.skillCd <= 0;
     skillButton.textContent = ready ? `${sk.name} (Espace)` : `${sk.name} : ${Math.ceil(p.skillCd)} s`;
     skillButton.disabled = status !== "running" || !ready;
@@ -1285,6 +1407,7 @@ function createRunUI(root, wallet) {
       }, label);
     }));
     renderWeapons();
+    renderUlts();
     renderOptions();
     forge.replaceChildren(...META.map((m) => {
       const rank = d.ranks[m.id];
@@ -1295,6 +1418,31 @@ function createRunUI(root, wallet) {
         onclick: () => { wallet.dungeonBuyRank(m.id); }
       }, h("strong", {}, m.name), h("span", {}, m.desc), h("em", {}, maxed ? "Max" : `${rank}/${m.max} · ${fmt(cost)} âmes`));
     }));
+  }
+
+  function renderUlts() {
+    const d = wallet.data.dungeon;
+    const have = d.ults || [];
+    const sel = currentUlt();
+    ultBar.replaceChildren(...ultsOf(classId).map((u) => {
+      const unlocked = have.includes(u.id);
+      return h("button", {
+        class: `map-button${sel === u.id ? " is-active" : ""}${unlocked ? "" : " is-locked"}`, type: "button", "data-ult": u.id, title: `${u.name} — ${u.desc} (recharge ${u.cd} s)`,
+        disabled: status === "running" || (!unlocked && d.souls < u.unlock),
+        onclick: () => onUlt(u.id)
+      }, unlocked ? u.name : `${u.name} · ${fmt(u.unlock)} âmes`);
+    }));
+    const u = ultFor(classId, sel);
+    ultInfo.textContent = `${u.name} — ${u.desc} (recharge ${u.cd} s)`;
+  }
+
+  function onUlt(id) {
+    if (status === "running") return;
+    if (!(wallet.data.dungeon.ults || []).includes(id)) { if (!wallet.dungeonUnlockUlt(id)) return; }
+    opts.ults = { ...(opts.ults || {}), [classId]: id };
+    saveOpts();
+    state = newState();
+    renderMeta(); updateHud(); draw();
   }
 
   function renderWeapons() {

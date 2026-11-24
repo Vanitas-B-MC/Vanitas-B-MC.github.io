@@ -13,7 +13,7 @@ import { freshFarm, sanitizeFarm } from "./farm.js";
 import { LEVEL_IDS } from "./mines.js";
 import { QUEST_IDS, questById, applyRunToQuests } from "./hub.js";
 import { MAX_CREDITS } from "./limits.js";
-import { CLASS_IDS, FREE_CLASS, META, META_IDS, freshRanks, metaCost, classById, WEAPONS, WEAPON_IDS, FREE_WEAPONS, weaponById } from "./dungeon.js";
+import { CLASS_IDS, FREE_CLASS, META, META_IDS, freshRanks, metaCost, classById, WEAPONS, WEAPON_IDS, FREE_WEAPONS, weaponById, ULT_IDS, FREE_ULTS, ultById } from "./dungeon.js";
 
 const KEY = "mc-arcade-wallet-v1";
 const START_CREDITS = 100;
@@ -53,7 +53,7 @@ function freshData() {
     trophies: 0,           // monnaie du RPG : gagnée uniquement en chassant
     bestHunt: 0,           // nombre de monstres différents vaincus
     bestDungeon: 0,        // étage le plus profond atteint dans « Donjon »
-    dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], weapons: FREE_WEAPONS.slice(), runs: 0,
+    dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], weapons: FREE_WEAPONS.slice(), ults: FREE_ULTS.slice(), runs: 0,
       stats: { kills: 0, bosses: 0, rooms: 0, gold: 0, elite: 0, deepest: 0 }, quests: {} },   // âmes, améliorations permanentes, classes
     farm: freshFarm(),     // « Pêche & Ferme » : parcelles, améliorations, carnet de pêche
     mines: Object.fromEntries(LEVEL_IDS.map((id) => [id, 0]))   // Démineur : meilleur temps (secondes) par niveau, 0 = aucun
@@ -109,6 +109,9 @@ export function sanitize(raw) {
         const q = raw.dungeon.quests[id];
         if (q && typeof q === "object") d.quests[id] = { p: Math.min(toCount(q.p), questById(id).target), claimed: !!q.claimed };
       }
+    }
+    if (Array.isArray(raw.dungeon.ults)) {
+      for (const id of raw.dungeon.ults) if (ULT_IDS.includes(id) && !d.ults.includes(id)) d.ults.push(id);
     }
     if (Array.isArray(raw.dungeon.weapons)) {
       for (const id of raw.dungeon.weapons) if (WEAPON_IDS.includes(id) && !d.weapons.includes(id)) d.weapons.push(id);
@@ -284,6 +287,16 @@ export function createWallet(storage = defaultStorage()) {
       const reward = def.reward;
       this.addBlue(reward);   // (commit inclus)
       return reward;
+    },
+
+    dungeonUnlockUlt(ultId) {
+      const u = ultById(ultId);
+      if (!u || data.dungeon.ults.includes(ultId)) return false;
+      if (data.dungeon.souls < u.unlock) return false;
+      data.dungeon.souls -= u.unlock;
+      data.dungeon.ults.push(ultId);
+      commit();
+      return true;
     },
 
     dungeonUnlockWeapon(weaponId) {

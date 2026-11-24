@@ -30,6 +30,7 @@ export function setRoomSize(size) {
 }
 export { WEAPONS, WEAPON_IDS, FREE_WEAPONS, weaponById } from "./weapons.js";
 import { weaponById } from "./weapons.js";
+import { EXTRA_ITEMS } from "./items.js";
 
 const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -100,7 +101,9 @@ export const ITEMS = {
   gold:   { name: "Main d'or",        desc: "Les pièces valent 50 % de plus",                    max: 3, apply: (s) => { s.coinMul += 0.5; } },
   glass:  { name: "Canon de verre",   desc: "+50 % de dégâts, −15 % de PV max",                  max: 1, apply: (s, p) => { s.damage *= 1.5; s.maxHp = Math.round(s.maxHp * 0.85); p.hp = Math.min(p.hp, s.maxHp); } }
 };
+Object.assign(ITEMS, EXTRA_ITEMS);
 export const ITEM_IDS = Object.keys(ITEMS);
+export const LEGEND_IDS = ITEM_IDS.filter((id) => ITEMS[id].legend);
 const HEAL_CHOICE = { name: "Réparation", desc: "Soigne 40 % des PV" };
 export const describe = (id) => (id === "heal" ? { id, ...HEAL_CHOICE } : { id, ...ITEMS[id] });
 
@@ -180,23 +183,34 @@ export const MEGAS = [
     kit: [["summon", { type: "skeleton", n: 3 }], ["fan", { n: 5, spread: 0.26, sp: 170, rep: 3, gap: 0.35 }], ["pools", { n: 5 }], ["blink", {}], ["beam", { n: 1, spin: 0.8, dur: 4 }]] },
   { id: "overmind",  name: "Overmind",             hp: 1250, speed: 30, r: 28, dmg: 18, color: "#ff2a6d", flying: true, mv: "hover", arena: "server", gap: 1.3,
     desc: "Salle serveur : lasers rotatifs, quadrillage de tirs, drones de défense.", adds: ["drone", 1],
-    kit: [["beam", { n: 2, spin: 0.7, dur: 4 }], ["lanes", { n: 1 }], ["spiral", { dur: 3, gap: 0.08, arms: 4, sp: 140 }], ["summon", { type: "drone", n: 1 }], ["beam", { n: 3, spin: 0.9, dur: 4.5 }]] }
+    kit: [["beam", { n: 2, spin: 0.7, dur: 4 }], ["lanes", { n: 1 }], ["spiral", { dur: 3, gap: 0.08, arms: 4, sp: 140 }], ["summon", { type: "drone", n: 1 }], ["beam", { n: 3, spin: 0.9, dur: 4.5 }]] },
+  // Boss secret (derrière un passage caché) : extrêmement difficile, 6 phases, jamais tiré parmi les 10 grands boss.
+  { id: "eclipse", secret: true, name: "L'Éclipse sans nom", hp: 2600, speed: 52, r: 34, dmg: 26, color: "#b020ff", flying: true, mv: "orbit", arena: "abyss", gap: 0.9, at: [0.8, 0.6, 0.4, 0.2, 0.08],
+    desc: "Le gardien du secret. Il utilise toutes les attaques des autres boss.", adds: ["shade", 2], phaseAct: ["walls", { n: 2 }],
+    kit: [["ring", { n: 26, sp: 150 }], ["fan", { n: 7, spread: 0.2, sp: 210, rep: 4, gap: 0.25 }], ["beam", { n: 3, spin: 0.8, dur: 4.5 }], ["lanes", { n: 2 }], ["rain", { n: 14, r: 46, gap: 0.14, jit: 30 }],
+           ["spiral", { dur: 3.5, gap: 0.06, arms: 5, sp: 150 }], ["blink", {}], ["pull", { dur: 2.5 }], ["slam", { r: 150, n: 30, sp: 130 }], ["summon", { type: "shade", n: 2 }], ["walls", { n: 2 }]] }
 ];
+const MEGA_MAIN = MEGAS.filter((m) => !m.secret);
 const PHASE_AT = [0.7, 0.4, 0.15];
 export const isMegaFloor = (floor) => floor % 10 === 0;
 export function megaFor(state, floor = state.floor) {
   if (state.forceMega) return MEGAS.find((m) => m.id === state.forceMega) || MEGAS[0];
   const k = Math.floor(floor / 10) - 1;
-  return MEGAS.find((m) => m.id === state.megaOrder[((k % MEGAS.length) + MEGAS.length) % MEGAS.length]);
+  return MEGA_MAIN.find((m) => m.id === state.megaOrder[((k % MEGA_MAIN.length) + MEGA_MAIN.length) % MEGA_MAIN.length]);
 }
 
 // Un thème par étage : couleurs et ennemis propres, pour que les étages ne se ressemblent pas.
 export const THEMES = [
-  { id: "cave",   name: "Caverne",  wall: "#3ddc84", a: "#0c1611", b: "#09120d", rock: "#1c3326", pool: ["slime", "bat", "splitter", "hopper", "archer", "brute", "bomber"], late: ["burrower", "drone", "berserker", "colossus"] },
-  { id: "crypt",  name: "Crypte",   wall: "#b58cff", a: "#120d1c", b: "#0e0a17", rock: "#2a2145", pool: ["wisp", "archer", "mage", "bat", "knight", "turret", "spawner"], late: ["shade", "necro", "priest", "sniper"] },
-  { id: "forge",  name: "Forge",    wall: "#ff8a3d", a: "#1a0f0a", b: "#150b07", rock: "#3a2418", pool: ["charger", "bomber", "turret", "slime", "brute", "spawner", "knight"], late: ["ember", "colossus", "berserker", "sniper"] },
-  { id: "ice",    name: "Glacier",  wall: "#7fd8ff", a: "#0b1520", b: "#08111a", rock: "#1f3a52", pool: ["orbiter", "archer", "hopper", "wisp", "charger", "mage", "splitter"], late: ["sniper", "magnetar", "drone", "priest"] },
-  { id: "void",   name: "Néant",    wall: "#ff2a6d", a: "#150a14", b: "#10070f", rock: "#3d1630", pool: ["wisp", "orbiter", "bomber", "mage", "knight", "turret", "hopper", "spawner", "charger", "brute"], late: ["shade", "magnetar", "necro", "burrower", "ember", "berserker", "colossus", "priest"] }
+  { id: "cave",   name: "Caverne",  wall: "#3ddc84", a: "#0c1611", b: "#09120d", rock: "#1c3326", deco: ["mushroom", "pebbles", "moss"], amb: "spores", pool: ["slime", "bat", "splitter", "hopper", "archer", "brute", "bomber"], late: ["burrower", "drone", "berserker", "colossus"] },
+  { id: "crypt",  name: "Crypte",   wall: "#b58cff", a: "#120d1c", b: "#0e0a17", rock: "#2a2145", deco: ["bones", "candle", "cobweb"], amb: "dust", pool: ["wisp", "archer", "mage", "bat", "knight", "turret", "spawner"], late: ["shade", "necro", "priest", "sniper"] },
+  { id: "forge",  name: "Forge",    wall: "#ff8a3d", a: "#1a0f0a", b: "#150b07", rock: "#3a2418", deco: ["vent", "cinders", "gear"], amb: "embers", pool: ["charger", "bomber", "turret", "slime", "brute", "spawner", "knight"], late: ["ember", "colossus", "berserker", "sniper"] },
+  { id: "ice",    name: "Glacier",  wall: "#7fd8ff", a: "#0b1520", b: "#08111a", rock: "#1f3a52", deco: ["crystal", "frostpatch", "pebbles"], amb: "snow", pool: ["orbiter", "archer", "hopper", "wisp", "charger", "mage", "splitter"], late: ["sniper", "magnetar", "drone", "priest"] },
+  { id: "void",   name: "Néant",    wall: "#ff2a6d", a: "#150a14", b: "#10070f", rock: "#3d1630", deco: ["rift", "eye", "crystal"], amb: "motes", pool: ["wisp", "orbiter", "bomber", "mage", "knight", "turret", "hopper", "spawner", "charger", "brute"], late: ["shade", "magnetar", "necro", "burrower", "ember", "berserker", "colossus", "priest"] },
+  { id: "jungle", name: "Jungle ruinée", wall: "#9cff3d", a: "#0b170a", b: "#081208", rock: "#223d18", deco: ["fern", "flower", "vine"], amb: "fireflies", pool: ["slime", "bat", "hopper", "archer", "brute", "splitter", "spawner", "charger"], late: ["burrower", "drone", "berserker", "ember"] },
+  { id: "desert", name: "Ruines du désert", wall: "#ffd24a", a: "#1a150a", b: "#140f07", rock: "#4a3a1c", deco: ["sandrune", "cactus", "bones"], amb: "sand", pool: ["charger", "archer", "bomber", "knight", "hopper", "turret", "brute"], late: ["colossus", "sniper", "necro", "shade"] },
+  { id: "neon",   name: "Mégalopole néon", wall: "#00f0ff", a: "#080d18", b: "#060a14", rock: "#162a44", deco: ["neonline", "chip", "vent"], amb: "rain", pool: ["orbiter", "turret", "mage", "bomber", "wisp", "charger", "knight", "archer"], late: ["drone", "sniper", "magnetar", "priest", "berserker"] },
+  { id: "abyss",  name: "Abysses", wall: "#4d9bff", a: "#050c1a", b: "#040916", rock: "#10284a", deco: ["coral", "bubble", "kelp"], amb: "bubbles", pool: ["wisp", "orbiter", "splitter", "bat", "mage", "hopper", "slime", "spawner"], late: ["magnetar", "burrower", "priest", "drone"] },
+  { id: "hell",   name: "Citadelle infernale", wall: "#ff3030", a: "#1c0707", b: "#150505", rock: "#4a1010", deco: ["spikebone", "cinders", "rift"], amb: "embers", pool: ["charger", "brute", "bomber", "knight", "turret", "mage", "spawner", "hopper"], late: ["ember", "colossus", "berserker", "necro", "shade", "sniper"] }
 ];
 export const themeFor = (floor) => THEMES[(floor - 1 + THEMES.length * 100) % THEMES.length];
 
@@ -296,6 +310,7 @@ const ARENAS = {
   duel: (g) => { box(g, 2, 2, 5, 1, "x"); box(g, 2, 2, 1, 4, "x"); box(g, 25, 2, 5, 1, "x"); box(g, 29, 2, 1, 4, "x"); box(g, 2, 17, 5, 1, "x"); box(g, 2, 14, 1, 4, "x"); box(g, 25, 17, 5, 1, "x"); box(g, 29, 14, 1, 4, "x"); return g; },
   quake: (g) => { for (const [c, r] of [[5, 4], [14, 4], [23, 4], [5, 13], [14, 13], [23, 13]]) box(g, c, r, 3, 3, "#"); return g; },
   crypt: (g) => { box(g, 0, 0, 6, 4, "#"); box(g, 26, 0, 6, 4, "#"); box(g, 0, 16, 6, 4, "#"); box(g, 26, 16, 6, 4, "#"); box(g, 10, 9, 2, 2, "#"); box(g, 20, 9, 2, 2, "#"); return g; },
+  abyss: (g) => { box(g, 5, 4, 22, 12, "o"); box(g, 8, 6, 16, 8, "."); box(g, 14, 4, 4, 12, "."); box(g, 5, 8, 22, 4, "."); for (const [c, r] of [[9, 7], [21, 7], [9, 12], [21, 12]]) box(g, c, r, 2, 1, "#"); box(g, 15, 9, 2, 2, "x"); return g; },
   server: (g) => { for (const [c, r] of [[4, 3], [26, 3], [4, 15], [26, 15]]) box(g, c, r, 2, 2, "#"); box(g, 14, 8, 4, 4, "#"); box(g, 8, 9, 3, 2, "o"); box(g, 21, 9, 3, 2, "o"); return g; }
 };
 function clearDoorsOnly(g) {
@@ -374,14 +389,16 @@ export function gotoFloor(state, floor) {
   startFloor(state);
 }
 
-export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {}, weaponId = null } = {}) {
+export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {}, weaponId = null, ultId = null } = {}) {
   const cls = classById(classId);
+  const ult = ultFor(cls.id, ultId);
   const a = weaponById(weaponId || cls.weapon);
   const stats = {
     maxHp: cls.hp, speed: cls.speed, damage: a.dmg, rate: a.rate,
     range: a.range || 0, arc: a.arc || 0, projSpeed: a.speed || 0, pierce: a.pierce || 0, shots: 1,
     crit: 0.05, vampire: 0, burn: 0, frost: 0, shieldMax: 0, shieldCd: 15, bomb: 0, magnet: 60,
-    skillCd: cls.skill.cd, regen: 0, orbs: 0, thorns: 0, berserk: 0, coinMul: 1
+    skillCd: ult.cd, regen: 0, orbs: 0, thorns: 0, berserk: 0, coinMul: 1,
+    armor: 0, dodge: 0, leech: 0, execute: 0, bossDmg: 0, eliteDmg: 0, heartDrop: 0, critDmg: 0, skillPower: 1, slowAura: 0, burnAura: 0, invBonus: 0, bounty: 0
   };
   const r = (id) => Math.min(ranks[id] || 0, META.find((m) => m.id === id).max);
   stats.maxHp += 10 * r("hp");
@@ -390,7 +407,7 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
   stats.crit += 0.04 * r("crit");
 
   const state = {
-    rng, cls, weapon: a, stats, ranks: { ...ranks }, zones: [], delayed: [], hazards: [], tempWalls: [], megaKills: 0, spin: 0,
+    rng, cls, ult, weapon: a, stats, ranks: { ...ranks }, zones: [], delayed: [], hazards: [], tempWalls: [], megaKills: 0, secretKills: 0, secretProg: 0, spin: 0,
     time: 0, over: false, revived: false,
     floor: 1, map: null, room: null, theme: themeFor(1), grid: blank(),
     player: { x: (X0 + X1) / 2, y: Y1 - 40, hp: stats.maxHp, inv: 0, cd: 0, skillCd: 0, shield: 0, shieldT: 0, facing: -Math.PI / 2, ghost: 0, crit100: 0, spikeT: 0 },
@@ -398,10 +415,35 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
     cleared: true, chest: null, trapdoor: null, choices: null, owned: {}, boss: null,
     kills: 0, coins: 0, coinsEarned: 0, bossKills: 0, eliteKills: 0, roomsCleared: 0, nextId: 1, banner: null, orbAngle: 0, rain: 0
   };
-  state.megaOrder = MEGAS.map((m) => m.id);
+  state.megaOrder = MEGA_MAIN.map((m) => m.id);
   for (let i = state.megaOrder.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [state.megaOrder[i], state.megaOrder[j]] = [state.megaOrder[j], state.megaOrder[i]]; }
   startFloor(state);
   return state;
+}
+
+const OPP = { u: "d", d: "u", l: "r", r: "l" };
+// Passage secret : une salle (combat ou trésor) cache un mur fissuré qui mène à une salle d'offrandes, puis au repaire du boss secret.
+function addSecrets(state) {
+  if (!state.forceSecret && (state.floor < 2 || state.rng() > 0.75)) return;
+  const rooms = state.map.rooms;
+  const occ = new Set(rooms.map((r) => `${r.gx},${r.gy}`));
+  const options = [];
+  for (const host of rooms) {
+    if (!["combat", "elite", "treasure"].includes(host.type)) continue;
+    for (const [d, v] of Object.entries(DIRS)) {
+      if (host.doors[d]) continue;
+      const a = [host.gx + v.dx, host.gy + v.dy], b = [host.gx + 2 * v.dx, host.gy + 2 * v.dy];
+      if (occ.has(`${a[0]},${a[1]}`) || occ.has(`${b[0]},${b[1]}`)) continue;
+      options.push({ host, d, a, b });
+    }
+  }
+  if (!options.length) return;
+  const o = options[Math.floor(state.rng() * options.length)];
+  const mk = (xy, type, doors, extra = {}) => ({ gx: xy[0], gy: xy[1], type, doors, visited: false, cleared: false, depth: 99, layout: 0, waves: 0, taken: false, stands: null, size: "normal", seed: 7, trap: false, bossChest: false, hidden: true, ...extra });
+  const hall = mk(o.a, "secret", { [OPP[o.d]]: true, [o.d]: true });
+  const lair = mk(o.b, "secretboss", { [OPP[o.d]]: true }, { size: "large", arena: "abyss", mega: "eclipse" });
+  rooms.push(hall, lair);
+  o.host.secret = { dir: o.d, found: false };
 }
 
 function startFloor(state) {
@@ -411,7 +453,9 @@ function startFloor(state) {
     const br = state.map.rooms.find((r) => r.type === "boss");
     if (br) { br.size = "large"; br.arena = megaFor(state).arena; br.layout = 0; br.mega = megaFor(state).id; }
   }
+  addSecrets(state);
   state.trapdoor = null;
+  state.secretProg = 0;
   enterRoom(state, state.map.start, null);
   state.banner = { text: `Étage ${state.floor} — ${state.theme.name}`, ttl: 2.4 };
 }
@@ -495,24 +539,26 @@ function enterRoom(state, room, fromDir) {
   if (room.cleared) {
     state.cleared = true;
     state.wavesLeft = 0;
+    if (room.type === "secretboss" && room.bossChest) state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: "legend" };
     if (room.type === "boss") {   // la trappe et le coffre restent dans la salle du boss
       if (room.trap) state.trapdoor = freeSpot(state, (X0 + X1) / 2 + 60, (Y0 + Y1) / 2 + 30);
       if (room.bossChest) state.chest = { ...freeSpot(state, (X0 + X1) / 2 - 60, (Y0 + Y1) / 2 + 30), opened: false, kind: "boss" };
     }
-  } else if (room.type === "boss") {
+  } else if (room.type === "boss" || room.type === "secretboss") {
     state.cleared = false;
     state.wavesLeft = 0;
     const mega = room.mega ? MEGAS.find((m) => m.id === room.mega) : null;
     const def = mega || bossFor(state.floor);
-    const mul = 1.1 + 0.35 * (state.floor - 1);
+    const mul = (1.1 + 0.35 * (state.floor - 1)) * (mega?.secret ? 1.5 : 1);
     const sp = mega ? freeSpot(state, (X0 + X1) / 2, Y0 + 5 * TILE) : { x: (X0 + X1) / 2, y: Y0 + 110 };
     const b = makeEnemy(state, def.id, sp.x, sp.y, { def, hpMul: mul, boss: true, spawn: 1.4 });
     b.name = def.name;
-    b.marks = mega ? [...PHASE_AT] : [0.75, 0.5, 0.25];
+    b.marks = mega ? [...(mega.at || PHASE_AT)] : [0.75, 0.5, 0.25];
     if (mega) { b.mega = true; b.phase = 1; b.cd = 2; b.orb = 0; b.invT = 0; }
     state.enemies.push(b);
     state.boss = b;
-    state.banner = { text: mega ? `GRAND BOSS — ${def.name}` : `BOSS — ${def.name}`, ttl: 2.8 };
+    state.banner = { text: mega?.secret ? `BOSS SECRET — ${def.name}` : mega ? `GRAND BOSS — ${def.name}` : `BOSS — ${def.name}`, ttl: 3 };
+    if (room.hidden) room.hidden = false;
   } else if (room.type === "combat" || room.type === "elite") {
     state.cleared = false;
     state.wavesLeft = room.waves - 1;
@@ -520,10 +566,17 @@ function enterRoom(state, room, fromDir) {
   } else {
     state.cleared = true;
     room.cleared = true;
+    if (room.type === "secret") {
+      const lair = state.map.rooms.find((r) => r.type === "secretboss");
+      if (lair) lair.hidden = false;
+      if (!room.taken) state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: "treasure" };
+      if (!room.hearts) { room.hearts = true; drop(state, (X0 + X1) / 2 - 70, (Y0 + Y1) / 2 + 30, "heart", 0.3); drop(state, (X0 + X1) / 2 + 70, (Y0 + Y1) / 2 + 30, "heart", 0.3); }
+      state.banner = { text: "Passage secret — ce qui dort plus loin ne pardonne pas", ttl: 3 };
+    }
     if (room.type === "treasure" && !room.taken) state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: "treasure" };
     if (room.type === "shop") {
       if (!room.stands) {
-        const pool = ITEM_IDS.filter((id) => (state.owned[id] || 0) < ITEMS[id].max);
+        const pool = ITEM_IDS.filter((id) => !ITEMS[id].legend && (state.owned[id] || 0) < ITEMS[id].max);
         const pick = () => pool.splice(Math.floor(state.rng() * pool.length), 1)[0];
         const price = 10 + 2 * state.floor;
         room.stands = [
@@ -534,10 +587,10 @@ function enterRoom(state, room, fromDir) {
       }
     }
   }
-  if (room.type !== "boss") state.banner = state.banner && state.banner.ttl > 0.5 && fromDir === null ? state.banner : { text: roomLabel(room), ttl: 1.2 };
+  if (room.type !== "boss" && room.type !== "secretboss" && room.type !== "secret") state.banner = state.banner && state.banner.ttl > 0.5 && fromDir === null ? state.banner : { text: roomLabel(room), ttl: 1.2 };
 }
 
-export const roomLabel = (room) => ({ start: "Entrée", combat: "Salle", elite: "Salle d'élite", treasure: "Salle au trésor", shop: "Boutique", boss: "Boss" }[room.type]);
+export const roomLabel = (room) => ({ start: "Entrée", combat: "Salle", elite: "Salle d'élite", treasure: "Salle au trésor", shop: "Boutique", boss: "Boss", secret: "Passage secret", secretboss: "Repaire secret" }[room.type]);
 
 /* ---------- Dégâts, mort, butin ---------- */
 
@@ -551,8 +604,14 @@ function hurtPlayer(state, amount) {
     state.fx.push({ kind: "ring", x: p.x, y: p.y, r: 24, ttl: 0.3, max: 0.3, color: "#4dffd2" });
     return;
   }
+  if (state.stats.dodge && state.rng() < Math.min(0.4, state.stats.dodge)) {
+    p.inv = 0.3;
+    state.fx.push({ kind: "num", x: p.x, y: p.y - 12, text: "ESQUIVE", ttl: 0.6, max: 0.6, color: "#4dffd2" });
+    return;
+  }
+  amount *= 1 - Math.min(0.6, state.stats.armor);
   p.hp -= amount;
-  p.inv = 0.7;
+  p.inv = 0.7 + state.stats.invBonus;
   state.fx.push({ kind: "num", x: p.x, y: p.y - 12, text: `-${Math.round(amount)}`, ttl: 0.7, max: 0.7, color: "#ff3b5c" });
   if (p.hp <= 0) {
     if (state.ranks.revive && !state.revived) {
@@ -601,6 +660,7 @@ function killEnemy(state, e, depth = 0) {
   if (e.type !== "slimelet") drop(state, e.x, e.y, "coin", e.elite ? worth * 4 : e.boss ? worth * 6 : worth);
   if (e.boss) {
     state.bossKills += 1;
+    if (e.type === "eclipse") state.secretKills += 1;
     if (e.mega) { state.megaKills += 1; for (let i = 0; i < 8; i++) drop(state, e.x + (i - 3.5) * 14, e.y - 12, "coin", worth * 4); drop(state, e.x + 20, e.y + 24, "heart", 0.5); }
     state.hazards = [];
     for (let i = 0; i < 6; i++) drop(state, e.x + (i - 2.5) * 12, e.y + 10, "coin", worth * 3);
@@ -608,13 +668,14 @@ function killEnemy(state, e, depth = 0) {
     state.player.hp = state.stats.maxHp;
     state.bullets = [];
     for (const o of state.enemies) if (!o.dead && o !== e) { o.dead = true; }
-  } else if (state.rng() < (e.elite ? 0.6 : 0.09)) {
+  } else if (state.rng() < (e.elite ? 0.6 : 0.09) + state.stats.heartDrop) {
     drop(state, e.x, e.y, "heart", 0.2);
   }
   if (def?.splits && depth < 2) {
     for (let i = 0; i < 2; i++) state.enemies.push(makeEnemy(state, def.splits, e.x + (i ? 12 : -12), e.y, { spawn: 0.25, hpMul: hpMul(state.floor) }));
   }
   const s = state.stats;
+  if (s.bounty && e.type !== "slimelet") drop(state, e.x, e.y, "coin", s.bounty * (1 + Math.floor(state.floor / 3)));
   if (s.vampire) state.player.hp = Math.min(s.maxHp, state.player.hp + s.vampire);
   if (s.bomb && depth < 2) {
     const radius = 52;
@@ -629,12 +690,16 @@ export function damageEnemy(state, e, amount, { silent = false, depth = 0, noCri
   if (e.dead || e.spawn > 0 || e.untouchable || e.hidden) return;
   const s = state.stats;
   const crit = !noCrit && (state.player.crit100 > 0 || state.rng() < s.crit);
-  let dmg = crit ? amount * 2 : amount;
+  let dmg = crit ? amount * (2 + s.critDmg) : amount;
+  if (s.execute && e.hp < e.maxHp * 0.25) dmg *= 1 + s.execute;
+  if (s.bossDmg && e.boss) dmg *= 1 + s.bossDmg;
+  if (s.eliteDmg && e.elite) dmg *= 1 + s.eliteDmg;
   if (s.berserk) dmg *= 1 + 0.4 * s.berserk * (1 - state.player.hp / s.maxHp) / 1.5;
   const armor = e.boss ? 0 : ENEMIES[e.type]?.armor || 0;
   dmg *= 1 - armor;
   e.hp -= dmg;
   e.flash = 0.1;
+  if (s.leech && !silent) state.player.hp = Math.min(s.maxHp, state.player.hp + dmg * s.leech);
   if (knock && !e.boss && !(ENEMIES[e.type]?.still) && from) {
     const d = Math.sqrt(dist2(from, e)) || 1;
     e.x = clamp(e.x + ((e.x - from.x) / d) * knock, X0 + e.r, X1 - e.r);
@@ -1026,38 +1091,179 @@ function endShot(state, s) {
 }
 
 
+/* ---------- Ultimes (touche Espace) : 4 par classe, le premier est gratuit ---------- */
+
+export const ULTS = [
+  { id: "whirl",   cls: "knight", name: "Tourbillon",        cd: 7,   unlock: 0,   desc: "Frappe tout autour de toi" },
+  { id: "charge",  cls: "knight", name: "Charge du croisé",  cd: 6,   unlock: 300, desc: "Fonce en ligne droite en piétinant tout sur ton passage" },
+  { id: "aegis",   cls: "knight", name: "Égide sacrée",      cd: 12,  unlock: 500, desc: "Bouclier ×2, soin de 20 % et onde qui repousse" },
+  { id: "quake",   cls: "knight", name: "Séisme",            cd: 9,   unlock: 800, desc: "Trois ondes de choc successives de plus en plus larges" },
+  { id: "volley",  cls: "ranger", name: "Pluie de flèches",  cd: 6,   unlock: 0,   desc: "12 flèches dans toutes les directions" },
+  { id: "snipe",   cls: "ranger", name: "Tir de précision",  cd: 8,   unlock: 300, desc: "Un trait dévastateur qui transperce toute la ligne visée" },
+  { id: "traps",   cls: "ranger", name: "Pièges explosifs",  cd: 9,   unlock: 500, desc: "Six charges piégées explosent sous tes ennemis" },
+  { id: "arrowstorm", cls: "ranger", name: "Tempête de flèches", cd: 10, unlock: 800, desc: "Une spirale de 24 flèches pendant 1,7 s" },
+  { id: "nova",    cls: "mage",   name: "Nova",              cd: 8,   unlock: 0,   desc: "Onde qui blesse, ralentit et efface les tirs ennemis" },
+  { id: "meteors", cls: "mage",   name: "Pluie de météores", cd: 10,  unlock: 300, desc: "Six météores s'écrasent sur tes ennemis et les enflamment" },
+  { id: "freeze",  cls: "mage",   name: "Zéro absolu",       cd: 12,  unlock: 500, desc: "Fige tous les ennemis 3 s (les boss sont seulement ralentis)" },
+  { id: "chain",   cls: "mage",   name: "Orage en chaîne",   cd: 8,   unlock: 800, desc: "Foudroie jusqu'à 8 ennemis en même temps" },
+  { id: "shadow",  cls: "rogue",  name: "Ombre",             cd: 5,   unlock: 0,   desc: "Bond invulnérable, puis 4 s de coups critiques" },
+  { id: "blades",  cls: "rogue",  name: "Lames fantômes",    cd: 6,   unlock: 300, desc: "16 dagues transperçantes jaillissent en cercle" },
+  { id: "assassin", cls: "rogue", name: "Assassinat",        cd: 9,   unlock: 500, desc: "Se téléporte sur la cible la plus résistante et la frappe ×7" },
+  { id: "smoke",   cls: "rogue",  name: "Fumigène toxique",  cd: 11,  unlock: 800, desc: "Nuage qui ralentit et empoisonne, critiques garantis 3 s" }
+];
+export const ULT_IDS = ULTS.map((u) => u.id);
+export const FREE_ULTS = ULTS.filter((u) => u.unlock === 0).map((u) => u.id);
+export const ultById = (id) => ULTS.find((u) => u.id === id);
+export const ultsOf = (clsId) => ULTS.filter((u) => u.cls === clsId);
+export const ultFor = (clsId, id) => (ultById(id)?.cls === clsId ? ultById(id) : ultsOf(clsId)[0]);
+
+function lineHit(state, x, y, ang, len, width, fn) {
+  for (const e of state.enemies) {
+    if (e.dead || e.spawn > 0 || e.hidden) continue;
+    if (segDist(e.x, e.y, x, y, ang, len) <= width + e.r) fn(e);
+  }
+}
+
 function useSkill(state, input) {
   const { player, stats, cls } = state;
+  const ult = state.ult;
   player.skillCd = stats.skillCd;
-  const id = cls.id;
-  if (id === "knight") {
-    const r = 86;
-    state.fx.push({ kind: "ring", x: player.x, y: player.y, r, ttl: 0.35, max: 0.35, color: cls.color });
-    for (const e of state.enemies) {
-      if (!e.dead && dist2(player, e) <= (r + e.r) ** 2) { damageEnemy(state, e, stats.damage * 2.4, { knock: 22, from: player }); applyHitEffects(state, e); }
-    }
-  } else if (id === "ranger") {
-    for (let i = 0; i < 12; i++) {
-      const dir = (i * Math.PI * 2) / 12;
-      state.shots.push({ x: player.x, y: player.y, vx: Math.cos(dir) * 360, vy: Math.sin(dir) * 360, dmg: stats.damage * 1.3, pierce: stats.pierce + 1, life: 1.1, hit: new Set(), color: cls.color });
-    }
-  } else if (id === "mage") {
-    const r = 140;
-    state.fx.push({ kind: "blast", x: player.x, y: player.y, r, ttl: 0.4, max: 0.4, color: cls.color });
-    state.bullets = state.bullets.filter((b) => dist2(player, b) > r * r);
-    for (const e of state.enemies) {
-      if (!e.dead && dist2(player, e) <= (r + e.r) ** 2) { damageEnemy(state, e, stats.damage * 3, { knock: 30, from: player }); e.slow = 2; applyHitEffects(state, e); }
-    }
-  } else if (id === "rogue") {
+  const id = ult.id;
+  const SP = stats.skillPower;
+  const D = stats.damage * SP;
+  const near = (list, n) => list.sort((a, b) => dist2(player, a) - dist2(player, b)).slice(0, n);
+  const alive = () => state.enemies.filter((e) => !e.dead && e.spawn <= 0 && !e.hidden);
+  const dir = () => {
     let dx = input.dx, dy = input.dy;
     if (!dx && !dy) { dx = Math.cos(player.facing); dy = Math.sin(player.facing); }
     const len = Math.hypot(dx, dy) || 1;
-    state.fx.push({ kind: "ring", x: player.x, y: player.y, r: 20, ttl: 0.25, max: 0.25, color: cls.color });
-    player.x += (dx / len) * 110;
-    player.y += (dy / len) * 110;
-    pushOut(state, player, PLAYER_R);
-    player.ghost = 0.5;
-    player.crit100 = 4;
+    return Math.atan2(dy / len, dx / len);
+  };
+  const hit = (e, mul, extra = {}) => { damageEnemy(state, e, D * mul, { knock: 20, from: player, ...extra }); applyHitEffects(state, e, extra); };
+  const color = cls.color;
+  switch (id) {
+    case "whirl": {
+      const r = 86;
+      state.fx.push({ kind: "ring", x: player.x, y: player.y, r, ttl: 0.35, max: 0.35, color });
+      for (const e of alive()) if (dist2(player, e) <= (r + e.r) ** 2) hit(e, 2.4, { knock: 22 });
+      break;
+    }
+    case "charge": {
+      const a = dir(), len = 210;
+      for (let k = 0; k < 8; k++) state.fx.push({ kind: "ring", x: player.x + Math.cos(a) * len * (k / 8), y: player.y + Math.sin(a) * len * (k / 8), r: 18, ttl: 0.3 + k * 0.02, max: 0.5, color });
+      lineHit(state, player.x, player.y, a, len, 22, (e) => hit(e, 2.8, { knock: 34 }));
+      player.x += Math.cos(a) * len; player.y += Math.sin(a) * len;
+      pushOut(state, player, PLAYER_R);
+      player.ghost = 0.45;
+      break;
+    }
+    case "aegis": {
+      player.shield = Math.min(stats.shieldMax + 2, player.shield + 2);
+      stats.shieldMax = Math.max(stats.shieldMax, 1);
+      player.shieldT = 0;
+      player.hp = Math.min(stats.maxHp, player.hp + stats.maxHp * 0.2);
+      state.fx.push({ kind: "blast", x: player.x, y: player.y, r: 110, ttl: 0.4, max: 0.4, color: "#ffe7a8" });
+      state.bullets = state.bullets.filter((b) => dist2(player, b) > 110 * 110);
+      for (const e of alive()) if (dist2(player, e) <= (110 + e.r) ** 2) hit(e, 1.4, { knock: 44 });
+      break;
+    }
+    case "quake": {
+      for (const [t, r] of [[0.1, 90], [0.45, 135], [0.8, 185]]) state.delayed.push({ t, max: t, kind: "blast", x: player.x, y: player.y, r, dmg: D * 1.9, color, knock: 26, sky: true });
+      break;
+    }
+    case "volley": {
+      for (let i = 0; i < 12; i++) {
+        const a = (i * Math.PI * 2) / 12;
+        state.shots.push({ x: player.x, y: player.y, vx: Math.cos(a) * 360, vy: Math.sin(a) * 360, dmg: D * 1.3, pierce: stats.pierce + 1, life: 1.1, hit: new Set(), color });
+      }
+      break;
+    }
+    case "snipe": {
+      const t = near(alive(), 1)[0];
+      const a = t ? angleTo(player, t) : dir();
+      player.facing = a;
+      state.fx.push({ kind: "beam", x: player.x, y: player.y, x2: player.x + Math.cos(a) * 1000, y2: player.y + Math.sin(a) * 1000, width: 16, ttl: 0.35, max: 0.35, color: "#ffffff" });
+      lineHit(state, player.x, player.y, a, 1000, 14, (e) => hit(e, 6.5, { knock: 30 }));
+      break;
+    }
+    case "traps": {
+      const pool = alive();
+      for (let i = 0; i < 6; i++) {
+        const e = pool.length ? pool[i % pool.length] : null;
+        const x = e ? e.x : clamp(player.x + (state.rng() - 0.5) * 300, X0 + 20, X1 - 20), y = e ? e.y : clamp(player.y + (state.rng() - 0.5) * 300, Y0 + 20, Y1 - 20);
+        state.delayed.push({ t: 0.5 + i * 0.12, max: 0.5 + i * 0.12, kind: "blast", x, y, r: 62, dmg: D * 2.2, color, knock: 20, burn: true });
+      }
+      break;
+    }
+    case "arrowstorm": {
+      for (let i = 0; i < 24; i++) state.delayed.push({ t: i * 0.07, max: i * 0.07 + 0.01, kind: "shot", ang: i * 0.52, speed: 380, extra: { dmg: D * 0.9, pierce: stats.pierce + 1, life: 1.0, r: 3, trail: true, quiet: true, color } });
+      break;
+    }
+    case "nova": {
+      const r = 140;
+      state.fx.push({ kind: "blast", x: player.x, y: player.y, r, ttl: 0.4, max: 0.4, color });
+      state.bullets = state.bullets.filter((b) => dist2(player, b) > r * r);
+      for (const e of alive()) if (dist2(player, e) <= (r + e.r) ** 2) { hit(e, 3, { knock: 30 }); e.slow = 2; }
+      break;
+    }
+    case "meteors": {
+      const pool = alive();
+      for (let i = 0; i < 6; i++) {
+        const e = pool.length ? pool[Math.floor(state.rng() * pool.length)] : null;
+        const x = e ? e.x : clamp(player.x + (state.rng() - 0.5) * 360, X0 + 20, X1 - 20), y = e ? e.y : clamp(player.y + (state.rng() - 0.5) * 240, Y0 + 20, Y1 - 20);
+        state.delayed.push({ t: 0.45 + i * 0.16, max: 0.45 + i * 0.16, kind: "blast", x, y, r: 64, dmg: D * 3.2, shape: "meteor", color: "#ff8a3d", burn: true, knock: 22, sky: true });
+      }
+      break;
+    }
+    case "freeze": {
+      state.fx.push({ kind: "blast", x: player.x, y: player.y, r: 420, ttl: 0.5, max: 0.5, color: "#bfefff" });
+      state.bullets = [];
+      for (const e of alive()) { if (e.boss) e.slow = Math.max(e.slow, 3); else e.freeze = 3; hit(e, 1.5, { knock: 0 }); }
+      break;
+    }
+    case "chain": {
+      const picks = near(alive(), 8);
+      let from = player;
+      for (const e of picks) {
+        state.fx.push({ kind: "bolt", pts: [{ x: from.x, y: from.y }, { x: e.x, y: e.y }], ttl: 0.3, max: 0.3, color: "#fff27a", seed: state.rng() * 1000 });
+        hit(e, 3, { knock: 6 });
+        from = e;
+      }
+      break;
+    }
+    case "shadow": {
+      const a = dir();
+      state.fx.push({ kind: "ring", x: player.x, y: player.y, r: 20, ttl: 0.25, max: 0.25, color });
+      player.x += Math.cos(a) * 110; player.y += Math.sin(a) * 110;
+      pushOut(state, player, PLAYER_R);
+      player.ghost = 0.5; player.crit100 = 4;
+      break;
+    }
+    case "blades": {
+      for (let i = 0; i < 16; i++) {
+        const a = (i * Math.PI * 2) / 16;
+        state.shots.push({ x: player.x, y: player.y, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, dmg: D * 1.2, pierce: stats.pierce + 3, life: 0.7, hit: new Set(), color });
+      }
+      break;
+    }
+    case "assassin": {
+      const t = alive().sort((a, b) => b.hp - a.hp).find((e) => dist2(player, e) < 420 * 420);
+      if (!t) { player.skillCd = 0.5; break; }
+      state.fx.push({ kind: "ring", x: player.x, y: player.y, r: 24, ttl: 0.3, max: 0.3, color });
+      const a = angleTo(t, player);
+      player.x = t.x + Math.cos(a) * (t.r + 16); player.y = t.y + Math.sin(a) * (t.r + 16);
+      pushOut(state, player, PLAYER_R);
+      player.ghost = 0.6; player.crit100 = 2;
+      if (!t.boss && t.hp < t.maxHp * 0.35) damageEnemy(state, t, 1e9, { silent: true, noCrit: true });
+      else hit(t, 7, { knock: 0 });
+      state.fx.push({ kind: "blast", x: t.x, y: t.y, r: 50, ttl: 0.3, max: 0.3, color: "#ffffff" });
+      break;
+    }
+    case "smoke": {
+      dropZone(state, { kind: "poison", x: player.x, y: player.y, r: 110, ttl: 5, dps: D * 2.4, color: "#9a7aff" });
+      player.crit100 = 3; player.ghost = 0.3;
+      break;
+    }
   }
 }
 
@@ -1227,7 +1433,7 @@ function megaAI(state, e, dt) {
   const d = Math.sqrt(dist2(e, p));
   // phases : à chaque palier de vie, bouclier bref, nettoyage des tirs, renforts et déblocage d'une attaque
   let ph = 1;
-  for (const t of PHASE_AT) if (e.hp <= e.maxHp * t) ph++;
+  for (const t of def.at || PHASE_AT) if (e.hp <= e.maxHp * t) ph++;
   if (ph > e.phase) {
     e.phase = ph; e.invT = 1.4; e.untouchable = true; e.act = null; e.hidden = false; e.st = "idle";
     state.bullets = [];
@@ -1684,6 +1890,9 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
     if (e.slow > 0) e.slow -= dt;
     if (e.burn > 0) { e.burn -= dt; damageEnemy(state, e, e.burnDps * dt, { silent: true, noCrit: true }); if (e.dead) continue; }
     if (e.spawn > 0) { e.spawn -= dt; continue; }
+    if (stats.slowAura && dist2(e, player) < 120 * 120) e.slow = Math.max(e.slow, 0.2);
+    if (stats.burnAura && !e.hidden && dist2(e, player) < 85 * 85) damageEnemy(state, e, stats.burnAura * stats.damage * 0.35 * dt, { silent: true, noCrit: true });
+    if (e.freeze > 0) { e.freeze -= dt; if (e.dead) continue; continue; }
     enemyAI(state, e, dt);
     if (state.over) break;
     if (e.dead) continue;
@@ -1841,18 +2050,37 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
         state.trapdoor = freeSpot(state, (X0 + X1) / 2 + 60, (Y0 + Y1) / 2 + 30);
         state.room.trap = true;
         state.room.bossChest = true;
+      } else if (state.room.type === "secretboss") {
+        state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: "legend" };
+        state.room.bossChest = true;
       } else if (state.rng() < 0.5) {
         drop(state, (X0 + X1) / 2, (Y0 + Y1) / 2, state.rng() < 0.5 ? "heart" : "coin", state.rng() < 0.5 ? 0.2 : 3);
       }
     }
   }
 
+  /* Mur fissuré : rester contre le mur (salle terminée) pour l'ouvrir */
+  const sr = state.room.secret;
+  if (sr && !sr.found && state.cleared && !state.choices) {
+    if (dist2(DOORS[sr.dir], player) < 50 * 50) state.secretProg = Math.min(1, state.secretProg + dt / 1.4);
+    else state.secretProg = Math.max(0, state.secretProg - dt * 1.5);
+    if (state.secretProg >= 1) {
+      sr.found = true;
+      state.room.doors[sr.dir] = true;
+      const hall = state.map.rooms.find((r) => r.type === "secret");
+      if (hall) hall.hidden = false;
+      state.banner = { text: "Le mur s'effondre : un passage secret !", ttl: 2.6 };
+      const dd = DOORS[sr.dir];
+      state.fx.push({ kind: "blast", x: dd.x, y: dd.y, r: 70, ttl: 0.5, max: 0.5, color: "#b020ff" });
+    }
+  } else if (!sr || sr.found) state.secretProg = 0;
+
   /* Coffre, boutique, trappe, portes */
   if (state.chest && !state.chest.opened && dist2(state.chest, player) < 26 * 26) {
     state.chest.opened = true;
-    if (state.room.type === "treasure") state.room.taken = true;
-    if (state.room.type === "boss") state.room.bossChest = false;
-    state.choices = rollChoices(state);
+    if (state.room.type === "treasure" || state.room.type === "secret") state.room.taken = true;
+    if (state.room.type === "boss" || state.room.type === "secretboss") state.room.bossChest = false;
+    state.choices = rollChoices(state, state.chest.kind === "legend");
     events.choices = true;
   }
   if (state.room.stands) {
@@ -1895,7 +2123,13 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
 
 /* ---------- Coffres ---------- */
 
-export function rollChoices(state) {
+export function rollChoices(state, legend = false) {
+  if (legend) {
+    const left = LEGEND_IDS.filter((id) => !state.owned[id]);
+    const picks = [];
+    while (picks.length < 3 && left.length) picks.push(left.splice(Math.floor(state.rng() * left.length), 1)[0]);
+    return picks.length ? picks : ["heal"];
+  }
   const pool = ITEM_IDS.filter((id) => (state.owned[id] || 0) < ITEMS[id].max);
   const count = state.ranks.luck ? 4 : 3;
   const picks = [];
@@ -1921,9 +2155,9 @@ export function chooseItem(state, id) {
 // Âmes : monnaie permanente (classes, améliorations). Crédits et pièces bleues : monnaies de l'arcade.
 export function runRewards(state) {
   const greed = 1 + 0.15 * (state.ranks.greed || 0);
-  const souls = Math.floor(((state.floor - 1) * 14 + state.roomsCleared * 2 + state.kills / 4 + state.bossKills * 30 + state.megaKills * 120 + state.coinsEarned / 3) * greed);
+  const souls = Math.floor(((state.floor - 1) * 14 + state.roomsCleared * 2 + state.kills / 4 + state.bossKills * 30 + state.megaKills * 120 + state.secretKills * 400 + state.coinsEarned / 3) * greed);
   const credits = Math.floor(state.floor * 8 + state.roomsCleared * 2 + state.kills / 3);
-  return { souls, credits, coins: state.bossKills + 3 * state.megaKills, floor: state.floor, kills: state.kills, bossKills: state.bossKills, rooms: state.roomsCleared, gold: state.coinsEarned, elite: state.eliteKills };
+  return { souls, credits, coins: state.bossKills + 3 * state.megaKills + 6 * state.secretKills, floor: state.floor, kills: state.kills, bossKills: state.bossKills, rooms: state.roomsCleared, gold: state.coinsEarned, elite: state.eliteKills };
 }
 
 export const enterRoomDebug = (state, room) => enterRoom(state, room, null);
