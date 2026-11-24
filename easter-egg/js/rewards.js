@@ -19,3 +19,16 @@ export const ACHIEVEMENT_PCT = 0.005;
 
 // Donjon : 0,3 % du solde par étage atteint (5 % maximum).
 export const dungeonPct = (floor) => Math.min(0.05, Math.max(0, floor) * 0.003);
+
+// Pêche : chaque prise ajoute un pourcentage du solde selon la rareté du poisson (de 0,01 % pour une sardine à 5 % pour un koï doré).
+export const FISH_PCT = {
+  sardine: 0.0001, carpe: 0.0002, truite: 0.0004, brochet: 0.001,
+  anguille: 0.003, thon: 0.008, requin: 0.02, koi: 0.05
+};
+export const fishPct = (fishId) => FISH_PCT[fishId] || 0;
+
+// Ferme : 0,15 % du solde par heure de pousse de la culture, à chaque récolte (une orchidée de 4 h rapporte 0,6 % du solde).
+export const farmPct = (growMs) => 0.0015 * (Math.max(0, growMs) / 3600000);
+
+// Filet automatique : par niveau, 0,000001 % du solde par seconde en plus de son revenu fixe.
+export const NET_PCT_PER_SEC = 1e-8;

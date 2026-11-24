@@ -14,11 +14,13 @@ import {
   rollCatch, biteDelay, biteWindow, reelParams, newReel, reelStep, castPower, castLuck, castWait, PERFECT_CAST
 } from "./farm.js";
 import { SIZE, stageOf, spriteFor, spriteRuns, fishSprite } from "./farm-art.js";
+import { wealthBonus, fishPct, farmPct } from "./rewards.js";
 import { h, fmt, fmtShort, prefersReducedMotion } from "./ui.js";
 
 const TICK_MS = 500;
 const COOLDOWN_MS = 800;                     // courte pause après une prise ou une fuite
 const SVG_NS = "http://www.w3.org/2000/svg";
+const pctText = (fraction) => `${(fraction * 100).toLocaleString("fr-FR", { maximumFractionDigits: 4 })} %`;
 const STAGE_NAMES = ["", "Jeune pousse", "En croissance", "Presque mûre"];
 const CAST_LABELS = {
   idle: "Maintenir pour lancer", charging: "Relâche au sommet !", waiting: "Rentrer la ligne",
@@ -95,7 +97,9 @@ export function createFarmUI(root, wallet) {
   const bookRows = FISH.map((f) => {
     const count = h("span", { class: "fm-book-count" });
     const icon = h("span", { class: "fm-fish-icon" }, svgFrom(fishSprite(f.color)));
-    const item = h("li", { class: "is-unknown" }, icon, h("span", {}, f.name), h("span", { class: "fm-book-value" }, `${fmt(f.value)} ¤`), count);
+    const worth = `${fmt(f.value)} ¤${f.blue ? ` + ${f.blue} pièce bleue` : ""}`;
+    const item = h("li", { class: "is-unknown", title: `${f.name} : bonus de ${pctText(fishPct(f.id))} de ta fortune à chaque prise${f.blue ? `, plus ${f.blue} pièce bleue` : ""}` },
+      icon, h("span", {}, f.name), h("span", { class: "fm-book-value" }, worth), count);
     bookEl.append(item);
     return { item, count };
   });
@@ -221,14 +225,19 @@ export function createFarmUI(root, wallet) {
   function land() {
     const { fish, size, value } = hooked;
     const f = farm();
+    const bonus = wealthBonus(wallet.credits, fishPct(fish.id));       // + un pourcentage de la fortune, selon la rareté
+    const total = value + bonus;
     f.caught += 1;
     f.fish[fish.id] += 1;
-    f.bestFish = Math.max(f.bestFish, value);
-    wallet.addCredits(value);
+    f.bestFish = Math.max(f.bestFish, total);
+    wallet.addCredits(total);
+    if (fish.blue) wallet.addBlue(fish.blue);                           // le koï doré offre une pièce bleue
     wallet.saveFarm();
     const rare = fish.value >= 100;
     clearFishing();
-    say(`Pris : ${fish.name} (${Math.round(size * 100)} %) : +${fmt(value)} crédits${rare ? " — belle prise !" : ""}`, rare ? "win" : "push");
+    const detail = bonus > 0 ? ` (dont ${fmtShort(bonus)} de bonus de fortune)` : "";
+    const blue = fish.blue ? ` + ${fish.blue} pièce bleue !` : "";
+    say(`Pris : ${fish.name} (${Math.round(size * 100)} %) : +${fmtShort(total)} crédits${detail}${blue}${rare && !blue ? " — belle prise !" : ""}`, rare ? "win" : "push");
     cooldown();
     render();
   }
@@ -304,7 +313,7 @@ export function createFarmUI(root, wallet) {
   const cropButtons = CROPS.map((c) =>
     h("button", {
       class: "chip chip-ghost fm-crop", type: "button", "aria-pressed": String(c.id === crop),
-      title: `${c.name} : graine ${fmt(c.cost)} ¤, vendu ${fmt(c.sell)} ¤, pousse en ${fmtDuration(c.ms)}`,
+      title: `${c.name} : graine ${fmt(c.cost)} ¤, vendu ${fmt(c.sell)} ¤ + ${pctText(farmPct(c.ms))} de ta fortune, pousse en ${fmtDuration(c.ms)}`,
       onclick: () => { crop = c.id; render(); }
     }, h("span", { class: "fm-crop-icon" }, svgFrom(spriteFor(c.id, 3))), `${c.name} · ${fmtShort(c.cost)} → ${fmtShort(c.sell)}`));
   const plantAllButton = h("button", { class: "button button-secondary", type: "button", id: "fm-plant-all", onclick: plantAll }, "Tout planter");
@@ -334,11 +343,12 @@ export function createFarmUI(root, wallet) {
   function harvestOn(i, now = Date.now()) {
     const info = plotInfo(farm(), i, now);
     if (info.state !== "ready") return 0;
-    wallet.addCredits(info.crop.sell);
+    const gain = info.crop.sell + wealthBonus(wallet.credits, farmPct(info.crop.ms));   // + un pourcentage de la fortune
+    wallet.addCredits(gain);
     farm().harvests += 1;
     farm().plots[i] = null;
     if (farm().bot && wallet.spendCredits(info.crop.cost)) farm().plots[i] = { crop: info.crop.id, at: now };   // le bot replante
-    return info.crop.sell;
+    return gain;
   }
 
   function onPlot(i) {
@@ -364,7 +374,7 @@ export function createFarmUI(root, wallet) {
     let total = 0;
     const now = Date.now();
     for (let i = 0; i < farm().plotCount; i++) total += harvestOn(i, now);
-    if (total) { say(`Récolte : +${fmt(total)} crédits.`, "win"); wallet.saveFarm(); }
+    if (total) { say(`Récolte : +${fmtShort(total)} crédits.`, "win"); wallet.saveFarm(); }
     render();
   }
 
@@ -410,7 +420,8 @@ export function createFarmUI(root, wallet) {
   root.replaceChildren(
     h("p", { class: "game-rules" },
       "Deux métiers, une seule monnaie. À la pêche : lance la ligne au bon moment, ferre, puis garde le poisson dans la zone pendant le combat ; plus il est rare, plus il se débat. ",
-      "À la ferme : plante, regarde pousser (3 stades), récolte. Les cultures poussent même quand tu fermes la page. Le fermier-bot et le filet travaillent pour toi (8 h au maximum hors ligne)."),
+      "À la ferme : plante, regarde pousser (3 stades), récolte. Les cultures poussent même quand tu fermes la page. Le fermier-bot et le filet travaillent pour toi (8 h au maximum hors ligne). ",
+      "Les récompenses suivent ta fortune : chaque prise et chaque récolte ajoutent un pourcentage de tes crédits (plus le poisson ou la culture est rare, plus il est élevé), et le koï doré offre une pièce bleue."),
     summaryEl,
     h("div", { class: "fm-layout" },
       h("section", { class: "fm-panel chamfer", "aria-labelledby": "fm-fish-title" },
@@ -460,7 +471,8 @@ export function createFarmUI(root, wallet) {
       const c = cropById(crop);
       const pct = info.state === "empty" ? 0 : Math.round(info.progress * 100);
       const stage = info.state === "empty" ? 0 : info.state === "ready" ? 3 : stageOf(info.progress);
-      key = `${info.state}:${info.crop?.id}:${stage}:${pct}:${info.state === "growing" ? fmtDuration(info.remaining) : ""}:${credits >= (c?.cost ?? 0)}:${crop}`;
+      const worth = info.state === "ready" ? info.crop.sell + wealthBonus(credits, farmPct(info.crop.ms)) : 0;   // vente + bonus de fortune
+      key = `${info.state}:${info.crop?.id}:${stage}:${pct}:${info.state === "growing" ? fmtDuration(info.remaining) : ""}:${credits >= (c?.cost ?? 0)}:${crop}:${fmtShort(worth)}`;
       if (view.last === key) continue;
       view.last = key;
       view.el.className = `fm-plot is-${info.state}`;
@@ -476,7 +488,7 @@ export function createFarmUI(root, wallet) {
       view.fill.style.width = `${pct}%`;
       view.bar.setAttribute("aria-valuenow", String(pct));
       view.time.textContent = info.state === "empty" ? "Prête à planter"
-        : info.state === "ready" ? `Mûre : ${fmt(info.crop.sell)} ¤`
+        : info.state === "ready" ? `Mûre : ${fmtShort(worth)} ¤`
         : `${STAGE_NAMES[stage]} · ${fmtDuration(info.remaining)}`;
       view.button.textContent = info.state === "empty" ? `Planter (${fmtShort(c.cost)} ¤)` : info.state === "ready" ? "Récolter" : "Pousse…";
       view.button.disabled = info.state === "growing" || (info.state === "empty" && credits < c.cost);
@@ -510,8 +522,8 @@ export function createFarmUI(root, wallet) {
   function settle() {
     const f = farm();
     const now = Date.now();
-    const bot = runBot(f, now);
-    const net = settleNet(f, now);
+    const bot = runBot(f, now, wallet.credits);
+    const net = settleNet(f, now, wallet.credits);
     const gain = bot.net + net;
     if (gain > 0) wallet.addCredits(gain);
     if (bot.harvests || net) wallet.saveFarm();

@@ -5,6 +5,8 @@
 // Améliorations : engrais, fermier-bot (récolte et replante tout seul), canne, appât, filet (revenu passif).
 // Les durées utilisent l'heure du navigateur (Date.now) pour que la progression continue hors ligne.
 
+import { wealthBonus, farmPct, NET_PCT_PER_SEC } from "./rewards.js";
+
 export const OFFLINE_CAP = 8 * 3600_000;       // au plus 8 h de gains passifs d'un coup
 export const START_PLOTS = 3;
 export const MAX_PLOTS = 12;
@@ -102,8 +104,9 @@ export function plotInfo(farm, index, now = Date.now()) {
 }
 
 // Fermier-bot : récolte et replante les parcelles prêtes, autant de cycles que le temps écoulé le permet.
-// Renvoie le gain net en crédits (vente moins graines) et le nombre de récoltes. Modifie `farm`.
-export function runBot(farm, now = Date.now()) {
+// Renvoie le gain net en crédits (vente moins graines, plus le bonus de fortune de chaque récolte) et le nombre de récoltes.
+// `balance` : solde du joueur, pour le bonus proportionnel. Modifie `farm`.
+export function runBot(farm, now = Date.now(), balance = 0) {
   if (!farm.bot) return { net: 0, harvests: 0 };
   let net = 0;
   let harvests = 0;
@@ -117,7 +120,7 @@ export function runBot(farm, now = Date.now()) {
     if (cycles < 1) continue;
     const done = Math.min(cycles, Math.max(1, Math.floor(OFFLINE_CAP / grow)));
     plot.at = done < cycles ? now - (elapsed % grow) : plot.at + done * grow;
-    net += done * (crop.sell - crop.cost);
+    net += done * (crop.sell - crop.cost + wealthBonus(balance, farmPct(crop.ms)));
     harvests += done;
   }
   farm.harvests += harvests;
@@ -125,8 +128,9 @@ export function runBot(farm, now = Date.now()) {
 }
 
 // Filet automatique : crédits gagnés depuis le dernier calcul. Modifie `farm.seen` (garde le temps non converti).
-export function settleNet(farm, now = Date.now()) {
-  const rate = netRate(farm.net);
+// `balance` : solde du joueur, pour la part proportionnelle du revenu.
+export function settleNet(farm, now = Date.now(), balance = 0) {
+  const rate = netRate(farm.net) + (farm.net > 0 ? Math.max(0, balance) * NET_PCT_PER_SEC * farm.net : 0);
   const elapsed = Math.min(Math.max(now - farm.seen, 0), OFFLINE_CAP);
   if (!rate) { farm.seen = now; return 0; }
   const whole = Math.floor((rate * elapsed) / 1000);
@@ -146,7 +150,7 @@ export const FISH = [
   { id: "anguille", name: "Anguille néon",    value: 100,   weight: 3,    diff: 0.60, color: "#00f0ff" },
   { id: "thon",     name: "Thon cyber",       value: 350,   weight: 1,    diff: 0.74, color: "#4d7cff" },
   { id: "requin",   name: "Requin zéro-jour", value: 1400,  weight: 0.3,  diff: 0.88, color: "#b266ff" },
-  { id: "koi",      name: "Koï doré",         value: 7000,  weight: 0.05, diff: 1,    color: "#ffb000" }
+  { id: "koi",      name: "Koï doré",         value: 7000,  weight: 0.05, diff: 1,    color: "#ffb000", blue: 1 }   // blue : pièces bleues offertes
 ];
 
 export function pickFish(rng = Math.random, bait = 0) {
