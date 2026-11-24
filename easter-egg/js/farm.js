@@ -137,15 +137,16 @@ export function settleNet(farm, now = Date.now()) {
 /* ---------- Pêche ---------- */
 
 // weight : fréquence de base. L'appât multiplie le poids des poissons rares (indice plus grand = plus rare).
+// diff : difficulté du combat (0 = très facile, 1 = très dur). color : couleur du poisson dans le mini-jeu.
 export const FISH = [
-  { id: "sardine",  name: "Sardine pixel",    value: 3,     weight: 40 },
-  { id: "carpe",    name: "Carpe bitmap",     value: 6,     weight: 28 },
-  { id: "truite",   name: "Truite binaire",   value: 14,    weight: 18 },
-  { id: "brochet",  name: "Brochet fantôme",  value: 35,    weight: 9 },
-  { id: "anguille", name: "Anguille néon",    value: 100,   weight: 3 },
-  { id: "thon",     name: "Thon cyber",       value: 350,   weight: 1 },
-  { id: "requin",   name: "Requin zéro-jour", value: 1400,  weight: 0.3 },
-  { id: "koi",      name: "Koï doré",         value: 7000,  weight: 0.05 }
+  { id: "sardine",  name: "Sardine pixel",    value: 3,     weight: 40,   diff: 0.08, color: "#9aa9bd" },
+  { id: "carpe",    name: "Carpe bitmap",     value: 6,     weight: 28,   diff: 0.20, color: "#d9a441" },
+  { id: "truite",   name: "Truite binaire",   value: 14,    weight: 18,   diff: 0.32, color: "#4db6ac" },
+  { id: "brochet",  name: "Brochet fantôme",  value: 35,    weight: 9,    diff: 0.46, color: "#7bd36b" },
+  { id: "anguille", name: "Anguille néon",    value: 100,   weight: 3,    diff: 0.60, color: "#00f0ff" },
+  { id: "thon",     name: "Thon cyber",       value: 350,   weight: 1,    diff: 0.74, color: "#4d7cff" },
+  { id: "requin",   name: "Requin zéro-jour", value: 1400,  weight: 0.3,  diff: 0.88, color: "#b266ff" },
+  { id: "koi",      name: "Koï doré",         value: 7000,  weight: 0.05, diff: 1,    color: "#ffb000" }
 ];
 
 export function pickFish(rng = Math.random, bait = 0) {
@@ -167,3 +168,66 @@ export function rollCatch(rng = Math.random, bait = 0) {
 
 export const biteDelay = (rod, rng = Math.random) => Math.round((1800 + rng() * 3200) * 0.95 ** rod);   // ms avant la touche
 export const biteWindow = (rod) => 900 + rod * 120;                                                       // ms pour ferrer
+
+/* ---------- Mini-jeu de combat (façon « Fisch ») ---------- */
+// Une piste de 0 à 1. Le poisson file de-ci de-là ; le joueur déplace une zone : en maintenant la touche, elle accélère
+// vers la droite, en relâchant, vers la gauche. La jauge monte quand le poisson est dans la zone et baisse sinon.
+// Elle atteint 100 % : prise. Elle tombe à 0 : le poisson s'échappe.
+
+export const REEL_START = 0.3;
+const REEL_ACC = 2.6;       // accélération de la zone
+const REEL_DAMP = 2.2;      // frottement
+
+// Paramètres du combat selon le poisson et le niveau de canne. `assist` (mouvement réduit) rend le combat plus doux.
+export function reelParams(fish, rod = 0, assist = false) {
+  const d = fish.diff;
+  return {
+    bar: Math.max(0.12, 0.30 - 0.13 * d + 0.014 * rod),             // largeur de la zone
+    fishSpeed: (0.30 + 1.0 * d) * (assist ? 0.6 : 1),                // vitesse du poisson
+    darts: [0.30 + 0.5 * (1 - d), 0.8 + 0.8 * (1 - d)],              // durée entre deux changements de cap (s)
+    gain: 0.30 + 0.02 * rod + (assist ? 0.15 : 0),                   // jauge gagnée par seconde dans la zone
+    drain: 0.14 + 0.12 * d - (assist ? 0.05 : 0)                     // jauge perdue par seconde hors de la zone
+  };
+}
+
+export function newReel(params, rng = Math.random) {
+  return { bar: 0.5, vel: 0, fish: 0.5, target: 0.5, wait: params.darts[0] + rng() * (params.darts[1] - params.darts[0]),
+           progress: REEL_START, inside: true, time: 0, status: "playing" };
+}
+
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+// Avance le combat de `dt` secondes. Modifie et renvoie `state` (status : "playing", "won" ou "lost").
+export function reelStep(state, dt, holding, params, rng = Math.random) {
+  if (state.status !== "playing") return state;
+  dt = Math.min(dt, 0.05);                                           // un onglet en veille ne doit pas fausser le combat
+
+  state.vel += (holding ? REEL_ACC : -REEL_ACC) * dt;
+  state.vel *= Math.max(0, 1 - REEL_DAMP * dt);
+  state.bar += state.vel * dt;
+  const half = params.bar / 2;
+  if (state.bar < half) { state.bar = half; state.vel = Math.abs(state.vel) * 0.3; }
+  if (state.bar > 1 - half) { state.bar = 1 - half; state.vel = -Math.abs(state.vel) * 0.3; }
+
+  state.wait -= dt;
+  if (state.wait <= 0) {
+    state.target = 0.04 + rng() * 0.92;
+    state.wait = params.darts[0] + rng() * (params.darts[1] - params.darts[0]);
+  }
+  const step = params.fishSpeed * dt;
+  state.fish += clamp(state.target - state.fish, -step, step);
+
+  state.inside = Math.abs(state.fish - state.bar) <= half;
+  state.progress = clamp(state.progress + (state.inside ? params.gain : -params.drain) * dt, 0, 1);
+  state.time += dt;
+  if (state.progress >= 1) state.status = "won";
+  else if (state.progress <= 0) state.status = "lost";
+  return state;
+}
+
+// Puissance du lancer (0 à 1) quand on maintient depuis `ms` millisecondes : monte puis redescend (période 1,4 s).
+export const castPower = (ms) => (1 - Math.cos((Math.max(0, ms) / 1400) * 2 * Math.PI)) / 2;
+export const PERFECT_CAST = 0.9;
+// Effets du lancer : un bon lancer fait mordre plus vite et attire de plus gros poissons.
+export const castLuck = (power) => (power >= PERFECT_CAST ? 3 : power >= 0.6 ? 1 : 0);   // niveaux d'appât en plus
+export const castWait = (power) => 1.25 - 0.5 * power;                                    // multiplicateur du délai de touche
