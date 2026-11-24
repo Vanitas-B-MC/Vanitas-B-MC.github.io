@@ -1905,3 +1905,9 @@ kbd {
 .sv-side .dg-fs, .sv-side .dg-setup-toggle { width: 100%; }
 .sv-main .dg-setup-toggle { margin-top: 12px; }
 .sv-main .dg-setup { margin-top: 4px; }
+
+/* Donjon : bandeau d'infos de partie au-dessus de la fenêtre de jeu (v18) */
+.dg-topbar { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0 0 10px; padding: 8px 12px; border: 1px solid var(--line, rgba(255,255,255,.12)); background: rgba(5,4,9,.55); }
+.dg-topbar > div { display: flex; flex-direction: column; min-width: 0; }
+.dg-topbar dd { margin: 0; }
+.dg-topbar strong { font-size: 16px; line-height: 1.2; }
