@@ -1825,6 +1825,10 @@ kbd {
   line-height: 1;
   user-select: none;
 }
+.sv-side .dg-toolbar { justify-content: stretch; }
+.sv-side .dg-fs, .sv-side .dg-setup-toggle { width: 100%; }
+.sv-side .dg-setup { margin-bottom: 12px; }
+.sv-side .dg-weapons { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); max-height: 240px; }
 .sl-cell.is-spinning { filter: blur(1.5px); opacity: .8; }
 .sl-cell.is-win { border-color: var(--yellow); box-shadow: 0 0 16px -2px var(--yellow); animation: sl-win .8s ease-in-out infinite alternate; }
 @keyframes sl-win { to { transform: scale(1.06); } }
