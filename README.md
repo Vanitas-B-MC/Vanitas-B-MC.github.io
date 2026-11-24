@@ -44,3 +44,5 @@ assets/                     favicon, images
 2. Il lance `scripts/fetch_veille.py`, qui lit les flux de `content/veille-sources.json`,
    nettoie les extraits (résumés) et écrit `content/veille.json`.
 3. Si le fichier a changé, le workflow le commit : GitHub Pages republie le site.
+
+- Donjon v14 : 11 nouveaux ennemis pour les étages élevés (Ombre, Tireur d'élite, Prêtre, Colosse, Ver fouisseur, Drones, Ardent, Nécromancien, Magnétar, Berserker + Squelettes invoqués), dangers au sol et nouveaux designs.

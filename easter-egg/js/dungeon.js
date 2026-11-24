@@ -122,7 +122,18 @@ export const ENEMIES = {
   hopper:   { name: "Sauteur",        hp: 30, speed: 0,   r: 10, dmg: 10, ai: "hopper",  color: "#ffd84a", cost: 2 },
   spawner:  { name: "Nid",            hp: 60, speed: 0,   r: 13, dmg: 6,  ai: "spawner", color: "#c97bff", cost: 3, still: true },
   orbiter:  { name: "Orbiteur",       hp: 24, speed: 70,  r: 8,  dmg: 8,  ai: "orbiter", color: "#4dffd2", cost: 2, flying: true },
-  knight:   { name: "Chevalier noir", hp: 70, speed: 38,  r: 12, dmg: 14, ai: "chase",   color: "#6b7bb0", cost: 3, armor: 0.5 }
+  knight:   { name: "Chevalier noir", hp: 70, speed: 38,  r: 12, dmg: 14, ai: "chase",   color: "#6b7bb0", cost: 3, armor: 0.5 },
+  shade:    { name: "Ombre", hp: 34, speed: 120, r: 9, dmg: 16, ai: "blink", color: "#8e6bff", cost: 3, minFloor: 4 },
+  sniper:   { name: "Tireur d'élite", hp: 30, speed: 36, r: 9, dmg: 20, ai: "sniper", color: "#ff4d4d", cost: 3.5, minFloor: 5 },
+  priest:   { name: "Prêtre", hp: 46, speed: 44, r: 10, dmg: 6, ai: "healer", color: "#ffe7a8", cost: 3, minFloor: 5 },
+  colossus: { name: "Colosse", hp: 180, speed: 28, r: 17, dmg: 22, ai: "slammer", color: "#c58a4a", cost: 5, armor: 0.25, minFloor: 6 },
+  burrower: { name: "Ver fouisseur", hp: 38, speed: 110, r: 10, dmg: 16, ai: "burrow", color: "#b5651d", cost: 3, minFloor: 4 },
+  drone:    { name: "Drone", hp: 8, speed: 120, r: 6, dmg: 7, ai: "flutter", color: "#4dffd2", cost: 0.7, flying: true, group: 4, minFloor: 4 },
+  ember:    { name: "Ardent", hp: 44, speed: 58, r: 10, dmg: 10, ai: "ember", color: "#ff6a1a", cost: 3, minFloor: 5 },
+  necro:    { name: "Nécromancien", hp: 54, speed: 40, r: 10, dmg: 8, ai: "necro", color: "#6bffb0", cost: 4, minFloor: 7 },
+  skeleton: { name: "Squelette", hp: 14, speed: 62, r: 7, dmg: 9, ai: "chase", color: "#e8e8e0", cost: 0 },
+  magnetar: { name: "Magnétar", hp: 70, speed: 30, r: 12, dmg: 12, ai: "gravity", color: "#7a5cff", cost: 4, flying: true, minFloor: 7 },
+  berserker:{ name: "Berserker", hp: 80, speed: 48, r: 12, dmg: 16, ai: "enrage", color: "#ff3030", cost: 3.5, minFloor: 6 }
 };
 export const ENEMY_IDS = Object.keys(ENEMIES);
 
@@ -138,11 +149,11 @@ export const bossFor = (floor) => BOSSES[(floor - 1 + BOSSES.length * 100) % BOS
 
 // Un thème par étage : couleurs et ennemis propres, pour que les étages ne se ressemblent pas.
 export const THEMES = [
-  { id: "cave",   name: "Caverne",  wall: "#3ddc84", a: "#0c1611", b: "#09120d", rock: "#1c3326", pool: ["slime", "bat", "splitter", "hopper", "archer", "brute", "bomber"] },
-  { id: "crypt",  name: "Crypte",   wall: "#b58cff", a: "#120d1c", b: "#0e0a17", rock: "#2a2145", pool: ["wisp", "archer", "mage", "bat", "knight", "turret", "spawner"] },
-  { id: "forge",  name: "Forge",    wall: "#ff8a3d", a: "#1a0f0a", b: "#150b07", rock: "#3a2418", pool: ["charger", "bomber", "turret", "slime", "brute", "spawner", "knight"] },
-  { id: "ice",    name: "Glacier",  wall: "#7fd8ff", a: "#0b1520", b: "#08111a", rock: "#1f3a52", pool: ["orbiter", "archer", "hopper", "wisp", "charger", "mage", "splitter"] },
-  { id: "void",   name: "Néant",    wall: "#ff2a6d", a: "#150a14", b: "#10070f", rock: "#3d1630", pool: ["wisp", "orbiter", "bomber", "mage", "knight", "turret", "hopper", "spawner", "charger", "brute"] }
+  { id: "cave",   name: "Caverne",  wall: "#3ddc84", a: "#0c1611", b: "#09120d", rock: "#1c3326", pool: ["slime", "bat", "splitter", "hopper", "archer", "brute", "bomber"], late: ["burrower", "drone", "berserker", "colossus"] },
+  { id: "crypt",  name: "Crypte",   wall: "#b58cff", a: "#120d1c", b: "#0e0a17", rock: "#2a2145", pool: ["wisp", "archer", "mage", "bat", "knight", "turret", "spawner"], late: ["shade", "necro", "priest", "sniper"] },
+  { id: "forge",  name: "Forge",    wall: "#ff8a3d", a: "#1a0f0a", b: "#150b07", rock: "#3a2418", pool: ["charger", "bomber", "turret", "slime", "brute", "spawner", "knight"], late: ["ember", "colossus", "berserker", "sniper"] },
+  { id: "ice",    name: "Glacier",  wall: "#7fd8ff", a: "#0b1520", b: "#08111a", rock: "#1f3a52", pool: ["orbiter", "archer", "hopper", "wisp", "charger", "mage", "splitter"], late: ["sniper", "magnetar", "drone", "priest"] },
+  { id: "void",   name: "Néant",    wall: "#ff2a6d", a: "#150a14", b: "#10070f", rock: "#3d1630", pool: ["wisp", "orbiter", "bomber", "mage", "knight", "turret", "hopper", "spawner", "charger", "brute"], late: ["shade", "magnetar", "necro", "burrower", "ember", "berserker", "colossus", "priest"] }
 ];
 export const themeFor = (floor) => THEMES[(floor - 1 + THEMES.length * 100) % THEMES.length];
 
@@ -299,7 +310,7 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
   stats.crit += 0.04 * r("crit");
 
   const state = {
-    rng, cls, weapon: a, stats, ranks: { ...ranks }, zones: [], delayed: [], spin: 0,
+    rng, cls, weapon: a, stats, ranks: { ...ranks }, zones: [], delayed: [], hazards: [], spin: 0,
     time: 0, over: false, revived: false,
     floor: 1, map: null, room: null, theme: themeFor(1), grid: blank(),
     player: { x: (X0 + X1) / 2, y: Y1 - 40, hp: stats.maxHp, inv: 0, cd: 0, skillCd: 0, shield: 0, shieldT: 0, facing: -Math.PI / 2, ghost: 0, crit100: 0, spikeT: 0 },
@@ -350,13 +361,14 @@ function planWave(state, isFirst) {
   const depth = room.depth;
   let budget = ((3 + state.floor * 1.1 + depth * 0.4) / (room.waves > 1 ? 1.4 : 1)) * Math.pow((COLS * ROWS) / 240, 0.75);
   const count = Math.min(state.theme.pool.length, 2 + state.floor);
-  const pool = state.theme.pool.slice(0, count);
+  const pool = state.theme.pool.slice(0, count).concat((state.theme.late || []).filter((id) => ENEMIES[id].minFloor <= state.floor));
   let at = 0;
   while (budget > 0) {
     const type = pool[Math.floor(state.rng() * pool.length)];
-    budget -= ENEMIES[type].cost;
+    const n = ENEMIES[type].group || 1;
+    budget -= ENEMIES[type].cost * n;
     const pt = spawnPoint(state);
-    state.spawnList.push({ at, type, x: pt.x, y: pt.y });
+    for (let i = 0; i < n; i++) state.spawnList.push({ at: at + i * 0.08, type, x: clamp(pt.x + (i % 2 ? 14 : -14), X0 + 12, X1 - 12), y: clamp(pt.y + (i > 1 ? 14 : -14), Y0 + 12, Y1 - 12) });
     at += 0.3 + state.rng() * 0.45;
   }
   if (isFirst && room.type === "elite") {
@@ -372,6 +384,7 @@ function enterRoom(state, room, fromDir) {
   state.room = room;
   state.zones = [];
   state.delayed = [];
+  state.hazards = [];
   state.trapdoor = null;
   room.visited = true;
   state.enemies = [];
@@ -502,7 +515,7 @@ function killEnemy(state, e, depth = 0) {
 }
 
 export function damageEnemy(state, e, amount, { silent = false, depth = 0, noCrit = false, knock = 0, from = null } = {}) {
-  if (e.dead || e.spawn > 0 || e.untouchable) return;
+  if (e.dead || e.spawn > 0 || e.untouchable || e.hidden) return;
   const s = state.stats;
   const crit = !noCrit && (state.player.crit100 > 0 || state.rng() < s.crit);
   let dmg = crit ? amount * 2 : amount;
@@ -581,7 +594,7 @@ function enemyShoot(state, e, angle, speed, dmgMul = 1, extra = {}) {
 function nearestEnemy(state, from, maxDist) {
   let best = null, bd = maxDist * maxDist;
   for (const e of state.enemies) {
-    if (e.dead || e.spawn > 0 || e.untouchable) continue;
+    if (e.dead || e.spawn > 0 || e.untouchable || e.hidden) continue;
     const d = dist2(from, e);
     if (d < bd) { bd = d; best = e; }
   }
@@ -604,7 +617,7 @@ function blastAt(state, x, y, r, dmg, opts = {}) {
   state.fx.push({ kind: "blast", x, y, r, ttl: 0.32, max: 0.32, color: opts.color || state.weapon.color });
   if (opts.sky) state.fx.push({ kind: "ring", x, y, r: r * 1.15, ttl: 0.4, max: 0.4, color: "#ffffff" });
   for (const e of state.enemies) {
-    if (e.dead || e.spawn > 0 || dist2({ x, y }, e) > (r + e.r) ** 2) continue;
+    if (e.dead || e.spawn > 0 || e.hidden || dist2({ x, y }, e) > (r + e.r) ** 2) continue;
     damageEnemy(state, e, dmg, { knock: opts.knock ?? 14, from: { x, y }, silent: opts.silent });
     applyHitEffects(state, e, opts);
   }
@@ -613,7 +626,7 @@ function blastAt(state, x, y, r, dmg, opts = {}) {
 function hitSegment(state, x1, y1, x2, y2, width, dmg, opts = {}) {
   const dx = x2 - x1, dy = y2 - y1, l2 = dx * dx + dy * dy || 1;
   for (const e of state.enemies) {
-    if (e.dead || e.spawn > 0) continue;
+    if (e.dead || e.spawn > 0 || e.hidden) continue;
     const t = clamp(((e.x - x1) * dx + (e.y - y1) * dy) / l2, 0, 1);
     const px = x1 + dx * t, py = y1 + dy * t;
     if ((e.x - px) ** 2 + (e.y - py) ** 2 <= (width / 2 + e.r) ** 2) {
@@ -626,7 +639,7 @@ function hitSegment(state, x1, y1, x2, y2, width, dmg, opts = {}) {
 function meleeArc(state, ang, range, arc, dmg, knock = 10) {
   const p = state.player;
   for (const e of state.enemies) {
-    if (e.dead || e.spawn > 0 || dist2(p, e) > (range + e.r) ** 2) continue;
+    if (e.dead || e.spawn > 0 || e.hidden || dist2(p, e) > (range + e.r) ** 2) continue;
     let diff = Math.abs(angleTo(p, e) - ang);
     if (diff > Math.PI) diff = Math.PI * 2 - diff;
     if (diff <= arc / 2 + 0.15) { damageEnemy(state, e, dmg, { knock, from: p }); applyHitEffects(state, e); }
@@ -655,7 +668,7 @@ function chainLightning(state, first, jumps, dmg, range = 120) {
     d *= 0.88;
     let best = null, bd = range * range;
     for (const e of state.enemies) {
-      if (e.dead || e.spawn > 0 || seen.has(e.id)) continue;
+      if (e.dead || e.spawn > 0 || e.hidden || seen.has(e.id)) continue;
       const q = dist2(cur, e);
       if (q < bd) { bd = q; best = e; }
     }
@@ -756,7 +769,7 @@ function fireWeapon(state, ang, target, pt) {
       break;
     }
     case "tesla": {
-      const list = state.enemies.filter((e) => !e.dead && e.spawn <= 0 && dist2(p, e) <= (w.reach + e.r) ** 2).sort((a, b) => dist2(p, a) - dist2(p, b)).slice(0, w.targets + n - 1);
+      const list = state.enemies.filter((e) => !e.dead && e.spawn <= 0 && !e.hidden && dist2(p, e) <= (w.reach + e.r) ** 2).sort((a, b) => dist2(p, a) - dist2(p, b)).slice(0, w.targets + n - 1);
       if (!list.length) return false;
       for (const e of list) {
         damageEnemy(state, e, D, { knock: 3, from: p });
@@ -803,7 +816,7 @@ function fireWeapon(state, ang, target, pt) {
       break;
     }
     case "meteor": {
-      const pool = state.enemies.filter((e) => !e.dead && e.spawn <= 0 && dist2(p, e) <= w.reach ** 2);
+      const pool = state.enemies.filter((e) => !e.dead && e.spawn <= 0 && !e.hidden && dist2(p, e) <= w.reach ** 2);
       const picks = [];
       if (pt && !target) picks.push({ x: pt.x, y: pt.y });
       while (picks.length < n && pool.length) picks.push(pool.splice(Math.floor(state.rng() * pool.length), 1)[0]);
@@ -870,7 +883,7 @@ function updateAux(state, dt) {
     z.tick -= dt;
     if (z.kind === "poison" || z.kind === "hole") {
       for (const e of state.enemies) {
-        if (e.dead || e.spawn > 0 || dist2(z, e) > (z.r + e.r) ** 2) continue;
+        if (e.dead || e.spawn > 0 || e.hidden || dist2(z, e) > (z.r + e.r) ** 2) continue;
         if (z.kind === "hole" && !e.boss && !ENEMIES[e.type]?.still) {
           const d = Math.sqrt(dist2(z, e)) || 1;
           e.x += ((z.x - e.x) / d) * 90 * dt; e.y += ((z.y - e.y) / d) * 90 * dt;
@@ -882,7 +895,7 @@ function updateAux(state, dt) {
       if (z.tick <= 0) z.tick = 0.25;
     } else if (z.kind === "mine") {
       z.arm -= dt;
-      if (z.arm <= 0) for (const e of state.enemies) if (!e.dead && e.spawn <= 0 && dist2(z, e) <= (28 + e.r) ** 2) { z.ttl = 0; break; }
+      if (z.arm <= 0) for (const e of state.enemies) if (!e.dead && e.spawn <= 0 && !e.hidden && dist2(z, e) <= (28 + e.r) ** 2) { z.ttl = 0; break; }
       if (z.ttl <= 0) blastAt(state, z.x, z.y, z.r, z.dmg, { knock: 22, color: z.color });
     } else if (z.kind === "turret" && z.tick <= 0) {
       const t = nearestEnemy(state, z, 340);
@@ -1116,6 +1129,100 @@ function enemyAI(state, e, dt) {
       moveEnemy(state, e, Math.cos(wob) * speed, Math.sin(wob) * speed, dt);
       break;
     }
+    case "blink": {
+      // fondu invisible -> téléportation dans le dos du joueur -> bond
+      e.t += dt;
+      if (e.st === "idle") { e.hidden = false; e.st = "fade"; e.t = 0; }
+      if (e.st === "fade") {
+        e.hidden = e.t > 0.25;
+        if (e.t > 1.1) { const a = p.facing + Math.PI; e.x = clamp(p.x + Math.cos(a) * 70, X0 + 14, X1 - 14); e.y = clamp(p.y + Math.sin(a) * 70, Y0 + 14, Y1 - 14); e.hidden = false; e.st = "wind"; e.t = 0; e.aim = angleTo(e, p); }
+      } else if (e.st === "wind") {
+        e.aim = angleTo(e, p);
+        if (e.t > 0.5) { e.st = "lunge"; e.t = 0; }
+      } else if (e.st === "lunge") {
+        moveEnemy(state, e, Math.cos(e.aim) * speed * 3.2, Math.sin(e.aim) * speed * 3.2, dt);
+        if (e.t > 0.35) { e.st = "rest"; e.t = 0; }
+      } else if (e.st === "rest" && e.t > 0.8) { e.st = "fade"; e.t = 0; }
+      if (e.hidden) return;
+      break;
+    }
+    case "sniper": {
+      if (e.st === "idle") {
+        const dir = d > 340 ? 1 : d < 260 ? -1 : 0;
+        moveEnemy(state, e, Math.cos(base) * speed * dir, Math.sin(base) * speed * dir, dt);
+        if (e.cd <= 0) { e.st = "aim"; e.t = 0; e.aim = base; }
+      } else {
+        e.t += dt;
+        if (e.t < 0.85) e.aim = base;
+        if (e.t > 1.2) { enemyShoot(state, e, e.aim, 420, 1.8, { r: 3, life: 2 }); e.st = "idle"; e.cd = 2.4; }
+      }
+      break;
+    }
+    case "healer": {
+      const dir = d < 200 ? -1 : d > 280 ? 1 : 0;
+      moveEnemy(state, e, Math.cos(base) * speed * dir, Math.sin(base) * speed * dir, dt);
+      if (e.cd <= 0) {
+        e.cd = 3.2;
+        state.fx.push({ kind: "ring", x: e.x, y: e.y, r: 150, ttl: 0.5, max: 0.5, color: "#ffe7a8" });
+        for (const o of state.enemies) if (!o.dead && o !== e && !o.boss && dist2(o, e) < 150 * 150 && o.hp < o.maxHp) {
+          o.hp = Math.min(o.maxHp, o.hp + o.maxHp * 0.2);
+          state.fx.push({ kind: "num", x: o.x, y: o.y - 12, text: "+", ttl: 0.6, max: 0.6, color: "#ffe7a8" });
+        }
+      }
+      break;
+    }
+    case "slammer": {
+      if (e.st === "idle") {
+        moveEnemy(state, e, Math.cos(base) * speed, Math.sin(base) * speed, dt);
+        if (e.cd <= 0 && d < 170) { e.st = "wind"; e.t = 0; state.hazards.push({ kind: "warn", x: e.x, y: e.y, r: 100, t: 0.9, max: 0.9, dmg: e.dmg * 1.4, own: e.id }); }
+      } else { e.t += dt; if (e.t > 1.3) { e.st = "idle"; e.cd = 2.2; } }
+      break;
+    }
+    case "burrow": {
+      if (e.st === "idle") {
+        moveEnemy(state, e, Math.cos(base) * speed * 0.5, Math.sin(base) * speed * 0.5, dt);
+        if (e.cd <= 0) { e.st = "dive"; e.t = 0; e.hidden = true; }
+      } else if (e.st === "dive") {
+        e.t += dt;
+        moveEnemy(state, e, Math.cos(base) * speed * 1.2, Math.sin(base) * speed * 1.2, dt);
+        if (e.t > 1.4 && d < 90 || e.t > 2.4) { e.st = "pop"; e.t = 0; state.hazards.push({ kind: "warn", x: e.x, y: e.y, r: 52, t: 0.5, max: 0.5, dmg: e.dmg }); }
+      } else if (e.st === "pop") {
+        e.t += dt;
+        if (e.t > 0.5) { e.hidden = false; e.st = "stun"; e.t = 0; }
+      } else if (e.st === "stun") { e.t += dt; if (e.t > 1) { e.st = "idle"; e.cd = 2.5; } }
+      if (e.hidden) return;
+      if (e.st === "stun") return;
+      break;
+    }
+    case "ember": {
+      moveEnemy(state, e, Math.cos(base) * speed, Math.sin(base) * speed, dt);
+      e.t += dt;
+      if (e.t > 0.4) { e.t = 0; state.hazards.push({ kind: "fire", x: e.x, y: e.y, r: 12, t: 3.2, max: 3.2, dmg: e.dmg * 0.6, tick: 0 }); }
+      break;
+    }
+    case "necro": {
+      const dir = d < 230 ? -1 : d > 320 ? 1 : 0;
+      moveEnemy(state, e, Math.cos(base) * speed * dir, Math.sin(base) * speed * dir, dt);
+      if (e.cd <= 0) {
+        e.cd = 5.5;
+        if (state.enemies.filter((o) => !o.dead && o.type === "skeleton").length < 5) {
+          for (let i = -1; i <= 1; i += 2) summon(state, "skeleton", e.x + i * 22, e.y + 10, e.id);
+          state.fx.push({ kind: "ring", x: e.x, y: e.y, r: 40, ttl: 0.4, max: 0.4, color: "#6bffb0" });
+        }
+      }
+      break;
+    }
+    case "gravity": {
+      moveEnemy(state, e, Math.cos(base) * speed * 0.6, Math.sin(base) * speed * 0.6, dt);
+      if (d < 300 && d > 1) { p.x -= Math.cos(base) * 55 * dt; p.y -= Math.sin(base) * 55 * dt; pushOut(state, p, PLAYER_R); }
+      if (e.cd <= 0) { e.cd = 3.4; for (let i = 0; i < 8; i++) enemyShoot(state, e, (i / 8) * Math.PI * 2 + state.time, 120, 1, { r: 5 }); }
+      break;
+    }
+    case "enrage": {
+      const k = 1 + 1.1 * (1 - e.hp / e.maxHp);
+      moveEnemy(state, e, Math.cos(base) * speed * k, Math.sin(base) * speed * k, dt);
+      break;
+    }
     case "flutter": {
       const wob = base + Math.sin(state.time * 5 + e.id) * 0.9;
       moveEnemy(state, e, Math.cos(wob) * speed, Math.sin(wob) * speed, dt);
@@ -1332,7 +1439,7 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
     }
     if (s.life <= 0) { endShot(state, s); continue; }
     for (const e of state.enemies) {
-      if (e.dead || e.spawn > 0 || s.hit.has(e.id)) continue;
+      if (e.dead || e.spawn > 0 || e.hidden || s.hit.has(e.id)) continue;
       if (dist2(s, e) <= (e.r + s.r) ** 2) {
         s.hit.add(e.id);
         damageEnemy(state, e, s.dmg, { knock: s.explode ? 0 : 6, from: s, silent: !!s.quiet });
@@ -1366,6 +1473,19 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
     if (b.life > 0 && dist2(b, player) <= (PLAYER_R + b.r - 2) ** 2) { hurtPlayer(state, b.dmg); b.life = 0; }
   }
   state.bullets = state.bullets.filter((b) => b.life > 0);
+
+  /* Dangers au sol (flaques de feu, zones d'impact annoncées) */
+  for (const h of state.hazards) {
+    h.t -= dt;
+    if (h.kind === "fire") {
+      h.tick -= dt;
+      if (h.tick <= 0 && dist2(h, player) < (h.r + PLAYER_R) ** 2) { hurtPlayer(state, h.dmg); h.tick = 0.5; }
+    } else if (h.t <= 0) {
+      if (dist2(h, player) < (h.r + PLAYER_R) ** 2) hurtPlayer(state, h.dmg);
+      state.fx.push({ kind: "ring", x: h.x, y: h.y, r: h.r, ttl: 0.35, max: 0.35, color: "#ff7a3d" });
+    }
+  }
+  state.hazards = state.hazards.filter((h) => h.t > 0);
   state.enemies = state.enemies.filter((e) => !e.dead);
 
   /* Butin au sol */
