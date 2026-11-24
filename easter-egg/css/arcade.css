@@ -1903,5 +1903,5 @@ kbd {
 @media (pointer: coarse) { .dg-fs { display: none; } }
 .sv-side .dg-toolbar { justify-content: stretch; }
 .sv-side .dg-fs, .sv-side .dg-setup-toggle { width: 100%; }
-.sv-side .dg-setup { margin-bottom: 12px; }
-.sv-side .dg-weapons { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); max-height: 240px; }
+.sv-main .dg-setup-toggle { margin-top: 12px; }
+.sv-main .dg-setup { margin-top: 4px; }
