@@ -82,16 +82,40 @@ function createRunUI(root, wallet) {
   const heroStats = h("dl", { class: "td-stats dg-hero-stats" });
   const forge = h("div", { class: "dg-forge" });
 
+  const setupPanel = h("div", { class: "dg-setup", id: "dg-setup" },
+    charBar,
+    h("h3", { class: "subhead" }, "Arme de départ"),
+    weaponBar,
+    weaponInfo,
+    optionBar);
+  const setupToggle = h("button", { class: "map-button dg-setup-toggle", id: "dg-setup-toggle", type: "button", "aria-expanded": "true", onclick: () => setSetupOpen(setupPanel.hidden) }, "▾ Classe, arme et commandes");
+  function setSetupOpen(open) {
+    setupPanel.hidden = !open;
+    setupToggle.setAttribute("aria-expanded", String(open));
+    setupToggle.textContent = `${open ? "▾" : "▸"} Classe, arme et commandes`;
+  }
+  const fsButton = h("button", { class: "map-button dg-fs", id: "dg-fs", type: "button", title: "Plein écran (F11 non requis)", onclick: () => toggleFullscreen() }, "⛶ Plein écran");
+  fsButton.hidden = !document.fullscreenEnabled;
+  const fsTarget = () => root.querySelector(".sv-board-wrap");
+  function toggleFullscreen() {
+    const el = fsTarget();
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    else el?.requestFullscreen?.().catch(() => {});
+  }
+  document.addEventListener("fullscreenchange", () => {
+    const on = document.fullscreenElement === fsTarget();
+    fsButton.textContent = on ? "✕ Quitter le plein écran" : "⛶ Plein écran";
+    fsTarget()?.classList.toggle("is-fullscreen", on);
+  });
+
   root.replaceChildren(
     h("p", { class: "game-rules" },
       "Explore la carte de chaque étage salle par salle (minimap en haut à droite) : combats, salles d'élite, trésor, boutique, puis le boss et sa trappe vers l'étage suivant. Les portes se verrouillent tant qu'il reste des ennemis. Choisis ton arme de départ (34 armes, à débloquer avec les âmes) : le héros attaque tout seul, ou à la main si tu préfères viser. Certaines salles sont plus grandes et la caméra défile. Les âmes gagnées financent des améliorations permanentes et de nouvelles classes."),
     h("div", { class: "sv-layout" },
       h("div", { class: "sv-main" },
-        charBar,
-        h("h3", { class: "subhead" }, "Arme de départ"),
-        weaponBar,
-        weaponInfo,
-        optionBar,
+        setupToggle,
+        setupPanel,
+        h("div", { class: "dg-toolbar" }, fsButton),
         h("div", { class: "sv-board-wrap chamfer" }, stage),
         h("div", { class: "sv-bars" },
           h("div", { class: "sv-bar", role: "img", "aria-label": "Points de vie" }, hpBar, hpText)),
@@ -1070,7 +1094,7 @@ function createRunUI(root, wallet) {
   let heroKey = "";
   function renderHeroStats() {
     const st = state.stats, w = state.weapon;
-    const key = [...Object.values(st).map((v) => Math.round(v * 100)), w.id, state.player.hp > 0 ? Math.round(state.player.hp / 10) : 0].join(",");
+    const key = [...Object.values(st).map((v) => Math.round(v * 100)), state.coins, w.id, state.player.hp > 0 ? Math.round(state.player.hp / 10) : 0].join(",");
     if (key === heroKey) return;
     heroKey = key;
     const pct = (v) => `${Math.round(v * 100)} %`;
@@ -1094,7 +1118,8 @@ function createRunUI(root, wallet) {
       ["Détonateur", st.bomb ? `niv. ${st.bomb}` : "—"],
       ["Sang chaud", st.berserk ? `+${st.berserk * 13} % max` : "—"],
       ["Aimant", Math.round(st.magnet)],
-      ["Pièces", `×${st.coinMul.toFixed(1)}`],
+      ["Pièces", Math.floor(state.coins)],
+      ["Bonus pièces", `×${st.coinMul.toFixed(1)}`],
       ["Compétence", `${st.skillCd.toFixed(1)} s`]
     ];
     heroStats.replaceChildren(...rows.map(([k, v]) => h("div", {}, h("dt", {}, k), h("dd", {}, h("strong", {}, String(v))))));
@@ -1236,6 +1261,7 @@ function createRunUI(root, wallet) {
     skillQueued = false;
     setStatus("running");
     overlay.hidden = true;
+    setSetupOpen(false);
     renderMeta();
     showChoices();
     updateHud();
@@ -1261,6 +1287,7 @@ function createRunUI(root, wallet) {
   function finish() {
     stopLoop();
     setStatus("over");
+    setSetupOpen(true);
     const rw = runRewards(state);
     // Valeurs figées avant d'écrire dans le portefeuille (ses écouteurs réagissent tout de suite).
     const credits = rw.credits + wealthBonus(wallet.credits, dungeonPct(rw.floor));

@@ -1892,3 +1892,13 @@ kbd {
 .hub-journal-item.is-ready { border-left-color: var(--green, #3ddc84); }
 .dg-hero-stats { gap: 6px 10px; }
 .dg-hero-stats strong { font-size: 15px; }
+
+
+/* Donjon : panneau de préparation repliable + plein écran (v15) */
+.dg-setup[hidden] { display: none; }
+.dg-setup-toggle { width: 100%; text-align: left; margin-bottom: 8px; }
+.dg-toolbar { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.dg-fs[hidden] { display: none; }
+.sv-board-wrap.is-fullscreen { display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; padding: 0; background: #050409; border: 0; }
+.sv-board-wrap.is-fullscreen .dg-stage { width: min(100vw, calc(100vh * 1.5)); margin: 0; }
+@media (pointer: coarse) { .dg-fs { display: none; } }

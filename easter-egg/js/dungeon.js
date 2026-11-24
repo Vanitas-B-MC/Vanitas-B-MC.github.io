@@ -171,15 +171,18 @@ export const LAYOUTS = [
   { id: "pillars",  build: () => { const g = blank(); for (const [c, r] of [[3, 2], [15, 2], [3, 8], [15, 8]]) box(g, c, r, 2, 2, "#"); return g; } },
   { id: "cross",    build: () => { const g = blank(); box(g, 8, 3, 4, 1, "#"); box(g, 8, 8, 4, 1, "#"); box(g, 4, 5, 1, 2, "#"); box(g, 15, 5, 1, 2, "#"); return g; } },
   { id: "pitring",  build: () => { const g = blank(); box(g, 6, 3, 8, 6, "o"); box(g, 7, 4, 6, 4, "."); box(g, 9, 3, 2, 1, "."); box(g, 9, 8, 2, 1, "."); return g; } },
-  { id: "corridors", build: () => { const g = blank(); box(g, 3, 3, 6, 1, "#"); box(g, 11, 3, 6, 1, "#"); box(g, 3, 8, 6, 1, "#"); box(g, 11, 8, 6, 1, "#"); return g; } },
-  { id: "spikes",   build: () => { const g = blank(); box(g, 4, 3, 3, 2, "x"); box(g, 13, 3, 3, 2, "x"); box(g, 8, 8, 4, 2, "x"); box(g, 8, 4, 4, 2, "#"); return g; } },
-  { id: "checker",  build: () => { const g = blank(); for (let r = 2; r < 10; r += 2) for (let c = 4; c < 16; c += 3) g[r][c + (r % 4 ? 1 : 0)] = "#"; return g; } },
-  { id: "lanes",    build: () => { const g = blank(); box(g, 5, 1, 2, 4, "o"); box(g, 5, 7, 2, 4, "o"); box(g, 13, 1, 2, 4, "o"); box(g, 13, 7, 2, 4, "o"); return g; } },
-  { id: "diamond",  build: () => { const g = blank(); for (const [c, r] of [[9, 2], [8, 3], [10, 3], [7, 4], [11, 4], [7, 7], [11, 7], [8, 8], [10, 8], [9, 9]]) g[r][c] = "#"; return g; } },
+  { id: "corridors", build: () => { const g = blank(); box(g, 1, 3, 7, 1, "#"); box(g, 12, 3, 7, 1, "#"); box(g, 1, 8, 7, 1, "#"); box(g, 12, 8, 7, 1, "#"); return g; } },
+  // Couloir à piques : bandes de piques en travers du passage (une case sûre en quinconce), murs rattachés aux parois.
+  { id: "gauntlet",  build: () => { const g = blank(); box(g, 2, 1, 6, 3, "#"); box(g, 12, 1, 6, 3, "#"); box(g, 2, 8, 6, 3, "#"); box(g, 12, 8, 6, 3, "#"); box(g, 5, 4, 1, 3, "x"); box(g, 14, 5, 1, 3, "x"); return g; } },
+  // Carrefour : quatre blocs aux angles, les portes débouchent sur des couloirs de 4 cases.
+  { id: "crossroads", build: () => { const g = blank(); box(g, 0, 0, 8, 4, "#"); box(g, 12, 0, 8, 4, "#"); box(g, 0, 8, 8, 4, "#"); box(g, 12, 8, 8, 4, "#"); return g; } },
+  { id: "alcoves",   build: () => { const g = blank(); box(g, 3, 0, 2, 3, "#"); box(g, 15, 0, 2, 3, "#"); box(g, 3, 9, 2, 3, "#"); box(g, 15, 9, 2, 3, "#"); box(g, 6, 0, 1, 2, "#"); box(g, 13, 0, 1, 2, "#"); box(g, 6, 10, 1, 2, "#"); box(g, 13, 10, 1, 2, "#"); return g; } },
+  // Gouffre traversé par un pont central.
+  { id: "chasm",     build: () => { const g = blank(); box(g, 3, 4, 14, 4, "o"); box(g, 8, 4, 4, 4, "."); return g; } },
   { id: "corners",  build: () => { const g = blank(); box(g, 2, 2, 3, 1, "#"); box(g, 2, 2, 1, 3, "#"); box(g, 15, 2, 3, 1, "#"); box(g, 17, 2, 1, 3, "#"); box(g, 2, 9, 3, 1, "#"); box(g, 2, 7, 1, 3, "#"); box(g, 15, 9, 3, 1, "#"); box(g, 17, 7, 1, 3, "#"); return g; } },
   { id: "bigpit",   build: () => { const g = blank(); box(g, 7, 4, 6, 4, "o"); box(g, 3, 2, 1, 1, "#"); box(g, 16, 2, 1, 1, "#"); box(g, 3, 9, 1, 1, "#"); box(g, 16, 9, 1, 1, "#"); return g; } },
   { id: "arena",    build: () => { const g = blank(); box(g, 3, 2, 5, 1, "#"); box(g, 12, 2, 5, 1, "#"); box(g, 3, 9, 5, 1, "#"); box(g, 12, 9, 5, 1, "#"); box(g, 3, 3, 1, 2, "#"); box(g, 16, 3, 1, 2, "#"); box(g, 3, 7, 1, 2, "#"); box(g, 16, 7, 1, 2, "#"); return g; } },
-  { id: "islands",  build: () => { const g = blank(); box(g, 4, 3, 3, 2, "o"); box(g, 13, 3, 3, 2, "o"); box(g, 4, 7, 3, 2, "o"); box(g, 13, 7, 3, 2, "o"); box(g, 9, 5, 2, 2, "#"); return g; } }
+  { id: "colonnade", build: () => { const g = blank(); for (const c of [2, 5, 13, 16]) { box(g, c, 2, 2, 2, "#"); box(g, c, 8, 2, 2, "#"); } return g; } }
 ];
 
 // Grandes salles : générées selon COLS × ROWS (passages toujours garantis, voir dg3.mjs).
@@ -197,9 +200,17 @@ const bigLayouts = [
       box(g, cx - 8, cy - 1, 16, 2, "."); box(g, cx - 1, cy - 5, 2, 10, ".");
       box(g, cx - 4, cy - 2, 2, 1, "#"); box(g, cx + 2, cy + 1, 2, 1, "#");
       return g; } },
-  { id: "spikefield", big: true, build: (rnd, g = blank()) => {
-      for (let i = 0; i < Math.floor((COLS * ROWS) / 40); i++) box(g, 3 + Math.floor(rnd() * (COLS - 8)), 2 + Math.floor(rnd() * (ROWS - 5)), 3, 2, "x");
-      for (let r = 4; r < ROWS - 3; r += 6) box(g, Math.floor(COLS / 2) - 2, r, 4, 1, "#");
+  // Galerie de piques : travées délimitées par des piliers rattachés aux murs, bandes de piques en travers avec une allée sûre.
+  { id: "spikehall", big: true, build: (rnd, g = blank()) => {
+      for (let c = 5; c < COLS - 5; c += 7) {
+        box(g, c, 0, 2, 4, "#"); box(g, c, ROWS - 4, 2, 4, "#");
+        box(g, c, 4, 2, ROWS - 9, "x");
+      }
+      return g; } },
+  // Serpentin : longues cloisons rattachées alternativement à gauche et à droite.
+  { id: "serpentine", big: true, build: (rnd, g = blank()) => {
+      let left = true;
+      for (let r = 3; r < ROWS - 2; r += 4) { if (left) box(g, 0, r, COLS - 6, 1, "#"); else box(g, 6, r, COLS - 6, 1, "#"); left = !left; }
       return g; } },
   { id: "archipelago", big: true, build: (rnd, g = blank()) => {
       for (let r = 1; r + 5 < ROWS; r += 6) for (let c = 2; c + 5 < COLS; c += 6) {
@@ -222,8 +233,8 @@ function mulberry(seed) {
 
 function clearDoorways(g) {
   const mc = Math.floor(COLS / 2), mr = Math.floor(ROWS / 2);
-  box(g, mc - 2, 0, 4, 2, "."); box(g, mc - 2, ROWS - 2, 4, 2, ".");
-  box(g, 0, mr - 2, 2, 4, "."); box(g, COLS - 2, mr - 2, 2, 4, ".");
+  box(g, mc - 2, 0, 4, 3, "."); box(g, mc - 2, ROWS - 3, 4, 3, ".");
+  box(g, 0, mr - 2, 3, 4, "."); box(g, COLS - 3, mr - 2, 3, 4, ".");
   const centre = g[mr - 1][mc - 1];
   if (COLS === 20 && ROWS === 12) box(g, mc - 2, mr - 2, 4, 4, centre === "#" ? "#" : centre === "o" ? "o" : "."); // garde le centre tel quel s'il est plein
   else { box(g, mc - 2, 2, 4, ROWS - 4, "."); box(g, 2, mr - 2, COLS - 4, 4, "."); }
@@ -409,8 +420,8 @@ function enterRoom(state, room, fromDir) {
     state.cleared = true;
     state.wavesLeft = 0;
     if (room.type === "boss") {   // la trappe et le coffre restent dans la salle du boss
-      if (room.trap) state.trapdoor = { x: (X0 + X1) / 2 + 60, y: (Y0 + Y1) / 2 + 30 };
-      if (room.bossChest) state.chest = { x: (X0 + X1) / 2 - 60, y: (Y0 + Y1) / 2 + 30, opened: false, kind: "boss" };
+      if (room.trap) state.trapdoor = freeSpot(state, (X0 + X1) / 2 + 60, (Y0 + Y1) / 2 + 30);
+      if (room.bossChest) state.chest = { ...freeSpot(state, (X0 + X1) / 2 - 60, (Y0 + Y1) / 2 + 30), opened: false, kind: "boss" };
     }
   } else if (room.type === "boss") {
     state.cleared = false;
@@ -430,7 +441,7 @@ function enterRoom(state, room, fromDir) {
   } else {
     state.cleared = true;
     room.cleared = true;
-    if (room.type === "treasure" && !room.taken) state.chest = { x: (X0 + X1) / 2, y: (Y0 + Y1) / 2, opened: false, kind: "treasure" };
+    if (room.type === "treasure" && !room.taken) state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: "treasure" };
     if (room.type === "shop") {
       if (!room.stands) {
         const pool = ITEM_IDS.filter((id) => (state.owned[id] || 0) < ITEMS[id].max);
@@ -478,7 +489,26 @@ function hurtPlayer(state, amount) {
   }
 }
 
+// Case libre ('.') la plus proche d'un point : empêche coffres, trappe et butin d'apparaître dans un mur, un trou ou des piques.
+export function freeSpot(state, x, y) {
+  const g = state.grid;
+  const c0 = Math.floor((x - X0) / TILE), r0 = Math.floor((y - Y0) / TILE);
+  const ok = (c, r) => g[r]?.[c] === ".";
+  const roomy = (c, r) => ok(c, r) && ok(c + 1, r) && ok(c - 1, r) && ok(c, r + 1) && ok(c, r - 1);
+  for (const test of [roomy, ok]) {
+    let best = null, bd = Infinity;
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      if (!test(c, r)) continue;
+      const d = (c - c0) ** 2 + (r - r0) ** 2;
+      if (d < bd) { bd = d; best = { x: X0 + c * TILE + TILE / 2, y: Y0 + r * TILE + TILE / 2 }; }
+    }
+    if (best) return (c0 >= 0 && c0 < COLS && r0 >= 0 && r0 < ROWS && test(c0, r0)) ? { x, y } : best;
+  }
+  return { x, y };
+}
+
 function drop(state, x, y, kind, v) {
+  if (state.grid) { const q = freeSpot(state, x, y); x = q.x; y = q.y; }
   if (state.pickups.length < 80) state.pickups.push({ kind, x, y, v });
 }
 
@@ -1517,8 +1547,8 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
       events.roomCleared = true;
       state.bullets = [];
       if (state.room.type === "boss") {
-        state.chest = { x: (X0 + X1) / 2 - 60, y: (Y0 + Y1) / 2 + 30, opened: false, kind: "boss" };
-        state.trapdoor = { x: (X0 + X1) / 2 + 60, y: (Y0 + Y1) / 2 + 30 };
+        state.chest = { ...freeSpot(state, (X0 + X1) / 2 - 60, (Y0 + Y1) / 2 + 30), opened: false, kind: "boss" };
+        state.trapdoor = freeSpot(state, (X0 + X1) / 2 + 60, (Y0 + Y1) / 2 + 30);
         state.room.trap = true;
         state.room.bossChest = true;
       } else if (state.rng() < 0.5) {

@@ -46,3 +46,4 @@ assets/                     favicon, images
 3. Si le fichier a changé, le workflow le commit : GitHub Pages republie le site.
 
 - Donjon v14 : 11 nouveaux ennemis pour les étages élevés (Ombre, Tireur d'élite, Prêtre, Colosse, Ver fouisseur, Drones, Ardent, Nécromancien, Magnétar, Berserker + Squelettes invoqués), dangers au sol et nouveaux designs.
+- Donjon v15 : salles retravaillées (couloirs, carrefour, gouffre à pont, galerie de piques, serpentin), butin/coffres/trappe toujours sur une case libre, panneau classe/arme repliable, pièces dans les stats, bouton plein écran (PC).
