@@ -7,7 +7,7 @@ import {
   W, H, X0, Y0, X1, Y1, TILE, COLS, ROWS, WORLD_W, WORLD_H, DOORS, PLAYER_R, CLASSES, FREE_CLASS, META, ULTS, ultsOf, ultFor, ITEMS, ENEMIES, BOSSES, MEGAS, WEAPONS, weaponById, roomLabel,
   createState, update, chooseItem, runRewards
 } from "./dungeon.js";
-import { describe, metaCost } from "./dungeon.js";
+import { describe, metaCost, RARITIES, SYNERGIES, rarityOf } from "./dungeon.js";
 import { wealthBonus, dungeonPct } from "./rewards.js";
 import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
 import { createHubUI } from "./ui-hub.js";
@@ -327,9 +327,10 @@ function createRunUI(root, wallet) {
       const x = d === "l" ? door.x - 14 : d === "r" ? door.x + 2 : door.x - w / 2;
       const y = d === "u" ? door.y - 14 : d === "d" ? door.y + 2 : door.y - hgt / 2;
       const secretDoor = state.room.secret?.found && state.room.secret.dir === d;
+      const greedDoor = state.room.greed?.open && state.room.greed.dir === d;
       ctx.fillStyle = open ? "#0a0a12" : "#2a1620";
       ctx.fillRect(x, y, w, hgt);
-      ctx.strokeStyle = secretDoor ? "#b020ff" : open ? "#00f0ff" : "#ff3b5c";
+      ctx.strokeStyle = secretDoor ? "#b020ff" : greedDoor ? "#ffd24a" : open ? "#00f0ff" : "#ff3b5c";
       ctx.lineWidth = 2;
       glow(ctx.strokeStyle, open ? 12 : 4);
       ctx.strokeRect(x, y, w, hgt);
@@ -372,6 +373,23 @@ function createRunUI(root, wallet) {
       ctx.font = "bold 10px monospace";
       ctx.textAlign = "center";
       ctx.fillText("ÉTAGE SUIVANT", t.x, t.y - 22);
+    }
+    // statue d'avarice
+    if (state.statue && state.room.greed) {
+      const st = state.statue, g = state.room.greed, pulse = 0.5 + 0.5 * Math.sin(state.time * 3);
+      ctx.fillStyle = "#3a2a08"; ctx.fillRect(st.x - 16, st.y + 12, 32, 8);
+      ctx.fillStyle = g.open ? "#fff3b0" : "#ffd24a"; glow("#ffd24a", 8 + pulse * 10);
+      ctx.beginPath(); ctx.moveTo(st.x - 12, st.y + 12); ctx.lineTo(st.x - 8, st.y - 8); ctx.lineTo(st.x + 8, st.y - 8); ctx.lineTo(st.x + 12, st.y + 12); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.arc(st.x, st.y - 14, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(st.x - 8, st.y - 20); ctx.lineTo(st.x - 6, st.y - 28); ctx.lineTo(st.x - 2, st.y - 22); ctx.lineTo(st.x, st.y - 29); ctx.lineTo(st.x + 2, st.y - 22); ctx.lineTo(st.x + 6, st.y - 28); ctx.lineTo(st.x + 8, st.y - 20); ctx.fill();
+      noGlow();
+      ctx.fillStyle = "#07060c"; ctx.fillRect(st.x - 5, st.y - 16, 3, 3); ctx.fillRect(st.x + 2, st.y - 16, 3, 3);
+      ctx.textAlign = "center"; ctx.font = "bold 10px monospace";
+      if (!g.open) {
+        ctx.fillStyle = "#1b1830"; ctx.fillRect(st.x - 24, st.y + 24, 48, 6);
+        ctx.fillStyle = "#ffd24a"; ctx.fillRect(st.x - 24, st.y + 24, 48 * (g.paid / g.need), 6);
+        ctx.fillStyle = "#ffe9a0"; ctx.fillText(`Statue d'avarice ${g.paid}/${g.need} ⛁`, st.x, st.y - 34);
+      } else { ctx.fillStyle = "#ffe9a0"; ctx.fillText("Passage ouvert", st.x, st.y - 34); }
     }
     // boutique
     if (state.room.stands) {
@@ -428,6 +446,55 @@ function createRunUI(root, wallet) {
 
   const angleBetween = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
   const base0 = (e) => Math.atan2(state.player.y - e.y, state.player.x - e.x);
+  // Dessin générique des ennemis définis par une « design » (enemies2.js) : corps + cornes, ailes, queue, pointes, anneau, yeux.
+  function drawDesign(e, def, fill, r, t) {
+    const d = def.design, x = e.x, y = e.y + (def.flying ? Math.sin(t * 5 + e.id) * 2 : 0), c2 = d.c2 || "#ffffff";
+    const dark = "#07060c", aim = base0(e);
+    ctx.lineJoin = "round";
+    if (d.wings) {
+      const flap = Math.sin(t * 20 + e.id) * r * 0.5;
+      for (const sg of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x + sg * r * 0.4, y); ctx.lineTo(x + sg * r * 1.9, y - flap - r * 0.5); ctx.lineTo(x + sg * r * 1.5, y + r * 0.2); ctx.lineTo(x + sg * r * 0.6, y + r * 0.7); ctx.closePath(); ctx.fill(); }
+    }
+    if (d.tail) {
+      ctx.lineWidth = Math.max(2, r * 0.3);
+      ctx.beginPath(); ctx.moveTo(x, y + r * 0.5); ctx.quadraticCurveTo(x + Math.sin(t * 6 + e.id) * r, y + r * 1.4, x + Math.sin(t * 3 + e.id) * r * 0.9, y + r * 2); ctx.stroke();
+    }
+    if (d.spikes) {
+      ctx.fillStyle = c2;
+      for (let i = 0; i < d.spikes; i++) { const a = (i * Math.PI * 2) / d.spikes + t * (d.sh === "star" ? 1.2 : 0.2); ctx.beginPath(); ctx.moveTo(x + Math.cos(a - 0.14) * r * 0.9, y + Math.sin(a - 0.14) * r * 0.9); ctx.lineTo(x + Math.cos(a) * r * 1.45, y + Math.sin(a) * r * 1.45); ctx.lineTo(x + Math.cos(a + 0.14) * r * 0.9, y + Math.sin(a + 0.14) * r * 0.9); ctx.fill(); }
+      ctx.fillStyle = fill;
+    }
+    ctx.beginPath();
+    switch (d.sh) {
+      case "dia": ctx.moveTo(x, y - r * 1.15); ctx.lineTo(x + r * 0.85, y); ctx.lineTo(x, y + r * 1.15); ctx.lineTo(x - r * 0.85, y); ctx.closePath(); break;
+      case "tri": ctx.moveTo(x, y - r * 1.15); ctx.lineTo(x + r * 1.05, y + r * 0.85); ctx.lineTo(x - r * 1.05, y + r * 0.85); ctx.closePath(); break;
+      case "sq": ctx.rect(x - r * 0.9, y - r * 0.9, r * 1.8, r * 1.8); break;
+      case "hex": for (let i = 0; i < 6; i++) { const a = (i * Math.PI) / 3 + Math.PI / 6; i ? ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r) : ctx.moveTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } ctx.closePath(); break;
+      case "star": ctx.arc(x, y, r * 0.8, 0, Math.PI * 2); break;
+      case "cap": ctx.arc(x, y - r * 0.15, r, Math.PI, 0); ctx.lineTo(x + r * 0.35, y + r * 0.9); ctx.lineTo(x - r * 0.35, y + r * 0.9); ctx.closePath(); break;
+      default: ctx.arc(x, y, r, 0, Math.PI * 2);
+    }
+    ctx.fill();
+    if (d.sh === "cap") { ctx.fillStyle = c2; for (const [dx, dy] of [[-0.4, -0.5], [0.2, -0.7], [0.5, -0.2]]) { ctx.beginPath(); ctx.arc(x + dx * r, y + dy * r, r * 0.16, 0, Math.PI * 2); ctx.fill(); } ctx.fillStyle = fill; }
+    if (d.horns) {
+      ctx.fillStyle = c2;
+      for (let i = 0; i < d.horns; i++) { const sg = d.horns === 1 ? 0 : i ? 1 : -1; ctx.beginPath(); ctx.moveTo(x + sg * r * 0.35, y - r * 0.8); ctx.lineTo(x + sg * r * 0.95, y - r * 1.7); ctx.lineTo(x + sg * r * 0.8, y - r * 0.55); ctx.closePath(); ctx.fill(); }
+      ctx.fillStyle = fill;
+    }
+    if (d.ring) {
+      ctx.strokeStyle = c2; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(x, y, r * 1.5, r * 0.5, t * 1.4 + e.id, 0, Math.PI * 2); ctx.stroke();
+    }
+    const n = d.eyes ?? 2;
+    ctx.fillStyle = dark;
+    for (let i = 0; i < n; i++) {
+      const ox = n === 1 ? 0 : n === 2 ? (i ? 1 : -1) * r * 0.38 : (i - 1) * r * 0.42, oy = -r * 0.2 + (n === 3 && i === 1 ? -r * 0.25 : 0);
+      ctx.beginPath(); ctx.arc(x + ox, y + oy, Math.max(2, r * 0.22), 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = c2 === "#07060c" ? "#ffffff" : "#ffffff"; ctx.fillRect(x + ox + Math.cos(aim) * 1.5 - 1, y + oy + Math.sin(aim) * 1.5 - 1, 2, 2); ctx.fillStyle = dark;
+    }
+    ctx.fillStyle = fill;
+  }
+
   function drawEnemy(e) {
     const isBoss = e.boss;
     const def = isBoss ? (BOSSES.find((b) => b.id === e.type) || MEGAS.find((b) => b.id === e.type)) : ENEMIES[e.type];
@@ -493,7 +560,8 @@ function createRunUI(root, wallet) {
     glow(color, e.elite || isBoss ? 18 : 8);
     const r = e.r;
     const flash = Math.floor(t * 14) % 2 === 0;
-    switch (e.type) {
+    if (def.design) drawDesign(e, def, fill, r, t);
+    else switch (e.type) {
       case "bat": {
         const flap = Math.sin(t * 22 + e.id) * 5;
         ctx.beginPath();
@@ -746,6 +814,69 @@ function createRunUI(root, wallet) {
         for (let i = 0; i < 4; i++) { const a = t * 1.8 + (i * Math.PI) / 2; ctx.fillStyle = "#d9ffe9"; ctx.beginPath(); ctx.arc(e.x + Math.cos(a) * (r + 14), e.y + Math.sin(a) * (r + 14) * 0.6, 4, 0, Math.PI * 2); ctx.fill(); }
         break;
       }
+      case "skydragon": {
+        const flap = Math.sin(t * 5) * r * 0.35, br = e.act?.k === "breath";
+        for (const sg of [-1, 1]) { ctx.beginPath(); ctx.moveTo(e.x + sg * r * 0.3, e.y); ctx.lineTo(e.x + sg * r * 2.3, e.y - r * 0.9 - flap); ctx.lineTo(e.x + sg * r * 1.9, e.y + r * 0.1); ctx.lineTo(e.x + sg * r * 1.4, e.y + r * 0.4); ctx.lineTo(e.x + sg * r * 0.9, e.y + r * 0.6); ctx.lineTo(e.x + sg * r * 0.4, e.y + r * 0.9); ctx.closePath(); ctx.fill(); }
+        ctx.beginPath(); ctx.ellipse(e.x, e.y + r * 0.1, r * 0.7, r * 1.0, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(e.x - r * 0.4, e.y - r * 0.6); ctx.lineTo(e.x, e.y - r * 1.5); ctx.lineTo(e.x + r * 0.4, e.y - r * 0.6); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#ffffff"; for (const sg of [-1, 1]) { ctx.beginPath(); ctx.moveTo(e.x + sg * r * 0.2, e.y - r * 1.1); ctx.lineTo(e.x + sg * r * 0.55, e.y - r * 1.7); ctx.lineTo(e.x + sg * r * 0.4, e.y - r * 1.0); ctx.fill(); }
+        ctx.fillStyle = br ? "#ffb347" : "#fcee0a"; ctx.fillRect(e.x - 7, e.y - r * 0.95, 4, 4); ctx.fillRect(e.x + 3, e.y - r * 0.95, 4, 4);
+        ctx.strokeStyle = fill; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(e.x, e.y + r * 1.0); ctx.quadraticCurveTo(e.x + Math.sin(t * 3) * r, e.y + r * 1.8, e.x + Math.sin(t * 2) * r * 0.6, e.y + r * 2.4); ctx.stroke();
+        break;
+      }
+      case "chronos": {
+        ctx.fillStyle = "#07060c"; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = fill; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.stroke();
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 12; i++) { const a = (i * Math.PI) / 6; ctx.beginPath(); ctx.moveTo(e.x + Math.cos(a) * r * 0.8, e.y + Math.sin(a) * r * 0.8); ctx.lineTo(e.x + Math.cos(a) * r * 0.95, e.y + Math.sin(a) * r * 0.95); ctx.stroke(); }
+        const fast = e.act ? 6 : 1.4;
+        ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(e.x + Math.cos(t * fast) * r * 0.75, e.y + Math.sin(t * fast) * r * 0.75); ctx.stroke();
+        ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(e.x + Math.cos(t * fast / 8) * r * 0.5, e.y + Math.sin(t * fast / 8) * r * 0.5); ctx.stroke();
+        ctx.fillStyle = fill; for (let i = 0; i < 3; i++) { const a = -t * 1.1 + (i * Math.PI * 2) / 3; ctx.beginPath(); ctx.arc(e.x + Math.cos(a) * (r + 14), e.y + Math.sin(a) * (r + 14), 4, 0, Math.PI * 2); ctx.fill(); }
+        ctx.beginPath(); ctx.arc(e.x, e.y, 3, 0, Math.PI * 2); ctx.fill();
+        break;
+      }
+      case "obsidian": {
+        ctx.fillStyle = "#14102a"; ctx.beginPath();
+        for (let i = 0; i < 8; i++) { const a = (i * Math.PI) / 4 + Math.PI / 8, rr = r * (i % 2 ? 0.95 : 1.15); i ? ctx.lineTo(e.x + Math.cos(a) * rr, e.y + Math.sin(a) * rr) : ctx.moveTo(e.x + Math.cos(a) * rr, e.y + Math.sin(a) * rr); }
+        ctx.closePath(); ctx.fill(); ctx.strokeStyle = fill; ctx.lineWidth = 3; ctx.stroke();
+        ctx.lineWidth = 2; ctx.globalAlpha = 0.6 + 0.3 * Math.sin(t * 4);
+        for (const [a, b, c, d2] of [[-0.6, -0.5, -0.1, 0.1], [0.5, -0.7, 0.2, -0.1], [-0.3, 0.6, 0.1, 0.2], [0.6, 0.4, 0.2, 0.1]]) { ctx.beginPath(); ctx.moveTo(e.x + a * r, e.y + b * r); ctx.lineTo(e.x + c * r, e.y + d2 * r); ctx.stroke(); }
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = e.act?.k === "slam" || e.act?.k === "leap" ? "#ffffff" : "#ff8a3d"; ctx.fillRect(e.x - r * 0.5, e.y - r * 0.3, r * 0.3, r * 0.2); ctx.fillRect(e.x + r * 0.2, e.y - r * 0.3, r * 0.3, r * 0.2);
+        break;
+      }
+      case "demonlord": {
+        for (const sg of [-1, 1]) { ctx.beginPath(); ctx.moveTo(e.x + sg * r * 0.5, e.y - r * 0.2); ctx.lineTo(e.x + sg * r * 2.0, e.y - r * 1.1 + Math.sin(t * 3) * 4); ctx.lineTo(e.x + sg * r * 1.5, e.y + r * 0.3); ctx.lineTo(e.x + sg * r * 0.7, e.y + r * 0.5); ctx.closePath(); ctx.fill(); }
+        ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#e8e0d0"; for (const sg of [-1, 1]) { ctx.beginPath(); ctx.moveTo(e.x + sg * r * 0.4, e.y - r * 0.7); ctx.lineTo(e.x + sg * r * 1.2, e.y - r * 1.9); ctx.lineTo(e.x + sg * r * 0.9, e.y - r * 0.5); ctx.fill(); }
+        ctx.fillStyle = "#ffd84a"; ctx.fillRect(e.x - r * 0.5, e.y - r * 0.2, r * 0.35, 4); ctx.fillRect(e.x + r * 0.15, e.y - r * 0.2, r * 0.35, 4);
+        ctx.fillStyle = "#07060c"; ctx.fillRect(e.x - r * 0.4, e.y + r * 0.3, r * 0.8, 4);
+        ctx.fillStyle = e.act?.k === "breath" ? "#ff8a3d" : "#ff3b5c"; for (let i = -2; i <= 2; i++) ctx.fillRect(e.x + i * r * 0.2 - 1, e.y + r * 0.3 - Math.abs(i) * 0, 2, 4);
+        break;
+      }
+      case "voidavatar": {
+        ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = fill; ctx.lineWidth = 3;
+        for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.ellipse(e.x, e.y, r + 8 + i * 5, (r + 8 + i * 5) * 0.35, t * (0.9 + i * 0.4) + i, 0, Math.PI * 2); ctx.globalAlpha = 0.85 - i * 0.18; ctx.stroke(); }
+        ctx.globalAlpha = 1;
+        for (let i = 0; i < 6; i++) { const a = t * 0.7 + (i * Math.PI) / 3; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(e.x + Math.cos(a) * r * 0.9, e.y + Math.sin(a) * r * 0.9); ctx.quadraticCurveTo(e.x + Math.cos(a + 0.5) * r * 1.5, e.y + Math.sin(a + 0.5) * r * 1.5, e.x + Math.cos(a + 0.2) * r * 2, e.y + Math.sin(a + 0.2) * r * 2); ctx.stroke(); }
+        const pe = base0(e); ctx.fillStyle = fill;
+        for (const [dx, dy, k] of [[0, 0, 0.5], [-0.55, -0.35, 0.2], [0.55, -0.35, 0.2], [-0.4, 0.45, 0.16], [0.4, 0.45, 0.16]]) { ctx.beginPath(); ctx.ellipse(e.x + dx * r, e.y + dy * r, r * k * 1.4, r * k, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = "#fff"; ctx.fillRect(e.x + dx * r + Math.cos(pe) * r * k * 0.5 - 1.5, e.y + dy * r + Math.sin(pe) * r * k * 0.4 - 1.5, 3, 3); ctx.fillStyle = fill; }
+        break;
+      }
+      case "ultragreed": {
+        const ph = e.phase || 1, spin = t * 3;
+        ctx.fillStyle = "#7a5a10"; ctx.fillRect(e.x - r * 0.7, e.y + r * 0.3, r * 1.4, r * 0.9);
+        ctx.fillStyle = fill; ctx.beginPath(); ctx.moveTo(e.x - r * 0.9, e.y + r * 0.4); ctx.lineTo(e.x - r * 0.6, e.y - r * 0.6); ctx.lineTo(e.x + r * 0.6, e.y - r * 0.6); ctx.lineTo(e.x + r * 0.9, e.y + r * 0.4); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.arc(e.x, e.y - r * 0.5, r * 0.62, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#fff3b0"; ctx.beginPath(); ctx.moveTo(e.x - r * 0.65, e.y - r * 0.95); for (let i = 0; i < 5; i++) { ctx.lineTo(e.x - r * 0.65 + (i + 0.5) * r * 0.26, e.y - r * 1.5 + (i % 2) * r * 0.2); ctx.lineTo(e.x - r * 0.65 + (i + 1) * r * 0.26, e.y - r * 0.95); } ctx.fill();
+        ctx.fillStyle = "#07060c"; ctx.font = `bold ${Math.round(r * 0.7)}px monospace`; ctx.textAlign = "center";
+        ctx.fillText("$", e.x - r * 0.28, e.y - r * 0.3); ctx.fillText("$", e.x + r * 0.28, e.y - r * 0.3);
+        ctx.fillStyle = "#07060c"; ctx.fillRect(e.x - r * 0.3, e.y - r * 0.05, r * 0.6, 3);
+        for (let i = 0; i < ph + 2; i++) { const a = spin + (i * Math.PI * 2) / (ph + 2); ctx.fillStyle = "#fcee0a"; ctx.beginPath(); ctx.ellipse(e.x + Math.cos(a) * (r + 18), e.y + Math.sin(a) * (r + 18) * 0.5, 5, 5 * Math.abs(Math.cos(a * 2 + t)), 0, 0, Math.PI * 2); ctx.fill(); }
+        break;
+      }
       case "overmind": {
         ctx.fillStyle = "#0d0612"; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = fill; ctx.lineWidth = 3;
@@ -803,7 +934,7 @@ function createRunUI(root, wallet) {
       ctx.arc(e.x, e.y, e.r + 4, 0, Math.PI * 2);
       ctx.stroke();
     }
-    if (!["bat", "wisp", "turret", "sentinel", "spider", "reaper", "orbiter", "lich", "eclipse", "hydra", "titan", "architect", "storm", "warden", "hive", "dread", "quake", "necrolord", "overmind", "shade", "sniper", "priest", "colossus", "burrower", "drone", "ember", "necro", "skeleton", "magnetar", "berserker"].includes(e.type)) {
+    if (!["bat", "wisp", "turret", "sentinel", "spider", "reaper", "orbiter", "lich", "eclipse", "hydra", "titan", "architect", "storm", "warden", "hive", "dread", "quake", "necrolord", "overmind", "shade", "sniper", "priest", "colossus", "burrower", "drone", "ember", "necro", "skeleton", "magnetar", "berserker"].includes(e.type) && !def.design) {
       ctx.fillStyle = "#07060c";
       ctx.fillRect(e.x - e.r * 0.45, e.y - e.r * 0.25, 3, 3);
       ctx.fillRect(e.x + e.r * 0.45 - 3, e.y - e.r * 0.25, 3, 3);
@@ -1207,9 +1338,15 @@ function createRunUI(root, wallet) {
       noGlow();
     }
     for (const h of state.hazards || []) {
-      if (h.kind === "fire") {
+      if (h.kind === "well") {
         const k = Math.min(1, h.t / 0.6);
-        ctx.globalAlpha = 0.55 * k; glow("#ff6a1a", 10); ctx.fillStyle = "#ff6a1a";
+        ctx.globalAlpha = 0.9 * k; ctx.fillStyle = "#07060c"; ctx.beginPath(); ctx.arc(h.x, h.y, h.r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#8e6bff"; ctx.lineWidth = 2; glow("#8e6bff", 10);
+        for (let i = 0; i < 3; i++) { ctx.globalAlpha = (0.7 - i * 0.18) * k; ctx.beginPath(); ctx.arc(h.x, h.y, h.r + 8 + i * 14 - ((state.time * 30) % 14), state.time * 4 + i, state.time * 4 + i + 3.2); ctx.stroke(); }
+        noGlow(); ctx.globalAlpha = 1;
+      } else if (h.kind === "fire") {
+        const k = Math.min(1, h.t / 0.6), hc = h.col || "#ff6a1a";
+        ctx.globalAlpha = 0.55 * k; glow(hc, 10); ctx.fillStyle = hc;
         ctx.beginPath(); ctx.arc(h.x, h.y, h.r * (0.8 + 0.15 * Math.sin(state.time * 14 + h.x)), 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#ffd24a"; ctx.beginPath(); ctx.arc(h.x, h.y, h.r * 0.45, 0, Math.PI * 2); ctx.fill();
         noGlow(); ctx.globalAlpha = 1;
@@ -1323,7 +1460,7 @@ function createRunUI(root, wallet) {
   let heroKey = "";
   function renderHeroStats() {
     const st = state.stats, w = state.weapon;
-    const key = [...Object.values(st).map((v) => Math.round(v * 100)), state.coins, w.id, state.player.hp > 0 ? Math.round(state.player.hp / 10) : 0].join(",");
+    const key = [...Object.values(st).map((v) => Math.round(v * 100)), state.coins, w.id, state.extraWeapons.length, state.synergies.length, state.player.hp > 0 ? Math.round(state.player.hp / 10) : 0].join(",");
     if (key === heroKey) return;
     heroKey = key;
     const pct = (v) => `${Math.round(v * 100)} %`;
@@ -1349,19 +1486,25 @@ function createRunUI(root, wallet) {
       ["Aimant", Math.round(st.magnet)],
       ["Pièces", Math.floor(state.coins)],
       ["Bonus pièces", `×${st.coinMul.toFixed(1)}`],
-      ["Compétence", `${st.skillCd.toFixed(1)} s`]
+      ["Compétence", `${st.skillCd.toFixed(1)} s`],
+      ["Armes", state.extraWeapons.length ? `${1 + state.extraWeapons.length} / ${1 + 3}` : "1"],
+      ["Synergies", state.synergies.length || "—"],
+      ["Choc thermique", st.thermal ? `+${Math.round(st.thermal * 100)} %` : "—"]
     ];
     heroStats.replaceChildren(...rows.map(([k, v]) => h("div", {}, h("dt", {}, k), h("dd", {}, h("strong", {}, String(v))))));
   }
 
   let ownedKey = "";
   function renderOwned() {
-    const key = JSON.stringify(state.owned);
+    const key = JSON.stringify([state.owned, state.extraWeapons.map((x) => x.id), state.synergies]);
     if (key === ownedKey) return;
     ownedKey = key;
     const entries = Object.entries(state.owned);
-    ownedList.replaceChildren(...(entries.length
-      ? entries.map(([id, n]) => h("li", { title: ITEMS[id].desc }, `${ITEMS[id].name} ×${n}`))
+    const rows = [];
+    if (state.extraWeapons.length) rows.push(h("li", { class: "sv-owned-sec" }, "Armes : " + [state.weapon.name, ...state.extraWeapons.map((x) => x.w.name)].join(" · ")));
+    for (const sid of state.synergies) { const sy = SYNERGIES.find((q) => q.id === sid); rows.push(h("li", { class: "sv-syn", title: `${sy.hint} → ${sy.text}` }, `★ ${sy.name} — ${sy.text}`)); }
+    ownedList.replaceChildren(...(entries.length || rows.length
+      ? [...rows, ...entries.map(([id, n]) => h("li", { title: ITEMS[id].desc, class: `sv-r-${rarityOf(id)}`, style: `--rc:${(RARITIES[rarityOf(id)] || RARITIES.common).color}` }, `${ITEMS[id].name} ×${n}`))]
       : [h("li", { class: "sv-owned-empty" }, "Aucun objet (ouvre les coffres)")]));
   }
 
@@ -1377,9 +1520,11 @@ function createRunUI(root, wallet) {
     choiceList.replaceChildren(...state.choices.map((id, i) => {
       const d = describe(id);
       const owned = state.owned[id] || 0;
-      return h("button", { class: "sv-choice", type: "button", onclick: () => pick(id) },
+      const ra = RARITIES[d.rarity] || RARITIES.common;
+      return h("button", { class: `sv-choice sv-r-${d.rarity}`, type: "button", style: `--rc:${ra.color}`, onclick: () => pick(id) },
         h("span", { class: "sv-choice-key" }, String(i + 1)),
         h("strong", {}, d.name),
+        h("em", { class: "sv-rar" }, ra.name + (d.grant ? " · arme" : "")),
         h("span", {}, d.desc + (owned ? ` (niv. ${owned} → ${owned + 1})` : "")));
     }));
     choicePanel.hidden = false;

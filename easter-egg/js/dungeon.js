@@ -30,7 +30,11 @@ export function setRoomSize(size) {
 }
 export { WEAPONS, WEAPON_IDS, FREE_WEAPONS, weaponById } from "./weapons.js";
 import { weaponById } from "./weapons.js";
-import { EXTRA_ITEMS } from "./items.js";
+import { EXTRA_ITEMS, RARITIES, applySpec, GREED_MYTHICS, TITAN_MYTHICS, LEGENDS } from "./items.js";
+import { ENEMIES2, ENEMY2_THEMES } from "./enemies2.js";
+import { SYNERGIES, TAGS, activeSynergies } from "./synergy.js";
+export { SYNERGIES, TAGS, TAG_NAMES } from "./synergy.js";
+export { RARITIES } from "./items.js";
 
 const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -105,7 +109,8 @@ Object.assign(ITEMS, EXTRA_ITEMS);
 export const ITEM_IDS = Object.keys(ITEMS);
 export const LEGEND_IDS = ITEM_IDS.filter((id) => ITEMS[id].legend);
 const HEAL_CHOICE = { name: "Réparation", desc: "Soigne 40 % des PV" };
-export const describe = (id) => (id === "heal" ? { id, ...HEAL_CHOICE } : { id, ...ITEMS[id] });
+export const describe = (id) => (id === "heal" ? { id, rarity: "common", ...HEAL_CHOICE } : { id, rarity: "common", ...ITEMS[id] });
+export const rarityOf = (id) => ITEMS[id]?.rarity || "common";
 
 /* ---------- Ennemis ---------- */
 
@@ -138,6 +143,8 @@ export const ENEMIES = {
   magnetar: { name: "Magnétar", hp: 70, speed: 30, r: 12, dmg: 12, ai: "gravity", color: "#7a5cff", cost: 4, flying: true, minFloor: 7 },
   berserker:{ name: "Berserker", hp: 80, speed: 48, r: 12, dmg: 16, ai: "enrage", color: "#ff3030", cost: 3.5, minFloor: 6 }
 };
+ENEMIES.greedling = { name: "Gobelin avide", hp: 34, speed: 78, r: 8, dmg: 10, ai: "chase", color: "#ffd24a", cost: 0, burst: { n: 6, sp: 100 }, design: { sh: "orb", c2: "#fff3b0", horns: 2, eyes: 2 } };
+Object.assign(ENEMIES, ENEMIES2);
 export const ENEMY_IDS = Object.keys(ENEMIES);
 
 export const BOSSES = [
@@ -153,6 +160,7 @@ export const bossFor = (floor) => BOSSES[(floor - 1 + BOSSES.length * 100) % BOS
 /* ---------- Grands boss (tous les 10 étages) : 10 boss à phases, chacun avec son arène dédiée ---------- */
 
 // kit : attaques dans l'ordre de déblocage (2 au début, une de plus à chaque phase). gap : pause entre deux attaques.
+const TITAN_AT = [0.86, 0.72, 0.58, 0.45, 0.33, 0.22, 0.1];
 export const MEGAS = [
   { id: "hydra",     name: "Hydre des marais",     hp: 1150, speed: 34, r: 30, dmg: 15, color: "#3ddc84", flying: true, mv: "orbit", arena: "marsh", gap: 1.5,
     desc: "Marécages : des mares l'entourent, ses têtes crachent des nappes toxiques.", adds: ["slime", 2],
@@ -188,13 +196,43 @@ export const MEGAS = [
   { id: "eclipse", secret: true, name: "L'Éclipse sans nom", hp: 2600, speed: 52, r: 34, dmg: 26, color: "#b020ff", flying: true, mv: "orbit", arena: "abyss", gap: 0.9, at: [0.8, 0.6, 0.4, 0.2, 0.08],
     desc: "Le gardien du secret. Il utilise toutes les attaques des autres boss.", adds: ["shade", 2], phaseAct: ["walls", { n: 2 }],
     kit: [["ring", { n: 26, sp: 150 }], ["fan", { n: 7, spread: 0.2, sp: 210, rep: 4, gap: 0.25 }], ["beam", { n: 3, spin: 0.8, dur: 4.5 }], ["lanes", { n: 2 }], ["rain", { n: 14, r: 46, gap: 0.14, jit: 30 }],
-           ["spiral", { dur: 3.5, gap: 0.06, arms: 5, sp: 150 }], ["blink", {}], ["pull", { dur: 2.5 }], ["slam", { r: 150, n: 30, sp: 130 }], ["summon", { type: "shade", n: 2 }], ["walls", { n: 2 }]] }
+           ["spiral", { dur: 3.5, gap: 0.06, arms: 5, sp: 150 }], ["blink", {}], ["pull", { dur: 2.5 }], ["slam", { r: 150, n: 30, sp: 130 }], ["summon", { type: "shade", n: 2 }], ["walls", { n: 2 }]] },
+  // Boss super secret (statue d'avarice de la boutique) : Ultra Greed, le gardien doré.
+  { id: "ultragreed", greed: true, name: "Ultra Greed", hp: 3000, speed: 42, r: 32, dmg: 22, color: "#ffd24a", flying: true, mv: "hover", arena: "vault", gap: 1.0, at: [0.8, 0.6, 0.4, 0.2], open: 2,
+    desc: "L'avarice incarnée : pluies d'or, gobelins, machine à sous.", adds: ["greedling", 3], phaseAct: ["summon", { type: "greedling", n: 3 }],
+    kit: [["ring", { n: 20, sp: 135 }], ["fan", { n: 7, spread: 0.2, sp: 190, rep: 3, gap: 0.3 }], ["summon", { type: "greedling", n: 3 }], ["rain", { n: 12, r: 46, gap: 0.16, jit: 60 }], ["slot", {}],
+           ["lanes", { n: 2 }], ["pools", { n: 6 }], ["spiral", { dur: 3.5, gap: 0.07, arms: 4, sp: 150 }], ["slam", { r: 130, n: 24, sp: 125 }], ["slot", {}], ["gapring", { n: 30, rep: 3 }]] },
+
+  // Titans : un boss colossal tous les 50 étages, 8 phases, kit de 12 attaques.
+  { id: "skydragon", titan: true, name: "Dragon céleste", hp: 2400, speed: 48, r: 38, dmg: 22, color: "#7fd8ff", flying: true, mv: "orbit", arena: "sky", gap: 1.25, open: 3, at: TITAN_AT,
+    desc: "Il survole le vide : souffle en éventail, foudre, foudroiements.", adds: ["icewraith", 2], phaseAct: ["rain", { n: 12, r: 50 }],
+    kit: [["breath", { dur: 2.2 }], ["fan", { n: 7, spread: 0.2, sp: 200, rep: 3, gap: 0.3 }], ["ring", { n: 24, sp: 140 }], ["rain", { n: 10, r: 46 }], ["wells", { n: 2 }], ["crossfire", { rep: 3 }],
+           ["spiral", { dur: 3.5, gap: 0.07, arms: 4, sp: 150 }], ["gapring", { n: 30, rep: 3 }], ["lanes", { n: 2 }], ["beam", { n: 2, spin: 0.7, dur: 4.5 }], ["summon", { type: "icewraith", n: 2 }], ["echo", {}]] },
+  { id: "chronos", titan: true, name: "Tisseur de temps", hp: 2300, speed: 40, r: 30, dmg: 22, color: "#fcee0a", flying: true, mv: "hover", arena: "chrono", gap: 1.2, open: 3, at: TITAN_AT,
+    desc: "Il rejoue tes pas : des frappes tombent là où tu étais.", adds: ["voidling", 3], phaseAct: ["echo", {}],
+    kit: [["echo", {}], ["gapring", { n: 28, rep: 3 }], ["wells", { n: 2 }], ["beam", { n: 3, spin: 0.55, dur: 4.5 }], ["blink", {}], ["walls", { n: 2 }], ["spiral", { dur: 3.5, gap: 0.07, arms: 5, sp: 140 }],
+           ["rain", { n: 12, r: 46, gap: 0.16 }], ["crossfire", { rep: 4 }], ["summon", { type: "voidling", n: 3 }], ["shrink", {}], ["ring", { n: 26, sp: 145 }]] },
+  { id: "obsidian", titan: true, name: "Colosse d'obsidienne", hp: 2900, speed: 34, r: 42, dmg: 26, color: "#9a7cff", mv: "chase", arena: "obsidian", gap: 1.5, open: 3, at: TITAN_AT,
+    desc: "Une masse volcanique : bonds, séismes, murs qui se referment.", adds: ["brute", 2], phaseAct: ["shrink", {}],
+    kit: [["slam", { r: 150, n: 26, sp: 120 }], ["leap", { r: 120, n: 14 }], ["lanes", { n: 2 }], ["rain", { n: 10, r: 54, jit: 90 }], ["dash", { sp: 420 }], ["shrink", {}],
+           ["summon", { type: "brute", n: 2 }], ["wells", { n: 1 }], ["crossfire", { rep: 3 }], ["ring", { n: 24, sp: 130 }], ["breath", { dur: 2 }], ["walls", { n: 2 }]] },
+  { id: "demonlord", titan: true, name: "Seigneur démon", hp: 2700, speed: 56, r: 34, dmg: 25, color: "#ff3030", mv: "chase", arena: "hellgate", gap: 1.2, open: 3, at: TITAN_AT,
+    desc: "Il bondit, crache des flammes et appelle ses diablotins.", adds: ["imp", 3], phaseAct: ["summon", { type: "imp", n: 3 }],
+    kit: [["breath", { dur: 2.4 }], ["leap", { r: 110, n: 16 }], ["pools", { n: 7 }], ["slam", { r: 130, n: 22, sp: 130 }], ["ring", { n: 26, sp: 140 }], ["fan", { n: 9, spread: 0.18, sp: 210, rep: 3, gap: 0.28 }],
+           ["dash", { sp: 480 }], ["summon", { type: "imp", n: 3 }], ["beam", { n: 2, spin: 0.8, dur: 4.5 }], ["echo", {}], ["rain", { n: 14, r: 48, gap: 0.14 }], ["gapring", { n: 32, rep: 3 }]] },
+  { id: "voidavatar", titan: true, name: "Avatar du Néant", hp: 3100, speed: 46, r: 36, dmg: 27, color: "#b020ff", flying: true, mv: "orbit", arena: "nullspace", gap: 1.1, open: 3, at: TITAN_AT,
+    desc: "Le Néant fait chair : toutes les attaques des Titans.", adds: ["voidling", 3], phaseAct: ["wells", { n: 2 }],
+    kit: [["wells", { n: 3 }], ["pull", { dur: 3 }], ["beam", { n: 3, spin: 0.8, dur: 5 }], ["shrink", {}], ["echo", {}], ["gapring", { n: 34, rep: 4 }], ["blink", {}], ["walls", { n: 3 }],
+           ["spiral", { dur: 4, gap: 0.06, arms: 5, sp: 155 }], ["crossfire", { rep: 4 }], ["slam", { r: 150, n: 30, sp: 135 }], ["leap", { r: 120, n: 20 }]] }
 ];
-const MEGA_MAIN = MEGAS.filter((m) => !m.secret);
+const MEGA_MAIN = MEGAS.filter((m) => !m.secret && !m.titan && !m.greed);
+export const TITANS = MEGAS.filter((m) => m.titan);
 const PHASE_AT = [0.7, 0.4, 0.15];
 export const isMegaFloor = (floor) => floor % 10 === 0;
+export const isTitanFloor = (floor) => floor % 50 === 0;
 export function megaFor(state, floor = state.floor) {
   if (state.forceMega) return MEGAS.find((m) => m.id === state.forceMega) || MEGAS[0];
+  if (isTitanFloor(floor)) return TITANS.find((m) => m.id === state.titanOrder[(floor / 50 - 1) % TITANS.length]);
   const k = Math.floor(floor / 10) - 1;
   return MEGA_MAIN.find((m) => m.id === state.megaOrder[((k % MEGA_MAIN.length) + MEGA_MAIN.length) % MEGA_MAIN.length]);
 }
@@ -212,6 +250,7 @@ export const THEMES = [
   { id: "abyss",  name: "Abysses", wall: "#4d9bff", a: "#050c1a", b: "#040916", rock: "#10284a", deco: ["coral", "bubble", "kelp"], amb: "bubbles", pool: ["wisp", "orbiter", "splitter", "bat", "mage", "hopper", "slime", "spawner"], late: ["magnetar", "burrower", "priest", "drone"] },
   { id: "hell",   name: "Citadelle infernale", wall: "#ff3030", a: "#1c0707", b: "#150505", rock: "#4a1010", deco: ["spikebone", "cinders", "rift"], amb: "embers", pool: ["charger", "brute", "bomber", "knight", "turret", "mage", "spawner", "hopper"], late: ["ember", "colossus", "berserker", "necro", "shade", "sniper"] }
 ];
+for (const t of THEMES) t.late = [...(t.late || []), ...(ENEMY2_THEMES[t.id] || [])];
 export const themeFor = (floor) => THEMES[(floor - 1 + THEMES.length * 100) % THEMES.length];
 
 // Difficulté : plus coriace et plus mordant à chaque étage (v13).
@@ -311,6 +350,12 @@ const ARENAS = {
   quake: (g) => { for (const [c, r] of [[5, 4], [14, 4], [23, 4], [5, 13], [14, 13], [23, 13]]) box(g, c, r, 3, 3, "#"); return g; },
   crypt: (g) => { box(g, 0, 0, 6, 4, "#"); box(g, 26, 0, 6, 4, "#"); box(g, 0, 16, 6, 4, "#"); box(g, 26, 16, 6, 4, "#"); box(g, 10, 9, 2, 2, "#"); box(g, 20, 9, 2, 2, "#"); return g; },
   abyss: (g) => { box(g, 5, 4, 22, 12, "o"); box(g, 8, 6, 16, 8, "."); box(g, 14, 4, 4, 12, "."); box(g, 5, 8, 22, 4, "."); for (const [c, r] of [[9, 7], [21, 7], [9, 12], [21, 12]]) box(g, c, r, 2, 1, "#"); box(g, 15, 9, 2, 2, "x"); return g; },
+  sky: (g) => { box(g, 3, 3, 26, 14, "o"); box(g, 6, 5, 20, 10, "."); box(g, 14, 3, 4, 14, "."); box(g, 3, 8, 26, 4, "."); box(g, 15, 9, 2, 2, "#"); for (const [c, r] of [[7, 6], [23, 6], [7, 13], [23, 13]]) box(g, c, r, 2, 1, "#"); return g; },
+  chrono: (g) => { for (let k = 0; k < 12; k++) { const a = (k * Math.PI) / 6; box(g, Math.round(15 + Math.cos(a) * 12), Math.round(9 + Math.sin(a) * 6.5), 2, 2, "#"); } box(g, 15, 9, 2, 2, "x"); return g; },
+  obsidian: (g) => { for (const [c, r] of [[5, 4], [14, 4], [23, 4], [5, 14], [14, 14], [23, 14]]) box(g, c, r, 4, 2, "#"); box(g, 15, 7, 2, 6, "x"); box(g, 9, 9, 3, 2, "x"); box(g, 20, 9, 3, 2, "x"); return g; },
+  hellgate: (g) => { box(g, 8, 2, 1, 16, "x"); box(g, 23, 2, 1, 16, "x"); box(g, 8, 9, 1, 2, "."); box(g, 23, 9, 1, 2, "."); box(g, 13, 7, 6, 6, "o"); for (const [c, r] of [[3, 3], [27, 3], [3, 15], [27, 15]]) box(g, c, r, 2, 2, "#"); return g; },
+  nullspace: (g) => { box(g, 3, 3, 26, 14, "o"); box(g, 14, 3, 4, 14, "."); box(g, 3, 8, 26, 4, "."); for (const [c, r, w, h] of [[5, 5, 5, 4], [22, 5, 5, 4], [5, 12, 5, 4], [22, 12, 5, 4], [12, 7, 8, 6]]) box(g, c, r, w, h, "."); box(g, 15, 9, 2, 2, "#"); return g; },
+  vault: (g) => { for (const [c, r] of [[3, 3], [26, 3], [3, 15], [26, 15], [8, 9], [23, 9]]) box(g, c, r, 3, 2, "#"); box(g, 14, 9, 4, 2, "x"); return g; },
   server: (g) => { for (const [c, r] of [[4, 3], [26, 3], [4, 15], [26, 15]]) box(g, c, r, 2, 2, "#"); box(g, 14, 8, 4, 4, "#"); box(g, 8, 9, 3, 2, "o"); box(g, 21, 9, 3, 2, "o"); return g; }
 };
 function clearDoorsOnly(g) {
@@ -398,7 +443,7 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
     range: a.range || 0, arc: a.arc || 0, projSpeed: a.speed || 0, pierce: a.pierce || 0, shots: 1,
     crit: 0.05, vampire: 0, burn: 0, frost: 0, shieldMax: 0, shieldCd: 15, bomb: 0, magnet: 60,
     skillCd: ult.cd, regen: 0, orbs: 0, thorns: 0, berserk: 0, coinMul: 1,
-    armor: 0, dodge: 0, leech: 0, execute: 0, bossDmg: 0, eliteDmg: 0, heartDrop: 0, critDmg: 0, skillPower: 1, slowAura: 0, burnAura: 0, invBonus: 0, bounty: 0
+    armor: 0, dodge: 0, leech: 0, execute: 0, bossDmg: 0, eliteDmg: 0, heartDrop: 0, critDmg: 0, skillPower: 1, slowAura: 0, burnAura: 0, invBonus: 0, bounty: 0, thermal: 0, lootRare: 0
   };
   const r = (id) => Math.min(ranks[id] || 0, META.find((m) => m.id === id).max);
   stats.maxHp += 10 * r("hp");
@@ -407,7 +452,7 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
   stats.crit += 0.04 * r("crit");
 
   const state = {
-    rng, cls, ult, weapon: a, stats, ranks: { ...ranks }, zones: [], delayed: [], hazards: [], tempWalls: [], megaKills: 0, secretKills: 0, secretProg: 0, spin: 0,
+    rng, cls, ult, weapon: a, stats, ranks: { ...ranks }, zones: [], delayed: [], hazards: [], tempWalls: [], extraWeapons: [], synergies: [], megaKills: 0, secretKills: 0, secretProg: 0, spin: 0,
     time: 0, over: false, revived: false,
     floor: 1, map: null, room: null, theme: themeFor(1), grid: blank(),
     player: { x: (X0 + X1) / 2, y: Y1 - 40, hp: stats.maxHp, inv: 0, cd: 0, skillCd: 0, shield: 0, shieldT: 0, facing: -Math.PI / 2, ghost: 0, crit100: 0, spikeT: 0 },
@@ -415,6 +460,8 @@ export function createState(rng = Math.random, { classId = FREE_CLASS, ranks = {
     cleared: true, chest: null, trapdoor: null, choices: null, owned: {}, boss: null,
     kills: 0, coins: 0, coinsEarned: 0, bossKills: 0, eliteKills: 0, roomsCleared: 0, nextId: 1, banner: null, orbAngle: 0, rain: 0
   };
+  state.titanOrder = TITANS.map((m) => m.id);
+  for (let i = state.titanOrder.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [state.titanOrder[i], state.titanOrder[j]] = [state.titanOrder[j], state.titanOrder[i]]; }
   state.megaOrder = MEGA_MAIN.map((m) => m.id);
   for (let i = state.megaOrder.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [state.megaOrder[i], state.megaOrder[j]] = [state.megaOrder[j], state.megaOrder[i]]; }
   startFloor(state);
@@ -446,6 +493,20 @@ function addSecrets(state) {
   o.host.secret = { dir: o.d, found: false };
 }
 
+// Statue d'avarice : une boutique cache parfois une statue dorée. En la nourrissant de pièces, elle ouvre un passage vers Ultra Greed.
+function addGreed(state) {
+  if (!state.forceGreed && (state.floor < 3 || state.rng() > 0.3)) return;
+  const rooms = state.map.rooms;
+  const occ = new Set(rooms.map((r) => `${r.gx},${r.gy}`));
+  const shop = rooms.find((r) => r.type === "shop");
+  if (!shop) return;
+  const dirs = Object.entries(DIRS).filter(([d, v]) => !shop.doors[d] && !occ.has(`${shop.gx + v.dx},${shop.gy + v.dy}`));
+  if (!dirs.length) return;
+  const [d, v] = dirs[Math.floor(state.rng() * dirs.length)];
+  rooms.push({ gx: shop.gx + v.dx, gy: shop.gy + v.dy, type: "secretboss", doors: { [OPP[d]]: true }, visited: false, cleared: false, depth: 99, layout: 0, waves: 0, taken: false, stands: null, size: "large", seed: 11, trap: false, bossChest: false, hidden: true, arena: "vault", mega: "ultragreed" });
+  shop.greed = { dir: d, need: 40 + 4 * state.floor, paid: 0, open: false };
+}
+
 function startFloor(state) {
   state.theme = themeFor(state.floor);
   state.map = generateFloor(state.rng, state.floor);
@@ -454,6 +515,7 @@ function startFloor(state) {
     if (br) { br.size = "large"; br.arena = megaFor(state).arena; br.layout = 0; br.mega = megaFor(state).id; }
   }
   addSecrets(state);
+  addGreed(state);
   state.trapdoor = null;
   state.secretProg = 0;
   enterRoom(state, state.map.start, null);
@@ -482,7 +544,7 @@ function makeEnemy(state, type, x, y, opts = {}) {
   return {
     id: state.nextId++, type, x, y, hp, maxHp: hp, r: def.r * (opts.elite ? 1.3 : 1), dmg: def.dmg * dmgMul(state.floor),
     spawn: opts.spawn ?? 0.7, cd: 1 + state.rng(), st: "idle", t: 0, vx: 0, vy: 0, burn: 0, burnDps: 0, slow: 0, flash: 0, orbCd: 0,
-    elite: !!opts.elite, boss: !!opts.boss, flying: !!def.flying, speedBase: def.speed, dead: false, parent: opts.parent || 0
+    elite: !!opts.elite, boss: !!opts.boss, flying: !!def.flying, shT: 1 + state.rng() * 1.5, trT: 0, speedBase: def.speed, dead: false, parent: opts.parent || 0
   };
 }
 
@@ -509,6 +571,8 @@ function planWave(state, isFirst) {
   state.spawnClock = 0;
 }
 
+const chestKind = (room) => (room.type === "secretboss" ? (room.mega === "ultragreed" ? "greed" : "legend") : MEGAS.find((m) => m.id === room.mega)?.titan ? "titan" : "boss");
+
 function enterRoom(state, room, fromDir) {
   setRoomSize(room.size);
   state.room = room;
@@ -528,6 +592,7 @@ function enterRoom(state, room, fromDir) {
   state.chest = null;
   state.boss = null;
   state.rain = 0;
+  state.ptrail = []; state.ptT = 0; state.statue = null;
   const g = buildLayout(room);
   state.grid = g;
   const p = state.player;
@@ -539,25 +604,25 @@ function enterRoom(state, room, fromDir) {
   if (room.cleared) {
     state.cleared = true;
     state.wavesLeft = 0;
-    if (room.type === "secretboss" && room.bossChest) state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: "legend" };
+    if (room.type === "secretboss" && room.bossChest) state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: chestKind(room) };
     if (room.type === "boss") {   // la trappe et le coffre restent dans la salle du boss
       if (room.trap) state.trapdoor = freeSpot(state, (X0 + X1) / 2 + 60, (Y0 + Y1) / 2 + 30);
-      if (room.bossChest) state.chest = { ...freeSpot(state, (X0 + X1) / 2 - 60, (Y0 + Y1) / 2 + 30), opened: false, kind: "boss" };
+      if (room.bossChest) state.chest = { ...freeSpot(state, (X0 + X1) / 2 - 60, (Y0 + Y1) / 2 + 30), opened: false, kind: chestKind(room) };
     }
   } else if (room.type === "boss" || room.type === "secretboss") {
     state.cleared = false;
     state.wavesLeft = 0;
     const mega = room.mega ? MEGAS.find((m) => m.id === room.mega) : null;
     const def = mega || bossFor(state.floor);
-    const mul = (1.1 + 0.35 * (state.floor - 1)) * (mega?.secret ? 1.5 : 1);
+    const mul = (1.1 + 0.35 * (state.floor - 1)) * (mega?.secret ? 1.5 : mega?.greed ? 1.2 : mega?.titan ? 0.5 : 1);
     const sp = mega ? freeSpot(state, (X0 + X1) / 2, Y0 + 5 * TILE) : { x: (X0 + X1) / 2, y: Y0 + 110 };
     const b = makeEnemy(state, def.id, sp.x, sp.y, { def, hpMul: mul, boss: true, spawn: 1.4 });
     b.name = def.name;
     b.marks = mega ? [...(mega.at || PHASE_AT)] : [0.75, 0.5, 0.25];
-    if (mega) { b.mega = true; b.phase = 1; b.cd = 2; b.orb = 0; b.invT = 0; }
+    if (mega) { b.titan = !!mega.titan; b.mega = true; b.phase = 1; b.cd = 2; b.orb = 0; b.invT = 0; }
     state.enemies.push(b);
     state.boss = b;
-    state.banner = { text: mega?.secret ? `BOSS SECRET — ${def.name}` : mega ? `GRAND BOSS — ${def.name}` : `BOSS — ${def.name}`, ttl: 3 };
+    state.banner = { text: mega?.secret || mega?.greed ? `BOSS SECRET — ${def.name}` : mega?.titan ? `TITAN — ${def.name}` : mega ? `GRAND BOSS — ${def.name}` : `BOSS — ${def.name}`, ttl: 3 };
     if (room.hidden) room.hidden = false;
   } else if (room.type === "combat" || room.type === "elite") {
     state.cleared = false;
@@ -567,7 +632,7 @@ function enterRoom(state, room, fromDir) {
     state.cleared = true;
     room.cleared = true;
     if (room.type === "secret") {
-      const lair = state.map.rooms.find((r) => r.type === "secretboss");
+      const lair = state.map.rooms.find((r) => r.type === "secretboss" && r.mega === "eclipse");
       if (lair) lair.hidden = false;
       if (!room.taken) state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: "treasure" };
       if (!room.hearts) { room.hearts = true; drop(state, (X0 + X1) / 2 - 70, (Y0 + Y1) / 2 + 30, "heart", 0.3); drop(state, (X0 + X1) / 2 + 70, (Y0 + Y1) / 2 + 30, "heart", 0.3); }
@@ -575,14 +640,14 @@ function enterRoom(state, room, fromDir) {
     }
     if (room.type === "treasure" && !room.taken) state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: "treasure" };
     if (room.type === "shop") {
+      if (room.greed) { const sp = freeSpot(state, (X0 + X1) / 2, Y0 + 2.5 * TILE); state.statue = { x: sp.x, y: sp.y, acc: 0 }; }
       if (!room.stands) {
-        const pool = ITEM_IDS.filter((id) => !ITEMS[id].legend && (state.owned[id] || 0) < ITEMS[id].max);
-        const pick = () => pool.splice(Math.floor(state.rng() * pool.length), 1)[0];
-        const price = 10 + 2 * state.floor;
+        const [a, b] = pickWeighted(state, 2, 0.2);
+        const price = 10 + 2 * state.floor, mult = { common: 1, rare: 1.7, epic: 2.6, legendary: 4 };
         room.stands = [
           { x: (X0 + X1) / 2 - 100, y: (Y0 + Y1) / 2, kind: "heart", price: 4 + state.floor, sold: false },
-          { x: (X0 + X1) / 2, y: (Y0 + Y1) / 2, kind: "item", id: pick() || "blade", price, sold: false },
-          { x: (X0 + X1) / 2 + 100, y: (Y0 + Y1) / 2, kind: "item", id: pick() || "haste", price: price + 4, sold: false }
+          { x: (X0 + X1) / 2, y: (Y0 + Y1) / 2, kind: "item", id: a || "blade", price: Math.round(price * (mult[rarityOf(a)] || 1)), sold: false },
+          { x: (X0 + X1) / 2 + 100, y: (Y0 + Y1) / 2, kind: "item", id: b || "haste", price: Math.round((price + 4) * (mult[rarityOf(b)] || 1)), sold: false }
         ];
       }
     }
@@ -660,7 +725,9 @@ function killEnemy(state, e, depth = 0) {
   if (e.type !== "slimelet") drop(state, e.x, e.y, "coin", e.elite ? worth * 4 : e.boss ? worth * 6 : worth);
   if (e.boss) {
     state.bossKills += 1;
-    if (e.type === "eclipse") state.secretKills += 1;
+    if (e.type === "eclipse" || e.type === "ultragreed") state.secretKills += 1;
+    if (e.titan) state.titanKills = (state.titanKills || 0) + 1;
+    if (e.type === "ultragreed") for (let i = 0; i < 24; i++) drop(state, e.x + Math.cos(i) * (10 + i * 3), e.y + Math.sin(i * 1.7) * (10 + i * 2), "coin", worth * 4);
     if (e.mega) { state.megaKills += 1; for (let i = 0; i < 8; i++) drop(state, e.x + (i - 3.5) * 14, e.y - 12, "coin", worth * 4); drop(state, e.x + 20, e.y + 24, "heart", 0.5); }
     state.hazards = [];
     for (let i = 0; i < 6; i++) drop(state, e.x + (i - 2.5) * 12, e.y + 10, "coin", worth * 3);
@@ -671,6 +738,7 @@ function killEnemy(state, e, depth = 0) {
   } else if (state.rng() < (e.elite ? 0.6 : 0.09) + state.stats.heartDrop) {
     drop(state, e.x, e.y, "heart", 0.2);
   }
+  if (def?.burst && depth < 2) for (let i = 0; i < def.burst.n; i++) enemyShoot(state, e, (i * Math.PI * 2) / def.burst.n, def.burst.sp, 0.7, { color: def.color });
   if (def?.splits && depth < 2) {
     for (let i = 0; i < 2; i++) state.enemies.push(makeEnemy(state, def.splits, e.x + (i ? 12 : -12), e.y, { spawn: 0.25, hpMul: hpMul(state.floor) }));
   }
@@ -692,6 +760,7 @@ export function damageEnemy(state, e, amount, { silent = false, depth = 0, noCri
   const crit = !noCrit && (state.player.crit100 > 0 || state.rng() < s.crit);
   let dmg = crit ? amount * (2 + s.critDmg) : amount;
   if (s.execute && e.hp < e.maxHp * 0.25) dmg *= 1 + s.execute;
+  if (s.thermal && e.burn > 0 && e.slow > 0) dmg *= 1 + s.thermal;
   if (s.bossDmg && e.boss) dmg *= 1 + s.bossDmg;
   if (s.eliteDmg && e.elite) dmg *= 1 + s.eliteDmg;
   if (s.berserk) dmg *= 1 + 0.4 * s.berserk * (1 - state.player.hp / s.maxHp) / 1.5;
@@ -1399,6 +1468,98 @@ const ACTS = {
     } else if (!a.fired) { a.fired = 1; for (let i = 0; i < 20; i++) enemyShoot(s, e, (i * Math.PI * 2) / 20, 135, 0.6, { color: e.color }); }
     return a.t > dur + 0.5;
   },
+  wells(s, e, dt, a, p) {
+    if (!a.init) {
+      a.init = 1;
+      for (let i = 0; i < (p.n || 2); i++) {
+        const ang = s.rng() * Math.PI * 2, rr = 60 + s.rng() * 130;
+        const x = clamp(s.player.x + Math.cos(ang) * rr, X0 + 30, X1 - 30), y = clamp(s.player.y + Math.sin(ang) * rr, Y0 + 30, Y1 - 30);
+        s.hazards.push({ kind: "well", x, y, r: 20, t: p.dur || 6, max: p.dur || 6, dmg: e.dmg * 0.5, tick: 0 });
+        s.fx.push({ kind: "ring", x, y, r: 60, ttl: 0.5, max: 0.5, color: e.color });
+      }
+    }
+    return a.t > 1;
+  },
+  shrink(s, e, dt, a, p) {
+    if (!a.init) {
+      a.init = 1; a.tiles = [];
+      const band = p.band || 3;
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        if (c >= band && c < COLS - band && r >= band && r < ROWS - band) continue;
+        if (s.grid[r][c] !== ".") continue;
+        a.tiles.push({ c, r });
+        if ((c + r) % 2 === 0) s.hazards.push({ kind: "warn", x: X0 + c * TILE + TILE / 2, y: Y0 + r * TILE + TILE / 2, r: 14, t: 1.1, max: 1.1, dmg: 0 });
+      }
+    }
+    if (!a.built && a.t > 1.1) {
+      a.built = 1;
+      const pc = Math.floor((s.player.x - X0) / TILE), pr = Math.floor((s.player.y - Y0) / TILE);
+      for (const { c, r } of a.tiles) {
+        if (s.grid[r][c] !== "." || Math.max(Math.abs(c - pc), Math.abs(r - pr)) < 2) continue;
+        s.grid[r][c] = "#"; s.tempWalls.push({ c, r, t: p.dur || 6 });
+      }
+    }
+    return a.t > 1.3;
+  },
+  breath(s, e, dt, a, p) {
+    if (!a.init) { a.init = 1; a.still = true; a.base = angleTo(e, s.player); a.dir = s.rng() < 0.5 ? -1 : 1; a.next = 0.6; e.st = "windup"; e.dir = a.base; }
+    const dur = p.dur || 2.2;
+    if (a.t >= a.next && a.t < 0.6 + dur) {
+      a.next += p.gap || 0.06; e.st = "idle";
+      const ang = a.base + a.dir * (-0.9 + (1.8 * (a.t - 0.6)) / dur);
+      enemyShoot(s, e, ang, p.sp || 230, 0.5, { color: "#ffb347" });
+      enemyShoot(s, e, ang + 0.14, (p.sp || 230) * 0.85, 0.5, { color: e.color });
+    }
+    return a.t > 0.9 + dur;
+  },
+  crossfire(s, e, dt, a, p) {
+    a.c = a.c || 0; a.next = a.next || 0;
+    if (a.c < (p.rep || 3) && a.t >= a.next) {
+      a.next += p.gap || 0.7; a.c++;
+      for (const [x, y] of [[X0 + 10, Y0 + 10], [X1 - 10, Y0 + 10], [X0 + 10, Y1 - 10], [X1 - 10, Y1 - 10]]) {
+        const b = Math.atan2(s.player.y - y, s.player.x - x);
+        for (let k = -1; k <= 1; k++) enemyShoot(s, e, b + k * 0.16, p.sp || 170, 0.6, { x, y, color: e.color });
+      }
+    }
+    return a.c >= (p.rep || 3) && a.t > a.next + 0.5;
+  },
+  leap(s, e, dt, a, p) {
+    if (!a.init) { a.init = 1; a.still = true; a.pos = { x: s.player.x, y: s.player.y }; s.hazards.push({ kind: "warn", x: a.pos.x, y: a.pos.y, r: p.r || 110, t: 1.0, max: 1.0, dmg: e.dmg * 1.3 }); e.hidden = true; s.fx.push({ kind: "ring", x: e.x, y: e.y, r: 50, ttl: 0.4, max: 0.4, color: e.color }); }
+    if (!a.landed && a.t > 1.0) {
+      a.landed = 1; e.hidden = false; e.x = a.pos.x; e.y = a.pos.y; pushOut(s, e, e.r, e.flying);
+      const n = p.n || 12; for (let i = 0; i < n; i++) enemyShoot(s, e, (i * Math.PI * 2) / n, 130, 0.6, { color: e.color });
+    }
+    return a.t > 1.5;
+  },
+  gapring(s, e, dt, a, p) {
+    a.c = a.c || 0; a.next = a.next || 0;
+    const rep = p.rep || 3;
+    if (a.c < rep && a.t >= a.next) {
+      a.next += p.gap || 0.55; a.c++;
+      const n = p.n || 28, b = angleTo(e, s.player) + (a.c - 1) * 0.55;
+      for (let i = 0; i < n; i++) {
+        const ang = (i * Math.PI * 2) / n;
+        let da = ang - b; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
+        if (Math.abs(da) < 0.42) continue;
+        enemyShoot(s, e, ang, p.sp || 140, 0.6, { color: e.color });
+      }
+    }
+    return a.c >= rep && a.t > a.next + 0.5;
+  },
+  echo(s, e, dt, a) {
+    if (!a.init) {
+      a.init = 1;
+      const tr = s.ptrail && s.ptrail.length ? s.ptrail : [{ x: s.player.x, y: s.player.y }];
+      tr.forEach((q, i) => s.hazards.push({ kind: "warn", x: q.x, y: q.y, r: 44, t: 0.7 + i * 0.16, max: 0.7 + i * 0.16, dmg: e.dmg }));
+      a.len = tr.length;
+    }
+    return a.t > 0.7 + a.len * 0.16 + 0.4;
+  },
+  slot(s, e, dt, a) {
+    if (!a.k2) { const ks = ["ring", "fan", "rain", "lanes", "pools", "spiral", "slam"]; a.k2 = ks[Math.floor(s.rng() * ks.length)]; a.sub = {}; s.fx.push({ kind: "ring", x: e.x, y: e.y, r: 70, ttl: 0.5, max: 0.5, color: "#fcee0a" }); s.banner = { text: `Jackpot : ${a.k2}`, ttl: 1 }; }
+    a.sub.t = a.t;
+    return ACTS[a.k2](s, e, dt, a.sub, {});
+  },
   walls(s, e, dt, a, p) {
     if (!a.init) {
       a.init = 1; a.tiles = [];
@@ -1448,7 +1609,7 @@ function megaAI(state, e, dt) {
     return;
   }
   const act = e.act;
-  const sp = e.speedBase * (1 + 0.14 * (ph - 1));
+  const sp = e.speedBase * Math.min(1.7, 1 + 0.14 * (ph - 1));
   if (!act?.still) {
     const cx = (X0 + X1) / 2, cy = (Y0 + Y1) / 2;
     switch (def.mv) {
@@ -1474,7 +1635,7 @@ function megaAI(state, e, dt) {
       let k, params;
       if (e.queued) { [k, params] = e.queued; e.queued = null; }
       else {
-        const unlocked = Math.min(def.kit.length, ph + 1);
+        const unlocked = Math.min(def.kit.length, ph + (def.open || 1));
         let i = Math.floor(state.rng() * unlocked);
         if (i === e.last) i = (i + 1) % unlocked;
         e.last = i;
@@ -1484,7 +1645,7 @@ function megaAI(state, e, dt) {
     }
   } else {
     e.act.t += dt;
-    if (ACTS[e.act.k](state, e, dt, e.act, e.act.p)) { e.act = null; e.hidden = false; e.cd = def.gap * (1 - 0.14 * (ph - 1)); }
+    if (ACTS[e.act.k](state, e, dt, e.act, e.act.p)) { e.act = null; e.hidden = false; e.cd = def.gap * Math.max(0.4, 1 - 0.14 * (ph - 1)); }
   }
 }
 
@@ -1632,6 +1793,28 @@ function bossAI(state, e, dt) {
   }
 }
 
+// Traits génériques des ennemis (enemies2.js) : tir en éventail, flaques, régénération.
+const TRAIL = { fire: "#ff6a1a", poison: "#6bff3d", ice: "#7fd8ff" };
+function enemyTraits(state, e, def, dt, base, d) {
+  if (def.regen && e.hp < e.maxHp) e.hp = Math.min(e.maxHp, e.hp + def.regen * dt);
+  if (e.hidden) return;
+  if (def.shoot && d < 480) {
+    e.shT -= dt;
+    if (e.shT <= 0) {
+      const sh = def.shoot, n = sh.n || 1;
+      e.shT = sh.every * (0.85 + state.rng() * 0.3);
+      for (let i = 0; i < n; i++) enemyShoot(state, e, base + (i - (n - 1) / 2) * (sh.spread || 0.2), sh.sp || 150, sh.dm || 0.7, { color: sh.color || e.color || def.color, r: sh.r || 4 });
+    }
+  }
+  if (def.trail && e.st !== "dive") {
+    e.trT -= dt;
+    if (e.trT <= 0 && state.hazards.length < 70) {
+      e.trT = 0.6;
+      state.hazards.push({ kind: "fire", x: e.x, y: e.y, r: 11, t: 2.6, max: 2.6, dmg: e.dmg * 0.4, tick: 0, col: TRAIL[def.trail] });
+    }
+  }
+}
+
 function enemyAI(state, e, dt) {
   const p = state.player;
   const def = e.boss ? null : ENEMIES[e.type];
@@ -1639,6 +1822,7 @@ function enemyAI(state, e, dt) {
   const base = angleTo(e, p);
   const d = Math.sqrt(dist2(e, p));
   e.cd -= dt;
+  if (def && (def.shoot || def.trail || def.regen)) enemyTraits(state, e, def, dt, base, d);
   switch (e.boss ? "boss" : def.ai) {
     case "boss": bossAI(state, e, dt); break;
     case "chase": moveEnemy(state, e, Math.cos(base) * speed, Math.sin(base) * speed, dt); break;
@@ -1870,6 +2054,12 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
       else player.cd = 0;
     } else player.cd = playerAttack(state, null) ? 1 / stats.rate : 0.05;
   }
+  for (const ex of state.extraWeapons) {
+    ex.cd -= dt;
+    if (ex.cd <= 0) ex.cd = fireExtra(state, ex) ? 1 / Math.max(0.3, ex.rate) : 0.12;
+  }
+  state.ptT = (state.ptT || 0) + dt;
+  if (state.ptT > 0.3) { state.ptT = 0; (state.ptrail ||= []).push({ x: player.x, y: player.y }); if (state.ptrail.length > 9) state.ptrail.shift(); }
   updateAux(state, dt);
 
   /* Apparition des ennemis de la vague */
@@ -2004,6 +2194,11 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
       if (!o) { h.t = 0; continue; }
       h.x = o.x; h.y = o.y; h.ang += h.spin * dt;
       if (h.t < h.max - h.warn && segDist(player.x, player.y, h.x, h.y, h.ang, h.len) < h.w + PLAYER_R) hurtPlayer(state, h.dmg);
+    } else if (h.kind === "well") {
+      const dx = h.x - player.x, dy = h.y - player.y, dd = Math.hypot(dx, dy) || 1, reach = h.r * 3.4;
+      if (dd < reach) { const k = 95 * (1 - dd / reach) * dt; player.x += (dx / dd) * k; player.y += (dy / dd) * k; pushOut(state, player, PLAYER_R); }
+      h.tick -= dt;
+      if (h.tick <= 0 && dd < h.r + PLAYER_R) { hurtPlayer(state, h.dmg); h.tick = 0.5; }
     } else if (h.kind === "fire") {
       h.tick -= dt;
       if (h.tick <= 0 && dist2(h, player) < (h.r + PLAYER_R) ** 2) { hurtPlayer(state, h.dmg); h.tick = 0.5; }
@@ -2046,12 +2241,12 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
       events.roomCleared = true;
       state.bullets = [];
       if (state.room.type === "boss") {
-        state.chest = { ...freeSpot(state, (X0 + X1) / 2 - 60, (Y0 + Y1) / 2 + 30), opened: false, kind: "boss" };
+        state.chest = { ...freeSpot(state, (X0 + X1) / 2 - 60, (Y0 + Y1) / 2 + 30), opened: false, kind: chestKind(state.room) };
         state.trapdoor = freeSpot(state, (X0 + X1) / 2 + 60, (Y0 + Y1) / 2 + 30);
         state.room.trap = true;
         state.room.bossChest = true;
       } else if (state.room.type === "secretboss") {
-        state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: "legend" };
+        state.chest = { ...freeSpot(state, (X0 + X1) / 2, (Y0 + Y1) / 2), opened: false, kind: chestKind(state.room) };
         state.room.bossChest = true;
       } else if (state.rng() < 0.5) {
         drop(state, (X0 + X1) / 2, (Y0 + Y1) / 2, state.rng() < 0.5 ? "heart" : "coin", state.rng() < 0.5 ? 0.2 : 3);
@@ -2075,12 +2270,32 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
     }
   } else if (!sr || sr.found) state.secretProg = 0;
 
+  /* Statue d'avarice : nourrir la statue de pièces */
+  const gr = state.room.greed;
+  if (gr && !gr.open && state.statue && dist2(state.statue, player) < 46 * 46 && state.coins > 0) {
+    state.statue.acc += dt * 14;
+    const pay = Math.min(Math.floor(state.statue.acc), state.coins, gr.need - gr.paid);
+    if (pay > 0) {
+      state.statue.acc -= pay; state.coins -= pay; gr.paid += pay;
+      state.fx.push({ kind: "ring", x: state.statue.x, y: state.statue.y, r: 18, ttl: 0.2, max: 0.2, color: "#ffd24a" });
+      if (gr.paid >= gr.need) {
+        gr.open = true;
+        state.room.doors[gr.dir] = true;
+        const lair = state.map.rooms.find((r) => r.type === "secretboss" && r.mega === "ultragreed");
+        if (lair) lair.hidden = false;
+        state.banner = { text: "La statue s'anime : un passage doré s'ouvre…", ttl: 3 };
+        const dd = DOORS[gr.dir];
+        state.fx.push({ kind: "blast", x: dd.x, y: dd.y, r: 80, ttl: 0.5, max: 0.5, color: "#ffd24a" });
+      }
+    }
+  }
+
   /* Coffre, boutique, trappe, portes */
   if (state.chest && !state.chest.opened && dist2(state.chest, player) < 26 * 26) {
     state.chest.opened = true;
     if (state.room.type === "treasure" || state.room.type === "secret") state.room.taken = true;
     if (state.room.type === "boss" || state.room.type === "secretboss") state.room.bossChest = false;
-    state.choices = rollChoices(state, state.chest.kind === "legend");
+    state.choices = rollChoices(state, state.chest.kind);
     events.choices = true;
   }
   if (state.room.stands) {
@@ -2089,7 +2304,7 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
       state.coins -= s.price;
       s.sold = true;
       if (s.kind === "heart") player.hp = Math.min(stats.maxHp, player.hp + stats.maxHp * 0.4);
-      else { ITEMS[s.id].apply(stats, player, state.weapon); state.owned[s.id] = (state.owned[s.id] || 0) + 1; }
+      else gainItem(state, s.id);
       state.fx.push({ kind: "ring", x: s.x, y: s.y, r: 30, ttl: 0.3, max: 0.3, color: "#fcee0a" });
       events.bought = true;
     }
@@ -2123,19 +2338,94 @@ export function update(state, dt, input = { dx: 0, dy: 0, skill: false }) {
 
 /* ---------- Coffres ---------- */
 
-export function rollChoices(state, legend = false) {
-  if (legend) {
-    const left = LEGEND_IDS.filter((id) => !state.owned[id]);
+// Tirage pondéré par rareté : les objets rares deviennent plus fréquents avec l'étage et la chance ; les mythiques ne tombent que sur les boss secrets.
+const GATE = { common: 0, rare: 1, epic: 3, legendary: 6, mythic: 999 };
+function eligible(state, id) {
+  const it = ITEMS[id];
+  if ((state.owned[id] || 0) >= it.max || it.legend) return false;
+  if (state.floor < GATE[it.rarity || "common"]) return false;
+  if (it.grant && (it.grant === state.weapon.id || state.extraWeapons.length >= MAX_EXTRA || state.extraWeapons.some((x) => x.id === it.grant))) return false;
+  return true;
+}
+export function pickWeighted(state, count, bonus = 0) {
+  const luck = 1 + 0.25 * (state.ranks.luck || 0) + state.stats.lootRare + Math.min(1.5, state.floor * 0.03) + bonus;
+  const pool = ITEM_IDS.filter((id) => eligible(state, id)).map((id) => {
+    const r = ITEMS[id].rarity || "common";
+    return [id, RARITIES[r].weight * (r === "common" ? 1 : luck)];
+  });
+  const picks = [];
+  while (picks.length < count && pool.length) {
+    let t = pool.reduce((a, x) => a + x[1], 0) * state.rng();
+    let k = 0;
+    while (k < pool.length - 1 && (t -= pool[k][1]) > 0) k++;
+    picks.push(pool.splice(k, 1)[0][0]);
+  }
+  return picks;
+}
+
+export function rollChoices(state, kind = false) {
+  const fixed = kind === true || kind === "legend" ? LEGENDS.map((l) => l[0]) : kind === "titan" ? TITAN_MYTHICS : kind === "greed" ? GREED_MYTHICS : null;
+  if (fixed) {
+    const left = fixed.filter((id) => !state.owned[id]);
     const picks = [];
     while (picks.length < 3 && left.length) picks.push(left.splice(Math.floor(state.rng() * left.length), 1)[0]);
     return picks.length ? picks : ["heal"];
   }
-  const pool = ITEM_IDS.filter((id) => (state.owned[id] || 0) < ITEMS[id].max);
   const count = state.ranks.luck ? 4 : 3;
-  const picks = [];
-  while (picks.length < count && pool.length) picks.push(pool.splice(Math.floor(state.rng() * pool.length), 1)[0]);
+  const picks = pickWeighted(state, count, kind === "boss" ? 0.8 : 0);
   while (picks.length < Math.min(count, 3)) picks.push("heal");
   return picks;
+}
+
+/* ---------- Armes secondaires (reliques) et synergies ---------- */
+
+export const MAX_EXTRA = 3;
+export function gainItem(state, id) {
+  const it = ITEMS[id];
+  it.apply(state.stats, state.player, state.weapon);
+  state.owned[id] = (state.owned[id] || 0) + 1;
+  if (it.grant) addExtraWeapon(state, it.grant);
+}
+
+export function addExtraWeapon(state, wid) {
+  if (wid === state.weapon.id || state.extraWeapons.some((x) => x.id === wid) || state.extraWeapons.length >= MAX_EXTRA) return false;
+  state.extraWeapons.push({ id: wid, w: weaponById(wid), cd: 0.4, rate: 1 });
+  state.banner = { text: `Nouvelle arme : ${weaponById(wid).name}`, ttl: 2 };
+  refreshSynergies(state);
+  return true;
+}
+
+export function refreshSynergies(state) {
+  const ids = [state.weapon.id, ...state.extraWeapons.map((x) => x.id)];
+  for (const sy of activeSynergies(ids)) {
+    if (state.synergies.includes(sy.id)) continue;
+    state.synergies.push(sy.id);
+    applySpec(state.stats, state.player, sy.spec);
+    state.banner = { text: `Synergie : ${sy.name} — ${sy.text}`, ttl: 3.2 };
+    state.fx.push({ kind: "ring", x: state.player.x, y: state.player.y, r: 60, ttl: 0.6, max: 0.6, color: "#fcee0a" });
+  }
+}
+
+// Tire une arme secondaire : on remplace brièvement l'arme et les stats d'attaque par celles de l'arme secondaire (mêmes bonus), puis on restaure.
+function fireExtra(state, ex) {
+  const st = state.stats, main = state.weapon, p = state.player;
+  const saved = { damage: st.damage, range: st.range, arc: st.arc, projSpeed: st.projSpeed, pierce: st.pierce, facing: p.facing, pos: { x: p.x, y: p.y } };
+  const w2 = ex.w.kind === "dash" ? { ...ex.w, kind: "thrust" } : ex.w;
+  const dm = saved.damage / (main.dmg || 1);
+  st.damage = w2.dmg * dm * 0.75;
+  st.range = (w2.range || 0) * (main.range ? saved.range / main.range : 1);
+  st.arc = (w2.arc || 0) * (main.arc ? saved.arc / main.arc : 1);
+  st.projSpeed = (w2.speed || 0) * (main.speed ? saved.projSpeed / main.speed : 1);
+  st.pierce = (w2.pierce || 0) + (saved.pierce - (main.pierce || 0));
+  state.weapon = w2;
+  ex.rate = w2.rate * (st.rate / (main.rate || 1));
+  let ok = false;
+  try { ok = playerAttack(state, null); } finally {
+    state.weapon = main;
+    st.damage = saved.damage; st.range = saved.range; st.arc = saved.arc; st.projSpeed = saved.projSpeed; st.pierce = saved.pierce;
+    p.facing = saved.facing;
+  }
+  return ok;
 }
 
 export function chooseItem(state, id) {
@@ -2143,8 +2433,7 @@ export function chooseItem(state, id) {
   if (id === "heal") {
     state.player.hp = Math.min(state.stats.maxHp, state.player.hp + state.stats.maxHp * 0.4);
   } else {
-    ITEMS[id].apply(state.stats, state.player, state.weapon);
-    state.owned[id] = (state.owned[id] || 0) + 1;
+    gainItem(state, id);
   }
   state.choices = null;
   return true;
@@ -2155,7 +2444,7 @@ export function chooseItem(state, id) {
 // Âmes : monnaie permanente (classes, améliorations). Crédits et pièces bleues : monnaies de l'arcade.
 export function runRewards(state) {
   const greed = 1 + 0.15 * (state.ranks.greed || 0);
-  const souls = Math.floor(((state.floor - 1) * 14 + state.roomsCleared * 2 + state.kills / 4 + state.bossKills * 30 + state.megaKills * 120 + state.secretKills * 400 + state.coinsEarned / 3) * greed);
+  const souls = Math.floor(((state.floor - 1) * 14 + (state.titanKills || 0) * 900 + state.roomsCleared * 2 + state.kills / 4 + state.bossKills * 30 + state.megaKills * 120 + state.secretKills * 400 + state.coinsEarned / 3) * greed);
   const credits = Math.floor(state.floor * 8 + state.roomsCleared * 2 + state.kills / 3);
   return { souls, credits, coins: state.bossKills + 3 * state.megaKills + 6 * state.secretKills, floor: state.floor, kills: state.kills, bossKills: state.bossKills, rooms: state.roomsCleared, gold: state.coinsEarned, elite: state.eliteKills };
 }

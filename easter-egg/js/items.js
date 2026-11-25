@@ -3,6 +3,8 @@
 //   multiplicateurs (damage, rate, speed, projSpeed, magnet, range, arc, skillCd) ; ajouts (le reste) ;
 //   maxHp s'ajoute et soigne d'autant ; shield ajoute des charges de bouclier ; frost active le givre.
 
+import { WEAPONS } from "./weapons.js";
+
 const MULT = new Set(["damage", "rate", "speed", "projSpeed", "magnet", "range", "arc", "skillCd"]);
 const LABEL = {
   damage: (v) => `${v >= 1 ? "+" : "−"}${Math.round(Math.abs(v - 1) * 100)} % de dégâts`,
@@ -39,27 +41,27 @@ const LABEL = {
   slowAura: () => "ralentit les ennemis proches",
   burnAura: () => "brûle les ennemis proches",
   invBonus: (v) => `+${v.toFixed(2)} s d'invulnérabilité après un coup`,
-  bounty: (v) => `+${v} pièce par ennemi`
+  bounty: (v) => `+${v} pièce par ennemi`,
+  thermal: (v) => `+${Math.round(v * 100)} % de dégâts aux ennemis brûlés et ralentis`,
+  lootRare: (v) => `+${Math.round(v * 100)} % de chance de raretés supérieures`
 };
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-function make(id, name, max, spec, legend = false) {
-  const keys = Object.keys(spec);
-  const desc = cap(keys.map((k) => LABEL[k](spec[k])).join(", "));
-  return [id, {
-    name, desc, max, legend,
-    apply: (s, p) => {
-      for (const k of keys) {
-        const v = spec[k];
-        if (k === "maxHp") { s.maxHp = Math.max(20, s.maxHp + v); p.hp = Math.min(s.maxHp, v > 0 ? p.hp + v : p.hp); }
-        else if (k === "shield") { s.shieldMax += v; p.shield = Math.min(s.shieldMax, p.shield + v); s.shieldCd = Math.max(5, 15 - 2 * (s.shieldMax - 1)); }
-        else if (k === "frost") s.frost = 1;
-        else if (k === "skillPower") s.skillPower += v;
-        else if (MULT.has(k)) s[k] = (s[k] || 0) * v;
-        else s[k] = (s[k] || 0) + v;
-      }
-    }
-  }];
+export function applySpec(s, p, spec) {
+  for (const k of Object.keys(spec)) {
+    const v = spec[k];
+    if (k === "maxHp") { s.maxHp = Math.max(20, s.maxHp + v); p.hp = Math.min(s.maxHp, v > 0 ? p.hp + v : p.hp); }
+    else if (k === "shield") { s.shieldMax += v; p.shield = Math.min(s.shieldMax, p.shield + v); s.shieldCd = Math.max(5, 15 - 2 * (s.shieldMax - 1)); }
+    else if (k === "frost") s.frost = 1;
+    else if (k === "skillPower") s.skillPower += v;
+    else if (MULT.has(k)) s[k] = (s[k] || 0) * v;
+    else s[k] = (s[k] || 0) + v;
+  }
+}
+export const specText = (spec) => cap(Object.keys(spec).map((k) => LABEL[k](spec[k])).join(", "));
+
+function make(id, name, max, spec, rarity = "common", extra = {}) {
+  return [id, { name, desc: specText(spec), max, rarity, legend: rarity === "mythic", spec, apply: (s, p) => applySpec(s, p, spec), ...extra }];
 }
 
 const ROWS = [
@@ -180,5 +182,58 @@ export const LEGENDS = [
   ["starprism", "Prisme d'étoiles", 1, { shots: 2, pierce: 3, bomb: 2 }]
 ];
 
-export const EXTRA_ITEMS = Object.fromEntries([...ROWS.map((r) => make(...r)), ...LEGENDS.map((r) => make(...r, true))]);
+const RARE = new Set(["runepow", "surgeon", "headsman", "giantbane", "elitehunt", "bigmag", "boomammo", "emberblade", "twinblades", "lifesteal", "overload", "heavyarm", "titanheart", "stoneskin", "shadowcape", "twinshield", "nanoplus", "glassthorn", "flamehalo", "guardorb", "leagueboots", "strongmag", "goldtooth", "masterycrystal", "condenser", "ultitome", "focuslens", "knightcode", "bloodmoon", "magecirclet", "warbanner", "duelist", "vultureeye", "ironwill", "thunderstone", "siegebreaker", "bountyhunter", "swiftcloak"]);
+const EPIC = new Set(["bloodpact", "deadly", "polar", "quantum", "constell", "finalform", "overdrive", "magmacore", "voidshard", "frostcore", "glasscannon2", "plaguemask", "moonprism", "chaossigil", "goldenaegis", "amplifier2", "pacttitan"]);
+const rarityOf = (id) => (EPIC.has(id) ? "epic" : RARE.has(id) ? "rare" : "common");
+
+// Objets Rares → Légendaires supplémentaires (plus puissants, souvent avec des compromis)
+const HIGH = [
+  ["bladestorm", "Tempête de lames", 2, { damage: 1.25, rate: 1.15 }, "rare"],
+  ["ironsoul", "Âme de fer", 2, { maxHp: 50, armor: 0.1 }, "rare"],
+  ["hawkeye", "Regard de faucon", 2, { crit: 0.12, critDmg: 0.4 }, "rare"],
+  ["voidwalker", "Marcheur du vide", 2, { speed: 1.15, dodge: 0.1 }, "rare"],
+  ["warlord", "Seigneur de guerre", 2, { damage: 1.3, bossDmg: 0.3 }, "epic"],
+  ["lifebinder", "Lieur de vie", 2, { leech: 0.03, regen: 1, maxHp: 30 }, "epic"],
+  ["stormheart", "Cœur d'orage", 2, { rate: 1.25, projSpeed: 1.2, crit: 0.06 }, "epic"],
+  ["timewarp", "Distorsion temporelle", 2, { skillCd: 0.75, skillPower: 0.4 }, "epic"],
+  ["fortress", "Forteresse", 2, { armor: 0.18, shield: 1, speed: 0.95 }, "epic"],
+  ["executioner", "Exécuteur", 2, { execute: 1, eliteDmg: 0.4, crit: 0.08 }, "epic"],
+  ["arsenalmind", "Esprit d'arsenal", 2, { shots: 1, pierce: 1, damage: 1.1 }, "epic"],
+  ["midastouch", "Toucher de Midas", 2, { coinMul: 0.8, bounty: 2, heartDrop: 0.1 }, "epic"],
+  ["dragonblood", "Sang de dragon", 1, { damage: 1.5, burn: 2, burnAura: 1, maxHp: 40 }, "legendary"],
+  ["phoenixplume", "Plume de phénix", 1, { maxHp: 80, regen: 1.5, heartDrop: 0.12, invBonus: 0.3 }, "legendary"],
+  ["reaperscythe", "Faux du moissonneur", 1, { execute: 1.5, leech: 0.04, crit: 0.1 }, "legendary"],
+  ["astralcore", "Noyau astral", 1, { skillCd: 0.6, skillPower: 0.8, rate: 1.15 }, "legendary"],
+  ["titanwill", "Volonté du titan", 1, { armor: 0.25, maxHp: 100, thorns: 4, shield: 2 }, "legendary"],
+  ["chronoblade", "Lame chronos", 1, { rate: 1.5, damage: 1.2, speed: 1.1 }, "legendary"],
+  ["prismheart", "Cœur prismatique", 1, { shots: 2, pierce: 2, thermal: 0.5, bomb: 1 }, "legendary"],
+  ["godhand", "Main divine", 1, { damage: 1.6, crit: 0.15, critDmg: 0.8, bossDmg: 0.4 }, "legendary"]
+];
+// Reliques d'armes : chacune ajoute une arme secondaire qui tire automatiquement (voir dungeon.js)
+const RELICS = WEAPONS.map((w) => [`relic_${w.id}`, `Relique : ${w.name}`, 1, {}, w.unlock <= 600 ? "rare" : w.unlock <= 1300 ? "epic" : "legendary", { grant: w.id, desc: `Ajoute l'arme « ${w.name} » (secondaire, tire automatiquement). ${w.desc}` }]);
+const MYTHIC_EXTRA = [
+  ["midashand", "Main de Midas", 1, { coinMul: 2, bounty: 4, damage: 1.5, heartDrop: 0.2 }],
+  ["greedcrown", "Couronne de l'avarice", 1, { damage: 1.4, rate: 1.3, coinMul: 1, maxHp: 80 }],
+  ["goldenheart", "Cœur d'or", 1, { maxHp: 200, regen: 3, armor: 0.12 }],
+  ["bankrupt", "Banqueroute divine", 1, { skillPower: 1.5, skillCd: 0.45, crit: 0.15 }],
+  ["titanbane", "Fléau des titans", 1, { bossDmg: 1, damage: 1.5, execute: 1 }],
+  ["worldtree", "Arbre-monde", 1, { maxHp: 250, regen: 4, thorns: 6, orbs: 3 }]
+];
+export const RARITIES = {
+  common: { name: "Commun", color: "#9aa4c7", weight: 62 },
+  rare: { name: "Rare", color: "#4d9bff", weight: 24 },
+  epic: { name: "Épique", color: "#b58cff", weight: 10 },
+  legendary: { name: "Légendaire", color: "#ff9a2a", weight: 3.2 },
+  mythic: { name: "Mythique", color: "#ff2a6d", weight: 0 }
+};
+
+export const EXTRA_ITEMS = Object.fromEntries([
+  ...ROWS.map((r) => make(r[0], r[1], r[2], r[3], rarityOf(r[0]))),
+  ...HIGH.map((r) => make(r[0], r[1], r[2], r[3], r[4])),
+  ...RELICS.map((r) => make(r[0], r[1], r[2], r[3], r[4], r[5])),
+  ...LEGENDS.map((r) => make(r[0], r[1], r[2], r[3], "mythic")),
+  ...MYTHIC_EXTRA.map((r) => make(r[0], r[1], r[2], r[3], "mythic"))
+]);
+export const GREED_MYTHICS = ["midashand", "greedcrown", "goldenheart", "bankrupt"];
+export const TITAN_MYTHICS = ["titanbane", "worldtree", "crownvoid", "worldblade", "cosmichourglass", "eclipseheart"];
 export const EXTRA_COUNT = ROWS.length;

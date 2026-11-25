@@ -1141,6 +1141,17 @@ kbd {
 .sv-choice:hover, .sv-choice:focus-visible { border-color: var(--yellow); }
 .sv-choice strong { font-family: var(--font-display); letter-spacing: .04em; text-transform: uppercase; }
 .sv-choice span { color: var(--muted); font-size: 13px; }
+.sv-choice[class*="sv-r-"] { border-color: var(--rc); }
+.sv-choice .sv-rar { color: var(--rc); font-family: var(--font-mono); font-size: 11px; font-style: normal; letter-spacing: .08em; text-transform: uppercase; }
+.sv-choice[class*="sv-r-"]:hover, .sv-choice[class*="sv-r-"]:focus-visible { border-color: var(--yellow); }
+.sv-choice.sv-r-epic { box-shadow: 0 0 10px -2px var(--rc); }
+.sv-choice.sv-r-legendary { box-shadow: 0 0 14px -2px var(--rc), inset 0 0 12px -8px var(--rc); }
+.sv-choice.sv-r-mythic { box-shadow: 0 0 18px 0 var(--rc), inset 0 0 14px -6px var(--rc); animation: sv-mythic 1.6s ease-in-out infinite alternate; }
+@keyframes sv-mythic { from { box-shadow: 0 0 10px 0 var(--rc), inset 0 0 8px -6px var(--rc); } to { box-shadow: 0 0 22px 2px var(--rc), inset 0 0 16px -6px var(--rc); } }
+@media (prefers-reduced-motion: reduce) { .sv-choice.sv-r-mythic { animation: none; } }
+.sv-owned li[class*="sv-r-"] { border-left: 3px solid var(--rc); padding-left: 6px; }
+.sv-owned .sv-syn { color: var(--yellow); }
+.sv-owned .sv-owned-sec { color: var(--cyan); }
 .sv-choice em { color: var(--cyan); font-family: var(--font-mono); font-size: 11px; font-style: normal; }
 
 /* Breach Protocol */
