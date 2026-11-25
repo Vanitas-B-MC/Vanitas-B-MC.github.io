@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-25T08:47:00Z",
+ "updated": "2026-11-25T19:23:50Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -36,6 +36,356 @@
   }
  },
  "items": [
+  {
+   "id": "https://www.theregister.com/a/5312205",
+   "title": "Huawei and crew tout homegrown EDA tools to overcome China’s fab deficit",
+   "link": "https://www.theregister.com/systems/2026/11/25/huawei-and-crew-tout-homegrown-eda-tools-to-overcome-chinas-fab-deficit/5312205",
+   "summary": "Chip design software leans heavily into 3D packaging and multi-node assemblies",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T18:02:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312153",
+   "title": "Hera probe finds DART left a stadium-sized dent in asteroid Dimorphos",
+   "link": "https://www.theregister.com/science/2026/11/25/hera-probe-finds-dart-left-a-stadium-sized-dent-in-asteroid-dimorphos/5312153",
+   "summary": "Next step is to move in for a closer look at the carnage",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T17:30:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312085",
+   "title": "Microsoft's NTLM security changes trip up third-party logins",
+   "link": "https://www.theregister.com/security/2026/11/25/microsofts-ntlm-security-changes-trip-up-third-party-logins/5312085",
+   "summary": "It's not our fault if you've implemented it wrong",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T17:01:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312174",
+   "title": "HP sees premium-priced AI PCs as its meal ticket in a shrinking market",
+   "link": "https://www.theregister.com/personal-tech/2026/11/25/hp-sees-premium-priced-ai-pcs-as-its-meal-ticket-in-a-shrinking-market/5312174",
+   "summary": "PC shipments set to fall further thanks to the memory shortage, but high-margin models for AI at the edge keep profits up",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T17:00:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312165",
+   "title": "US Treasury financial crimes unit becomes latest fed breach victim",
+   "link": "https://www.theregister.com/security/2026/11/25/us-treasury-financial-crimes-unit-becomes-latest-fed-breach-victim/5312165",
+   "summary": "FinCEN takes systems offline and extends filing deadlines while investigating 'unauthorized access'",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T16:40:16Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/cisa-warns-of-critical-unpatched-flaw-in-danfoss-refrigeration-controllers/",
+   "title": "CISA warns of critical unpatched flaw in Danfoss refrigeration controllers",
+   "link": "https://www.bleepingcomputer.com/news/security/cisa-warns-of-critical-unpatched-flaw-in-danfoss-refrigeration-controllers/",
+   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) is warning about a critical vulnerability in Danfoss AK-SM 8xxA Series controllers used by food retailers to manage commercial refrigeration, HVAC, and lighting systems.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T16:13:40Z"
+  },
+  {
+   "id": "https://github.blog/?p=100468",
+   "title": "Art of play in the age of AI",
+   "link": "https://github.blog/news-insights/company-news/art-of-play-in-the-age-of-ai/",
+   "summary": "Now that code ships faster than ever, you have more time to spend on projects just for the fun of it. Here's what we can learn through that process as developers.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-11-25T16:00:00Z"
+  },
+  {
+   "id": "https://hardware.developpez.com/actu/389491/-Une-hierarchie-inutile-Jensen-Huang-affirme-que-Nvidia-n-a-pas-besoin-d-un-plan-de-succession-arguant-que-la-structure-organisationnelle-horizontale-du-fabricant-de-puces-rend-une-telle-mesure-superflue/",
+   "title": "« Une hiérarchie inutile » : Jensen Huang affirme que Nvidia n'a pas besoin d'un plan de succession, arguant que la structure organisationnelle horizontale du fabricant de puces rend une telle mesure superflue",
+   "link": "https://hardware.developpez.com/actu/389491/-Une-hierarchie-inutile-Jensen-Huang-affirme-que-Nvidia-n-a-pas-besoin-d-un-plan-de-succession-arguant-que-la-structure-organisationnelle-horizontale-du-fabricant-de-puces-rend-une-telle-mesure-superflue/",
+   "summary": "« Une hiérarchie inutile » : Jensen Huang affirme que Nvidia n'a pas besoin d'un plan de succession, arguant que la structure organisationnelle horizontale du fabricant de puces rend une telle mesure superflue La structure de direction de…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T15:52:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312147",
+   "title": "NASA's nuclear-powered Mars delivery service takes shape",
+   "link": "https://www.theregister.com/science/2026/11/25/nasas-nuclear-powered-mars-delivery-service-takes-shape/5312147",
+   "summary": "SR-1 Freedom gets a shorter boom and larger antennas, with roughly two years to finish design, construction, and testing",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T15:30:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/more-pentests-without-more-pentesters-where-ai-safely-helps/",
+   "title": "More Pentests Without More Pentesters: Where AI Safely Helps",
+   "link": "https://www.bleepingcomputer.com/news/security/more-pentests-without-more-pentesters-where-ai-safely-helps/",
+   "summary": "Penetration testers spend a significant portion of their engagements on documentation, reporting, and other tasks outside of testing. PentestPad explains how AI can reduce this workload, help teams handle more engagements, and keep…",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T15:00:10Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/infratrust-warns-of-exploited-supply-chain-flaws-in-network-appliances/",
+   "title": "InfraTrust warns of exploited supply chain flaws in network appliances",
+   "link": "https://www.bleepingcomputer.com/news/security/infratrust-warns-of-exploited-supply-chain-flaws-in-network-appliances/",
+   "summary": "Eclypsium's November InfraTrust report warns that most infrastructure security advisories addressing exploited vulnerabilities over the past month involve flaws in third-party software bundled into products rather than code developed by…",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T15:00:00Z"
+  },
+  {
+   "id": "https://github.blog/?p=99982",
+   "title": "How to choose the next safe step in application modernization",
+   "link": "https://github.blog/ai-and-ml/github-copilot/how-to-choose-the-next-safe-step-in-application-modernization/",
+   "summary": "Learn how to assess a legacy application, choose a bounded modernization step, and reuse the method with a GitHub Copilot agent skill.",
+   "source": "GitHub Blog",
+   "category": "Développement",
+   "lang": "en",
+   "published": "2026-11-25T15:00:00Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389482/Un-physicien-du-MIT-affirme-que-des-employes-d-Anthropic-evoquent-le-renversement-du-gouvernement-americain-et-la-domination-du-monde-un-avenir-ou-l-IA-echapperait-au-controle-democratique/",
+   "title": "Un physicien du MIT affirme que des employés d'Anthropic évoquent le renversement du gouvernement américain et la domination du monde, un avenir où l'IA échapperait au contrôle démocratique",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389482/Un-physicien-du-MIT-affirme-que-des-employes-d-Anthropic-evoquent-le-renversement-du-gouvernement-americain-et-la-domination-du-monde-un-avenir-ou-l-IA-echapperait-au-controle-democratique/",
+   "summary": "Un physicien du MIT affirme que des employés d'Anthropic évoquent le renversement du gouvernement américain et la domination du monde, un avenir où l'IA échapperait au contrôle démocratique Alors qu'Anthropic célèbre ses succès…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T14:58:00Z"
+  },
+  {
+   "id": "https://microsoft.developpez.com/actu/389483/La-panne-historique-du-cloud-de-Microsoft-a-mis-en-evidence-un-brouillard-de-guerre-technique-et-environ-dix-ans-de-defaillances-jugees-acceptables-declenchant-une-alerte-de-type-code-rouge/",
+   "title": "La panne historique du cloud de Microsoft a mis en évidence un « brouillard de guerre » technique et environ dix ans de défaillances jugées « acceptables », déclenchant une alerte de type « code rouge »",
+   "link": "https://microsoft.developpez.com/actu/389483/La-panne-historique-du-cloud-de-Microsoft-a-mis-en-evidence-un-brouillard-de-guerre-technique-et-environ-dix-ans-de-defaillances-jugees-acceptables-declenchant-une-alerte-de-type-code-rouge/",
+   "summary": "La panne historique du cloud de Microsoft a mis en évidence un « brouillard de guerre » technique et environ dix ans de défaillances jugées « acceptables » déclenchant une alerte de type « code rouge » Microsoft déclenche une alerte de…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T14:47:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312057",
+   "title": "Microsoft fixes Office dialog that had nothing to say and wouldn't go away",
+   "link": "https://www.theregister.com/software/2026/11/25/microsoft-fixes-office-dialog-that-had-nothing-to-say-and-wouldnt-go-away/5312057",
+   "summary": "Update resolves work-blocking popup, but affected users may need an administrator command prompt to install it",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T14:45:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311999",
+   "title": "JetBrains finds agents may cheat with open source",
+   "link": "https://www.theregister.com/devops/2026/11/25/jetbrains-finds-agents-may-cheat-with-open-source/5311999",
+   "summary": "AI coding agents caught peeking at GitHub answers, stumble when JetBrains hides the crib sheet",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T14:07:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312111",
+   "title": "Debian wakes up wearing Windows XP's actual skin",
+   "link": "https://www.theregister.com/os-platforms/2026/11/25/debian-wakes-up-wearing-windows-xps-actual-skin/5312111",
+   "summary": "Win4Wine runs the genuine Explorer shell atop Linux",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T13:23:32Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389446/L-action-d-Anthropic-chute-d-environ-13-pourcent-a-76-sous-son-prix-d-introduction-en-bourse-de-83-tandis-que-son-PDG-Dario-Amodei-a-deja-vendu-pour-280-millions-d-actions/",
+   "title": "L'action d'Anthropic chute d'environ 13 % à 76 $, sous son prix d'introduction en bourse de 83 $, tandis que son PDG, Dario Amodei, a déjà vendu pour 280 millions $ d'actions",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389446/L-action-d-Anthropic-chute-d-environ-13-pourcent-a-76-sous-son-prix-d-introduction-en-bourse-de-83-tandis-que-son-PDG-Dario-Amodei-a-deja-vendu-pour-280-millions-d-actions/",
+   "summary": "L'action d'Anthropic chute d'environ 13 % à 76 $, sous son prix d'introduction en bourse de 83 $, tandis que son PDG, Dario Amodei, a déjà vendu pour 280 millions $ d'actions L'action Anthropic a chuté d'environ 13 % pour s'établir à 76…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T13:07:00Z"
+  },
+  {
+   "id": "https://visualstudio.developpez.com/actu/389454/Microsoft-publie-la-mise-a-jour-de-novembre-de-Visual-Studio-2026-qui-offre-des-flux-de-travail-plus-rapides-une-gestion-plus-structuree-des-revisions-des-pull-requests-et-un-Copilot-Chat-ameliore/",
+   "title": "Microsoft publie la mise à jour de novembre de Visual Studio 2026, qui offre des flux de travail plus rapides, une gestion plus structurée des révisions des pull requests et un Copilot Chat amélioré",
+   "link": "https://visualstudio.developpez.com/actu/389454/Microsoft-publie-la-mise-a-jour-de-novembre-de-Visual-Studio-2026-qui-offre-des-flux-de-travail-plus-rapides-une-gestion-plus-structuree-des-revisions-des-pull-requests-et-un-Copilot-Chat-ameliore/",
+   "summary": "Microsoft publie la mise à jour de novembre de Visual Studio 2026, qui offre des flux de travail plus rapides, une gestion plus structurée des révisions des pull requests et un Copilot Chat amélioré Microsoft a publié la mise à jour de…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T13:06:00Z"
+  },
+  {
+   "id": "https://cloud-computing.developpez.com/actu/389447/Les-centres-de-donnees-seraient-a-l-origine-de-centaines-de-deces-prematures-leur-consommation-d-energie-a-base-de-gaz-deteriorant-la-qualite-de-l-air-avec-650-deces-estimes-aux-USA-en-2023/",
+   "title": "Les centres de données seraient à l'origine de centaines de décès prématurés, leur consommation d'énergie à base de gaz détériorant la qualité de l'air, avec 650 décès estimés aux USA en 2023",
+   "link": "https://cloud-computing.developpez.com/actu/389447/Les-centres-de-donnees-seraient-a-l-origine-de-centaines-de-deces-prematures-leur-consommation-d-energie-a-base-de-gaz-deteriorant-la-qualite-de-l-air-avec-650-deces-estimes-aux-USA-en-2023/",
+   "summary": "Les centres de données seraient à l'origine de centaines de décès prématurés, leur consommation d'énergie à base de gaz détériorant la qualité de l'air, avec 650 décès estimés aux USA en 2023 Une nouvelle étude publiée dans Environmental…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T13:05:00Z"
+  },
+  {
+   "id": "https://qt.developpez.com/actu/389449/Qt-Creator-21-la-derniere-version-de-l-EDI-multiplateforme-de-Qt-arrive-avec-un-outil-de-profilage-repense-un-controle-etendu-des-agents-d-IA-et-des-fonctionnalites-d-edition-ameliorees/",
+   "title": "Qt Creator 21, la dernière version de l'EDI multiplateforme de Qt, arrive avec un outil de profilage repensé, un contrôle étendu des agents d'IA et des fonctionnalités d'édition améliorées",
+   "link": "https://qt.developpez.com/actu/389449/Qt-Creator-21-la-derniere-version-de-l-EDI-multiplateforme-de-Qt-arrive-avec-un-outil-de-profilage-repense-un-controle-etendu-des-agents-d-IA-et-des-fonctionnalites-d-edition-ameliorees/",
+   "summary": "Qt Creator 21, la dernière version de l'EDI multiplateforme de Qt, arrive avec un outil de profilage repensé, un contrôle étendu des agents d'IA et des fonctionnalités d'édition améliorées Qt a lancé Qt Creator 21, la dernière version de…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T13:00:00Z"
+  },
+  {
+   "id": "https://securite.developpez.com/actu/389450/CrowdStrike-conclut-un-accord-pour-racheter-Zscaler-dans-une-transaction-entierement-en-actions-de-44-milliards-la-derniere-consolidation-dans-la-cybersecurite-face-aux-piratages-et-pannes-lies-a-l-IA/",
+   "title": "CrowdStrike conclut un accord pour racheter Zscaler dans une transaction entièrement en actions de 44 milliards $, la dernière consolidation dans la cybersécurité face aux piratages et pannes liés à l'IA",
+   "link": "https://securite.developpez.com/actu/389450/CrowdStrike-conclut-un-accord-pour-racheter-Zscaler-dans-une-transaction-entierement-en-actions-de-44-milliards-la-derniere-consolidation-dans-la-cybersecurite-face-aux-piratages-et-pannes-lies-a-l-IA/",
+   "summary": "CrowdStrike conclut un accord pour racheter Zscaler dans une transaction entièrement en actions de 44 milliards $, la dernière consolidation dans la cybersécurité face aux piratages et pannes liés à l'IA CrowdStrike a annoncé son intention…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T12:59:00Z"
+  },
+  {
+   "id": "https://securite.developpez.com/actu/389453/Des-pirates-informatiques-donnent-jusqu-au-28-novembre-a-Nvidia-alors-qu-un-groupe-de-ransomware-menace-de-divulguer-des-donnees-mais-le-groupe-n-a-fourni-aucune-preuve-de-ses-allegations/",
+   "title": "Des pirates informatiques donnent jusqu'au 28 novembre à Nvidia alors qu'un groupe de ransomware menace de divulguer des données, mais le groupe n'a fourni aucune preuve de ses allégations",
+   "link": "https://securite.developpez.com/actu/389453/Des-pirates-informatiques-donnent-jusqu-au-28-novembre-a-Nvidia-alors-qu-un-groupe-de-ransomware-menace-de-divulguer-des-donnees-mais-le-groupe-n-a-fourni-aucune-preuve-de-ses-allegations/",
+   "summary": "Des pirates informatiques donnent jusqu'au 28 novembre à Nvidia alors qu'un groupe de ransomware menace de divulguer des données, mais le groupe n'a fourni aucune preuve de ses allégations Nvidia fait face à une menace de ransomware alors…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T12:58:00Z"
+  },
+  {
+   "id": "https://droit.developpez.com/actu/389448/Apres-le-scandale-Nvidia-les-USA-blacklistent-Megaspeed-specialiste-singapourien-de-l-IA-et-sa-filiale-Speedmatrix-pour-avoir-aide-des-entreprises-chinoises-a-se-procurer-des-puces-Nvidia-restreintes/",
+   "title": "Après le scandale Nvidia, les USA blacklistent Megaspeed, spécialiste singapourien de l'IA, et sa filiale Speedmatrix, pour avoir aidé des entreprises chinoises à se procurer des puces Nvidia restreintes",
+   "link": "https://droit.developpez.com/actu/389448/Apres-le-scandale-Nvidia-les-USA-blacklistent-Megaspeed-specialiste-singapourien-de-l-IA-et-sa-filiale-Speedmatrix-pour-avoir-aide-des-entreprises-chinoises-a-se-procurer-des-puces-Nvidia-restreintes/",
+   "summary": "Après le scandale Nvidia, les USA blacklistent Megaspeed, spécialiste singapourien de l'IA, et sa filiale Speedmatrix, pour avoir aidé des entreprises chinoises à se procurer des puces Nvidia restreintes L'administration Trump a inscrit…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T12:56:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/hackers-exploit-two-geoserver-flaws-as.html",
+   "title": "Hackers Exploit Two GeoServer Flaws as Researchers Warn of Unauthenticated RCE Chains",
+   "link": "https://thehackernews.com/2026/11/hackers-exploit-two-geoserver-flaws-as.html",
+   "summary": "Threat actors are actively exploiting two newly patched security flaws in GeoServer, according to watchTowr. The vulnerabilities in question are CVE-2026-120705 and CVE-2026-129243, details of which are below - CVE-2026-120705 (CVSS score…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T12:48:54Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312043",
+   "title": "Microsoft 365 Backup stretches recovery window to ten years",
+   "link": "https://www.theregister.com/saas/2026/11/25/microsoft-365-backup-stretches-recovery-window-to-ten-years/5312043",
+   "summary": "Sadly, no time travel back to 2016",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T12:35:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/us-treasurys-fincen-takes-some-systems.html",
+   "title": "U.S. Treasury's Financial Crimes Agency Takes Some Systems Offline After Cyber Intrusion",
+   "link": "https://thehackernews.com/2026/11/us-treasurys-fincen-takes-some-systems.html",
+   "summary": "The U.S. Treasury Department's Financial Crimes Enforcement Network (FinCEN) has been hit by a cybersecurity incident that resulted in \"unauthorized access to a limited subset of its systems,\" the bureau said on Tuesday. As a precaution…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T12:30:08Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/credential-remediation-is-slow-when-you.html",
+   "title": "Credential Remediation Is Slow When You Don’t Know What Will Break",
+   "link": "https://thehackernews.com/2026/11/credential-remediation-is-slow-when-you.html",
+   "summary": "TL;DR More than 64% still valid after four years: GitGuardian’s State of Secrets Sprawl 2026 found that most valid secrets discovered in 2022 still worked in January 2026, because teams stall on what a revoke will break. Validity-only…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T11:51:48Z"
+  },
+  {
+   "id": "tag:linuxfr.org,2005:News/42777",
+   "title": "Coretilus",
+   "link": "https://linuxfr.org/news/coretilus",
+   "summary": "Coretilus est un projet libre qui rend hommage — de façon totalement inutile donc absolument indispensable — aux commandes Unix classiques… avec des animations ASCII et une bonne dose d’absurde. Si vous connaissez déjà sl (la locomotive…",
+   "source": "LinuxFr.org",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T11:37:48Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/drupal-fail2install-exploit-details.html",
+   "title": "Drupal Fail2Install Exploit Details Emerge as Critical RCE Flaw Faces Active Exploitation",
+   "link": "https://thehackernews.com/2026/11/drupal-fail2install-exploit-details.html",
+   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) on Tuesday added a critical flaw impacting Drupal to its Known Exploited Vulnerabilities (KEV) catalog, requiring federal agencies to apply the fixes by November 27, 2026…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T11:23:26Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-fixes-blank-dialog-that-made-microsoft-365-office-apps-unusable/",
+   "title": "Microsoft fixes Microsoft 365 bug blocking access to Office apps",
+   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-fixes-blank-dialog-that-made-microsoft-365-office-apps-unusable/",
+   "summary": "Earlier this week, Microsoft resolved a known issue that was preventing some Microsoft 365 customers from accessing Office applications.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T11:16:32Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/ex-openai-employee-accused-of-bugging.html",
+   "title": "Ex-OpenAI Employee Accused of Bugging Company Offices Granted $1 Million Bail",
+   "link": "https://thehackernews.com/2026/11/ex-openai-employee-accused-of-bugging.html",
+   "summary": "A former OpenAI employee accused of concealing a covert recording device at the company's San Francisco offices will be allowed to be released from jail on a $1 million bond, a San Francisco federal court judge ruled Tuesday. Abdulrahman…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T10:43:07Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/hackers-now-exploit-critical-drupal-rce-flaw-to-hijack-sites/",
+   "title": "Hackers now exploit critical Drupal RCE flaw to hijack sites",
+   "link": "https://www.bleepingcomputer.com/news/security/hackers-now-exploit-critical-drupal-rce-flaw-to-hijack-sites/",
+   "summary": "The Drupal security team has confirmed that a critical vulnerability that lets attackers hijack unpatched sites has been actively exploited since at least Thursday.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T10:10:20Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/hackers-exploited-cvss-100-hexpm-rce.html",
+   "title": "Hackers Exploited CVSS 10.0 Hex.pm RCE Flaw to Compromise 6 Package Registry Servers",
+   "link": "https://thehackernews.com/2026/11/hackers-exploited-cvss-100-hexpm-rce.html",
+   "summary": "An attacker ran operating system commands on Monday on six production servers of Hex.pm, the package registry that Elixir and Erlang developers fetch their dependencies from. The flaw used in the attack had been in the registry's code…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T09:06:59Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-confirms-authentication-issues-after-november-updates/",
+   "title": "Microsoft confirms authentication issues after November updates",
+   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-confirms-authentication-issues-after-november-updates/",
+   "summary": "Microsoft has confirmed that customers may experience authentication issues after installing November security updates that address a high-severity remote code execution vulnerability.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T09:02:57Z"
+  },
   {
    "id": "https://www.bleepingcomputer.com/news/security/hackers-reportedly-breached-cia-intelligence-analysis-system/",
    "title": "Hackers reportedly breached CIA intelligence analysis system",
@@ -77,44 +427,94 @@
    "published": "2026-11-25T06:21:12Z"
   },
   {
-   "id": "https://www.theregister.com/a/5312017",
-   "title": "This could mess with Thanksgiving, says VMware as it drops third critical patch bundle in a week",
-   "link": "https://www.theregister.com/virtualization/2026/11/25/this-could-mess-with-thanksgiving-says-vmware-as-it-drops-third-critical-patch-bundle-in-a-week/5312017",
-   "summary": "Four more critical vulns, including another unauthorized access flaw in vCenter",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-25T05:15:08Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5312010",
-   "title": "Nutanix CEO announces gradual departure, intent to complete set of storage links",
-   "link": "https://www.theregister.com/virtualization/2026/11/25/nutanix-ceo-announces-gradual-departure-intent-to-complete-set-of-storage-links/5312010",
-   "summary": "Rajiv Ramaswami will stay in the chair until new hire lands, then stick around as advisor",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-25T03:13:13Z"
-  },
-  {
-   "id": "https://visualstudio.developpez.com/actu/389441/Microsoft-annonce-Visual-Studio-Code-1-147-avec-la-fonctionnalite-Envoyer-plus-tard-pour-programmer-les-demandes-aux-agents-IA-locaux-pour-plus-tard/",
-   "title": "Microsoft annonce Visual Studio Code 1.147 avec la fonctionnalité « Envoyer plus tard », pour programmer les demandes aux agents IA locaux pour plus tard",
-   "link": "https://visualstudio.developpez.com/actu/389441/Microsoft-annonce-Visual-Studio-Code-1-147-avec-la-fonctionnalite-Envoyer-plus-tard-pour-programmer-les-demandes-aux-agents-IA-locaux-pour-plus-tard/",
-   "summary": "Microsoft annonce Visual Studio Code 1.147 avec la fonctionnalité « Envoyer plus tard », pour programmer les demandes aux agents IA locaux pour plus tard La version 1.147 de Visual Studio Code a été publiée le 18 novembre 2026. Vous avez…",
-   "source": "Developpez.com",
-   "category": "Développement",
+   "id": "https://www.cert.cyber.gouv.fr/dur/CERTFR-2026-DUR-001/",
+   "title": "Recommandations de sécurisation des liaisons inter-sites (25 novembre 2026)",
+   "link": "https://www.cert.cyber.gouv.fr/dur/CERTFR-2026-DUR-001/",
+   "summary": "Objet : Recommandations de sécurisation des liaisons inter-sites, à destination des clients de ces offres. Annexe : Liens et références Depuis plusieurs années, l’Agence nationale de la sécurité des systèmes d'information (ANSSI) a…",
+   "source": "CERT-FR",
+   "category": "Cybersécurité",
    "lang": "fr",
-   "published": "2026-11-25T02:08:00Z"
+   "published": "2026-11-25T00:00:00Z"
   },
   {
-   "id": "https://www.theregister.com/a/5312003",
-   "title": "Dell and HPE both say they’ve become ‘different companies’",
-   "link": "https://www.theregister.com/systems/2026/11/25/dell-and-hpe-both-say-theyve-become-different-companies/5312003",
-   "summary": "Still slinging hardware – now with added AI and attendant risks or opportunities",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-25T01:17:30Z"
+   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1616/",
+   "title": "Multiples vulnérabilités dans les produits Mozilla (25 novembre 2026)",
+   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1616/",
+   "summary": "De multiples vulnérabilités ont été découvertes dans les produits Mozilla. Certaines d'entre elles permettent à un attaquant de provoquer une exécution de code arbitraire, une élévation de privilèges et une atteinte à la confidentialité…",
+   "source": "CERT-FR",
+   "category": "Cybersécurité",
+   "lang": "fr",
+   "published": "2026-11-25T00:00:00Z"
+  },
+  {
+   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1620/",
+   "title": "Vulnérabilité dans Microsoft Office (25 novembre 2026)",
+   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1620/",
+   "summary": "Une vulnérabilité a été découverte dans Microsoft Office. Elle permet à un attaquant de provoquer une exécution de code arbitraire à distance.",
+   "source": "CERT-FR",
+   "category": "Cybersécurité",
+   "lang": "fr",
+   "published": "2026-11-25T00:00:00Z"
+  },
+  {
+   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1622/",
+   "title": "Multiples vulnérabilités dans les produits VMware (25 novembre 2026)",
+   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1622/",
+   "summary": "De multiples vulnérabilités ont été découvertes dans les produits VMware. Certaines d'entre elles permettent à un attaquant de provoquer une exécution de code arbitraire à distance, une élévation de privilèges et un déni de service à…",
+   "source": "CERT-FR",
+   "category": "Cybersécurité",
+   "lang": "fr",
+   "published": "2026-11-25T00:00:00Z"
+  },
+  {
+   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1618/",
+   "title": "Vulnérabilité dans les produits Schneider Electric (25 novembre 2026)",
+   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1618/",
+   "summary": "Une vulnérabilité a été découverte dans les produits Schneider Electric. Elle permet à un attaquant de provoquer une exécution de code arbitraire à distance et un déni de service à distance.",
+   "source": "CERT-FR",
+   "category": "Cybersécurité",
+   "lang": "fr",
+   "published": "2026-11-25T00:00:00Z"
+  },
+  {
+   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1619/",
+   "title": "Multiples vulnérabilités dans Symfony (25 novembre 2026)",
+   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1619/",
+   "summary": "De multiples vulnérabilités ont été découvertes dans Symfony. Certaines d'entre elles permettent à un attaquant de provoquer un déni de service à distance, une atteinte à la confidentialité des données et un contournement de la politique…",
+   "source": "CERT-FR",
+   "category": "Cybersécurité",
+   "lang": "fr",
+   "published": "2026-11-25T00:00:00Z"
+  },
+  {
+   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1621/",
+   "title": "Vulnérabilité dans Palo Alto Networks PAN-OS (25 novembre 2026)",
+   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1621/",
+   "summary": "Une vulnérabilité a été découverte dans Palo Alto Networks PAN-OS. Elle permet à un attaquant de provoquer une élévation de privilèges. Palo Alto Networks indique que la vulnérabilité CVE-2026-43600 est activement exploitée.",
+   "source": "CERT-FR",
+   "category": "Cybersécurité",
+   "lang": "fr",
+   "published": "2026-11-25T00:00:00Z"
+  },
+  {
+   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1615/",
+   "title": "Multiples vulnérabilités dans Tenable Enclave Security (25 novembre 2026)",
+   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1615/",
+   "summary": "De multiples vulnérabilités ont été découvertes dans Tenable Enclave Security. Certaines d'entre elles permettent à un attaquant de provoquer une exécution de code arbitraire à distance, une élévation de privilèges et un déni de service à…",
+   "source": "CERT-FR",
+   "category": "Cybersécurité",
+   "lang": "fr",
+   "published": "2026-11-25T00:00:00Z"
+  },
+  {
+   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1617/",
+   "title": "Vulnérabilité dans Laravel (25 novembre 2026)",
+   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1617/",
+   "summary": "Une vulnérabilité a été découverte dans Laravel. Elle permet à un attaquant de provoquer un déni de service à distance.",
+   "source": "CERT-FR",
+   "category": "Cybersécurité",
+   "lang": "fr",
+   "published": "2026-11-25T00:00:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/rackspace-shuts-down-spot-cloud-platform-after-security-breach/",
@@ -127,16 +527,6 @@
    "published": "2026-11-24T21:37:30Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311986",
-   "title": "AI godfather Yann LeCun torches Anthropic CEO over AI gatekeeping",
-   "link": "https://www.theregister.com/ai-and-ml/2026/11/24/ai-godfather-yann-lecun-torches-anthropic-ceo-over-ai-gatekeeping/5311986",
-   "summary": "‘It’s like the Ottoman Empire banning the printing press for Arabic so they would keep in control of the dogma,’ he says",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T20:57:08Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/new-inception-extortion-gang-launches-large-scale-vishing-campaign/",
    "title": "New Inception extortion gang launches large-scale vishing campaign",
    "link": "https://www.bleepingcomputer.com/news/security/new-inception-extortion-gang-launches-large-scale-vishing-campaign/",
@@ -145,16 +535,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-24T20:21:20Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311978",
-   "title": "'We are not ShinyHunters,' says criminal hacking crew that looks and acts just like ShinyHunters",
-   "link": "https://www.theregister.com/security/2026/11/24/we-are-not-shinyhunters-says-criminal-hacking-crew-that-looks-and-acts-just-like-shinyhunters/5311978",
-   "summary": "Nothing to see here…",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T20:15:36Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/turnitin-discloses-cyberattack-affecting-customer-facing-systems/",
@@ -167,46 +547,6 @@
    "published": "2026-11-24T18:59:52Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311925",
-   "title": "Arm strongarms site that hosts ad-free documentation and it may disappear",
-   "link": "https://www.theregister.com/systems/2026/11/24/arm-strongarms-site-that-hosts-ad-free-documentation-and-it-may-disappear/5311925",
-   "summary": "Easy-to-use, popular, not collecting data for us, or serving our ads? Down with you!",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T17:57:41Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/radware-discloses-breach-exposing-customer-cloud-access-keys/",
-   "title": "Radware discloses breach exposing customer cloud access keys",
-   "link": "https://www.bleepingcomputer.com/news/security/radware-discloses-breach-exposing-customer-cloud-access-keys/",
-   "summary": "Cybersecurity company Radware says attackers gained access to some of its customers' account details and cloud access keys through an unsecured internal Cloud WAF (Web Application Firewall) management API that was left exposed online.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T17:49:05Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311922",
-   "title": "An AI coding agent, a browser, and a Mac tool found a financial firm's access key in under 6 minutes",
-   "link": "https://www.theregister.com/security/2026/11/24/an-ai-coding-agent-a-browser-and-a-mac-tool-found-a-financial-firms-access-key-in-under-6-minutes/5311922",
-   "summary": "No sophisticated malware or attack framework required",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T17:00:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311895",
-   "title": "Microsoft refreshes Copilot app search for users without an AI subscription",
-   "link": "https://www.theregister.com/personal-tech/2026/11/24/microsoft-refreshes-copilot-app-search-for-users-without-an-ai-subscription/5311895",
-   "summary": "Meanwhile, Google's homepage demo leaves a familiar button out of the picture",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T17:00:00Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/iran-aligned-volant-manticore-uses-ipfs.html",
    "title": "Iran-Aligned Volant Manticore Uses IPFS-Based KuboShell Backdoor in Espionage Campaigns",
    "link": "https://thehackernews.com/2026/11/iran-aligned-volant-manticore-uses-ipfs.html",
@@ -215,46 +555,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-24T16:54:07Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/shinyhunters-resurfaces-after-fbi-arrests-uses-old-pgp-keys-as-proof/",
-   "title": "ShinyHunters claims to return after FBI arrests, uses old PGP keys as proof",
-   "link": "https://www.bleepingcomputer.com/news/security/shinyhunters-resurfaces-after-fbi-arrests-uses-old-pgp-keys-as-proof/",
-   "summary": "The ShinyHunters extortion gang claims to have returned in posts on a new data leak site after a series of arrests over the past two months targeting alleged members.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T16:30:19Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/european-commission-confirms-data-theft-in-eu-academy-breach/",
-   "title": "European Commission confirms data theft in EU Academy breach",
-   "link": "https://www.bleepingcomputer.com/news/security/european-commission-confirms-data-theft-in-eu-academy-breach/",
-   "summary": "The European Commission, the European Union's main executive body, has confirmed that attackers breached its EU Academy online learning hub and stole the personal data of an undisclosed number of users.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T16:22:44Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/hackers-compromise-check-point-servers-in-22-organizations/",
-   "title": "Hackers compromise Check Point Servers in 22 organizations",
-   "link": "https://www.bleepingcomputer.com/news/security/hackers-compromise-check-point-servers-in-22-organizations/",
-   "summary": "Threat actors have exploited multiple vulnerabilities to compromise two dozen Check Point Security management servers in an ongoing campaign targeting 22 organizations.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T16:15:23Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311841",
-   "title": "Microsoft brings serverless PostgreSQL into Fabric to bridge transactions and analytics",
-   "link": "https://www.theregister.com/databases/2026/11/24/microsoft-brings-serverless-postgresql-into-fabric-to-bridge-transactions-and-analytics/5311841",
-   "summary": "HorizonDB preview follows rivals' moves, with analysts warning tighter integration could make an eventual exit harder",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T16:00:00Z"
   },
   {
    "id": "https://github.blog/?p=100438",
@@ -267,186 +567,6 @@
    "published": "2026-11-24T16:00:00Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311901",
-   "title": "US blacklists Megaspeed hours after Jensen Huang returns to Nvidia",
-   "link": "https://www.theregister.com/systems/2026/11/24/us-blacklists-megaspeed-hours-after-jensen-huang-returns-to-nvidia/5311901",
-   "summary": "Chip boss gets his old job back, but Washington isn't done investigating one of his former flame's businesses",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T15:15:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/police-disrupt-57-illegal-streaming-services-with-73-million-visits/",
-   "title": "Police disrupt 57 illegal streaming services with 7.3 million visits",
-   "link": "https://www.bleepingcomputer.com/news/security/police-disrupt-57-illegal-streaming-services-with-73-million-visits/",
-   "summary": "Law enforcement authorities from 11 countries have disrupted 57 illegal streaming services that operated hundreds of websites and drew over 7.3 million visits each year.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T15:10:10Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/from-vulnerability-noise-to-resilience-rethinking-security-in-the-ai-era/",
-   "title": "From Vulnerability Noise to Resilience: Rethinking Security in the AI Era",
-   "link": "https://www.bleepingcomputer.com/news/security/from-vulnerability-noise-to-resilience-rethinking-security-in-the-ai-era/",
-   "summary": "AI-driven development is adding complexity to software supply chains, leaving security teams overwhelmed by vulnerabilities that may pose little actual risk. RapidFort explains how runtime visibility, container hardening, and automated…",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T15:01:11Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389428/ARTEX-un-framework-de-tests-d-intrusion-propulse-par-l-IA-detourne-par-des-pirates-pour-cibler-les-entreprises-et-les-infrastructures-gouvernementales-sensibles-l-outil-est-massivement-partage-en-ligne/",
-   "title": "ARTEX : un framework de tests d'intrusion propulsé par l'IA détourné par des pirates pour cibler les entreprises et les infrastructures gouvernementales sensibles, l'outil est massivement partagé en ligne",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389428/ARTEX-un-framework-de-tests-d-intrusion-propulse-par-l-IA-detourne-par-des-pirates-pour-cibler-les-entreprises-et-les-infrastructures-gouvernementales-sensibles-l-outil-est-massivement-partage-en-ligne/",
-   "summary": "ARTEX : un framework de tests d'intrusion propulsé par l'IA détourné par des pirates pour cibler les entreprises et les infrastructures gouvernementales sensibles l'outil est massivement partagé en ligne Un framework de tests d'intrusion…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-24T14:14:00Z"
-  },
-  {
-   "id": "https://hardware.developpez.com/actu/389401/Jensen-Huang-affirme-qu-il-sera-un-meilleur-PDG-apres-avoir-recu-une-ovation-de-la-part-de-ses-collaborateurs-a-son-retour-au-siege-de-l-entreprise-moins-de-deux-semaines-apres-avoir-demissionne/",
-   "title": "Jensen Huang affirme qu'il sera un « meilleur PDG » après avoir reçu une ovation de la part de ses collaborateurs à son retour au siège de l'entreprise, moins de deux semaines après avoir démissionné",
-   "link": "https://hardware.developpez.com/actu/389401/Jensen-Huang-affirme-qu-il-sera-un-meilleur-PDG-apres-avoir-recu-une-ovation-de-la-part-de-ses-collaborateurs-a-son-retour-au-siege-de-l-entreprise-moins-de-deux-semaines-apres-avoir-demissionne/",
-   "summary": "Jensen Huang affirme qu'il sera un « meilleur PDG » après avoir reçu une ovation de la part de ses collaborateurs à son retour au siège de l'entreprise, moins de deux semaines après avoir démissionné Le cofondateur de Nvidia, Jensen Huang…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-24T14:14:00Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389399/Pour-aider-les-ingenieurs-logiciels-a-deployer-leur-code-Anthropic-lance-de-nouvelles-fonctionnalites-d-IA-Claude-Ship-capables-desormais-d-examiner-de-corriger-et-d-approuver-des-pull-requests/",
-   "title": "Pour aider les ingénieurs logiciels à déployer leur code, Anthropic lance de nouvelles fonctionnalités d'IA, Claude Ship, capables désormais d'examiner, de corriger et d'approuver des pull requests",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389399/Pour-aider-les-ingenieurs-logiciels-a-deployer-leur-code-Anthropic-lance-de-nouvelles-fonctionnalites-d-IA-Claude-Ship-capables-desormais-d-examiner-de-corriger-et-d-approuver-des-pull-requests/",
-   "summary": "Pour aider les ingénieurs logiciels à déployer leur code, Anthropic lance de nouvelles fonctionnalités d'IA, Claude Ship, capables désormais d'examiner, de corriger et d'approuver des pull requests Anthropic a dévoilé Claude Ship, un…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-24T14:14:00Z"
-  },
-  {
-   "id": "https://onlyoffice.developpez.com/actu/389413/La-solution-collaborative-en-ligne-ONLYOFFICE-Apps-s-integre-a-Claude-pour-gerer-les-fichiers-et-les-salles-depuis-un-assistant-IA/",
-   "title": "La solution collaborative en ligne ONLYOFFICE Apps s'intègre à Claude pour gérer les fichiers et les salles depuis un assistant IA",
-   "link": "https://onlyoffice.developpez.com/actu/389413/La-solution-collaborative-en-ligne-ONLYOFFICE-Apps-s-integre-a-Claude-pour-gerer-les-fichiers-et-les-salles-depuis-un-assistant-IA/",
-   "summary": "La solution collaborative en ligne ONLYOFFICE Apps s'intègre à Claude pour gérer les fichiers et les salles depuis un assistant IA ONLYOFFICE est une suite bureautique open source conçue pour les développeurs qui ont besoin de…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-24T14:06:00Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389400/Thinking-Machines-devoile-Inkling-2-Mini-un-modele-d-IA-en-boucle-qui-s-execute-localement-sur-un-ordinateur-portable-6-fois-moins-cher-et-4-fois-plus-rapide-par-tache-que-Qwen3-8-27B/",
-   "title": "Thinking Machines dévoile Inkling 2 Mini, un modèle d'IA en boucle qui s'exécute localement sur un ordinateur portable, 6 fois moins cher et 4 fois plus rapide par tâche que Qwen3.8 27B",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389400/Thinking-Machines-devoile-Inkling-2-Mini-un-modele-d-IA-en-boucle-qui-s-execute-localement-sur-un-ordinateur-portable-6-fois-moins-cher-et-4-fois-plus-rapide-par-tache-que-Qwen3-8-27B/",
-   "summary": "Thinking Machines dévoile Inkling 2 Mini, un modèle d'IA en boucle qui s'exécute localement sur un ordinateur portable, 6 fois moins cher et 4 fois plus rapide par tâche que Qwen3.8 27B Thinking Machines Lab a annoncé la sortie d'Inkling 2…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-24T14:00:00Z"
-  },
-  {
-   "id": "https://intelligence-artificielle.developpez.com/actu/389411/Z-ai-lance-le-modele-IA-chinois-GLM-5-4-dote-de-capacites-de-vision-et-d-un-quota-hebdomadaire-de-codage-accru-de-50-pourcent-et-qui-serait-le-meilleur-modele-de-codage-open-source-a-ce-jour/",
-   "title": "Z.ai lance le modèle IA chinois GLM-5.4, doté de capacités de vision et d'un quota hebdomadaire de codage accru de 50 %, et qui serait le meilleur modèle de codage open source à ce jour",
-   "link": "https://intelligence-artificielle.developpez.com/actu/389411/Z-ai-lance-le-modele-IA-chinois-GLM-5-4-dote-de-capacites-de-vision-et-d-un-quota-hebdomadaire-de-codage-accru-de-50-pourcent-et-qui-serait-le-meilleur-modele-de-codage-open-source-a-ce-jour/",
-   "summary": "Z.ai lance le modèle IA chinois GLM-5.4, doté de capacités de vision et d'un quota hebdomadaire de codage accru de 50 %, qui serait le meilleur modèle de codage open source à ce jour Le laboratoire chinois d'intelligence artificielle (IA)…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-24T13:59:00Z"
-  },
-  {
-   "id": "https://embarque.developpez.com/actu/389406/Les-voitures-bourrees-de-technologies-logicielles-font-grimper-les-couts-de-reparation-et-d-assurance-entrainant-un-gaspillage-de-12-milliards-par-an-selon-une-nouvelle-enquete-de-Right-to-Repair/",
-   "title": "Les voitures bourrées de technologies logicielles font grimper les coûts de réparation et d'assurance, entraînant un gaspillage de 12 milliards $ par an, selon une nouvelle enquête de Right to Repair",
-   "link": "https://embarque.developpez.com/actu/389406/Les-voitures-bourrees-de-technologies-logicielles-font-grimper-les-couts-de-reparation-et-d-assurance-entrainant-un-gaspillage-de-12-milliards-par-an-selon-une-nouvelle-enquete-de-Right-to-Repair/",
-   "summary": "Les voitures bourrées de technologies logicielles font grimper les coûts de réparation et d'assurance, entraînant un gaspillage de 12 milliards $ par an, selon une nouvelle enquête de Right to Repair Une nouvelle enquête menée par des…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-24T13:58:00Z"
-  },
-  {
-   "id": "https://securite.developpez.com/actu/389404/La-Grande-Bretagne-a-ete-contrainte-de-reconnaitre-l-existence-d-une-ordonnance-secrete-imposant-a-Apple-de-contourner-le-chiffrement-et-de-donner-acces-aux-donnees-de-ses-clients-selon-une-decision-de-justice/",
-   "title": "La Grande-Bretagne a été contrainte de reconnaître l'existence d'une ordonnance secrète imposant à Apple de contourner le chiffrement et de donner accès aux données de ses clients, selon une décision de justice",
-   "link": "https://securite.developpez.com/actu/389404/La-Grande-Bretagne-a-ete-contrainte-de-reconnaitre-l-existence-d-une-ordonnance-secrete-imposant-a-Apple-de-contourner-le-chiffrement-et-de-donner-acces-aux-donnees-de-ses-clients-selon-une-decision-de-justice/",
-   "summary": "La Grande-Bretagne a été contrainte de reconnaître l'existence d'une ordonnance secrète imposant à Apple de contourner le chiffrement et de donner accès aux données de ses clients, selon une décision de justice Un tribunal britannique…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-24T13:56:00Z"
-  },
-  {
-   "id": "https://hardware.developpez.com/actu/389403/Le-president-Trump-a-mene-des-demarches-en-coulisses-pour-reintegrer-Jensen-Huang-a-la-tete-de-Nvidia-en-obtenant-l-assurance-de-responsables-federaux-qu-il-ne-fait-l-objet-d-aucune-poursuite-penale/",
-   "title": "Le président Trump à mené des démarches en coulisses pour réintégrer Jensen Huang à la tête de Nvidia, en obtenant l'assurance de responsables fédéraux qu'il ne fait l'objet d'aucune poursuite pénale",
-   "link": "https://hardware.developpez.com/actu/389403/Le-president-Trump-a-mene-des-demarches-en-coulisses-pour-reintegrer-Jensen-Huang-a-la-tete-de-Nvidia-en-obtenant-l-assurance-de-responsables-federaux-qu-il-ne-fait-l-objet-d-aucune-poursuite-penale/",
-   "summary": "Le président Trump à mené des démarches en coulisses pour réintégrer Jensen Huang à la tête de Nvidia, en obtenant l'assurance de responsables fédéraux qu'il ne fait l'objet d'aucune poursuite pénale Le président américain Donald Trump et…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-24T13:55:00Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/vmware-vcenter-hit-by-another-critical.html",
-   "title": "VMware vCenter Hit by Another Critical 9.8-Rated Auth Bypass Flaw After Zero-Day Exploitation",
-   "link": "https://thehackernews.com/2026/11/vmware-vcenter-hit-by-another-critical.html",
-   "summary": "Broadcom has shipped patches to address 23 vulnerabilities impacting VMware ESX, vCenter, Workstation, Fusion, and Avi Load Balancer, including one critical bug that could be abused to bypass authentication. The critical vulnerability…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T13:28:26Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/okta-links-shinyhunters-associated.html",
-   "title": "Okta Links ShinyHunters-Associated Vishing Group to New INCEPTION Data Leak Site",
-   "link": "https://thehackernews.com/2026/11/okta-links-shinyhunters-associated.html",
-   "summary": "A threat cluster previously assessed to be affiliated with the ShinyHunters extortion crew may have rebranded and continued operations under a new name called INCEPTION, according to Okta's Threat Intelligence team. The cluster, dubbed…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T13:28:21Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/hackers-found-way-around-github-sha.html",
-   "title": "Hackers Found a Way Around GitHub SHA Pinning. This Webinar Explains How to Close the Gap",
-   "link": "https://thehackernews.com/2026/11/hackers-found-way-around-github-sha.html",
-   "summary": "Pinning GitHub Actions to an exact version of their code, known as SHA pinning, has become the go-to defense against software supply chain attacks. Attackers have already found a way around it. In March 2026, the hackers who hijacked…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T12:42:09Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/google-researcher-shows-how-single-bit.html",
-   "title": "Google Researcher Shows How a Single Bit Change in .NET Files Bypassed Windows Code Integrity",
-   "link": "https://thehackernews.com/2026/11/google-researcher-shows-how-single-bit.html",
-   "summary": "A quirk in how the .NET Framework loads a program file let a local attacker run untrusted code past two separate protections on Windows built to block it, Google Project Zero researcher James Forshaw showed in a write-up published…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T12:02:00Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/2027-soc-budget-reset-5-priorities-to.html",
-   "title": "2027 SOC Budget Reset: 5 Priorities to Cut Costs and Reduce Cyber Risk",
-   "link": "https://thehackernews.com/2026/11/2027-soc-budget-reset-5-priorities-to.html",
-   "summary": "What if your biggest SOC budget problem isn't how much you spend, but how much analyst time you lose? According to ANY.RUN's estimates, SOC teams could recover 450 analyst hours per 1,000 investigated alerts through faster threat analysis…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T12:01:54Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/microsoft-fixes-azure-api-management.html",
-   "title": "Microsoft Fixes Azure API Management Classic Flaw as Actor Targets Customer Secrets",
-   "link": "https://thehackernews.com/2026/11/microsoft-fixes-azure-api-management.html",
-   "summary": "Norway's National Security Authority (NSM) has disclosed that it became aware of a security vulnerability in Microsoft's Azure API Management (APIM) that has affected multiple businesses in the country, including energy companies Equinor…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T10:44:49Z"
-  },
-  {
    "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1610/",
    "title": "Multiples vulnérabilités dans Postfix (24 novembre 2026)",
    "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1610/",
@@ -455,96 +575,6 @@
    "category": "Cybersécurité",
    "lang": "fr",
    "published": "2026-11-24T00:00:00Z"
-  },
-  {
-   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1609/",
-   "title": "Vulnérabilité dans Laravel (24 novembre 2026)",
-   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1609/",
-   "summary": "Une vulnérabilité a été découverte dans Laravel. Elle permet à un attaquant de provoquer un contournement de la politique de sécurité.",
-   "source": "CERT-FR",
-   "category": "Cybersécurité",
-   "lang": "fr",
-   "published": "2026-11-24T00:00:00Z"
-  },
-  {
-   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1614/",
-   "title": "Multiples vulnérabilités dans les produits Elastic (24 novembre 2026)",
-   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1614/",
-   "summary": "De multiples vulnérabilités ont été découvertes dans les produits Elastic. Certaines d'entre elles permettent à un attaquant de provoquer une exécution de code arbitraire à distance, une élévation de privilèges et un déni de service à…",
-   "source": "CERT-FR",
-   "category": "Cybersécurité",
-   "lang": "fr",
-   "published": "2026-11-24T00:00:00Z"
-  },
-  {
-   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1608/",
-   "title": "Vulnérabilité dans Google Chrome (24 novembre 2026)",
-   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1608/",
-   "summary": "Une vulnérabilité a été découverte dans Google Chrome. Elle permet à un attaquant de provoquer une exécution de code arbitraire à distance et un contournement de la politique de sécurité.",
-   "source": "CERT-FR",
-   "category": "Cybersécurité",
-   "lang": "fr",
-   "published": "2026-11-24T00:00:00Z"
-  },
-  {
-   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1613/",
-   "title": "Multiples vulnérabilités dans OpenSSL (24 novembre 2026)",
-   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1613/",
-   "summary": "De multiples vulnérabilités ont été découvertes dans OpenSSL. Elles permettent à un attaquant de provoquer un déni de service à distance.",
-   "source": "CERT-FR",
-   "category": "Cybersécurité",
-   "lang": "fr",
-   "published": "2026-11-24T00:00:00Z"
-  },
-  {
-   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1612/",
-   "title": "Vulnérabilité dans les produits F5 (24 novembre 2026)",
-   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1612/",
-   "summary": "Une vulnérabilité a été découverte dans les produits F5. Elle permet à un attaquant de provoquer un déni de service à distance.",
-   "source": "CERT-FR",
-   "category": "Cybersécurité",
-   "lang": "fr",
-   "published": "2026-11-24T00:00:00Z"
-  },
-  {
-   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1611/",
-   "title": "Multiples vulnérabilités dans Traefik (24 novembre 2026)",
-   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1611/",
-   "summary": "De multiples vulnérabilités ont été découvertes dans Traefik. Elle permet à un attaquant de provoquer un déni de service à distance, une atteinte à la confidentialité des données et un contournement de la politique de sécurité.",
-   "source": "CERT-FR",
-   "category": "Cybersécurité",
-   "lang": "fr",
-   "published": "2026-11-24T00:00:00Z"
-  },
-  {
-   "id": "https://www.cert.cyber.gouv.fr/actualite/CERTFR-2026-ACT-049/",
-   "title": "Bulletin d'actualité CERTFR-2026-ACT-049 (23 novembre 2026)",
-   "link": "https://www.cert.cyber.gouv.fr/actualite/CERTFR-2026-ACT-049/",
-   "summary": "Ce bulletin d'actualité du CERT-FR revient sur les vulnérabilités significatives de la semaine passée pour souligner leurs criticités. Il ne remplace pas l'analyse de l'ensemble des avis et alertes publiés par le CERT-FR dans le cadre…",
-   "source": "CERT-FR",
-   "category": "Cybersécurité",
-   "lang": "fr",
-   "published": "2026-11-23T00:00:00Z"
-  },
-  {
-   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1599/",
-   "title": "Multiples vulnérabilités dans SPIP (23 novembre 2026)",
-   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1599/",
-   "summary": "De multiples vulnérabilités ont été découvertes dans SPIP. Elles permettent à un attaquant de provoquer une injection de code indirecte à distance (XSS) et une injection de requêtes illégitimes par rebond (CSRF).",
-   "source": "CERT-FR",
-   "category": "Cybersécurité",
-   "lang": "fr",
-   "published": "2026-11-23T00:00:00Z"
-  },
-  {
-   "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1606/",
-   "title": "Multiples vulnérabilités dans MongoDB (23 novembre 2026)",
-   "link": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1606/",
-   "summary": "De multiples vulnérabilités ont été découvertes dans MongoDB. Certaines d'entre elles permettent à un attaquant de provoquer une exécution de code arbitraire, une atteinte à la confidentialité des données et une atteinte à l'intégrité des…",
-   "source": "CERT-FR",
-   "category": "Cybersécurité",
-   "lang": "fr",
-   "published": "2026-11-23T00:00:00Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/43325",
@@ -667,16 +697,6 @@
    "published": "2026-11-14T19:55:06Z"
   },
   {
-   "id": "tag:linuxfr.org,2005:News/43304",
-   "title": "Haro sur les sections de commune françaises",
-   "link": "https://linuxfr.org/news/haro-sur-les-sections-de-commune-francaises",
-   "summary": "Une section de commune désigne selon Wikipedia « une personne morale de droit public autre que la commune, qui possède sur tout ou partie du territoire communal et à titre permanent et exclusif, des droits et/ou des biens distincts de ceux…",
-   "source": "LinuxFr.org",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-13T08:35:45Z"
-  },
-  {
    "id": "https://github.blog/?p=100130",
    "title": "GitHub availability report: October 2026",
    "link": "https://github.blog/news-insights/company-news/github-availability-report-october-2026/",
@@ -715,26 +735,6 @@
    "category": "Développement",
    "lang": "en",
    "published": "2026-11-06T22:15:59Z"
-  },
-  {
-   "id": "https://github.blog/?p=100002",
-   "title": "Inside GitHub’s new Git storage architecture",
-   "link": "https://github.blog/engineering/architecture-optimization/inside-githubs-new-git-storage-architecture/",
-   "summary": "GitHub's new Git storage architecture is built so thousands of agents can push to a single repository at once. Here's how it works.",
-   "source": "GitHub Blog",
-   "category": "Développement",
-   "lang": "en",
-   "published": "2026-11-05T20:23:21Z"
-  },
-  {
-   "id": "https://github.blog/?p=99949",
-   "title": "Accessibility statements now have a home on GitHub",
-   "link": "https://github.blog/open-source/maintainers/accessibility-statements-now-have-a-home-on-github/",
-   "summary": "GitHub now highlights ACCESSIBILITY.md files and helps maintainers document accessibility goals, known barriers, supported environments, contributor expectations, and reporting processes.",
-   "source": "GitHub Blog",
-   "category": "Développement",
-   "lang": "en",
-   "published": "2026-11-05T16:00:00Z"
   }
  ]
 }
