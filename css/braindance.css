@@ -1,0 +1,240 @@
+/* =========================================================
+   MODE BRAINDANCE — easter egg (taper « braindance » sur le site)
+   L'éditeur de braindance : bleu glacé sur fond marine, blanc de scan, un point REC rouge.
+   Des repères de chronologie en haut, un faisceau de balayage qui passe lentement.
+
+   Tout est limité à html.braindance : sans cette classe, rien ne change.
+   Même principe que neon.css : on remplace les variables de couleur du site,
+   puis on corrige les couleurs écrites en dur dans style.css et veille.css.
+========================================================= */
+
+html.braindance {
+  --bg: #02060e;
+  --surface: #071221;
+  --surface-2: #0c1c33;
+  --line: #123049;
+  --line-strong: #1f6f9b;
+
+  --text: #eaf7ff;
+  --muted: #9bb8cc;
+
+  /* rôles repris des thèmes (index : yellow/cyan/pink, veille : hot/blue/violet) */
+  --yellow: #5cc8ff;   /* bleu glacé : l'accent principal */
+  --cyan: #c9f2ff;     /* blanc de scan */
+  --pink: #ff6b7a;
+  --hot: #ff5c7a;
+  --blue: #5cc8ff;
+  --violet: #8f7bff;
+
+  --th-a-rgb: 92, 200, 255;
+  --th-b-rgb: 201, 242, 255;
+  --th-c-rgb: 143, 123, 255;
+  --th-bone-rgb: 234, 247, 255;
+
+  scrollbar-color: var(--line-strong) var(--bg);
+}
+
+/* Fond */
+html.braindance body::before {
+  background:
+    linear-gradient(90deg, transparent 0 calc(100% - 1px), rgba(var(--th-a-rgb), .09) calc(100% - 1px)) 0 0 / 9.99% 100%,
+    repeating-linear-gradient(90deg, rgba(var(--th-a-rgb), .22) 0 1px, transparent 1px 12px) 0 0 / 100% 10px no-repeat,
+    radial-gradient(70vw 50vh at 90% -10%, rgba(var(--th-a-rgb), .2), transparent 70%),
+    radial-gradient(60vw 50vh at -8% 108%, rgba(var(--th-c-rgb), .16), transparent 70%),
+    linear-gradient(rgba(var(--th-a-rgb), .045) 1px, transparent 1px) 0 0 / 100% 40px;
+
+}
+
+/* Écran : faisceau de balayage vertical qui traverse lentement, lignes fines et vignette bleutée */
+html.braindance body::after {
+  background:
+    linear-gradient(90deg, transparent 0 46%, rgba(var(--th-b-rgb), .08) 50%, transparent 54% 100%) 0 0 / 220% 100%,
+    radial-gradient(ellipse at center, transparent 52%, rgba(0, 8, 24, .6) 100%),
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 10, 30, .22) 2px 3px);
+  animation: braindance-scan 12s linear infinite;
+}
+@keyframes braindance-scan { from { background-position-x: -110%, 0, 0; } to { background-position-x: 110%, 0, 0; } }
+
+
+
+/* Étiquette fixe, collée en bas à droite */
+html.braindance::after {
+  content: "BRAINDANCE // ● REC";
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  pointer-events: none;
+  padding: 4px 12px 4px 14px;
+  background: rgba(2, 6, 14, .92);
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+  color: var(--cyan);
+  font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+  font-size: 10px;
+  letter-spacing: .22em;
+  opacity: .85;
+  animation: braindance-rec 1.6s steps(1, end) infinite;
+}
+
+/* Titres */
+html.braindance .hero-name,
+html.braindance .arcade-title,
+html.braindance .vtitle {
+  text-shadow: -3px 0 rgba(255, 92, 122, .6), 3px 0 rgba(var(--th-a-rgb), .75), 0 0 26px rgba(var(--th-a-rgb), .5);
+}
+
+html.braindance .game-title,
+html.braindance .overlay-title {
+  text-shadow: -2px 0 rgba(255, 92, 122, .55), 2px 0 rgba(var(--th-a-rgb), .7), 0 0 16px rgba(var(--th-a-rgb), .45);
+}
+
+html.braindance .section-heading h2 {
+  text-shadow: 0 0 18px rgba(var(--th-a-rgb), .4);
+}
+
+html.braindance ::selection {
+  background: var(--yellow);
+  color: #02060e;
+}
+
+/* ---------- Couleurs écrites en dur dans style.css ---------- */
+
+html.braindance .site-header.is-scrolled {
+  border-bottom-color: rgba(var(--th-a-rgb), .6);
+  box-shadow: 0 6px 28px -10px rgba(var(--th-a-rgb), .6);
+}
+
+/* Logo (une image jaune et cyan) : passé à la couleur du thème, avec un halo */
+html.braindance .logo img,
+html.braindance .brand img,
+html.braindance .card-head img {
+  filter: grayscale(1) sepia(1) hue-rotate(147deg) saturate(3.4) brightness(1.05) drop-shadow(0 0 6px rgba(var(--th-a-rgb), .5));
+}
+
+html.braindance .logo:hover img,
+html.braindance .brand:hover img {
+  filter: grayscale(1) sepia(1) hue-rotate(147deg) saturate(3.4) brightness(1.05) drop-shadow(0 0 12px rgba(var(--th-a-rgb), .9));
+}
+
+html.braindance .github-link:hover {
+  background: rgba(var(--th-b-rgb), .1);
+}
+
+html.braindance .about-seeking {
+  background: rgba(var(--th-a-rgb), .08);
+}
+
+html.braindance .timeline li:first-child::before {
+  box-shadow: 0 0 14px rgba(var(--th-a-rgb), .9);
+}
+
+/* Cartes à coins coupés : un filter suit la forme, un box-shadow serait coupé */
+html.braindance .profile-card,
+html.braindance .terminal {
+  filter: drop-shadow(0 0 14px rgba(var(--th-a-rgb), .24));
+}
+
+html.braindance .project:hover {
+  filter: drop-shadow(0 0 18px rgba(var(--th-a-rgb), .5));
+}
+
+html.braindance .button-primary {
+  color: #02060e;
+  box-shadow: 0 0 18px -2px rgba(var(--th-a-rgb), .6);
+}
+
+html.braindance .contact-list a {
+  border-bottom-color: rgba(var(--th-a-rgb), .5);
+}
+
+html.braindance .status-dot {
+  box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7);
+  animation-name: pulse-braindance;
+}
+
+@keyframes pulse-braindance {
+  0% { box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7); }
+  70%, 100% { box-shadow: 0 0 0 10px rgba(var(--th-a-rgb), 0); }
+}
+
+/* ---------- veille.css ---------- */
+
+html.braindance .hud > div:nth-child(3) { border-left-color: var(--violet); }
+html.braindance .hud > div:nth-child(3) dd { color: var(--violet); }
+
+html.braindance .banner {
+  background:
+    radial-gradient(60% 90% at 88% 15%, rgba(var(--th-a-rgb), .26), transparent 70%),
+    radial-gradient(50% 80% at 8% 100%, rgba(var(--th-b-rgb), .14), transparent 70%);
+}
+
+html.braindance .banner-lead { color: #d4ecf9; }
+
+html.braindance .field select:focus,
+html.braindance .field input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--th-b-rgb), .4);
+}
+
+html.braindance .step-num {
+  -webkit-text-stroke-color: rgba(var(--th-a-rgb), .75);
+}
+
+/* Couleur d'accent des articles et des sources, par catégorie.
+   (Les règles de veille.css sont moins précises : on les redéfinit toutes ici.) */
+html.braindance .shard,
+html.braindance .source-token { --accent-rgb: var(--th-b-rgb); }
+
+html.braindance .shard[data-cat="cybersecurite"],
+html.braindance .source-token[data-cat="cybersecurite"] { --accent-rgb: var(--th-a-rgb); }
+
+html.braindance .shard[data-cat="developpement"],
+html.braindance .source-token[data-cat="developpement"] { --accent-rgb: var(--th-c-rgb); }
+
+html.braindance .shard[data-cat="infrastructure"],
+html.braindance .source-token[data-cat="infrastructure"] { --accent-rgb: var(--th-bone-rgb); }
+
+/* ---------- Arcade ---------- */
+
+html.braindance .game-stage {
+  box-shadow: inset 0 0 40px rgba(var(--th-a-rgb), .07), 0 0 30px -8px rgba(var(--th-a-rgb), .55);
+}
+
+/* ---------- Alerte plein écran à l'activation (easter-egg/js/secret-code.js) ---------- */
+
+html.braindance .secret-braindance {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .3) 2px 3px),
+    radial-gradient(70% 60% at 50% 55%, rgba(var(--th-a-rgb), .32), rgba(1, 4, 10, .96) 75%);
+  animation: braindance-alert 1.9s steps(1, end) both;
+}
+
+html.braindance .secret-braindance .secret-unlock-title {
+  color: var(--yellow);
+  text-shadow: -4px 0 rgba(255, 92, 122, .7), 4px 0 rgba(var(--th-a-rgb), .85), 0 0 32px rgba(var(--th-a-rgb), .7);
+}
+
+@keyframes braindance-alert {
+  0% { opacity: 0; }
+  8%, 80% { opacity: 1; }
+  84% { opacity: .55; }
+  88%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  html.braindance::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.braindance body::before,
+  html.braindance body::after,
+  html.braindance::before,
+  html.braindance::after,
+  html.braindance .hero-name,
+  html.braindance .vtitle,
+  html.braindance .status-dot,
+  html.braindance .secret-braindance { animation: none; }
+}
+
+@keyframes braindance-rec { 0%, 70%, 100% { opacity: .9; } 72%, 98% { opacity: .35; } }

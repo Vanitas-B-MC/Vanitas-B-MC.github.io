@@ -1,0 +1,231 @@
+/* =========================================================
+   MODE AFTERLIFE — easter egg (taper « afterlife » sur le site)
+   L'Afterlife de Night City, le bar des légendes mercenaires : violet nuit, enseigne dorée,
+   rose chaud. Un néon qui crépite, une ambiance de comptoir.
+
+   Tout est limité à html.afterlife : sans cette classe, rien ne change.
+   Même principe que neon.css : on remplace les variables de couleur du site,
+   puis on corrige les couleurs écrites en dur dans style.css et veille.css.
+========================================================= */
+
+html.afterlife {
+  --bg: #0b0410;
+  --surface: #150821;
+  --surface-2: #200d30;
+  --line: #3b1a45;
+  --line-strong: #8b2f78;
+
+  --text: #fff1e6;
+  --muted: #d4adc2;
+
+  /* rôles repris des thèmes (index : yellow/cyan/pink, veille : hot/blue/violet) */
+  --yellow: #ffc14d;   /* or de l'enseigne : l'accent principal */
+  --cyan: #ff4fa3;     /* rose néon du comptoir */
+  --pink: #ff7a59;
+  --hot: #ff4fa3;
+  --blue: #ffc14d;
+  --violet: #b05cff;
+
+  --th-a-rgb: 255, 193, 77;
+  --th-b-rgb: 255, 79, 163;
+  --th-c-rgb: 176, 92, 255;
+  --th-bone-rgb: 255, 241, 230;
+
+  scrollbar-color: var(--line-strong) var(--bg);
+}
+
+/* Fond */
+html.afterlife body::before {
+  background:
+    radial-gradient(70vw 50vh at 50% 118%, rgba(var(--th-b-rgb), .28), transparent 72%),
+    radial-gradient(50vw 45vh at 92% -8%, rgba(var(--th-a-rgb), .2), transparent 70%),
+    radial-gradient(40vw 40vh at 4% 50%, rgba(var(--th-c-rgb), .14), transparent 70%),
+    radial-gradient(circle at 20% 30%, rgba(var(--th-a-rgb), .1) 0 3px, transparent 4px) 0 0 / 120px 120px,
+    radial-gradient(circle at 70% 70%, rgba(var(--th-b-rgb), .1) 0 4px, transparent 5px) 0 0 / 170px 170px;
+  animation: afterlife-glow 8s ease-in-out infinite;
+}
+
+
+
+/* Étiquette fixe, collée en bas à droite */
+html.afterlife::after {
+  content: "★ AFTERLIFE — LÉGENDES SEULEMENT ★";
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  pointer-events: none;
+  padding: 4px 12px 4px 14px;
+  background: rgba(11, 4, 16, .92);
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+  color: var(--yellow);
+  font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+  font-size: 10px;
+  letter-spacing: .22em;
+  opacity: .85;
+  animation: afterlife-sign 5s steps(1, end) infinite;
+}
+
+/* Titres */
+html.afterlife .hero-name,
+html.afterlife .arcade-title,
+html.afterlife .vtitle {
+  text-shadow: 0 0 8px rgba(var(--th-a-rgb), .9), 0 0 26px rgba(var(--th-a-rgb), .6), 0 0 52px rgba(var(--th-b-rgb), .55);
+}
+
+html.afterlife .game-title,
+html.afterlife .overlay-title {
+  text-shadow: 0 0 6px rgba(var(--th-a-rgb), .8), 0 0 20px rgba(var(--th-b-rgb), .5);
+}
+
+html.afterlife .section-heading h2 {
+  text-shadow: 0 0 18px rgba(var(--th-a-rgb), .4);
+}
+
+html.afterlife ::selection {
+  background: var(--yellow);
+  color: #1a0620;
+}
+
+/* ---------- Couleurs écrites en dur dans style.css ---------- */
+
+html.afterlife .site-header.is-scrolled {
+  border-bottom-color: rgba(var(--th-a-rgb), .6);
+  box-shadow: 0 6px 28px -10px rgba(var(--th-a-rgb), .6);
+}
+
+/* Logo (une image jaune et cyan) : passé à la couleur du thème, avec un halo */
+html.afterlife .logo img,
+html.afterlife .brand img,
+html.afterlife .card-head img {
+  filter: grayscale(1) sepia(1) hue-rotate(6deg) saturate(3.2) brightness(1.05) drop-shadow(0 0 6px rgba(var(--th-a-rgb), .5));
+}
+
+html.afterlife .logo:hover img,
+html.afterlife .brand:hover img {
+  filter: grayscale(1) sepia(1) hue-rotate(6deg) saturate(3.2) brightness(1.05) drop-shadow(0 0 12px rgba(var(--th-a-rgb), .9));
+}
+
+html.afterlife .github-link:hover {
+  background: rgba(var(--th-b-rgb), .1);
+}
+
+html.afterlife .about-seeking {
+  background: rgba(var(--th-a-rgb), .08);
+}
+
+html.afterlife .timeline li:first-child::before {
+  box-shadow: 0 0 14px rgba(var(--th-a-rgb), .9);
+}
+
+/* Cartes à coins coupés : un filter suit la forme, un box-shadow serait coupé */
+html.afterlife .profile-card,
+html.afterlife .terminal {
+  filter: drop-shadow(0 0 14px rgba(var(--th-a-rgb), .24));
+}
+
+html.afterlife .project:hover {
+  filter: drop-shadow(0 0 18px rgba(var(--th-a-rgb), .5));
+}
+
+html.afterlife .button-primary {
+  color: #1a0620;
+  box-shadow: 0 0 18px -2px rgba(var(--th-a-rgb), .6);
+}
+
+html.afterlife .contact-list a {
+  border-bottom-color: rgba(var(--th-a-rgb), .5);
+}
+
+html.afterlife .status-dot {
+  box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7);
+  animation-name: pulse-afterlife;
+}
+
+@keyframes pulse-afterlife {
+  0% { box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7); }
+  70%, 100% { box-shadow: 0 0 0 10px rgba(var(--th-a-rgb), 0); }
+}
+
+/* ---------- veille.css ---------- */
+
+html.afterlife .hud > div:nth-child(3) { border-left-color: var(--violet); }
+html.afterlife .hud > div:nth-child(3) dd { color: var(--violet); }
+
+html.afterlife .banner {
+  background:
+    radial-gradient(60% 90% at 88% 15%, rgba(var(--th-a-rgb), .26), transparent 70%),
+    radial-gradient(50% 80% at 8% 100%, rgba(var(--th-b-rgb), .14), transparent 70%);
+}
+
+html.afterlife .banner-lead { color: #f3dcd0; }
+
+html.afterlife .field select:focus,
+html.afterlife .field input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--th-b-rgb), .4);
+}
+
+html.afterlife .step-num {
+  -webkit-text-stroke-color: rgba(var(--th-a-rgb), .75);
+}
+
+/* Couleur d'accent des articles et des sources, par catégorie.
+   (Les règles de veille.css sont moins précises : on les redéfinit toutes ici.) */
+html.afterlife .shard,
+html.afterlife .source-token { --accent-rgb: var(--th-b-rgb); }
+
+html.afterlife .shard[data-cat="cybersecurite"],
+html.afterlife .source-token[data-cat="cybersecurite"] { --accent-rgb: var(--th-a-rgb); }
+
+html.afterlife .shard[data-cat="developpement"],
+html.afterlife .source-token[data-cat="developpement"] { --accent-rgb: var(--th-c-rgb); }
+
+html.afterlife .shard[data-cat="infrastructure"],
+html.afterlife .source-token[data-cat="infrastructure"] { --accent-rgb: var(--th-bone-rgb); }
+
+/* ---------- Arcade ---------- */
+
+html.afterlife .game-stage {
+  box-shadow: inset 0 0 40px rgba(var(--th-a-rgb), .07), 0 0 30px -8px rgba(var(--th-a-rgb), .55);
+}
+
+/* ---------- Alerte plein écran à l'activation (easter-egg/js/secret-code.js) ---------- */
+
+html.afterlife .secret-afterlife {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .3) 2px 3px),
+    radial-gradient(70% 60% at 50% 55%, rgba(var(--th-a-rgb), .32), rgba(9, 2, 13, .96) 75%);
+  animation: afterlife-alert 1.9s steps(1, end) both;
+}
+
+html.afterlife .secret-afterlife .secret-unlock-title {
+  color: var(--yellow);
+  text-shadow: 0 0 10px rgba(var(--th-a-rgb), .95), 0 0 36px rgba(var(--th-b-rgb), .8);
+}
+
+@keyframes afterlife-alert {
+  0% { opacity: 0; }
+  8%, 80% { opacity: 1; }
+  84% { opacity: .55; }
+  88%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  html.afterlife::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.afterlife body::before,
+  html.afterlife body::after,
+  html.afterlife::before,
+  html.afterlife::after,
+  html.afterlife .hero-name,
+  html.afterlife .vtitle,
+  html.afterlife .status-dot,
+  html.afterlife .secret-afterlife { animation: none; }
+}
+
+@keyframes afterlife-glow { 0%, 100% { opacity: 1; } 50% { opacity: .86; } }
+@keyframes afterlife-sign { 0%, 62%, 66%, 100% { opacity: .9; } 63%, 65% { opacity: .2; } 80%, 82% { opacity: .45; } }

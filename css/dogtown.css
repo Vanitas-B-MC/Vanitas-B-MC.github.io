@@ -1,0 +1,238 @@
+/* =========================================================
+   MODE DOGTOWN — easter egg (taper « dogtown » sur le site)
+   Dogtown, le quartier fortifié de Phantom Liberty : poussière orange, rouille, sarcelle oxydée,
+   un soleil bas dans la brume de chaleur. Ici, pas de loi.
+
+   Tout est limité à html.dogtown : sans cette classe, rien ne change.
+   Même principe que neon.css : on remplace les variables de couleur du site,
+   puis on corrige les couleurs écrites en dur dans style.css et veille.css.
+========================================================= */
+
+html.dogtown {
+  --bg: #0d0805;
+  --surface: #17100a;
+  --surface-2: #22160d;
+  --line: #3a2616;
+  --line-strong: #8a5a2b;
+
+  --text: #f5e9dc;
+  --muted: #bba58f;
+
+  /* rôles repris des thèmes (index : yellow/cyan/pink, veille : hot/blue/violet) */
+  --yellow: #ff7a1a;   /* orange rouille : l'accent principal */
+  --cyan: #2ec4b6;     /* sarcelle oxydée */
+  --pink: #ff9a52;
+  --hot: #ff6a1a;
+  --blue: #2ec4b6;
+  --violet: #c0562a;
+
+  --th-a-rgb: 255, 122, 26;
+  --th-b-rgb: 46, 196, 182;
+  --th-c-rgb: 192, 86, 42;
+  --th-bone-rgb: 245, 233, 220;
+
+  scrollbar-color: var(--line-strong) var(--bg);
+}
+
+/* Fond */
+html.dogtown body::before {
+  background:
+    radial-gradient(90vw 46vh at 50% 114%, rgba(var(--th-a-rgb), .32), transparent 72%),
+    radial-gradient(50vw 40vh at 96% -8%, rgba(var(--th-c-rgb), .22), transparent 70%),
+    radial-gradient(40vw 35vh at 6% 30%, rgba(var(--th-b-rgb), .08), transparent 70%),
+    repeating-linear-gradient(135deg, rgba(var(--th-a-rgb), .035) 0 2px, transparent 2px 9px),
+    linear-gradient(rgba(var(--th-bone-rgb), .025) 1px, transparent 1px) 0 0 / 100% 60px;
+  animation: dogtown-haze 9s ease-in-out infinite;
+}
+
+/* Écran : brume de chaleur (voile orangé), grain et vignette brune */
+html.dogtown body::after {
+  background:
+    linear-gradient(180deg, transparent 0 55%, rgba(var(--th-a-rgb), .07) 100%),
+    radial-gradient(ellipse at center, transparent 50%, rgba(20, 8, 0, .6) 100%),
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .2) 2px 3px);
+}
+
+
+
+/* Étiquette fixe, collée en bas à droite */
+html.dogtown::after {
+  content: "DOGTOWN // ZONE FORTIFIÉE — PAS DE LOI";
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  pointer-events: none;
+  padding: 4px 12px 4px 14px;
+  background: rgba(13, 8, 5, .92);
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+  color: var(--cyan);
+  font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+  font-size: 10px;
+  letter-spacing: .22em;
+  opacity: .85;
+  
+}
+
+/* Titres */
+html.dogtown .hero-name,
+html.dogtown .arcade-title,
+html.dogtown .vtitle {
+  text-shadow: -3px 0 rgba(var(--th-b-rgb), .5), 3px 0 rgba(var(--th-c-rgb), .75), 0 0 28px rgba(var(--th-a-rgb), .5);
+}
+
+html.dogtown .game-title,
+html.dogtown .overlay-title {
+  text-shadow: -2px 0 rgba(var(--th-b-rgb), .45), 2px 0 rgba(var(--th-c-rgb), .7), 0 0 16px rgba(var(--th-a-rgb), .4);
+}
+
+html.dogtown .section-heading h2 {
+  text-shadow: 0 0 18px rgba(var(--th-a-rgb), .4);
+}
+
+html.dogtown ::selection {
+  background: var(--yellow);
+  color: #140800;
+}
+
+/* ---------- Couleurs écrites en dur dans style.css ---------- */
+
+html.dogtown .site-header.is-scrolled {
+  border-bottom-color: rgba(var(--th-a-rgb), .6);
+  box-shadow: 0 6px 28px -10px rgba(var(--th-a-rgb), .6);
+}
+
+/* Logo (une image jaune et cyan) : passé à la couleur du thème, avec un halo */
+html.dogtown .logo img,
+html.dogtown .brand img,
+html.dogtown .card-head img {
+  filter: grayscale(1) sepia(1) hue-rotate(-16deg) saturate(3.6) brightness(1) drop-shadow(0 0 6px rgba(var(--th-a-rgb), .5));
+}
+
+html.dogtown .logo:hover img,
+html.dogtown .brand:hover img {
+  filter: grayscale(1) sepia(1) hue-rotate(-16deg) saturate(3.6) brightness(1) drop-shadow(0 0 12px rgba(var(--th-a-rgb), .9));
+}
+
+html.dogtown .github-link:hover {
+  background: rgba(var(--th-b-rgb), .1);
+}
+
+html.dogtown .about-seeking {
+  background: rgba(var(--th-a-rgb), .08);
+}
+
+html.dogtown .timeline li:first-child::before {
+  box-shadow: 0 0 14px rgba(var(--th-a-rgb), .9);
+}
+
+/* Cartes à coins coupés : un filter suit la forme, un box-shadow serait coupé */
+html.dogtown .profile-card,
+html.dogtown .terminal {
+  filter: drop-shadow(0 0 14px rgba(var(--th-a-rgb), .24));
+}
+
+html.dogtown .project:hover {
+  filter: drop-shadow(0 0 18px rgba(var(--th-a-rgb), .5));
+}
+
+html.dogtown .button-primary {
+  color: #140800;
+  box-shadow: 0 0 18px -2px rgba(var(--th-a-rgb), .6);
+}
+
+html.dogtown .contact-list a {
+  border-bottom-color: rgba(var(--th-a-rgb), .5);
+}
+
+html.dogtown .status-dot {
+  box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7);
+  animation-name: pulse-dogtown;
+}
+
+@keyframes pulse-dogtown {
+  0% { box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7); }
+  70%, 100% { box-shadow: 0 0 0 10px rgba(var(--th-a-rgb), 0); }
+}
+
+/* ---------- veille.css ---------- */
+
+html.dogtown .hud > div:nth-child(3) { border-left-color: var(--violet); }
+html.dogtown .hud > div:nth-child(3) dd { color: var(--violet); }
+
+html.dogtown .banner {
+  background:
+    radial-gradient(60% 90% at 88% 15%, rgba(var(--th-a-rgb), .26), transparent 70%),
+    radial-gradient(50% 80% at 8% 100%, rgba(var(--th-b-rgb), .14), transparent 70%);
+}
+
+html.dogtown .banner-lead { color: #f0dccb; }
+
+html.dogtown .field select:focus,
+html.dogtown .field input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--th-b-rgb), .4);
+}
+
+html.dogtown .step-num {
+  -webkit-text-stroke-color: rgba(var(--th-a-rgb), .75);
+}
+
+/* Couleur d'accent des articles et des sources, par catégorie.
+   (Les règles de veille.css sont moins précises : on les redéfinit toutes ici.) */
+html.dogtown .shard,
+html.dogtown .source-token { --accent-rgb: var(--th-b-rgb); }
+
+html.dogtown .shard[data-cat="cybersecurite"],
+html.dogtown .source-token[data-cat="cybersecurite"] { --accent-rgb: var(--th-a-rgb); }
+
+html.dogtown .shard[data-cat="developpement"],
+html.dogtown .source-token[data-cat="developpement"] { --accent-rgb: var(--th-c-rgb); }
+
+html.dogtown .shard[data-cat="infrastructure"],
+html.dogtown .source-token[data-cat="infrastructure"] { --accent-rgb: var(--th-bone-rgb); }
+
+/* ---------- Arcade ---------- */
+
+html.dogtown .game-stage {
+  box-shadow: inset 0 0 40px rgba(var(--th-a-rgb), .07), 0 0 30px -8px rgba(var(--th-a-rgb), .55);
+}
+
+/* ---------- Alerte plein écran à l'activation (easter-egg/js/secret-code.js) ---------- */
+
+html.dogtown .secret-dogtown {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .3) 2px 3px),
+    radial-gradient(70% 60% at 50% 55%, rgba(var(--th-a-rgb), .32), rgba(12, 6, 2, .96) 75%);
+  animation: dogtown-alert 1.9s steps(1, end) both;
+}
+
+html.dogtown .secret-dogtown .secret-unlock-title {
+  color: var(--yellow);
+  text-shadow: -4px 0 rgba(var(--th-b-rgb), .6), 4px 0 rgba(var(--th-c-rgb), .85), 0 0 32px rgba(var(--th-a-rgb), .75);
+}
+
+@keyframes dogtown-alert {
+  0% { opacity: 0; }
+  8%, 80% { opacity: 1; }
+  84% { opacity: .55; }
+  88%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  html.dogtown::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.dogtown body::before,
+  html.dogtown body::after,
+  html.dogtown::before,
+  html.dogtown::after,
+  html.dogtown .hero-name,
+  html.dogtown .vtitle,
+  html.dogtown .status-dot,
+  html.dogtown .secret-dogtown { animation: none; }
+}
+
+@keyframes dogtown-haze { 0%, 100% { opacity: 1; } 50% { opacity: .88; } }

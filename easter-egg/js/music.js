@@ -10,6 +10,8 @@
 // drones qui grondent, flux de données en arpège, grosse caisse industrielle, pulsations de basse, mélodie glaciale,
 // puis une brèche où la musique se déchire (bégaiements, montée) avant le retour du mur.
 
+import { THEME_TRACKS } from "./music-themes.js";
+
 const BPM = 96;
 const BPM_EDGE = 62;                  // tempo du morceau Edgerunners
 const BPM_NEON = 118;                 // tempo du morceau Neon
@@ -17,7 +19,12 @@ const BPM_BLACKWALL = 88;             // tempo du morceau Blackwall
 const isEdge = () => document.documentElement.classList.contains("edgerunners");
 const isNeon = () => document.documentElement.classList.contains("neon");
 const isBlackwall = () => document.documentElement.classList.contains("blackwall");
-const stepSeconds = () => 60 / (isEdge() ? BPM_EDGE : isNeon() ? BPM_NEON : isBlackwall() ? BPM_BLACKWALL : BPM) / 4;   // une double-croche, en secondes
+// Thème secret qui a son propre morceau (voir music-themes.js), ou null.
+const extraTrack = () => {
+  for (const id of Object.keys(THEME_TRACKS)) if (document.documentElement.classList.contains(id)) return THEME_TRACKS[id];
+  return null;
+};
+const stepSeconds = () => 60 / (extraTrack()?.bpm ?? (isEdge() ? BPM_EDGE : isNeon() ? BPM_NEON : isBlackwall() ? BPM_BLACKWALL : BPM)) / 4;   // une double-croche, en secondes
 const LOOKAHEAD = 0.25;               // on programme les notes 250 ms à l'avance
 const KEY = "mc-music";
 
@@ -97,7 +104,7 @@ const NEON_CHORUS = [
 ];
 const STEPS_PER_BAR = 16;
 const BARS = 8;
-const loopSteps = () => STEPS_PER_BAR * (isEdge() ? EDGE_BARS : isNeon() ? NEON_BARS : isBlackwall() ? BW_BARS : BARS);
+const loopSteps = () => STEPS_PER_BAR * (extraTrack()?.bars ?? (isEdge() ? EDGE_BARS : isNeon() ? NEON_BARS : isBlackwall() ? BW_BARS : BARS));
 
 function readPref() {
   try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
@@ -210,6 +217,125 @@ export function createMusic() {
     src.start(time);
     src.stop(time + 1.6);
   }
+
+  // --- Instruments supplémentaires, utilisés par les morceaux de music-themes.js ---
+
+  // Nappe douce : deux triangles désaccordés, attaque lente, filtre passe-bas.
+  function pad(freq, time, length, gain, attack = 0.6, cutoff = 1400, dest = master) {
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = cutoff;
+    const amp = ctx.createGain();
+    amp.gain.setValueAtTime(0.0001, time);
+    amp.gain.exponentialRampToValueAtTime(gain, time + attack);
+    amp.gain.setValueAtTime(gain, time + Math.max(attack, length * 0.6));
+    amp.gain.exponentialRampToValueAtTime(0.0001, time + length);
+    for (const detune of [-7, 7]) {
+      const osc = ctx.createOscillator();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+      osc.detune.value = detune;
+      osc.connect(filter);
+      osc.start(time);
+      osc.stop(time + length + 0.05);
+    }
+    filter.connect(amp).connect(dest);
+  }
+
+  // Caisse claire : souffle filtré + petit corps sourd.
+  function snare(time, gain = 0.2) {
+    hat(time, gain, 1800, 0.13, "bandpass");
+    hat(time, gain * 0.5, 6500, 0.08);
+    note(midi(55), time, 0.09, "triangle", gain * 0.55, master, 0.002);
+  }
+
+  // Taiko : un sinus qui chute, plus un coup de souffle grave.
+  function taiko(time, gain = 0.5, pitch = 64) {
+    const osc = ctx.createOscillator();
+    const amp = ctx.createGain();
+    osc.frequency.setValueAtTime(pitch * 2, time);
+    osc.frequency.exponentialRampToValueAtTime(pitch * 0.62, time + 0.3);
+    amp.gain.setValueAtTime(gain, time);
+    amp.gain.exponentialRampToValueAtTime(0.0001, time + 0.55);
+    osc.connect(amp).connect(master);
+    osc.start(time);
+    osc.stop(time + 0.6);
+    hat(time, gain * 0.35, 400, 0.1, "lowpass");
+  }
+
+  // Accord de cuivres : dents de scie désaccordées dans un filtre qui se referme vite.
+  function stab(freqs, time, length, gain, cutoff = 2600, dest = master) {
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.Q.value = 2;
+    filter.frequency.setValueAtTime(cutoff, time);
+    filter.frequency.exponentialRampToValueAtTime(380, time + length);
+    const amp = ctx.createGain();
+    amp.gain.setValueAtTime(0.0001, time);
+    amp.gain.exponentialRampToValueAtTime(gain, time + 0.015);
+    amp.gain.exponentialRampToValueAtTime(0.0001, time + length);
+    for (const freq of freqs) {
+      for (const detune of [-8, 8]) {
+        const osc = ctx.createOscillator();
+        osc.type = "sawtooth";
+        osc.frequency.value = freq;
+        osc.detune.value = detune;
+        osc.connect(filter);
+        osc.start(time);
+        osc.stop(time + length + 0.05);
+      }
+    }
+    filter.connect(amp).connect(dest);
+  }
+
+  // Piano électrique : un sinus + deux harmoniques qui s'éteignent plus vite (son « Rhodes »).
+  function epiano(freq, time, length, gain, dest = master) {
+    for (const [mult, level, decay] of [[1, 1, 1], [2, 0.4, 0.55], [4, 0.12, 0.25]]) {
+      const osc = ctx.createOscillator();
+      const amp = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq * mult;
+      amp.gain.setValueAtTime(0.0001, time);
+      amp.gain.exponentialRampToValueAtTime(gain * level, time + 0.006);
+      amp.gain.exponentialRampToValueAtTime(0.0001, time + length * decay);
+      osc.connect(amp).connect(dest);
+      osc.start(time);
+      osc.stop(time + length * decay + 0.05);
+    }
+  }
+
+  // Basse filtrée : dent de scie dont le filtre se referme à chaque note.
+  function bassLP(freq, time, length, gain, cutoff = 700) {
+    const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const amp = ctx.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.value = freq;
+    filter.type = "lowpass";
+    filter.Q.value = 6;
+    filter.frequency.setValueAtTime(cutoff, time);
+    filter.frequency.exponentialRampToValueAtTime(Math.max(90, cutoff * 0.25), time + length);
+    amp.gain.setValueAtTime(0.0001, time);
+    amp.gain.exponentialRampToValueAtTime(gain, time + 0.01);
+    amp.gain.exponentialRampToValueAtTime(0.0001, time + length);
+    osc.connect(filter).connect(amp).connect(master);
+    osc.start(time);
+    osc.stop(time + length + 0.05);
+  }
+
+  // Corde pincée : triangle + carré à l'octave, extinction rapide, petit clic de bruit.
+  function pluck(freq, time, length, gain, dest = master) {
+    note(freq, time, length, "triangle", gain, dest, 0.004);
+    note(freq * 2, time, length * 0.5, "square", gain * 0.25, dest, 0.004);
+    hat(time, gain * 0.6, 3000, 0.02, "highpass");
+  }
+
+  // Trousse transmise aux morceaux de music-themes.js.
+  const kit = {
+    midi, note, lead, bright, kick, hat, drone, riser, impact, pad, snare, taiko, stab, epiano, bassLP, pluck,
+    get leadBus() { return leadBus; },
+    get master() { return master; }
+  };
 
   // Voix de mélodie : sinus doux + triangle, attaque lente, vibrato qui s'installe après la note.
   function lead(freq, time, length, gain) {
@@ -434,6 +560,8 @@ export function createMusic() {
   }
 
   function playStep(index, time) {
+    const extra = extraTrack();
+    if (extra) return extra.play(kit, index, time, stepSeconds());
     if (isEdge()) return playEdgeStep(index, time);
     if (isBlackwall()) return playBlackwallStep(index, time);
     if (isNeon()) return playNeonStep(index, time);
@@ -470,6 +598,14 @@ export function createMusic() {
   // Écho (croche pointée) et réverbération : longs et enveloppants pour Edgerunners, courts et nets pour Neon.
   function tune() {
     echo.delayTime.value = stepSeconds() * 3;
+    const extra = extraTrack();
+    if (extra) {
+      trim.gain.value = extra.fx.trim;
+      feedback.gain.value = extra.fx.feedback;
+      wet.gain.value = extra.fx.wet;
+      reverbLevel.gain.value = extra.fx.reverb;
+      return;
+    }
     const neon = isNeon();
     const dark = isBlackwall();
     trim.gain.value = dark ? 0.42 : 1;

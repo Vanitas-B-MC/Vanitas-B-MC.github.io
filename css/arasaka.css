@@ -1,0 +1,251 @@
+/* =========================================================
+   MODE ARASAKA — easter egg (taper « arasaka » sur le site)
+   La mégacorporation Arasaka de Cyberpunk 2077 : noir de tour d'entreprise, blanc clinique,
+   un seul rouge vermillon. Austère, précis, froid. Le kanji 荒坂 veille en filigrane.
+
+   Tout est limité à html.arasaka : sans cette classe, rien ne change.
+   Même principe que neon.css : on remplace les variables de couleur du site,
+   puis on corrige les couleurs écrites en dur dans style.css et veille.css.
+========================================================= */
+
+html.arasaka {
+  --bg: #060607;
+  --surface: #0e0e10;
+  --surface-2: #17171a;
+  --line: #2a2a2f;
+  --line-strong: #6b6b75;
+
+  --text: #f4f4f2;
+  --muted: #a9a9b0;
+
+  /* rôles repris des thèmes (index : yellow/cyan/pink, veille : hot/blue/violet) */
+  --yellow: #f4f4f2;   /* blanc clinique : l'accent principal */
+  --cyan: #e60012;     /* rouge Arasaka : les repères */
+  --pink: #ff3b47;
+  --hot: #e60012;
+  --blue: #e60012;
+  --violet: #9a9aa6;
+
+  --th-a-rgb: 230, 0, 18;
+  --th-b-rgb: 244, 244, 242;
+  --th-c-rgb: 154, 154, 166;
+  --th-bone-rgb: 244, 244, 242;
+
+  scrollbar-color: var(--line-strong) var(--bg);
+}
+
+/* Fond */
+html.arasaka body::before {
+  background:
+    radial-gradient(70vw 50vh at 100% -10%, rgba(var(--th-a-rgb), .16), transparent 70%),
+    radial-gradient(60vw 45vh at -10% 110%, rgba(var(--th-bone-rgb), .06), transparent 70%),
+    linear-gradient(90deg, rgba(var(--th-bone-rgb), .035) 1px, transparent 1px) 0 0 / 72px 100%,
+    linear-gradient(rgba(var(--th-bone-rgb), .03) 1px, transparent 1px) 0 0 / 100% 72px;
+
+}
+
+/* Écran : lignes de balayage plus fines et vignette discrète */
+html.arasaka body::after {
+  background:
+    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, .55) 100%),
+    repeating-linear-gradient(to bottom, transparent 0 3px, rgba(0, 0, 0, .14) 3px 4px);
+}
+
+
+/* Kanji du logo Arasaka en filigrane, et une fine ligne rouge sur le bord gauche de l'écran */
+html.arasaka::before {
+  content: "荒坂";
+  position: fixed;
+  right: -2vw;
+  bottom: -6vh;
+  z-index: -1;
+  pointer-events: none;
+  color: rgba(var(--th-bone-rgb), .03);
+  font-family: "Noto Serif JP", "Yu Mincho", "MS Mincho", serif;
+  font-size: 46vw;
+  font-weight: 700;
+  line-height: .8;
+  letter-spacing: -.04em;
+}
+html.arasaka body > .site-header,
+html.arasaka body > header { border-left: 3px solid var(--cyan); }
+
+/* Étiquette fixe, collée en bas à droite */
+html.arasaka::after {
+  content: "ARASAKA CORP. — ACCÈS EMPLOYÉS UNIQUEMENT";
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  pointer-events: none;
+  padding: 4px 12px 4px 14px;
+  background: rgba(6, 6, 7, .92);
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+  color: var(--cyan);
+  font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+  font-size: 10px;
+  letter-spacing: .22em;
+  opacity: .85;
+  
+}
+
+/* Titres */
+html.arasaka .hero-name,
+html.arasaka .arcade-title,
+html.arasaka .vtitle {
+  text-shadow: 0 0 0 transparent, 4px 4px 0 rgba(var(--th-a-rgb), .75), 0 0 28px rgba(var(--th-bone-rgb), .18);
+}
+
+html.arasaka .game-title,
+html.arasaka .overlay-title {
+  text-shadow: 3px 3px 0 rgba(var(--th-a-rgb), .7);
+}
+
+html.arasaka .section-heading h2 {
+  text-shadow: 0 0 18px rgba(var(--th-a-rgb), .4);
+}
+
+html.arasaka ::selection {
+  background: var(--yellow);
+  color: #060607;
+}
+
+/* ---------- Couleurs écrites en dur dans style.css ---------- */
+
+html.arasaka .site-header.is-scrolled {
+  border-bottom-color: rgba(var(--th-a-rgb), .6);
+  box-shadow: 0 6px 28px -10px rgba(var(--th-a-rgb), .6);
+}
+
+/* Logo (une image jaune et cyan) : passé à la couleur du thème, avec un halo */
+html.arasaka .logo img,
+html.arasaka .brand img,
+html.arasaka .card-head img {
+  filter: grayscale(1) contrast(1.15) brightness(1.1) drop-shadow(0 0 6px rgba(var(--th-a-rgb), .5));
+}
+
+html.arasaka .logo:hover img,
+html.arasaka .brand:hover img {
+  filter: grayscale(1) contrast(1.15) brightness(1.1) drop-shadow(0 0 12px rgba(var(--th-a-rgb), .9));
+}
+
+html.arasaka .github-link:hover {
+  background: rgba(var(--th-b-rgb), .1);
+}
+
+html.arasaka .about-seeking {
+  background: rgba(var(--th-a-rgb), .08);
+}
+
+html.arasaka .timeline li:first-child::before {
+  box-shadow: 0 0 14px rgba(var(--th-a-rgb), .9);
+}
+
+/* Cartes à coins coupés : un filter suit la forme, un box-shadow serait coupé */
+html.arasaka .profile-card,
+html.arasaka .terminal {
+  filter: drop-shadow(0 0 14px rgba(var(--th-a-rgb), .24));
+}
+
+html.arasaka .project:hover {
+  filter: drop-shadow(0 0 18px rgba(var(--th-a-rgb), .5));
+}
+
+html.arasaka .button-primary {
+  color: #060607;
+  box-shadow: 0 0 18px -2px rgba(var(--th-a-rgb), .6);
+}
+
+html.arasaka .contact-list a {
+  border-bottom-color: rgba(var(--th-a-rgb), .5);
+}
+
+html.arasaka .status-dot {
+  box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7);
+  animation-name: pulse-arasaka;
+}
+
+@keyframes pulse-arasaka {
+  0% { box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7); }
+  70%, 100% { box-shadow: 0 0 0 10px rgba(var(--th-a-rgb), 0); }
+}
+
+/* ---------- veille.css ---------- */
+
+html.arasaka .hud > div:nth-child(3) { border-left-color: var(--violet); }
+html.arasaka .hud > div:nth-child(3) dd { color: var(--violet); }
+
+html.arasaka .banner {
+  background:
+    radial-gradient(60% 90% at 88% 15%, rgba(var(--th-a-rgb), .26), transparent 70%),
+    radial-gradient(50% 80% at 8% 100%, rgba(var(--th-b-rgb), .14), transparent 70%);
+}
+
+html.arasaka .banner-lead { color: #dcdce0; }
+
+html.arasaka .field select:focus,
+html.arasaka .field input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--th-b-rgb), .4);
+}
+
+html.arasaka .step-num {
+  -webkit-text-stroke-color: rgba(var(--th-a-rgb), .75);
+}
+
+/* Couleur d'accent des articles et des sources, par catégorie.
+   (Les règles de veille.css sont moins précises : on les redéfinit toutes ici.) */
+html.arasaka .shard,
+html.arasaka .source-token { --accent-rgb: var(--th-b-rgb); }
+
+html.arasaka .shard[data-cat="cybersecurite"],
+html.arasaka .source-token[data-cat="cybersecurite"] { --accent-rgb: var(--th-a-rgb); }
+
+html.arasaka .shard[data-cat="developpement"],
+html.arasaka .source-token[data-cat="developpement"] { --accent-rgb: var(--th-c-rgb); }
+
+html.arasaka .shard[data-cat="infrastructure"],
+html.arasaka .source-token[data-cat="infrastructure"] { --accent-rgb: var(--th-bone-rgb); }
+
+/* ---------- Arcade ---------- */
+
+html.arasaka .game-stage {
+  box-shadow: inset 0 0 40px rgba(var(--th-a-rgb), .07), 0 0 30px -8px rgba(var(--th-a-rgb), .55);
+}
+
+/* ---------- Alerte plein écran à l'activation (easter-egg/js/secret-code.js) ---------- */
+
+html.arasaka .secret-arasaka {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .3) 2px 3px),
+    radial-gradient(70% 60% at 50% 55%, rgba(var(--th-a-rgb), .32), rgba(3, 3, 4, .96) 75%);
+  animation: arasaka-alert 1.9s steps(1, end) both;
+}
+
+html.arasaka .secret-arasaka .secret-unlock-title {
+  color: var(--yellow);
+  text-shadow: 4px 4px 0 rgba(var(--th-a-rgb), .85), 0 0 30px rgba(var(--th-bone-rgb), .25);
+}
+
+@keyframes arasaka-alert {
+  0% { opacity: 0; }
+  8%, 80% { opacity: 1; }
+  84% { opacity: .55; }
+  88%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  html.arasaka::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.arasaka body::before,
+  html.arasaka body::after,
+  html.arasaka::before,
+  html.arasaka::after,
+  html.arasaka .hero-name,
+  html.arasaka .vtitle,
+  html.arasaka .status-dot,
+  html.arasaka .secret-arasaka { animation: none; }
+}

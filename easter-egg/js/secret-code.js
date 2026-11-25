@@ -3,6 +3,8 @@
 //   « edgerunner » active / désactive le style Edgerunners (rouge, vert)
 //   « neon »       active / désactive le style Neon (rose néon, cyan)
 //   « blackwall »  active / désactive le style Blackwall (noir, rouge sang, ambre) avec une brève alerte NetWatch
+//   « arasaka », « militech », « afterlife », « braindance », « dogtown » : autres styles secrets, chacun avec sa propre alerte
+//   et sa propre musique dans l'arcade (voir css/<nom>.css et easter-egg/js/music-themes.js)
 //   « cyberpsychosis » glitch progressif de la page pendant quelques secondes (js/cyberpsychosis.js)
 // Chargé sur index.html, veille.html et easter-egg/arcade.html.
 
@@ -20,7 +22,23 @@ export const THEME_CODES = [
   { code: THEME_CODE, theme: "edgerunners", label: "edgerunner" },
   { code: NEON_CODE, theme: "neon", label: "neon" },
   { code: BLACKWALL_CODE, theme: "blackwall", label: "blackwall",
-    messages: { on: "> blackwall franchie : signal corrompu", off: "> blackwall rétablie : réseau isolé" } },
+    messages: { on: "> blackwall franchie : signal corrompu", off: "> blackwall rétablie : réseau isolé" },
+    alert: ["> netwatch : brèche détectée", "Blackwall", "> accès non autorisé · les IA rebelles vous observent"] },
+  { code: "arasaka", theme: "arasaka", label: "arasaka",
+    messages: { on: "> arasaka : accès accordé", off: "> arasaka : session fermée" },
+    alert: ["> arasaka corp. : authentification réussie", "Arasaka", "> bienvenue, employé n° 0001"] },
+  { code: "militech", theme: "militech", label: "militech",
+    messages: { on: "> militech : armement activé", off: "> militech : mode veille" },
+    alert: ["> militech : systèmes en ligne", "Militech", "> protocole de combat chargé"] },
+  { code: "afterlife", theme: "afterlife", label: "afterlife",
+    messages: { on: "> afterlife : table réservée", off: "> afterlife : fermeture du bar" },
+    alert: ["> afterlife : entrée autorisée", "Afterlife", "> ce soir, on fait des légendes"] },
+  { code: "braindance", theme: "braindance", label: "braindance",
+    messages: { on: "> braindance : lecture lancée", off: "> braindance : lecture arrêtée" },
+    alert: ["> braindance : synchronisation neuronale", "Braindance", "> lecture des souvenirs en cours"] },
+  { code: "dogtown", theme: "dogtown", label: "dogtown",
+    messages: { on: "> dogtown : tu es entré dans la zone", off: "> dogtown : tu as quitté la zone" },
+    alert: ["> dogtown : zone contrôlée", "Dogtown", "> pas de loi ici, choom"] },
 ];
 
 // Garde les dernières lettres tapées ; renvoie true quand elles forment le code.
@@ -154,15 +172,15 @@ function init() {
     toastTimer = window.setTimeout(() => toast.remove(), 2200);
   }
 
-  // Brève alerte plein écran quand on franchit la Blackwall (les couleurs viennent du thème qui vient de s'activer).
-  function blackwallAlert() {
-    if (document.querySelector(".secret-unlock")) return;
+  // Brève alerte plein écran quand on active un thème qui en a une (les couleurs viennent du thème qui vient de s'activer).
+  function themeAlert(entry) {
+    if (!entry.alert || document.querySelector(".secret-unlock")) return;
     addStyle();
-    const lines = [["> netwatch : brèche détectée", "secret-unlock-line"], ["Blackwall", "secret-unlock-title"], ["> accès non autorisé · les IA rebelles vous observent", "secret-unlock-line"]];
+    const [kicker, title, subline] = entry.alert;
     const alert = document.createElement("div");
-    alert.className = "secret-unlock secret-blackwall";
+    alert.className = `secret-unlock secret-${entry.theme}`;
     alert.setAttribute("role", "status");
-    for (const [text, cls] of lines) {
+    for (const [text, cls] of [[kicker, "secret-unlock-line"], [title, "secret-unlock-title"], [subline, "secret-unlock-line"]]) {
       const p = document.createElement("p");
       p.className = cls;
       p.textContent = text;
@@ -187,7 +205,7 @@ function init() {
     if (hit) {
       const on = toggleTheme(hit.theme);
       themeToast(hit, on);
-      if (on && hit.theme === "blackwall") blackwallAlert();
+      if (on) themeAlert(hit);
     }
     if (psycho) {
       // Chargé seulement quand on en a besoin.

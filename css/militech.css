@@ -1,0 +1,244 @@
+/* =========================================================
+   MODE MILITECH — easter egg (taper « militech » sur le site)
+   Militech International Armaments : vert olive, jaune tactique, HUD de combat.
+   Quatre repères d'écran dans les coins, comme une visière.
+
+   Tout est limité à html.militech : sans cette classe, rien ne change.
+   Même principe que neon.css : on remplace les variables de couleur du site,
+   puis on corrige les couleurs écrites en dur dans style.css et veille.css.
+========================================================= */
+
+html.militech {
+  --bg: #070904;
+  --surface: #0d1008;
+  --surface-2: #151a0d;
+  --line: #26301a;
+  --line-strong: #566b2e;
+
+  --text: #eef1e2;
+  --muted: #a8b38f;
+
+  /* rôles repris des thèmes (index : yellow/cyan/pink, veille : hot/blue/violet) */
+  --yellow: #a6d233;   /* vert tactique : l'accent principal */
+  --cyan: #ffb300;     /* ambre HUD : les repères */
+  --pink: #d9ff66;
+  --hot: #a6d233;
+  --blue: #ffb300;
+  --violet: #7fa13a;
+
+  --th-a-rgb: 166, 210, 51;
+  --th-b-rgb: 255, 179, 0;
+  --th-c-rgb: 127, 161, 58;
+  --th-bone-rgb: 238, 241, 226;
+
+  scrollbar-color: var(--line-strong) var(--bg);
+}
+
+/* Fond */
+html.militech body::before {
+  background:
+    radial-gradient(80vw 50vh at 50% 112%, rgba(var(--th-a-rgb), .16), transparent 72%),
+    radial-gradient(50vw 40vh at 96% -8%, rgba(var(--th-b-rgb), .09), transparent 70%),
+    linear-gradient(rgba(var(--th-a-rgb), .05) 1px, transparent 1px) 0 0 / 48px 48px,
+    linear-gradient(90deg, rgba(var(--th-a-rgb), .05) 1px, transparent 1px) 0 0 / 48px 48px;
+
+}
+
+/* Écran : visière (quatre repères d'angle), lignes de balayage et vignette */
+html.militech body::after {
+  background:
+    linear-gradient(var(--yellow), var(--yellow)) 14px 14px / 34px 2px no-repeat,
+    linear-gradient(var(--yellow), var(--yellow)) 14px 14px / 2px 34px no-repeat,
+    linear-gradient(var(--yellow), var(--yellow)) calc(100% - 14px) 14px / 34px 2px no-repeat,
+    linear-gradient(var(--yellow), var(--yellow)) calc(100% - 14px) 14px / 2px 34px no-repeat,
+    linear-gradient(var(--yellow), var(--yellow)) 14px calc(100% - 14px) / 34px 2px no-repeat,
+    linear-gradient(var(--yellow), var(--yellow)) 14px calc(100% - 14px) / 2px 34px no-repeat,
+    linear-gradient(var(--yellow), var(--yellow)) calc(100% - 14px) calc(100% - 14px) / 34px 2px no-repeat,
+    linear-gradient(var(--yellow), var(--yellow)) calc(100% - 14px) calc(100% - 14px) / 2px 34px no-repeat,
+    radial-gradient(ellipse at center, transparent 52%, rgba(0, 6, 0, .6) 100%),
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .24) 2px 3px);
+}
+
+
+
+/* Étiquette fixe, collée en bas à droite */
+html.militech::after {
+  content: "MILITECH // SYSTÈMES NOMINAUX";
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  pointer-events: none;
+  padding: 4px 12px 4px 14px;
+  background: rgba(7, 9, 4, .92);
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+  color: var(--cyan);
+  font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+  font-size: 10px;
+  letter-spacing: .22em;
+  opacity: .85;
+  animation: militech-blink 3s steps(1, end) infinite;
+}
+
+/* Titres */
+html.militech .hero-name,
+html.militech .arcade-title,
+html.militech .vtitle {
+  text-shadow: -3px 0 rgba(var(--th-b-rgb), .5), 3px 0 rgba(var(--th-c-rgb), .6), 0 0 24px rgba(var(--th-a-rgb), .45);
+}
+
+html.militech .game-title,
+html.militech .overlay-title {
+  text-shadow: -2px 0 rgba(var(--th-b-rgb), .45), 2px 0 rgba(var(--th-c-rgb), .55), 0 0 16px rgba(var(--th-a-rgb), .4);
+}
+
+html.militech .section-heading h2 {
+  text-shadow: 0 0 18px rgba(var(--th-a-rgb), .4);
+}
+
+html.militech ::selection {
+  background: var(--yellow);
+  color: #0a0f02;
+}
+
+/* ---------- Couleurs écrites en dur dans style.css ---------- */
+
+html.militech .site-header.is-scrolled {
+  border-bottom-color: rgba(var(--th-a-rgb), .6);
+  box-shadow: 0 6px 28px -10px rgba(var(--th-a-rgb), .6);
+}
+
+/* Logo (une image jaune et cyan) : passé à la couleur du thème, avec un halo */
+html.militech .logo img,
+html.militech .brand img,
+html.militech .card-head img {
+  filter: grayscale(1) sepia(1) hue-rotate(62deg) saturate(3.4) brightness(.95) drop-shadow(0 0 6px rgba(var(--th-a-rgb), .5));
+}
+
+html.militech .logo:hover img,
+html.militech .brand:hover img {
+  filter: grayscale(1) sepia(1) hue-rotate(62deg) saturate(3.4) brightness(.95) drop-shadow(0 0 12px rgba(var(--th-a-rgb), .9));
+}
+
+html.militech .github-link:hover {
+  background: rgba(var(--th-b-rgb), .1);
+}
+
+html.militech .about-seeking {
+  background: rgba(var(--th-a-rgb), .08);
+}
+
+html.militech .timeline li:first-child::before {
+  box-shadow: 0 0 14px rgba(var(--th-a-rgb), .9);
+}
+
+/* Cartes à coins coupés : un filter suit la forme, un box-shadow serait coupé */
+html.militech .profile-card,
+html.militech .terminal {
+  filter: drop-shadow(0 0 14px rgba(var(--th-a-rgb), .24));
+}
+
+html.militech .project:hover {
+  filter: drop-shadow(0 0 18px rgba(var(--th-a-rgb), .5));
+}
+
+html.militech .button-primary {
+  color: #0a0f02;
+  box-shadow: 0 0 18px -2px rgba(var(--th-a-rgb), .6);
+}
+
+html.militech .contact-list a {
+  border-bottom-color: rgba(var(--th-a-rgb), .5);
+}
+
+html.militech .status-dot {
+  box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7);
+  animation-name: pulse-militech;
+}
+
+@keyframes pulse-militech {
+  0% { box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7); }
+  70%, 100% { box-shadow: 0 0 0 10px rgba(var(--th-a-rgb), 0); }
+}
+
+/* ---------- veille.css ---------- */
+
+html.militech .hud > div:nth-child(3) { border-left-color: var(--violet); }
+html.militech .hud > div:nth-child(3) dd { color: var(--violet); }
+
+html.militech .banner {
+  background:
+    radial-gradient(60% 90% at 88% 15%, rgba(var(--th-a-rgb), .26), transparent 70%),
+    radial-gradient(50% 80% at 8% 100%, rgba(var(--th-b-rgb), .14), transparent 70%);
+}
+
+html.militech .banner-lead { color: #dfe6c8; }
+
+html.militech .field select:focus,
+html.militech .field input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--th-b-rgb), .4);
+}
+
+html.militech .step-num {
+  -webkit-text-stroke-color: rgba(var(--th-a-rgb), .75);
+}
+
+/* Couleur d'accent des articles et des sources, par catégorie.
+   (Les règles de veille.css sont moins précises : on les redéfinit toutes ici.) */
+html.militech .shard,
+html.militech .source-token { --accent-rgb: var(--th-b-rgb); }
+
+html.militech .shard[data-cat="cybersecurite"],
+html.militech .source-token[data-cat="cybersecurite"] { --accent-rgb: var(--th-a-rgb); }
+
+html.militech .shard[data-cat="developpement"],
+html.militech .source-token[data-cat="developpement"] { --accent-rgb: var(--th-c-rgb); }
+
+html.militech .shard[data-cat="infrastructure"],
+html.militech .source-token[data-cat="infrastructure"] { --accent-rgb: var(--th-bone-rgb); }
+
+/* ---------- Arcade ---------- */
+
+html.militech .game-stage {
+  box-shadow: inset 0 0 40px rgba(var(--th-a-rgb), .07), 0 0 30px -8px rgba(var(--th-a-rgb), .55);
+}
+
+/* ---------- Alerte plein écran à l'activation (easter-egg/js/secret-code.js) ---------- */
+
+html.militech .secret-militech {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .3) 2px 3px),
+    radial-gradient(70% 60% at 50% 55%, rgba(var(--th-a-rgb), .32), rgba(4, 6, 2, .96) 75%);
+  animation: militech-alert 1.9s steps(1, end) both;
+}
+
+html.militech .secret-militech .secret-unlock-title {
+  color: var(--yellow);
+  text-shadow: -4px 0 rgba(var(--th-b-rgb), .7), 4px 0 rgba(var(--th-c-rgb), .8), 0 0 30px rgba(var(--th-a-rgb), .7);
+}
+
+@keyframes militech-alert {
+  0% { opacity: 0; }
+  8%, 80% { opacity: 1; }
+  84% { opacity: .55; }
+  88%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  html.militech::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.militech body::before,
+  html.militech body::after,
+  html.militech::before,
+  html.militech::after,
+  html.militech .hero-name,
+  html.militech .vtitle,
+  html.militech .status-dot,
+  html.militech .secret-militech { animation: none; }
+}
+
+@keyframes militech-blink { 0%, 90%, 100% { opacity: .85; } 93% { opacity: .25; } 96% { opacity: .85; } }
