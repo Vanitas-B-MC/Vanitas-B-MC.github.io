@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-24T23:56:22Z",
+ "updated": "2026-11-25T08:47:00Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -19,9 +19,8 @@
    "count": 10
   },
   "The Register": {
-   "ok": false,
-   "count": 10,
-   "error": "not well-formed (invalid token): line 7, column 22"
+   "ok": true,
+   "count": 10
   },
   "The Hacker News": {
    "ok": true,
@@ -38,6 +37,86 @@
  },
  "items": [
   {
+   "id": "https://www.bleepingcomputer.com/news/security/hackers-reportedly-breached-cia-intelligence-analysis-system/",
+   "title": "Hackers reportedly breached CIA intelligence analysis system",
+   "link": "https://www.bleepingcomputer.com/news/security/hackers-reportedly-breached-cia-intelligence-analysis-system/",
+   "summary": "Unknown attackers have reportedly breached an open-source intelligence analysis system at the US Central Intelligence Agency (CIA)",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T07:45:03Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/hackers-compromise-24-check-point.html",
+   "title": "Hackers Compromise 24 Check Point Management Servers in Suspected AI-Driven Attack Campaign",
+   "link": "https://thehackernews.com/2026/11/hackers-compromise-24-check-point.html",
+   "summary": "An unknown threat actor has been using artificial intelligence (AI)-driven offensive tooling in a campaign targeting Check Point Security Management servers, impacting 22 distinct organizations across the world. The intrusion activity…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T06:50:19Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/com-affiliated-hackers-hijack-cloud.html",
+   "title": "Com-Affiliated Hackers Hijack Cloud Accounts via Vishing for Data Theft and Extortion",
+   "link": "https://thehackernews.com/2026/11/com-affiliated-hackers-hijack-cloud.html",
+   "summary": "Palo Alto Networks Unit 42 has disclosed that it's tracking and has responded to \"numerous waves of vishing attacks\" orchestrated by Com-affiliated threat actors since August 2026 that have led to data theft and extortion attempts. The…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T06:37:06Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/wordpress-blocks-six-backdoored-wp.html",
+   "title": "WordPress Blocks Six Backdoored WP Connect Plugins Before Malicious Releases Go Live",
+   "link": "https://thehackernews.com/2026/11/wordpress-blocks-six-backdoored-wp.html",
+   "summary": "WordPress has removed six WordPress plugins developed by WP Connect after they were backdoored on November 22, 2026, to enable arbitrary code execution on sites that have them installed, following a suspected compromise of the developer's…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-25T06:21:12Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312017",
+   "title": "This could mess with Thanksgiving, says VMware as it drops third critical patch bundle in a week",
+   "link": "https://www.theregister.com/virtualization/2026/11/25/this-could-mess-with-thanksgiving-says-vmware-as-it-drops-third-critical-patch-bundle-in-a-week/5312017",
+   "summary": "Four more critical vulns, including another unauthorized access flaw in vCenter",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T05:15:08Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312010",
+   "title": "Nutanix CEO announces gradual departure, intent to complete set of storage links",
+   "link": "https://www.theregister.com/virtualization/2026/11/25/nutanix-ceo-announces-gradual-departure-intent-to-complete-set-of-storage-links/5312010",
+   "summary": "Rajiv Ramaswami will stay in the chair until new hire lands, then stick around as advisor",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T03:13:13Z"
+  },
+  {
+   "id": "https://visualstudio.developpez.com/actu/389441/Microsoft-annonce-Visual-Studio-Code-1-147-avec-la-fonctionnalite-Envoyer-plus-tard-pour-programmer-les-demandes-aux-agents-IA-locaux-pour-plus-tard/",
+   "title": "Microsoft annonce Visual Studio Code 1.147 avec la fonctionnalité « Envoyer plus tard », pour programmer les demandes aux agents IA locaux pour plus tard",
+   "link": "https://visualstudio.developpez.com/actu/389441/Microsoft-annonce-Visual-Studio-Code-1-147-avec-la-fonctionnalite-Envoyer-plus-tard-pour-programmer-les-demandes-aux-agents-IA-locaux-pour-plus-tard/",
+   "summary": "Microsoft annonce Visual Studio Code 1.147 avec la fonctionnalité « Envoyer plus tard », pour programmer les demandes aux agents IA locaux pour plus tard La version 1.147 de Visual Studio Code a été publiée le 18 novembre 2026. Vous avez…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-25T02:08:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312003",
+   "title": "Dell and HPE both say they’ve become ‘different companies’",
+   "link": "https://www.theregister.com/systems/2026/11/25/dell-and-hpe-both-say-theyve-become-different-companies/5312003",
+   "summary": "Still slinging hardware – now with added AI and attendant risks or opportunities",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-25T01:17:30Z"
+  },
+  {
    "id": "https://www.bleepingcomputer.com/news/security/rackspace-shuts-down-spot-cloud-platform-after-security-breach/",
    "title": "Rackspace shuts down Spot cloud platform after security breach",
    "link": "https://www.bleepingcomputer.com/news/security/rackspace-shuts-down-spot-cloud-platform-after-security-breach/",
@@ -46,6 +125,16 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-24T21:37:30Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311986",
+   "title": "AI godfather Yann LeCun torches Anthropic CEO over AI gatekeeping",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/24/ai-godfather-yann-lecun-torches-anthropic-ceo-over-ai-gatekeeping/5311986",
+   "summary": "‘It’s like the Ottoman Empire banning the printing press for Arabic so they would keep in control of the dogma,’ he says",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-24T20:57:08Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/new-inception-extortion-gang-launches-large-scale-vishing-campaign/",
@@ -58,6 +147,16 @@
    "published": "2026-11-24T20:21:20Z"
   },
   {
+   "id": "https://www.theregister.com/a/5311978",
+   "title": "'We are not ShinyHunters,' says criminal hacking crew that looks and acts just like ShinyHunters",
+   "link": "https://www.theregister.com/security/2026/11/24/we-are-not-shinyhunters-says-criminal-hacking-crew-that-looks-and-acts-just-like-shinyhunters/5311978",
+   "summary": "Nothing to see here…",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-24T20:15:36Z"
+  },
+  {
    "id": "https://www.bleepingcomputer.com/news/security/turnitin-discloses-cyberattack-affecting-customer-facing-systems/",
    "title": "Turnitin discloses cyberattack affecting customer-facing systems",
    "link": "https://www.bleepingcomputer.com/news/security/turnitin-discloses-cyberattack-affecting-customer-facing-systems/",
@@ -68,6 +167,16 @@
    "published": "2026-11-24T18:59:52Z"
   },
   {
+   "id": "https://www.theregister.com/a/5311925",
+   "title": "Arm strongarms site that hosts ad-free documentation and it may disappear",
+   "link": "https://www.theregister.com/systems/2026/11/24/arm-strongarms-site-that-hosts-ad-free-documentation-and-it-may-disappear/5311925",
+   "summary": "Easy-to-use, popular, not collecting data for us, or serving our ads? Down with you!",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-24T17:57:41Z"
+  },
+  {
    "id": "https://www.bleepingcomputer.com/news/security/radware-discloses-breach-exposing-customer-cloud-access-keys/",
    "title": "Radware discloses breach exposing customer cloud access keys",
    "link": "https://www.bleepingcomputer.com/news/security/radware-discloses-breach-exposing-customer-cloud-access-keys/",
@@ -76,6 +185,26 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-24T17:49:05Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311922",
+   "title": "An AI coding agent, a browser, and a Mac tool found a financial firm's access key in under 6 minutes",
+   "link": "https://www.theregister.com/security/2026/11/24/an-ai-coding-agent-a-browser-and-a-mac-tool-found-a-financial-firms-access-key-in-under-6-minutes/5311922",
+   "summary": "No sophisticated malware or attack framework required",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-24T17:00:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311895",
+   "title": "Microsoft refreshes Copilot app search for users without an AI subscription",
+   "link": "https://www.theregister.com/personal-tech/2026/11/24/microsoft-refreshes-copilot-app-search-for-users-without-an-ai-subscription/5311895",
+   "summary": "Meanwhile, Google's homepage demo leaves a familiar button out of the picture",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-24T17:00:00Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/iran-aligned-volant-manticore-uses-ipfs.html",
@@ -118,6 +247,16 @@
    "published": "2026-11-24T16:15:23Z"
   },
   {
+   "id": "https://www.theregister.com/a/5311841",
+   "title": "Microsoft brings serverless PostgreSQL into Fabric to bridge transactions and analytics",
+   "link": "https://www.theregister.com/databases/2026/11/24/microsoft-brings-serverless-postgresql-into-fabric-to-bridge-transactions-and-analytics/5311841",
+   "summary": "HorizonDB preview follows rivals' moves, with analysts warning tighter integration could make an eventual exit harder",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-24T16:00:00Z"
+  },
+  {
    "id": "https://github.blog/?p=100438",
    "title": "These are the gifts developers will actually want",
    "link": "https://github.blog/news-insights/company-news/these-are-the-gifts-developers-will-actually-want/",
@@ -126,6 +265,16 @@
    "category": "Développement",
    "lang": "en",
    "published": "2026-11-24T16:00:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5311901",
+   "title": "US blacklists Megaspeed hours after Jensen Huang returns to Nvidia",
+   "link": "https://www.theregister.com/systems/2026/11/24/us-blacklists-megaspeed-hours-after-jensen-huang-returns-to-nvidia/5311901",
+   "summary": "Chip boss gets his old job back, but Washington isn't done investigating one of his former flame's businesses",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-24T15:15:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/police-disrupt-57-illegal-streaming-services-with-73-million-visits/",
@@ -176,16 +325,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-24T14:14:00Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/mcdonalds-japan-data-breach-exposes-customer-location-information/",
-   "title": "McDonald's Japan data breach exposes customer location information",
-   "link": "https://www.bleepingcomputer.com/news/security/mcdonalds-japan-data-breach-exposes-customer-location-information/",
-   "summary": "McDonald's Japan, the fast-food giant's Japanese subsidiary, has disclosed a data breach after attackers accessed a database containing sensitive information for users of the company's official smartphone app.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T14:09:37Z"
   },
   {
    "id": "https://onlyoffice.developpez.com/actu/389413/La-solution-collaborative-en-ligne-ONLYOFFICE-Apps-s-integre-a-Claude-pour-gerer-les-fichiers-et-les-salles-depuis-un-assistant-IA/",
@@ -248,16 +387,6 @@
    "published": "2026-11-24T13:55:00Z"
   },
   {
-   "id": "https://microsoft.developpez.com/actu/389412/Microsoft-remplace-son-application-de-gestion-des-taches-basee-sur-le-cloud-To-Do-par-Planner-laissant-les-particuliers-sans-alternative-car-Planner-n-est-pas-disponible-pour-les-comptes-grand-public/",
-   "title": "Microsoft remplace son application de gestion des tâches basée sur le cloud To Do par Planner, laissant les particuliers sans alternative, car Planner n'est pas disponible pour les comptes grand public",
-   "link": "https://microsoft.developpez.com/actu/389412/Microsoft-remplace-son-application-de-gestion-des-taches-basee-sur-le-cloud-To-Do-par-Planner-laissant-les-particuliers-sans-alternative-car-Planner-n-est-pas-disponible-pour-les-comptes-grand-public/",
-   "summary": "Microsoft remplace son application de gestion des tâches basée sur le cloud To Do par Planner, laissant les particuliers sans alternative, car Planner n'est pas disponible pour les comptes grand public Microsoft mettra fin à Microsoft To…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-24T13:52:00Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/vmware-vcenter-hit-by-another-critical.html",
    "title": "VMware vCenter Hit by Another Critical 9.8-Rated Auth Bypass Flaw After Zero-Day Exploitation",
    "link": "https://thehackernews.com/2026/11/vmware-vcenter-hit-by-another-critical.html",
@@ -278,16 +407,6 @@
    "published": "2026-11-24T13:28:21Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311844",
-   "title": "9/UX brings a classic Mac feel to 9front",
-   "link": "https://www.theregister.com/software/2026/11/24/9/ux-brings-a-classic-mac-feel-to-9front/5311844",
-   "summary": "A spatial classic Finder in the style of A/UX",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T13:06:00Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/hackers-found-way-around-github-sha.html",
    "title": "Hackers Found a Way Around GitHub SHA Pinning. This Webinar Explains How to Close the Gap",
    "link": "https://thehackernews.com/2026/11/hackers-found-way-around-github-sha.html",
@@ -296,16 +415,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-24T12:42:09Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311877",
-   "title": "CrowdStrike splashes $44B on Zscaler, customers brace for the bill",
-   "link": "https://www.theregister.com/security/2026/11/24/crowdstrike-splashes-44b-on-zscaler-customers-brace-for-the-bill/5311877",
-   "summary": "Record-breaking cybersecurity deal promises tighter integration, but sysadmins fear higher prices and vendor lock-in",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T12:22:17Z"
   },
   {
    "id": "https://thehackernews.com/2026/11/google-researcher-shows-how-single-bit.html",
@@ -328,26 +437,6 @@
    "published": "2026-11-24T12:01:54Z"
   },
   {
-   "id": "https://www.theregister.com/a/5311834",
-   "title": "European Commission confirms personal data stolen in AI-assisted cyberattack",
-   "link": "https://www.theregister.com/cyber-crime/2026/11/24/european-commission-confirms-personal-data-stolen-in-ai-assisted-cyberattack/5311834",
-   "summary": "EU Academy names and email addresses exposed, with users warned via website notice rather than contacted directly",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T11:32:41Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311825",
-   "title": "BepiColombo takes the long way around Mercury after software glitch",
-   "link": "https://www.theregister.com/science/2026/11/24/bepicolombo-takes-the-long-way-around-mercury-after-software-glitch/5311825",
-   "summary": "Shortened burn leaves probe in a 75-hour orbit, but ESA says December separation remains on schedule",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T11:06:52Z"
-  },
-  {
    "id": "https://thehackernews.com/2026/11/microsoft-fixes-azure-api-management.html",
    "title": "Microsoft Fixes Azure API Management Classic Flaw as Actor Targets Customer Secrets",
    "link": "https://thehackernews.com/2026/11/microsoft-fixes-azure-api-management.html",
@@ -356,96 +445,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-24T10:44:49Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311704",
-   "title": "InferNode gives Bell Labs' Inferno OS a 64-bit second wind",
-   "link": "https://www.theregister.com/os-platforms/2026/11/24/infernode-gives-bell-labs-inferno-os-a-64-bit-second-wind/5311704",
-   "summary": "Plan 9's successor finds a new role containing AI agents, though its developer says those features are optional",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T10:09:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311707",
-   "title": "UK gov invests in defense startup making virtual training ground for AI",
-   "link": "https://www.theregister.com/ai-and-ml/2026/11/24/uk-gov-invests-in-defense-startup-making-virtual-training-ground-for-ai/5311707",
-   "summary": "Britain wants sovereign capability to test whether military AI will work before it gets deployed for real",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T09:16:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311622",
-   "title": "Education software supplier's legacy login system left 355,000 school email addresses exposed",
-   "link": "https://www.theregister.com/cyber-crime/2026/11/24/education-software-suppliers-legacy-login-system-left-355000-school-email-addresses-exposed/5311622",
-   "summary": "Have I Been Pwned puts a number on September's attack on Bromcom",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T08:37:00Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/whmcs-sql-injection-flaw-could-expose.html",
-   "title": "WHMCS SQL Injection Could Expose Customer Data and Admin Password Hashes without Login",
-   "link": "https://thehackernews.com/2026/11/whmcs-sql-injection-flaw-could-expose.html",
-   "summary": "A flaw in WHMCS's shopping cart, the billing and automation platform many web hosting companies use to run their businesses, could allow anyone on the internet to retrieve customer records and administrator password hashes from an…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T08:34:20Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/openai-and-cisco-unveil-ai-assisted.html",
-   "title": "OpenAI and Cisco Unveil AI-Assisted Linux Security Tool to Block Exploits Before Patching",
-   "link": "https://thehackernews.com/2026/11/openai-and-cisco-unveil-ai-assisted.html",
-   "summary": "OpenAI and Cisco have teamed up to launch Shirudo (meaning \"shield\" in Japanese), an open-source Linux runtime that allows artificial intelligence (AI) agents to defend systems without downtime. \"It lets agents write dynamic eBPF controls…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T06:02:57Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/hackers-exploit-n-able-mailassure-flaw.html",
-   "title": "Hackers Exploit N-able MailAssure Flaw While AI Agents Exploit MONAI Label Zero-Day",
-   "link": "https://thehackernews.com/2026/11/hackers-exploit-n-able-mailassure-flaw.html",
-   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) on Monday added two flaws impacting N-able MailAssure and MONAI Label to its Known Exploited Vulnerabilities (KEV) catalog, citing evidence of active exploitation. The…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-24T06:02:45Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311802",
-   "title": "Orgs that leak data 'prioritize corporate interests over customers' says Have I Been Pwned’s Troy Hunt",
-   "link": "https://www.theregister.com/security/2026/11/24/orgs-that-leak-data-prioritize-corporate-interests-over-customers-says-have-i-been-pwneds-troy-hunt/5311802",
-   "summary": "Leakers move through denial, bargaining, delay, legal threats, then claiming Hunt is the real villain",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T05:13:51Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311795",
-   "title": "Cisco and OpenAI pitch eBPF kernel plugins as the way to tame the patchpocalypse",
-   "link": "https://www.theregister.com/security/2026/11/24/cisco-and-openai-pitch-ebpf-kernel-plugins-as-the-way-to-tame-the-patchpocalypse/5311795",
-   "summary": "‘Shirudo’ project promises to whip up compensating controls in a hurry",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T01:46:56Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311775",
-   "title": "Anthropic says Claude solved an age-old math problem, but the written proof is 250,000 pages of slop",
-   "link": "https://www.theregister.com/ai-and-ml/2026/11/24/anthropic-says-claude-solved-an-age-old-math-problem-but-the-written-proof-is-250000-pages-of-slop/5311775",
-   "summary": "If the AI can't explain what it's proven, are we actually any closer to understanding?",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-24T00:18:17Z"
   },
   {
    "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1610/",
