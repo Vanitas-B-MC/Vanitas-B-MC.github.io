@@ -17,6 +17,11 @@ export const START_LIVES = 20;      // valeurs de la difficulté « Normal »
 export const START_GOLD = 140;
 export const SELL_RATIO = 0.6;
 
+// Paragon (comme Bloons TD6) : on fusionne 3 tours d'un même type ayant un chemin au palier 4. Une seule par type.
+export const PARAGON_NEED = 3;
+export const PARAGON_COST_MUL = 25;      // coût = coût de pose × 25
+export const PARAGON_MAX_DEGREE = 20;
+
 export const PATH_COUNT = 3;        // chemins d'amélioration par tour
 export const MAX_TIER = 4;          // paliers par chemin ; le palier 4 est l'amélioration ultime du chemin
 
@@ -107,9 +112,12 @@ export const TOWER_DEFS = {
   gatling:{ id: "gatling", name: "Gatling",         desc: "Cadence folle, dégâts minuscules. Achève les essaims.", cost: 130, unlock: 7000, range: 2.4, rate: 6,    dmg: 4,  color: "#e6e6e6" },
   pulsar: { id: "pulsar", name: "Pulsar",          desc: "Onde qui touche tous les ennemis proches.",            cost: 160, unlock: 3000, range: 2.2, rate: 0.7,  dmg: 24, color: "#ff6bd6", pulse: true },
   beacon: { id: "beacon", name: "Beacon",         desc: "Ne tire pas : booste les tours voisines (dégâts, cadence). Plusieurs beacons se cumulent.", cost: 120, unlock: 9000,  range: 2.2, rate: 0, dmg: 0, color: "#4dffd2", support: true },
-  miner:  { id: "miner",  name: "Data Miner",      desc: "Ne tire pas : produit de l'énergie à la fin de chaque vague.",  cost: 100, unlock: 4000,  range: 0,   rate: 0, dmg: 0, color: "#5b9bff", income: true }
+  miner:  { id: "miner",  name: "Data Miner",      desc: "Ne tire pas : produit de l'énergie à la fin de chaque vague.",  cost: 100, unlock: 4000,  range: 0,   rate: 0, dmg: 0, color: "#5b9bff", income: true },
+  dartling: { id: "dartling", name: "Dartling", desc: "Tir en ligne : chaque salve transperce plusieurs ennemis alignés. Au bout du chemin 1, le Rayon de la mort.", cost: 110, unlock: 6000, range: 3, rate: 5, dmg: 7, color: "#ffe14d", line: true },
+  desperado: { id: "desperado", name: "Desperado", desc: "Duelliste : tire d'autant plus vite qu'il y a peu d'ennemis à portée. Critiques à longue distance, salves de revolver.", cost: 150, unlock: 12000, range: 3.2, rate: 1.5, dmg: 26, color: "#ff9f5a" }
 };
 export const TOWER_IDS = Object.keys(TOWER_DEFS);
+export const LINE_WIDTH = 11;           // demi-largeur (px) du tir en ligne du Dartling
 
 /* ---------- Chemins d'amélioration ---------- */
 // Règles (comme Bloons TD6) : une tour utilise au plus 2 chemins, et un seul chemin peut dépasser le palier 2.
@@ -133,7 +141,9 @@ export const PATH_NAMES = {
   gatling: ["Munitions", "Cadence", "Multi-canon"],
   pulsar:  ["Onde", "Entrave", "Cadence"],
   beacon:  ["Dégâts", "Cadence", "Réseau"],
-  miner:   ["Rendement", "Intérêts", "Surcadence"]
+  miner:   ["Rendement", "Intérêts", "Surcadence"],
+  dartling: ["Perforation", "Cadence", "Armement"],
+  desperado: ["Duel", "Précision", "Barillet"]
 };
 
 export const UPGRADES = {
@@ -191,11 +201,23 @@ export const UPGRADES = {
     [U("Processeur", 0.6, { income: 1.4 }), U("Grappe", 1.2, { income: 1.4 }), U("Ferme de calcul", 2.4, { income: 1.5 }), U("Supercalculateur", 5, { income: 2 })],
     [U("Placement", 0.7, { interest: 0.01 }), U("Épargne", 1.3, { interest: 0.015 }), U("Portefeuille", 2.5, { interest: 0.02 }), U("Marché noir", 5, { interest: 0.03, income: 1.2 })],
     [U("Refroidissement", 0.6, { income: 1.2 }), U("Overclock", 1.2, { income: 1.2 }), U("Minage groupé", 2.4, { income: 1.3 }), U("Dividende", 5.4, { income: 1.5, ability: "dividend" })]
+  ],
+  // Dartling : chemin 1 = perforation jusqu'au Rayon de la mort (touche tous les ennemis de la ligne)
+  dartling: [
+    [U("Ailettes", 0.6, { pierceN: 2, dmg: 1.2 }), U("Pointes de tungstène", 1.2, { pierceN: 3, dmg: 1.3 }), U("Faisceau laser", 2.5, { pierceN: 5, dmg: 1.5, range: 1.1 }), U("Rayon de la mort", 5.5, { pierceN: 99, dmg: 2.5, rate: 1.5 })],
+    [U("Moteur", 0.6, { rate: 1.3 }), U("Barillet rapide", 1.2, { rate: 1.3 }), U("Mitrailleuse", 2.4, { rate: 1.4, range: 1.1 }), U("Hyper-rafale", 5, { rate: 1.6, dmg: 1.3 })],
+    [U("Gros calibre", 0.7, { dmg: 1.5 }), U("Canons jumeaux", 1.4, { targets: 1 }), U("Triple canon", 2.6, { targets: 1, dmg: 1.3 }), U("Rayon fatal", 5.5, { targets: 1, dmg: 1.6, ability: "deathbeam" })]
+  ],
+  // Desperado : duel (cadence selon le nombre d'ennemis), critiques à distance, salves
+  desperado: [
+    [U("Dégaine rapide", 0.6, { quick: 0.5 }), U("Colt long", 1.2, { dmg: 1.3, rate: 1.1 }), U("Gros calibre", 2.4, { duel: 1.2, dmg: 1.2 }), U("Soleil de plomb", 5.2, { dmg: 2, duel: 0.6, rate: 1.2 })],
+    [U("Visée", 0.6, { critFar: 0.1, critMul: 2.5 }), U("Mouche", 1.2, { critFar: 0.15, range: 1.1 }), U("Œil de lynx", 2.5, { critFar: 0.2, critMul: 3.5, pierce: true }), U("Fantôme du désert", 5, { crit: 0.15, critFar: 0.25, execute: 0.2, range: 1.2 })],
+    [U("Errant", 0.7, { burst: 1 }), U("Face à face", 1.3, { burst: 1, rate: 1.2 }), U("Six coups", 2.6, { burst: 2, rate: 1.1 }), U("Twin Sixes", 5.6, { burst: 4, dmg: 1.2, ability: "highnoon" })]
   ]
 };
 
 const MUL = { dmg: "damage", rate: "rate", range: "range", poisonDps: "poisonDps", income: "income", boostDamage: "boostDamage", boostRate: "boostRate" };
-const ADD = new Set(["targets", "splash", "chain", "chainReach", "spreadCount", "spreadRadius", "crit", "boostRange", "poisonTime", "slowTime", "pulseSlowTime", "interest"]);
+const ADD = new Set(["burst", "duel", "quick", "critFar", "pierceN", "targets", "splash", "chain", "chainReach", "spreadCount", "spreadRadius", "crit", "boostRange", "poisonTime", "slowTime", "pulseSlowTime", "interest"]);
 
 function applyFx(st, fx) {
   for (const [k, v] of Object.entries(fx)) {
@@ -214,7 +236,7 @@ export function towerStats(def, tiers = [0, 0, 0]) {
     stun: 0, slow: def.slow || 0, slowTime: def.slowTime || 0, freezeChance: 0, freezeTime: 0,
     poisonDps: def.poisonDps || 0, poisonTime: def.poisonTime || 0,
     spreadCount: 0, spreadRadius: 0, crit: 0, critMul: 2, pierce: false, execute: 0,
-    pulseSlow: 0, pulseSlowTime: 0,
+    pulseSlow: 0, pulseSlowTime: 0, pierceN: def.line ? 3 : 0, burst: 0, duel: 0, quick: 0, critFar: 0,
     boostDamage: def.id === "beacon" ? 0.2 : 0, boostRate: def.id === "beacon" ? 0.15 : 0, boostRange: 0,
     income: def.id === "miner" ? 24 : 0, interest: 0, ability: null
   };
@@ -253,6 +275,11 @@ export function describeFx(fx) {
   if (fx.critMul) out.push(`critiques ×${String(fx.critMul).replace(".", ",")}`);
   if (fx.execute) out.push(`exécute sous ${Math.round(fx.execute * 100)} % PV`);
   if (fx.pierce) out.push("ignore le blindage");
+  if (fx.pierceN) out.push(fx.pierceN >= 50 ? "transperce toute la ligne" : `transperce +${fx.pierceN} ennemis`);
+  if (fx.burst) out.push(`+${fx.burst} tir${fx.burst > 1 ? "s" : ""} par salve`);
+  if (fx.duel) out.push(`jusqu'à +${Math.round(fx.duel * 100)} % cadence si peu d'ennemis`);
+  if (fx.quick) out.push(`jusqu'à +${Math.round(fx.quick * 100)} % cadence sur cible lointaine`);
+  if (fx.critFar) out.push(`jusqu'à +${Math.round(fx.critFar * 100)} % critique à longue portée`);
   if (fx.pulseSlow) out.push(`l'onde ralentit de ${Math.round(fx.pulseSlow * 100)} %`);
   if (fx.boostDamage) out.push(`${pct(fx.boostDamage)} effet dégâts`);
   if (fx.boostRate) out.push(`${pct(fx.boostRate)} effet cadence`);
@@ -288,6 +315,7 @@ export function upgradeInfo(state, tower, path) {
 
 // Énergie dépensée au total pour une tour (pose + améliorations) : sert à calculer la revente.
 export function invested(tower) {
+  if (tower.paragon) return tower.paragon.spent;
   const def = TOWER_DEFS[tower.type];
   let sum = def.cost;
   for (let p = 0; p < PATH_COUNT; p++) for (let t = 0; t < tower.tiers[p]; t++) sum += upgradeCostOf(def, p, t);
@@ -407,7 +435,7 @@ export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP, diffId = 
     nextId: 1,
     creditsEarned: 0,
     kills: 0,
-    strikeCd: 0             // temps restant avant de pouvoir relancer la frappe orbitale
+    src: null               // tour qui est en train de tirer (sert à compter les éliminations des paragons)
   };
 }
 
@@ -429,7 +457,7 @@ export function placeTower(state, typeId, col, row) {
   if (state.gold < def.cost) return { ok: false, reason: "gold" };
   state.gold -= def.cost;
   const tiers = [0, 0, 0];
-  const tower = { id: state.nextId++, type: typeId, col, row, tiers, st: towerStats(def, tiers), cooldown: 0, target: "first", abilityCd: 0, fury: 0, jam: 0 };
+  const tower = { id: state.nextId++, type: typeId, col, row, tiers, st: towerStats(def, tiers), cooldown: 0, target: "first", abilityCd: 0, fury: 0, jam: 0, kills: 0, paragon: null, dyn: 1 };
   state.towers.push(tower);
   return { ok: true, tower };
 }
@@ -455,22 +483,6 @@ export function sellTower(state, id) {
   state.gold += refund;
   state.towers.splice(index, 1);
   return { ok: true, refund };
-}
-
-// Frappe orbitale : pouvoir actif coûteux, utilisable en pleine vague. Touche tous les ennemis (3 × les PV de base).
-export const STRIKE_COOLDOWN = 30;
-export const STRIKE_COST = 750;
-export const strikeReady = (state) => state.phase === "wave" && state.strikeCd <= 0 && state.gold >= STRIKE_COST;
-
-export function orbitalStrike(state) {
-  if (!strikeReady(state)) return false;
-  const events = { killed: 0, leaked: 0 };
-  const damage = baseHp(state.wave) * 3 * state.hpMul;
-  state.gold -= STRIKE_COST;
-  for (const e of state.enemies) if (!e.dead) hit(state, e, damage, events);
-  state.strikeCd = STRIKE_COOLDOWN;
-  state.fx.push({ kind: "boom", x: (COLS * CELL) / 2, y: (ROWS * CELL) / 2, r: (COLS * CELL) / 2, ttl: 0.5, max: 0.5, color: "#ffffff" });
-  return true;
 }
 
 export function startWave(state) {
@@ -504,6 +516,8 @@ function hit(state, enemy, damage, events, pierce = false) {
     state.gold += killGold(enemy.type, state.wave);
     state.kills += 1;
     events.killed += 1;
+    const src = state.src;
+    if (src) { src.kills += 1; if (src.paragon) refreshParagon(src); }
   }
 }
 
@@ -532,6 +546,7 @@ function applyEffects(state, e, st) {
   if (st.poisonDps) {
     e.poison = Math.max(e.poison, st.poisonDps);
     e.poisonLeft = Math.max(e.poisonLeft, st.poisonTime);
+    e.poisonBy = state.src || e.poisonBy || null;
   }
 }
 
@@ -539,7 +554,7 @@ function applyEffects(state, e, st) {
 export function beaconBuff(state, tower) {
   const buff = { damage: 1, rate: 1, range: 1 };
   if (TOWER_DEFS[tower.type].support) return buff;
-  let d = 0, r = 0, g = 0, surge = false;
+  let d = 0, r = 0, g = 0, surge = false, para = false;
   for (const b of state.towers) {
     if (b.type !== "beacon") continue;
     const reach = b.st.range;
@@ -547,9 +562,10 @@ export function beaconBuff(state, tower) {
     if (dx * dx + dy * dy > reach * reach) continue;
     d += b.st.boostDamage; r += b.st.boostRate; g = Math.max(g, b.st.boostRange);
     if (b.fury > 0) { surge = true; d += 0.4; r += 0.4; }
+    if (b.paragon) para = true;
   }
-  buff.damage += Math.min(surge ? 1.4 : 1, d);
-  buff.rate += Math.min(surge ? 1 : 0.6, r);
+  buff.damage += Math.min((surge ? 1.4 : 1) + (para ? 1 : 0), d);
+  buff.rate += Math.min((surge ? 1 : 0.6) + (para ? 0.6 : 0), r);
   buff.range += g;
   return buff;
 }
@@ -558,7 +574,7 @@ export function beaconBuff(state, tower) {
 export function towerRate(state, tower) {
   const ab = tower.st.ability && ABILITIES[tower.st.ability];
   const fury = tower.fury > 0 && ab && ab.fury && ab.fury.rate ? ab.fury.rate : 1;
-  return tower.st.rate * beaconBuff(state, tower).rate * fury;
+  return tower.st.rate * beaconBuff(state, tower).rate * fury * (tower.dyn || 1);
 }
 
 function explode(state, x, y, radius, damage, events, st, color) {
@@ -571,7 +587,15 @@ function explode(state, x, y, radius, damage, events, st, color) {
   }
 }
 
+// state.src : la tour qui tire, pour attribuer les éliminations (degré des paragons).
 function fire(state, tower, events) {
+  state.src = tower;
+  const fired = fireShots(state, tower, events);
+  state.src = null;
+  return fired;
+}
+
+function fireShots(state, tower, events) {
   const def = TOWER_DEFS[tower.type];
   const st = { ...tower.st };
   const buff = beaconBuff(state, tower);
@@ -579,7 +603,11 @@ function fire(state, tower, events) {
   const fury = tower.fury > 0 && ab && ab.fury ? ab.fury : null;
   st.damage *= buff.damage * (fury && fury.dmg ? fury.dmg : 1);
   st.range *= buff.range;
-  if (fury && fury.pierce) st.pierce = true;
+  if (fury) {
+    if (fury.pierce) st.pierce = true;
+    if (fury.crit) st.crit = Math.max(st.crit, fury.crit);
+    if (fury.pierceN) st.pierceN = Math.max(st.pierceN, fury.pierceN);
+  }
   const range = st.range;
   const cx = (tower.col + 0.5) * CELL;
   const cy = (tower.row + 0.5) * CELL;
@@ -588,13 +616,21 @@ function fire(state, tower, events) {
 
   // Cibles : les ennemis à portée, triés selon le mode de ciblage de la tour.
   const inRange = sortTargets(state.enemies.filter((e) => !e.dead && dist2(origin, e) <= range * range), tower.target, origin);
-  if (!inRange.length) return false;
+  if (!inRange.length) { tower.dyn = 1; return false; }
 
+  // Desperado : cadence selon le nombre d'ennemis à portée (duel) et la distance de la cible (dégaine rapide).
+  let dyn = 1;
+  if (st.duel) dyn += st.duel * Math.max(0, (5 - inRange.length) / 4);
+  if (st.quick) dyn += st.quick * Math.min(1, Math.sqrt(dist2(origin, inRange[0])) / range);
+  tower.dyn = dyn;
+
+  const maxChance = fury && fury.crit >= 1 ? 1 : 0.95;
   const beam = (a, b) => state.fx.push({ kind: "beam", x1: a.x, y1: a.y, x2: b.x, y2: b.y, ttl: 0.1, max: 0.1, color: def.color });
-  // Dégâts d'un coup : critique et exécution (sniper) selon les paliers.
+  // Dégâts d'un coup : critique (plus fréquent de loin pour le Desperado) et exécution selon les paliers.
   const strike = (e, base) => {
     let damage = base;
-    if (st.crit && rng() < st.crit) damage *= st.critMul;
+    const chance = Math.min(maxChance, st.crit + (st.critFar ? st.critFar * Math.min(1, Math.sqrt(dist2(origin, e)) / range) : 0));
+    if (chance > 0 && rng() < chance) damage *= st.critMul;
     if (st.execute && !isBoss(e) && e.hp - damage <= e.maxHp * st.execute) damage = Math.max(damage, e.hp);
     hit(state, e, damage, events, st.pierce);
   };
@@ -609,7 +645,36 @@ function fire(state, tower, events) {
     return true;
   }
 
-  for (const mainTarget of inRange.slice(0, st.targets)) {
+  const list = inRange.slice(0, st.targets);
+
+  if (def.line) {
+    // Dartling : un rayon par cible ; il touche les `pierceN` premiers ennemis alignés (tous avec le Rayon de la mort).
+    const all = st.pierceN >= 50;
+    for (const aim of list) {
+      const len = Math.max(1, Math.sqrt(dist2(origin, aim)));
+      const ux = (aim.x - cx) / len;
+      const uy = (aim.y - cy) / len;
+      const hits = [];
+      for (const e of state.enemies) {
+        if (e.dead) continue;
+        const rx = e.x - cx, ry = e.y - cy;
+        const along = rx * ux + ry * uy;
+        if (along < 0 || along > range || Math.abs(rx * uy - ry * ux) > LINE_WIDTH) continue;
+        hits.push({ e, along });
+      }
+      hits.sort((a, b) => a.along - b.along);
+      const aimed = hits.findIndex((h) => h.e === aim);
+      if (aimed > 0) hits.unshift(hits.splice(aimed, 1)[0]);      // la cible visée est toujours touchée
+      state.fx.push({ kind: "beam", x1: cx, y1: cy, x2: cx + ux * range, y2: cy + uy * range, ttl: all ? 0.16 : 0.08, max: all ? 0.16 : 0.08, color: def.color, w: all ? 7 : 2 });
+      for (const { e } of hits.slice(0, st.pierceN)) { strike(e, st.damage); applyEffects(state, e, st); }
+    }
+    return true;
+  }
+
+  // Salve (Desperado) : 1 + burst tirs répartis sur les cibles ; sinon un tir par cible.
+  const shots = st.burst ? Array.from({ length: 1 + st.burst }, (_, k) => list[k % list.length]) : list;
+  for (const mainTarget of shots) {
+    if (mainTarget.dead) continue;
     beam(origin, mainTarget);
     if (st.splash) {
       const radius = st.splash * CELL;
@@ -674,6 +739,8 @@ const abilityStats = (state, tower) => {
 export const ABILITIES = {
   overdrive: { name: "Surcharge", cd: 45, desc: "6 s : cadence ×2,5 et dégâts ×1,5.", fury: { time: 6, rate: 2.5, dmg: 1.5 } },
   frenzy:    { name: "Furie", cd: 40, desc: "5 s : cadence ×3, dégâts ×1,5, balles perforantes.", fury: { time: 5, rate: 3, dmg: 1.5, pierce: true } },
+  highnoon:  { name: "Midi pile", cd: 45, desc: "5 s : cadence ×3, dégâts ×2, tous les tirs sont critiques et perforants.", fury: { time: 5, rate: 3, dmg: 2, crit: 1, pierce: true } },
+  deathbeam: { name: "Rayon fatal", cd: 40, desc: "4 s : le rayon transperce toute la ligne, dégâts ×3 et cadence ×2.", fury: { time: 4, rate: 2, dmg: 3, pierceN: 99 } },
   surge:     { name: "Surtension", cd: 60, desc: "8 s : les tours dans l'aura gagnent +40 % de dégâts et de cadence en plus.", fury: { time: 8 } },
   absolute: {
     name: "Zéro absolu", cd: 50, desc: "Gèle 1 s, ralentit de 70 % et inflige 3× les dégâts à tous les ennemis proches.",
@@ -753,8 +820,10 @@ export function useAbility(state, id) {
   if (tower.abilityCd > 0) return { ok: false, reason: "cd" };
   const events = { killed: 0, leaked: 0 };
   if (ab.fury) tower.fury = ab.fury.time;
+  state.src = tower;
   if (ab.run) ab.run(state, tower, abilityStats(state, tower), events);
-  tower.abilityCd = ab.cd;
+  state.src = null;
+  tower.abilityCd = tower.paragon ? ab.cd / 2 : ab.cd;      // un paragon recharge deux fois plus vite
   state.fx.push({ kind: "boom", x: origin(tower).x, y: origin(tower).y, r: CELL * 0.9, ttl: 0.35, max: 0.35, color: TOWER_DEFS[tower.type].color });
   return { ok: true, name: ab.name };
 }
@@ -791,7 +860,6 @@ export function update(state, dt) {
   const events = { killed: 0, leaked: 0, waveCleared: false, credits: 0, over: false };
   if (state.phase === "over") return events;
   state.time += dt;
-  if (state.strikeCd > 0) state.strikeCd = Math.max(0, state.strikeCd - dt);
 
   // Apparitions
   if (state.phase === "wave") {
@@ -813,7 +881,9 @@ export function update(state, dt) {
     }
     if (e.poisonLeft > 0) {
       e.poisonLeft -= dt;
+      state.src = e.poisonBy || null;
       hit(state, e, e.poison * dt, events, true);
+      state.src = null;
       if (e.dead) continue;
     }
     if (def.boss) bossTick(state, e, def, dt);
@@ -834,11 +904,16 @@ export function update(state, dt) {
   }
 
   // Tirs des tours
+  // Recharge des capacités, durée des effets et brouillage : ces minuteurs ne tournent que pendant une vague.
+  const waving = state.phase === "wave";
   for (const tower of state.towers) {
     tower.cooldown -= dt;
-    if (tower.abilityCd > 0) tower.abilityCd = Math.max(0, tower.abilityCd - dt);
-    if (tower.fury > 0) tower.fury = Math.max(0, tower.fury - dt);
-    if (tower.jam > 0) { tower.jam = Math.max(0, tower.jam - dt); continue; }      // brouillée par un Rootkit
+    if (waving) {
+      if (tower.abilityCd > 0) tower.abilityCd = Math.max(0, tower.abilityCd - dt);
+      if (tower.fury > 0) tower.fury = Math.max(0, tower.fury - dt);
+      if (tower.jam > 0) tower.jam = Math.max(0, tower.jam - dt);
+    }
+    if (tower.jam > 0) continue;      // brouillée par un Rootkit
     if (tower.cooldown > 0) continue;
     const tdef = TOWER_DEFS[tower.type];
     if (tdef.support || tdef.income) continue;   // Beacon et Data Miner ne tirent pas
@@ -863,6 +938,7 @@ export function update(state, dt) {
   // Vague repoussée
   if (state.phase === "wave" && state.spawnList.length === 0 && state.enemies.length === 0) {
     state.phase = "idle";
+    for (const t of state.towers) t.jam = 0;      // le brouillage s'arrête avec la vague
     // Data Miners : de l'énergie en plus à la fin de la vague (les Beacons voisins l'augmentent un peu).
     let mined = 0;
     for (const t of state.towers) {
@@ -878,4 +954,71 @@ export function update(state, dt) {
     events.credits = credits;
   }
   return events;
+}
+
+
+/* ---------- Paragons ---------- */
+// Fusion de 3 tours d'un même type (chacune avec un chemin au palier 4) : une tour qui cumule les 3 chemins au palier 4,
+// avec une capacité qui recharge deux fois plus vite. Son degré (1 à 20) monte avec l'énergie investie et ses éliminations.
+
+export const paragonCost = (def) => def.cost * PARAGON_COST_MUL;
+
+export function paragonDegree(tower) {
+  if (!tower.paragon) return 0;
+  const def = TOWER_DEFS[tower.type];
+  const worth = tower.paragon.spent / def.cost + Math.min(60, (tower.kills || 0) / 25);
+  return Math.max(1, Math.min(PARAGON_MAX_DEGREE, 1 + Math.floor((worth - 40) / 4)));
+}
+
+export function paragonStats(def, tower) {
+  const st = towerStats(def, [MAX_TIER, MAX_TIER, MAX_TIER]);
+  const d = paragonDegree(tower);
+  st.degree = d;
+  if (def.support) { st.boostDamage *= 1 + 0.1 * (d - 1); st.boostRate *= 1 + 0.1 * (d - 1); }
+  else if (def.income) st.income *= 1 + 0.15 * (d - 1);
+  else { st.damage *= 1 + 0.15 * (d - 1); st.rate *= 1 + 0.03 * (d - 1); st.range *= 1 + 0.01 * (d - 1); }
+  return st;
+}
+
+function refreshParagon(tower) {
+  const def = TOWER_DEFS[tower.type];
+  if (paragonDegree(tower) !== tower.st.degree) tower.st = paragonStats(def, tower);
+}
+
+// État d'une tour face aux paragons : { is: true, degree } si c'en est un, sinon le coût, le nombre de tours prêtes et la raison
+// du blocage : have (ce type a déjà un paragon) | notmax (aucun chemin au palier 4) | need (pas assez de tours prêtes) | gold.
+export function paragonInfo(state, tower) {
+  const def = TOWER_DEFS[tower.type];
+  if (tower.paragon) return { is: true, degree: paragonDegree(tower) };
+  const cost = paragonCost(def);
+  const ready = state.towers.filter((t) => t.type === tower.type && !t.paragon && t.tiers.some((x) => x >= MAX_TIER));
+  let reason = null;
+  if (state.towers.some((t) => t.type === tower.type && t.paragon)) reason = "have";
+  else if (!tower.tiers.some((x) => x >= MAX_TIER)) reason = "notmax";
+  else if (ready.length < PARAGON_NEED) reason = "need";
+  else if (state.gold < cost) reason = "gold";
+  return { is: false, cost, ready: ready.length, need: PARAGON_NEED, reason };
+}
+
+// Fusionne : la tour choisie devient le paragon, les 2 autres tours prêtes (les plus investies) sont sacrifiées.
+export function makeParagon(state, id) {
+  const tower = state.towers.find((t) => t.id === id);
+  if (!tower || state.phase === "over") return { ok: false, reason: "unknown" };
+  const info = paragonInfo(state, tower);
+  if (info.is) return { ok: false, reason: "have" };
+  if (info.reason) return { ok: false, reason: info.reason };
+  const def = TOWER_DEFS[tower.type];
+  const others = state.towers
+    .filter((t) => t !== tower && t.type === tower.type && !t.paragon && t.tiers.some((x) => x >= MAX_TIER))
+    .sort((a, b) => invested(b) - invested(a))
+    .slice(0, PARAGON_NEED - 1);
+  const spent = invested(tower) + others.reduce((sum, t) => sum + invested(t), 0) + info.cost;
+  state.gold -= info.cost;
+  state.towers = state.towers.filter((t) => !others.includes(t));
+  tower.paragon = { spent };
+  tower.tiers = [MAX_TIER, MAX_TIER, MAX_TIER];
+  tower.st = paragonStats(def, tower);
+  tower.abilityCd = 0;
+  state.fx.push({ kind: "boom", x: (tower.col + 0.5) * CELL, y: (tower.row + 0.5) * CELL, r: CELL * 2, ttl: 0.6, max: 0.6, color: "#fcee0a" });
+  return { ok: true, tower, sacrificed: others.map((t) => t.id) };
 }

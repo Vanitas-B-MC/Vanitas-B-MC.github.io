@@ -1952,3 +1952,9 @@ kbd {
 .pb-name { font-weight: 700; }
 .pb-desc { grid-column: 1 / -1; color: var(--muted); font-size: 11px; line-height: 1.35; }
 .pb-cost { grid-row: 1; grid-column: 2; color: var(--yellow); }
+
+/* Pare-feu : paragons */
+.sel-paragon { display: grid; gap: 6px; margin: 6px 0; padding: 8px; border: 1px dashed var(--yellow); }
+.sel-paragon p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.sel-paragon-title { color: var(--yellow); font-family: var(--font-display); font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
+.sel-paragon[hidden] { display: none; }
