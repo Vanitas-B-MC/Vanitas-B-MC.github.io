@@ -1,7 +1,8 @@
 /* =========================================================
    MODE AFTERLIFE — easter egg (taper « afterlife » sur le site)
-   L'Afterlife de Night City, le bar des légendes mercenaires : violet nuit, enseigne dorée,
-   rose chaud. Un néon qui crépite, une ambiance de comptoir.
+   L'Afterlife de Night City, le bar des légendes mercenaires, tel qu'il apparaît dans le jeu : salle d'acier
+   et de verre baignée de turquoise, plafond lumineux d'un vert-jaune pâle qui se reflète sur le carrelage,
+   enseigne blanche au néon. Calme, brillant, un peu irréel.
 
    Tout est limité à html.afterlife : sans cette classe, rien ne change.
    Même principe que neon.css : on remplace les variables de couleur du site,
@@ -9,27 +10,27 @@
 ========================================================= */
 
 html.afterlife {
-  --bg: #0b0410;
-  --surface: #150821;
-  --surface-2: #200d30;
-  --line: #3b1a45;
-  --line-strong: #8b2f78;
+  --bg: #030d0e;
+  --surface: #071a1c;
+  --surface-2: #0c2a2c;
+  --line: #12383a;
+  --line-strong: #2f8a86;
 
-  --text: #fff1e6;
-  --muted: #d4adc2;
+  --text: #eafff8;
+  --muted: #8fbfb6;
 
   /* rôles repris des thèmes (index : yellow/cyan/pink, veille : hot/blue/violet) */
-  --yellow: #ffc14d;   /* or de l'enseigne : l'accent principal */
-  --cyan: #ff4fa3;     /* rose néon du comptoir */
-  --pink: #ff7a59;
-  --hot: #ff4fa3;
-  --blue: #ffc14d;
-  --violet: #b05cff;
+  --yellow: #58f0d0;   /* turquoise de l'enseigne : l'accent principal */
+  --cyan: #d4f56a;     /* vert-jaune pâle des plafonniers */
+  --pink: #8cffb8;
+  --hot: #58f0d0;
+  --blue: #d4f56a;
+  --violet: #3fb8c9;
 
-  --th-a-rgb: 255, 193, 77;
-  --th-b-rgb: 255, 79, 163;
-  --th-c-rgb: 176, 92, 255;
-  --th-bone-rgb: 255, 241, 230;
+  --th-a-rgb: 88, 240, 208;
+  --th-b-rgb: 212, 245, 106;
+  --th-c-rgb: 63, 184, 201;
+  --th-bone-rgb: 234, 255, 248;
 
   scrollbar-color: var(--line-strong) var(--bg);
 }
@@ -37,29 +38,38 @@ html.afterlife {
 /* Fond */
 html.afterlife body::before {
   background:
-    radial-gradient(70vw 50vh at 50% 118%, rgba(var(--th-b-rgb), .28), transparent 72%),
-    radial-gradient(50vw 45vh at 92% -8%, rgba(var(--th-a-rgb), .2), transparent 70%),
-    radial-gradient(40vw 40vh at 4% 50%, rgba(var(--th-c-rgb), .14), transparent 70%),
-    radial-gradient(circle at 20% 30%, rgba(var(--th-a-rgb), .1) 0 3px, transparent 4px) 0 0 / 120px 120px,
-    radial-gradient(circle at 70% 70%, rgba(var(--th-b-rgb), .1) 0 4px, transparent 5px) 0 0 / 170px 170px;
-  animation: afterlife-glow 8s ease-in-out infinite;
+    linear-gradient(180deg, rgba(var(--th-b-rgb), .2), rgba(var(--th-b-rgb), .05) 14%, transparent 30%),
+    radial-gradient(ellipse 15vw 5vh at 26% 97%, rgba(var(--th-b-rgb), .22), transparent 72%),
+    radial-gradient(ellipse 19vw 6vh at 70% 91%, rgba(var(--th-b-rgb), .16), transparent 72%),
+    radial-gradient(80vw 50vh at 50% 118%, rgba(var(--th-a-rgb), .24), transparent 72%),
+    radial-gradient(50vw 45vh at 4% 30%, rgba(var(--th-c-rgb), .16), transparent 70%),
+    linear-gradient(rgba(var(--th-a-rgb), .06) 1px, transparent 1px) 0 0 / 100% 64px;
+  animation: afterlife-glow 9s ease-in-out infinite;
+}
+
+/* Écran : fine brume turquoise, lignes de balayage discrètes et vignette */
+html.afterlife body::after {
+  background:
+    linear-gradient(180deg, rgba(var(--th-a-rgb), .04), transparent 40%),
+    radial-gradient(ellipse at center, transparent 54%, rgba(0, 14, 14, .55) 100%),
+    repeating-linear-gradient(to bottom, transparent 0 3px, rgba(0, 12, 12, .16) 3px 4px);
 }
 
 
 
 /* Étiquette fixe, collée en bas à droite */
 html.afterlife::after {
-  content: "★ AFTERLIFE — LÉGENDES SEULEMENT ★";
+  content: "AFTERLIFE — OUVERT TOUTE LA NUIT";
   position: fixed;
   right: 0;
   bottom: 0;
   z-index: 95;
   pointer-events: none;
   padding: 4px 12px 4px 14px;
-  background: rgba(11, 4, 16, .92);
+  background: rgba(3, 13, 14, .92);
   border-top: 1px solid var(--line-strong);
   border-left: 1px solid var(--line-strong);
-  color: var(--yellow);
+  color: var(--text);
   font-family: var(--font-mono, ui-monospace, Consolas, monospace);
   font-size: 10px;
   letter-spacing: .22em;
@@ -71,12 +81,12 @@ html.afterlife::after {
 html.afterlife .hero-name,
 html.afterlife .arcade-title,
 html.afterlife .vtitle {
-  text-shadow: 0 0 8px rgba(var(--th-a-rgb), .9), 0 0 26px rgba(var(--th-a-rgb), .6), 0 0 52px rgba(var(--th-b-rgb), .55);
+  text-shadow: 0 0 5px rgba(var(--th-bone-rgb), .85), 0 0 22px rgba(var(--th-a-rgb), .7), 0 0 48px rgba(var(--th-a-rgb), .4);
 }
 
 html.afterlife .game-title,
 html.afterlife .overlay-title {
-  text-shadow: 0 0 6px rgba(var(--th-a-rgb), .8), 0 0 20px rgba(var(--th-b-rgb), .5);
+  text-shadow: 0 0 4px rgba(var(--th-bone-rgb), .8), 0 0 18px rgba(var(--th-a-rgb), .6);
 }
 
 html.afterlife .section-heading h2 {
@@ -85,7 +95,7 @@ html.afterlife .section-heading h2 {
 
 html.afterlife ::selection {
   background: var(--yellow);
-  color: #1a0620;
+  color: #021012;
 }
 
 /* ---------- Couleurs écrites en dur dans style.css ---------- */
@@ -99,12 +109,12 @@ html.afterlife .site-header.is-scrolled {
 html.afterlife .logo img,
 html.afterlife .brand img,
 html.afterlife .card-head img {
-  filter: grayscale(1) sepia(1) hue-rotate(6deg) saturate(3.2) brightness(1.05) drop-shadow(0 0 6px rgba(var(--th-a-rgb), .5));
+  filter: grayscale(1) sepia(1) hue-rotate(127deg) saturate(3.2) brightness(1.05) drop-shadow(0 0 6px rgba(var(--th-a-rgb), .5));
 }
 
 html.afterlife .logo:hover img,
 html.afterlife .brand:hover img {
-  filter: grayscale(1) sepia(1) hue-rotate(6deg) saturate(3.2) brightness(1.05) drop-shadow(0 0 12px rgba(var(--th-a-rgb), .9));
+  filter: grayscale(1) sepia(1) hue-rotate(127deg) saturate(3.2) brightness(1.05) drop-shadow(0 0 12px rgba(var(--th-a-rgb), .9));
 }
 
 html.afterlife .github-link:hover {
@@ -130,7 +140,7 @@ html.afterlife .project:hover {
 }
 
 html.afterlife .button-primary {
-  color: #1a0620;
+  color: #021012;
   box-shadow: 0 0 18px -2px rgba(var(--th-a-rgb), .6);
 }
 
@@ -159,7 +169,7 @@ html.afterlife .banner {
     radial-gradient(50% 80% at 8% 100%, rgba(var(--th-b-rgb), .14), transparent 70%);
 }
 
-html.afterlife .banner-lead { color: #f3dcd0; }
+html.afterlife .banner-lead { color: #d2f3ea; }
 
 html.afterlife .field select:focus,
 html.afterlife .field input:focus {
@@ -195,13 +205,13 @@ html.afterlife .game-stage {
 html.afterlife .secret-afterlife {
   background:
     repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .3) 2px 3px),
-    radial-gradient(70% 60% at 50% 55%, rgba(var(--th-a-rgb), .32), rgba(9, 2, 13, .96) 75%);
+    radial-gradient(70% 60% at 50% 55%, rgba(var(--th-a-rgb), .32), rgba(2, 12, 13, .96) 75%);
   animation: afterlife-alert 1.9s steps(1, end) both;
 }
 
 html.afterlife .secret-afterlife .secret-unlock-title {
   color: var(--yellow);
-  text-shadow: 0 0 10px rgba(var(--th-a-rgb), .95), 0 0 36px rgba(var(--th-b-rgb), .8);
+  text-shadow: 0 0 8px rgba(var(--th-bone-rgb), .9), 0 0 36px rgba(var(--th-a-rgb), .85);
 }
 
 @keyframes afterlife-alert {
@@ -227,5 +237,5 @@ html.afterlife .secret-afterlife .secret-unlock-title {
   html.afterlife .secret-afterlife { animation: none; }
 }
 
-@keyframes afterlife-glow { 0%, 100% { opacity: 1; } 50% { opacity: .86; } }
-@keyframes afterlife-sign { 0%, 62%, 66%, 100% { opacity: .9; } 63%, 65% { opacity: .2; } 80%, 82% { opacity: .45; } }
+@keyframes afterlife-glow { 0%, 100% { opacity: 1; } 50% { opacity: .88; } }
+@keyframes afterlife-sign { 0%, 62%, 66%, 100% { opacity: .9; } 63%, 65% { opacity: .25; } 80%, 82% { opacity: .5; } }
