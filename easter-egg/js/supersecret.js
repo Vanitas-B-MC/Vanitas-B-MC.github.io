@@ -5,23 +5,11 @@
 "use strict";
 
 // ------------------------------------------------------------------ constantes
+const W = 960, H = 544, T = 32, ROWS = 17, GRAV = 1900;
 const cv = document.getElementById("game");
-const ov = document.getElementById("ov");
-
-if (!cv || !ov) {
-  console.error("Crypte Néon : canvas #game ou overlay #ov introuvable.");
-  return;
-}
-
 const ctx = cv.getContext("2d");
-
-if (!ctx) {
-  console.error("Crypte Néon : impossible d'initialiser le contexte Canvas 2D.");
-  return;
-}
-
-cv.width = W;
-cv.height = H;
+cv.width = W; cv.height = H;
+const ov = document.getElementById("ov");
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rnd = (a, b) => a + Math.random() * (b - a);
