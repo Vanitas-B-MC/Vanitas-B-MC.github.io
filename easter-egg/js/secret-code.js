@@ -12,6 +12,10 @@ import { toggleTheme } from "../../js/theme.js";
 
 export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "easter-egg/arcade.html";
+
+export const CRYPT_CODE = "supersecret";
+export const CRYPT_PAGE = "easter-egg/supersecret.html";
+
 export const THEME_CODE = "edgerunner";
 export const NEON_CODE = "neon";
 export const BLACKWALL_CODE = "blackwall";
@@ -122,6 +126,7 @@ const STYLE = `
 function init() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const pushPage = createMatcher(SECRET_CODE);
+  const pushCrypt = createMatcher(CRYPT_CODE);
   const psychoMatchers = PSYCHO_CODES.map((code) => createMatcher(code));
   const themeMatchers = THEME_CODES.map((entry) => ({ ...entry, push: createMatcher(entry.code) }));
   const onArcade = document.body.classList.contains("arcade-page");
@@ -137,7 +142,7 @@ function init() {
     document.head.append(style);
   }
 
-  function unlock() {
+  function unlock(destination = SECRET_PAGE, titleText = "Accès autorisé") {
     if (overlay) return;
     addStyle();
 
@@ -147,7 +152,7 @@ function init() {
 
     const title = document.createElement("p");
     title.className = "secret-unlock-title";
-    title.textContent = "Accès autorisé";
+    title.textContent = titleText;
 
     overlay = document.createElement("div");
     overlay.className = "secret-unlock";
@@ -155,7 +160,9 @@ function init() {
     overlay.append(line, title);
     document.body.append(overlay);
 
-    timer = window.setTimeout(() => { window.location.href = SECRET_PAGE; }, reduceMotion ? 300 : 900);
+    timer = window.setTimeout(() => {
+      window.location.href = destination;
+    }, reduceMotion ? 300 : 900);
   }
 
   function themeToast(entry, on) {
@@ -198,10 +205,15 @@ function init() {
 
     // On alimente toujours tous les détecteurs : chacun suit sa propre suite de lettres.
     const page = pushPage(event.key);
+    const crypt = pushCrypt(event.key);
     const psycho = psychoMatchers.map((push) => push(event.key)).some(Boolean);
     const hit = themeMatchers.map((matcher) => matcher.push(event.key) && matcher).find(Boolean);
 
     if (page && !onArcade) unlock();
+
+    if (crypt && !onArcade) {
+      unlock(CRYPT_PAGE, "Crypte Néon");
+    }
     if (hit) {
       const on = toggleTheme(hit.theme);
       themeToast(hit, on);
