@@ -5,16 +5,31 @@
 //   - l'ÉNERGIE (state.gold) : sert à poser et améliorer des tours PENDANT une partie ;
 //   - les CRÉDITS (portefeuille) : servent à DÉBLOQUER un type de tour pour de bon.
 //     Chaque vague survivie rapporte aussi quelques crédits.
+//
+// Inspiré de Bloons TD6 : 3 chemins d'amélioration par tour (4 paliers chacun), ciblage réglable,
+// capacités actives, boss à pouvoirs, étourdissement limité (durée plafonnée + immunité ensuite).
 
 export const COLS = 14;
 export const ROWS = 9;
 export const CELL = 40;
 
-export const START_LIVES = 20;
+export const START_LIVES = 20;      // valeurs de la difficulté « Normal »
 export const START_GOLD = 140;
-export const MAX_LEVEL = 4;          // niveaux 1 à 5 ; le niveau 5 est l'amélioration ultime
-export const ULTIMATE_LEVEL = MAX_LEVEL;
 export const SELL_RATIO = 0.6;
+
+export const PATH_COUNT = 3;        // chemins d'amélioration par tour
+export const MAX_TIER = 4;          // paliers par chemin ; le palier 4 est l'amélioration ultime du chemin
+
+/* ---------- Difficulté ---------- */
+
+// lives / gold : vies et énergie de départ. hp : solidité des ennemis. reward : multiplicateur de crédits.
+export const DIFFICULTIES = [
+  { id: "facile",    name: "Facile",    desc: "Plus de vies et d'énergie, ennemis moins solides. Crédits ×0,6, ne bat pas le record.", lives: 30, gold: 200, hp: 0.75, reward: 0.6, record: false },
+  { id: "normal",    name: "Normal",    desc: "L'équilibre prévu.",                                                                     lives: 20, gold: 140, hp: 1,    reward: 1,   record: true },
+  { id: "difficile", name: "Difficile", desc: "Peu de vies, ennemis plus solides. Crédits ×1,5.",                                       lives: 12, gold: 110, hp: 1.3,  reward: 1.5, record: true }
+];
+export const DEFAULT_DIFFICULTY = "normal";
+export const diffById = (id) => DIFFICULTIES.find((d) => d.id === id) || DIFFICULTIES[1];
 
 /* ---------- Cartes et chemins des ennemis ---------- */
 
@@ -83,10 +98,10 @@ export const FREE_TOWER = "laser";
 // range en cases, rate en tirs par seconde.
 export const TOWER_DEFS = {
   laser:  { id: "laser",  name: "Laser",           desc: "Tir rapide, dégâts faibles. Bon partout.",             cost: 50,  unlock: 0,    range: 2.7, rate: 2.2,  dmg: 7,  color: "#00f0ff" },
-  cryo:   { id: "cryo",   name: "Tour cryo",       desc: "Ralentit les ennemis de 50 % pendant 2 s. Évolue vers le gel.",            cost: 70,  unlock: 150,  range: 2.5, rate: 1.4,  dmg: 3,  color: "#7fd8ff", slow: 0.5,  slowTime: 2 },
+  cryo:   { id: "cryo",   name: "Tour cryo",       desc: "Ralentit les ennemis de 50 % pendant 2 s. Peut les geler.", cost: 70,  unlock: 150,  range: 2.5, rate: 1.4,  dmg: 3,  color: "#7fd8ff", slow: 0.5,  slowTime: 2 },
   canon:  { id: "canon",  name: "Canon à plasma",  desc: "Dégâts de zone : idéal contre les groupes.",           cost: 95,  unlock: 400,  range: 2.9, rate: 0.8,  dmg: 34, color: "#ff8a3d", splash: 1.15 },
   sniper: { id: "sniper", name: "Sniper",          desc: "Portée immense et gros dégâts, mais lent.",            cost: 120, unlock: 900,  range: 6,   rate: 0.5,  dmg: 100, color: "#fcee0a" },
-  tesla:  { id: "tesla",  name: "Tesla",           desc: "Un éclair qui rebondit sur 3 ennemis (plus en montant de niveau) et les étourdit.",                cost: 140, unlock: 1800, range: 2.7, rate: 1.2,  dmg: 26, color: "#b58cff", chain: 3 },
+  tesla:  { id: "tesla",  name: "Tesla",           desc: "Un éclair qui rebondit sur 3 ennemis et peut les étourdir.", cost: 140, unlock: 1800, range: 2.7, rate: 1.2,  dmg: 26, color: "#b58cff", chain: 3 },
   venin:  { id: "venin",  name: "Injecteur viral", desc: "Empoisonne : dégâts sur la durée, ignore le blindage.", cost: 110, unlock: 1200, range: 2.6, rate: 1.3,  dmg: 6,  color: "#3ddc84", poisonDps: 18, poisonTime: 4 },
   mortier:{ id: "mortier", name: "Mortier",        desc: "Portée énorme, énormes dégâts de zone, très lent.",    cost: 150, unlock: 5000, range: 5,   rate: 0.3,  dmg: 90, color: "#ffb347", splash: 1.7 },
   gatling:{ id: "gatling", name: "Gatling",         desc: "Cadence folle, dégâts minuscules. Achève les essaims.", cost: 130, unlock: 7000, range: 2.4, rate: 6,    dmg: 4,  color: "#e6e6e6" },
@@ -96,109 +111,225 @@ export const TOWER_DEFS = {
 };
 export const TOWER_IDS = Object.keys(TOWER_DEFS);
 
-// Caractéristiques d'une tour selon son niveau : chaque tour a sa propre évolution
-// (le niveau 5 est l'amélioration ultime : stats nettement plus hautes + une capacité en plus).
-export function towerStats(def, level) {
-  const ult = level >= ULTIMATE_LEVEL;
+/* ---------- Chemins d'amélioration ---------- */
+// Règles (comme Bloons TD6) : une tour utilise au plus 2 chemins, et un seul chemin peut dépasser le palier 2.
+// Coût d'un palier = coût de pose × cost. Le palier 4 du chemin 3 donne une capacité active.
+//
+// fx — multiplicateurs : dmg, rate, range, poisonDps, income, boostDamage, boostRate
+//      ajouts : targets, splash, chain, chainReach, spreadCount, spreadRadius, crit, boostRange,
+//               poisonTime, slowTime, pulseSlowTime, interest
+//      minimums (on garde le plus haut) : stun, slow, freezeChance, freezeTime, pulseSlow, critMul, execute, chainFalloff
+//      pierce (vrai/faux), ability (nom d'une capacité de ABILITIES)
+const U = (name, cost, fx) => ({ name, cost, fx });
+
+export const PATH_NAMES = {
+  laser:   ["Optique", "Cadence", "Puissance"],
+  cryo:    ["Froid", "Gel", "Givre"],
+  canon:   ["Explosif", "Choc", "Artillerie"],
+  sniper:  ["Précision", "Cadence", "Pénétration"],
+  tesla:   ["Arcs", "Choc", "Puissance"],
+  venin:   ["Toxine", "Contagion", "Injection"],
+  mortier: ["Zone", "Choc", "Artillerie"],
+  gatling: ["Munitions", "Cadence", "Multi-canon"],
+  pulsar:  ["Onde", "Entrave", "Cadence"],
+  beacon:  ["Dégâts", "Cadence", "Réseau"],
+  miner:   ["Rendement", "Intérêts", "Surcadence"]
+};
+
+export const UPGRADES = {
+  laser: [
+    [U("Lentille focale", 0.6, { range: 1.15, dmg: 1.2 }), U("Double faisceau", 1.1, { targets: 1 }), U("Triple faisceau", 2.2, { targets: 1, dmg: 1.3 }), U("Prisme", 4.8, { targets: 2, crit: 0.2, critMul: 2.5 })],
+    [U("Condensateurs", 0.6, { rate: 1.3 }), U("Surcadence", 1.2, { rate: 1.3 }), U("Mitrailleuse laser", 2.4, { rate: 1.4, dmg: 1.2 }), U("Chaîne infinie", 5, { rate: 1.6 })],
+    [U("Diodes", 0.7, { dmg: 1.4 }), U("Perforant", 1.3, { pierce: true, dmg: 1.2 }), U("Rayon thermique", 2.5, { dmg: 1.6 }), U("Surcharge", 5.5, { dmg: 1.6, ability: "overdrive" })]
+  ],
+  cryo: [
+    [U("Compresseur", 0.5, { slow: 0.6, slowTime: 1 }), U("Azote liquide", 1, { slow: 0.7, slowTime: 1, range: 1.1 }), U("Cryo-zone", 2.2, { splash: 1, slowTime: 1 }), U("Âge glaciaire", 4.5, { splash: 0.5, slow: 0.75, dmg: 2 })],
+    [U("Cristallisation", 0.7, { freezeChance: 0.15, freezeTime: 0.6 }), U("Gel profond", 1.3, { freezeChance: 0.25, freezeTime: 0.8 }), U("Permafrost", 2.5, { freezeChance: 0.35, freezeTime: 1, rate: 1.2 }), U("Cœur de glace", 5, { freezeChance: 0.5, rate: 1.3, splash: 0.4 })],
+    [U("Éclats", 0.6, { dmg: 2 }), U("Lames de givre", 1.2, { dmg: 1.8, range: 1.1 }), U("Tempête de glace", 2.4, { rate: 1.5, pierce: true }), U("Zéro absolu", 5, { splash: 0.8, dmg: 1.8, ability: "absolute" })]
+  ],
+  canon: [
+    [U("Charge creuse", 0.6, { splash: 0.25, dmg: 1.2 }), U("Napalm", 1.2, { splash: 0.25, dmg: 1.3 }), U("Fragmentation", 2.5, { splash: 0.4, dmg: 1.4 }), U("Cataclysme", 5.2, { splash: 0.6, dmg: 1.8 })],
+    [U("Onde de choc", 0.6, { stun: 0.3 }), U("Sidération", 1.1, { stun: 0.5, rate: 1.2 }), U("Choc répété", 2.3, { stun: 0.7, rate: 1.3 }), U("Séisme", 4.8, { stun: 0.9, splash: 0.3, rate: 1.3 })],
+    [U("Rechargeur", 0.7, { rate: 1.3 }), U("Canon long", 1.3, { range: 1.2, dmg: 1.2 }), U("Double canon", 2.6, { targets: 1 }), U("Bombardier", 5.5, { targets: 1, rate: 1.3, ability: "barrage" })]
+  ],
+  sniper: [
+    [U("Lunette", 0.6, { crit: 0.15, critMul: 3 }), U("Visée laser", 1.2, { crit: 0.15 }), U("Tir fatal", 2.5, { crit: 0.15, critMul: 4 }), U("Œil de dieu", 5.2, { crit: 0.2, execute: 0.3 })],
+    [U("Culasse rapide", 0.6, { rate: 1.3 }), U("Chargeur", 1.2, { rate: 1.4 }), U("Semi-auto", 2.4, { rate: 1.5 }), U("Tireur d'élite", 5, { rate: 1.6, dmg: 1.3 })],
+    [U("Balles AP", 0.7, { pierce: true, dmg: 1.3 }), U("Munitions HE", 1.3, { dmg: 1.6 }), U("Anti-matériel", 2.6, { dmg: 2, range: 1.15 }), U("Railgun", 5.6, { dmg: 2.5, targets: 1, ability: "headshot" })]
+  ],
+  tesla: [
+    [U("Bobines", 0.6, { chain: 1, chainReach: 0.3 }), U("Surtension", 1.2, { chain: 2, dmg: 1.2 }), U("Foudre en chaîne", 2.5, { chain: 3, chainFalloff: 0.95 }), U("Orage", 5.2, { chain: 5, chainFalloff: 1, dmg: 1.3 })],
+    [U("Décharge", 0.6, { stun: 0.25 }), U("Paralysie", 1.1, { stun: 0.4, dmg: 1.2 }), U("Électrocution", 2.3, { stun: 0.6, rate: 1.2 }), U("Tétanie", 5, { stun: 0.8, chain: 2, rate: 1.2 })],
+    [U("Condensateur", 0.7, { dmg: 1.4 }), U("Générateur", 1.3, { dmg: 1.5, range: 1.1 }), U("Réacteur", 2.7, { rate: 1.5 }), U("Tempête", 5.6, { dmg: 1.8, ability: "storm" })]
+  ],
+  venin: [
+    [U("Concentré", 0.6, { poisonDps: 1.4 }), U("Neurotoxine", 1.2, { poisonDps: 1.5 }), U("Acide", 2.4, { poisonDps: 1.6, poisonTime: 2 }), U("Nécrose", 5, { poisonDps: 2, poisonTime: 3 })],
+    [U("Spores", 0.7, { spreadCount: 1, spreadRadius: 1.2 }), U("Vecteurs", 1.3, { spreadCount: 1, spreadRadius: 0.4 }), U("Épidémie", 2.5, { spreadCount: 2, spreadRadius: 0.4, rate: 1.2 }), U("Contagion totale", 5.2, { spreadCount: 4, spreadRadius: 0.6, range: 1.15 })],
+    [U("Seringue", 0.6, { rate: 1.3 }), U("Double dose", 1.2, { targets: 1 }), U("Trio", 2.4, { targets: 1, rate: 1.3 }), U("Virulence", 5.4, { dmg: 2, poisonDps: 1.4, ability: "plague" })]
+  ],
+  mortier: [
+    [U("Charge lourde", 0.6, { splash: 0.3 }), U("Explosif brisant", 1.2, { splash: 0.3, dmg: 1.2 }), U("Obus à grappes", 2.5, { splash: 0.5, dmg: 1.3 }), U("Napalm", 5.2, { splash: 0.7, dmg: 1.6 })],
+    [U("Onde de choc", 0.6, { stun: 0.3 }), U("Sidération", 1.1, { stun: 0.5, rate: 1.2 }), U("Choc répété", 2.3, { stun: 0.7, rate: 1.3 }), U("Double obus", 4.8, { stun: 0.9, targets: 1 })],
+    [U("Rechargeur", 0.7, { rate: 1.4 }), U("Tube long", 1.3, { range: 1.2, dmg: 1.3 }), U("Chargeur auto", 2.6, { targets: 1, rate: 1.3 }), U("Pilonnage", 5.5, { targets: 1, dmg: 1.5, ability: "carpet" })]
+  ],
+  gatling: [
+    [U("Perforant", 0.7, { pierce: true }), U("Tungstène", 1.3, { dmg: 1.5 }), U("Explosif", 2.5, { dmg: 1.5, crit: 0.1 }), U("Uranium", 5, { dmg: 2, crit: 0.1 })],
+    [U("Moteur", 0.6, { rate: 1.3 }), U("Surrégime", 1.2, { rate: 1.3 }), U("Refroidisseur", 2.4, { rate: 1.4, range: 1.1 }), U("Fusion", 5, { rate: 1.6 })],
+    [U("Deux canons", 0.8, { targets: 1 }), U("Trois canons", 1.4, { targets: 1 }), U("Barillet", 2.6, { targets: 1, rate: 1.2 }), U("Tempête d'acier", 5.5, { targets: 2, dmg: 1.5, ability: "frenzy" })]
+  ],
+  pulsar: [
+    [U("Antenne", 0.6, { range: 1.15 }), U("Amplificateur", 1.2, { dmg: 1.4 }), U("Résonance", 2.5, { range: 1.2, dmg: 1.4 }), U("Onde colossale", 5, { dmg: 2, range: 1.2 })],
+    [U("Brouillage", 0.7, { pulseSlow: 0.3, pulseSlowTime: 1.2 }), U("Entrave", 1.3, { pulseSlow: 0.45, pulseSlowTime: 0.5 }), U("Paralysie", 2.5, { stun: 0.4, pulseSlow: 0.6 }), U("Verrou", 5, { stun: 0.7, pulseSlow: 0.7, pulseSlowTime: 1 })],
+    [U("Pompe", 0.6, { rate: 1.3 }), U("Double pompe", 1.2, { rate: 1.3 }), U("Surchauffe", 2.5, { rate: 1.4, dmg: 1.2 }), U("Choc sismique", 5.5, { rate: 1.5, dmg: 1.5, ability: "shock" })]
+  ],
+  beacon: [
+    [U("Relais", 0.6, { boostDamage: 1.3 }), U("Amplis", 1.2, { boostDamage: 1.3 }), U("Surpuissance", 2.5, { boostDamage: 1.4 }), U("Matrice", 5, { boostDamage: 1.6 })],
+    [U("Horloge", 0.6, { boostRate: 1.3 }), U("Overclock", 1.2, { boostRate: 1.3 }), U("Surrégime", 2.5, { boostRate: 1.4 }), U("Fréquence folle", 5, { boostRate: 1.6 })],
+    [U("Antenne", 0.7, { range: 1.15 }), U("Portée étendue", 1.3, { range: 1.15, boostRange: 0.07 }), U("Réseau maillé", 2.6, { range: 1.15, boostDamage: 1.2 }), U("Surtension", 5.4, { range: 1.2, boostRate: 1.2, boostDamage: 1.2, ability: "surge" })]
+  ],
+  miner: [
+    [U("Processeur", 0.6, { income: 1.4 }), U("Grappe", 1.2, { income: 1.4 }), U("Ferme de calcul", 2.4, { income: 1.5 }), U("Supercalculateur", 5, { income: 2 })],
+    [U("Placement", 0.7, { interest: 0.01 }), U("Épargne", 1.3, { interest: 0.015 }), U("Portefeuille", 2.5, { interest: 0.02 }), U("Marché noir", 5, { interest: 0.03, income: 1.2 })],
+    [U("Refroidissement", 0.6, { income: 1.2 }), U("Overclock", 1.2, { income: 1.2 }), U("Minage groupé", 2.4, { income: 1.3 }), U("Dividende", 5.4, { income: 1.5, ability: "dividend" })]
+  ]
+};
+
+const MUL = { dmg: "damage", rate: "rate", range: "range", poisonDps: "poisonDps", income: "income", boostDamage: "boostDamage", boostRate: "boostRate" };
+const ADD = new Set(["targets", "splash", "chain", "chainReach", "spreadCount", "spreadRadius", "crit", "boostRange", "poisonTime", "slowTime", "pulseSlowTime", "interest"]);
+
+function applyFx(st, fx) {
+  for (const [k, v] of Object.entries(fx)) {
+    if (MUL[k]) st[MUL[k]] *= v;
+    else if (ADD.has(k)) st[k] += v;
+    else if (k === "pierce" || k === "ability") st[k] = v;
+    else st[k] = Math.max(st[k], v);
+  }
+}
+
+// Caractéristiques d'une tour selon ses paliers [chemin 1, chemin 2, chemin 3].
+export function towerStats(def, tiers = [0, 0, 0]) {
   const st = {
-    damage: def.dmg * (1 + 0.35 * level) * (ult ? 1.5 : 1),
-    range: def.range * (1 + 0.06 * level) * (ult ? 1.1 : 1) * CELL,   // en pixels
-    rate: def.rate * (ult ? 1.25 : 1),
+    damage: def.dmg, range: def.range * CELL, rate: def.rate,                 // portée en pixels
     targets: 1, splash: def.splash || 0, chain: def.chain || 0, chainFalloff: 0.85, chainReach: 2,
     stun: 0, slow: def.slow || 0, slowTime: def.slowTime || 0, freezeChance: 0, freezeTime: 0,
-    poisonDps: def.poisonDps ? def.poisonDps * (1 + 0.35 * level) : 0, poisonTime: def.poisonTime || 0,
-    spreadCount: 0, spreadRadius: 0, crit: 0, critMul: 3, pierce: false, execute: 0,
+    poisonDps: def.poisonDps || 0, poisonTime: def.poisonTime || 0,
+    spreadCount: 0, spreadRadius: 0, crit: 0, critMul: 2, pierce: false, execute: 0,
     pulseSlow: 0, pulseSlowTime: 0,
-    boostDamage: 0, boostRate: 0, boostRange: 0, income: 0
+    boostDamage: def.id === "beacon" ? 0.2 : 0, boostRate: def.id === "beacon" ? 0.15 : 0, boostRange: 0,
+    income: def.id === "miner" ? 24 : 0, interest: 0, ability: null
   };
-  switch (def.id) {
-    case "beacon":
-      st.boostDamage = (0.2 + 0.08 * level) * (ult ? 1.5 : 1);
-      st.boostRate = (0.15 + 0.05 * level) * (ult ? 1.5 : 1);
-      st.boostRange = ult ? 0.15 : level >= 2 ? 0.07 : 0;
-      break;
-    case "miner":
-      st.income = Math.round(24 * (1 + 0.75 * level) * (ult ? 1.6 : 1));
-      break;
-    case "laser":
-      if (level >= 2) st.targets = 2;
-      if (ult) { st.targets = 3; st.crit = 0.25; st.critMul = 2.5; }
-      break;
-    case "cryo":
-      st.slow = Math.min(0.8, 0.5 + 0.08 * level);
-      st.slowTime = 2 + 0.5 * level;
-      if (level >= 2) { st.freezeChance = 0.2; st.freezeTime = 1; }
-      if (ult) { st.freezeChance = 0.5; st.freezeTime = 1.5; st.splash = 1.3; }
-      break;
-    case "canon":
-      st.splash += 0.1 * level;
-      if (level >= 2) st.stun = 0.3;
-      if (ult) { st.stun = 0.7; st.splash += 0.3; }
-      break;
-    case "sniper":
-      if (level >= 1) st.crit = 0.1;
-      if (level >= 2) { st.crit = 0.2; st.pierce = true; }
-      if (ult) { st.crit = 0.35; st.execute = 0.25; }
-      break;
-    case "tesla":
-      st.chain = 3 + level + (ult ? 2 : 0);
-      st.chainReach = 2 + 0.25 * level;
-      if (ult) st.chainFalloff = 0.95;
-      if (level >= 1) st.stun = 0.2 + 0.08 * level;
-      break;
-    case "venin":
-      st.poisonTime = 4 + level + (ult ? 2 : 0);
-      if (level >= 2) { st.spreadCount = 1; st.spreadRadius = 1.2; }
-      if (ult) { st.spreadCount = 4; st.spreadRadius = 1.8; }
-      break;
-    case "mortier":
-      st.splash += 0.15 * level;
-      if (level >= 2) st.stun = 0.4;
-      if (ult) { st.targets = 2; st.stun = 0.8; }
-      break;
-    case "gatling":
-      if (level >= 2) st.pierce = true;
-      if (level >= 3) st.crit = 0.1;
-      if (ult) st.rate *= 1.3;
-      break;
-    case "pulsar":
-      if (level >= 1) { st.pulseSlow = 0.3; st.pulseSlowTime = 1.2; }
-      if (level >= 2) st.stun = 0.3;
-      if (ult) st.stun = 0.6;
-      break;
+  const paths = UPGRADES[def.id];
+  for (let p = 0; p < PATH_COUNT; p++) {
+    for (let t = 0; t < (tiers[p] || 0); t++) applyFx(st, paths[p][t].fx);
   }
+  st.crit = Math.min(st.crit, 0.9);
   return st;
 }
 
-export const towerDamage = (def, level) => towerStats(def, level).damage;
-export const towerRange = (def, level) => towerStats(def, level).range;
-// Les 3 premières améliorations coûtent cher progressivement ; l'ultime coûte 6 × le prix de pose.
-export const upgradeCost = (def, level) => (level >= ULTIMATE_LEVEL - 1 ? Math.round(def.cost * 6) : Math.round(def.cost * 0.8 * (level + 1)));
+export const towerDamage = (def, tiers) => towerStats(def, tiers).damage;
+export const towerRange = (def, tiers) => towerStats(def, tiers).range;
+export const upgradeCostOf = (def, path, tier) => Math.round(def.cost * UPGRADES[def.id][path][tier].cost);
 
-// Ce que débloque chaque niveau (affiché dans le panneau de la tour sélectionnée).
-export const TOWER_PERKS = {
-  laser:  [[2, "Double tir : touche 2 ennemis"], [5, "ULTIME : 3 cibles, 25 % de coups critiques ×2,5"]],
-  cryo:   [[1, "Ralentissement et durée accrus à chaque niveau"], [3, "20 % de chances de GELER 1 s"], [5, "ULTIME : gel 1,5 s (50 %) en zone"]],
-  canon:  [[1, "Explosion plus large à chaque niveau"], [3, "Étourdit 0,3 s les ennemis touchés"], [5, "ULTIME : zone géante, étourdissement 0,7 s"]],
-  sniper: [[2, "Critiques ×3 (20 %), ignore le blindage"], [5, "ULTIME : 35 % de critiques, exécute sous 25 % de PV"]],
-  tesla:  [[1, "+1 rebond par niveau, étourdit brièvement"], [5, "ULTIME : +2 rebonds, plus aucune perte de dégâts"]],
-  venin:  [[1, "Poison plus long à chaque niveau"], [3, "Le poison se propage à 1 voisin"], [5, "ULTIME : propagation à 4 voisins, poison 10 s"]],
-  mortier:[[1, "Explosion plus large à chaque niveau"], [3, "Étourdit 0,4 s"], [5, "ULTIME : 2 obus par tir, étourdissement 0,8 s"]],
-  gatling:[[3, "Balles perforantes : ignore le blindage"], [4, "10 % de critiques"], [5, "ULTIME : cadence +30 %"]],
-  beacon: [[1, "Aura plus forte et plus large à chaque niveau"], [3, "Les tours boostées gagnent +7 % de portée"], [5, "ULTIME : effets ×1,5 et +15 % de portée"]],
-  miner:  [[1, "Production d'énergie accrue à chaque niveau"], [5, "ULTIME : production ×1,6"]],
-  pulsar: [[2, "L'onde ralentit de 30 %"], [3, "L'onde étourdit 0,3 s"], [5, "ULTIME : étourdissement 0,6 s"]]
-};
+// Description automatique d'une amélioration (affichée sur le bouton).
+export function describeFx(fx) {
+  const pct = (m) => `+${Math.round((m - 1) * 100)} %`;
+  const out = [];
+  if (fx.dmg) out.push(`${pct(fx.dmg)} dégâts`);
+  if (fx.rate) out.push(`${pct(fx.rate)} cadence`);
+  if (fx.range) out.push(`${pct(fx.range)} portée`);
+  if (fx.targets) out.push(`+${fx.targets} cible${fx.targets > 1 ? "s" : ""}`);
+  if (fx.splash) out.push(`explosion +${fx.splash} case`);
+  if (fx.chain) out.push(`+${fx.chain} rebond${fx.chain > 1 ? "s" : ""}`);
+  if (fx.chainFalloff && fx.chainFalloff >= 0.95) out.push("rebonds sans perte");
+  if (fx.stun) out.push(`étourdit ${String(fx.stun).replace(".", ",")} s`);
+  if (fx.slow) out.push(`ralentit de ${Math.round(fx.slow * 100)} %`);
+  if (fx.slowTime) out.push(`+${fx.slowTime} s de ralentissement`);
+  if (fx.freezeChance) out.push(`${Math.round(fx.freezeChance * 100)} % de gel (${String(fx.freezeTime).replace(".", ",")} s)`);
+  else if (fx.freezeTime) out.push(`gel ${String(fx.freezeTime).replace(".", ",")} s`);
+  if (fx.poisonDps) out.push(`${pct(fx.poisonDps)} poison`);
+  if (fx.poisonTime) out.push(`+${fx.poisonTime} s de poison`);
+  if (fx.spreadCount) out.push(`propage à ${fx.spreadCount} voisin${fx.spreadCount > 1 ? "s" : ""} de plus`);
+  if (fx.crit) out.push(`+${Math.round(fx.crit * 100)} % critique`);
+  if (fx.critMul) out.push(`critiques ×${String(fx.critMul).replace(".", ",")}`);
+  if (fx.execute) out.push(`exécute sous ${Math.round(fx.execute * 100)} % PV`);
+  if (fx.pierce) out.push("ignore le blindage");
+  if (fx.pulseSlow) out.push(`l'onde ralentit de ${Math.round(fx.pulseSlow * 100)} %`);
+  if (fx.boostDamage) out.push(`${pct(fx.boostDamage)} effet dégâts`);
+  if (fx.boostRate) out.push(`${pct(fx.boostRate)} effet cadence`);
+  if (fx.boostRange) out.push(`alliés +${Math.round(fx.boostRange * 100)} % portée`);
+  if (fx.income) out.push(`${pct(fx.income)} énergie`);
+  if (fx.interest) out.push(`+${String(fx.interest * 100).replace(".", ",")} % d'intérêts`);
+  if (fx.ability) out.push(`CAPACITÉ : ${ABILITIES[fx.ability].name}`);
+  return out.join(" · ");
+}
+
+// Les paliers atteints dans l'ordre, pour afficher « Prisme + Surcharge » etc.
+export function ownedUpgrades(tower) {
+  const list = [];
+  for (let p = 0; p < PATH_COUNT; p++) for (let t = 0; t < tower.tiers[p]; t++) list.push(UPGRADES[tower.type][p][t]);
+  return list;
+}
+
+// Règles des chemins : renvoie { up, price, tier, locked, affordable } pour le prochain palier d'un chemin.
+// locked : "max" (palier 4 atteint) | "paths" (déjà 2 chemins utilisés) | "crossed" (un autre chemin dépasse déjà le palier 2).
+export function upgradeInfo(state, tower, path) {
+  const def = TOWER_DEFS[tower.type];
+  const t = tower.tiers[path];
+  if (t >= MAX_TIER) return { locked: "max", tier: t, affordable: false };
+  const up = UPGRADES[def.id][path][t];
+  const others = tower.tiers.filter((_, i) => i !== path);
+  const next = t + 1;
+  let locked = null;
+  if (t === 0 && others.filter((x) => x > 0).length >= 2) locked = "paths";
+  else if (next >= 3 && others.some((x) => x >= 3)) locked = "crossed";
+  const price = upgradeCostOf(def, path, t);
+  return { up, price, tier: next, locked, affordable: state.gold >= price };
+}
 
 // Énergie dépensée au total pour une tour (pose + améliorations) : sert à calculer la revente.
 export function invested(tower) {
   const def = TOWER_DEFS[tower.type];
   let sum = def.cost;
-  for (let l = 0; l < tower.level; l++) sum += upgradeCost(def, l);
+  for (let p = 0; p < PATH_COUNT; p++) for (let t = 0; t < tower.tiers[p]; t++) sum += upgradeCostOf(def, p, t);
   return sum;
 }
 
+/* ---------- Ciblage ---------- */
+
+export const TARGET_MODES = ["first", "last", "strong", "close"];
+export const TARGET_LABELS = { first: "Premier", last: "Dernier", strong: "Plus fort", close: "Plus proche" };
+
+function sortTargets(list, mode, origin) {
+  if (mode === "last") list.sort((a, b) => a.dist - b.dist);
+  else if (mode === "strong") list.sort((a, b) => b.hp - a.hp);
+  else if (mode === "close") list.sort((a, b) => dist2(origin, a) - dist2(origin, b));
+  else list.sort((a, b) => b.dist - a.dist);
+  return list;
+}
+
+export function setTargetMode(state, id, mode) {
+  const tower = state.towers.find((t) => t.id === id);
+  if (!tower || !TARGET_MODES.includes(mode)) return false;
+  tower.target = mode;
+  return true;
+}
+
+export function cycleTargetMode(state, id) {
+  const tower = state.towers.find((t) => t.id === id);
+  if (!tower) return null;
+  tower.target = TARGET_MODES[(TARGET_MODES.indexOf(tower.target) + 1) % TARGET_MODES.length];
+  return tower.target;
+}
+
 /* ---------- Ennemis et vagues ---------- */
+
+// Étourdissement : durée plafonnée, impossible à prolonger, et immunité juste après. Un ennemi ne peut donc
+// jamais rester bloqué : au mieux STUN_CAP s à l'arrêt, puis STUN_IMMUNITY s obligatoires en mouvement.
+export const STUN_CAP = 1;
+export const STUN_IMMUNITY = 2.5;
+export const STUN_IMMUNITY_BOSS = 6;
+export const SLOW_CAP = 0.75;
+export const SLOW_CAP_BOSS = 0.35;
 
 // hp : multiplicateur de points de vie. speed : cases par seconde. gold : énergie gagnée à la mort.
 export const ENEMY_DEFS = {
@@ -207,12 +338,24 @@ export const ENEMY_DEFS = {
   tank:   { name: "Blindé", hp: 3.4,  speed: 0.9, gold: 10, lives: 2, color: "#a066ff" },
   armored:{ name: "Cuirassé", hp: 2.2, speed: 1.1, gold: 9,  lives: 2, color: "#9aa5b1", armor: 5 },
   swarm:  { name: "Essaim",  hp: 0.25, speed: 2.0, gold: 2,  lives: 1, color: "#ffd1e8" },
-  boss:   { name: "Virus",  hp: 26,   speed: 0.7, gold: 70, lives: 8, color: "#ffffff" }
+  // Boss : un type différent toutes les 10 vagues, chacun avec un pouvoir.
+  boss:   { name: "Virus",     hp: 10, speed: 0.7,  gold: 70,  lives: 5,  color: "#ffffff", boss: true, spawnAt: [0.66, 0.33], power: "Libère des drones à 66 % et 33 % de PV" },
+  boss2:  { name: "Rootkit",   hp: 8, speed: 0.8,  gold: 90,  lives: 5,  color: "#ff6bd6", boss: true, armor: 4, jam: { every: 6, radius: 3, time: 3 }, power: "Brouille les tours proches toutes les 6 s (elles ne tirent plus 3 s)" },
+  boss3:  { name: "Ver",       hp: 12, speed: 0.65, gold: 110, lives: 6, color: "#3ddc84", boss: true, armor: 8, rage: 1.7, power: "Blindage 8 ; accélère de 70 % sous 50 % de PV" }
 };
+export const BOSS_ORDER = ["boss", "boss2", "boss3"];
+export const isBoss = (e) => !!ENEMY_DEFS[e.type].boss;
 
-export const baseHp = (wave) => 26 * 1.17 ** (wave - 1);
-export const waveCredits = (wave, map = BUILT[FREE_MAP]) => Math.round((5 + 3 * wave) * (map.reward || 1));   // crédits versés quand la vague est repoussée
-export const waveBonusGold = (wave) => 20 + 2 * wave;     // énergie offerte à la fin de la vague
+// Solidité de base d'un ennemi à la vague `wave` (croissance douce : la courbe suit celle de la puissance des tours).
+export const HP_START = 24;
+export const HP_GROWTH = 1.11;
+export const HP_LINEAR = 0.02;
+export const baseHp = (wave) => HP_START * HP_GROWTH ** (wave - 1) * (1 + HP_LINEAR * (wave - 1));
+
+export const waveCredits = (wave, map = BUILT[FREE_MAP], diff = diffById(DEFAULT_DIFFICULTY)) =>
+  Math.round((5 + 3 * wave) * (map.reward || 1) * (diff.reward || 1));          // crédits versés quand la vague est repoussée
+export const waveBonusGold = (wave) => 20 + 2 * wave;                             // énergie offerte à la fin de la vague
+export const killGold = (type, wave) => Math.round(ENEMY_DEFS[type].gold * (1 + 0.03 * (wave - 1)));
 
 // Liste des ennemis d'une vague, avec l'instant de leur apparition (en secondes).
 export function waveSpec(wave, hpMul = 1) {
@@ -231,18 +374,28 @@ export function waveSpec(wave, hpMul = 1) {
   if (wave >= 4 && wave % 4 === 0) {
     for (let k = 0; k < 8 + wave / 2; k++) list.push({ type: "swarm", hp: hp * ENEMY_DEFS.swarm.hp, at: count * gap * 0.4 + k * 0.18 });
   }
-  if (wave % 10 === 0) list.push({ type: "boss", hp: hp * ENEMY_DEFS.boss.hp, at: count * gap + 1 });
+  // Boss toutes les 10 vagues : Virus, Rootkit, Ver, puis on recommence avec un boss de plus tous les 3 cycles.
+  if (wave % 10 === 0) {
+    const k = wave / 10;
+    const type = BOSS_ORDER[(k - 1) % BOSS_ORDER.length];
+    const n = 1 + Math.floor((k - 1) / BOSS_ORDER.length);
+    for (let b = 0; b < n; b++) list.push({ type, hp: hp * ENEMY_DEFS[type].hp, at: count * gap + 1 + b * 4 });
+  }
   return list.sort((x, y) => x.at - y.at);
 }
 
 /* ---------- Partie ---------- */
 
-export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP) {
+export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP, diffId = DEFAULT_DIFFICULTY) {
+  const map = builtMap(mapId);
+  const diff = diffById(diffId);
   return {
-    map: builtMap(mapId),
+    map,
+    diff,
+    hpMul: (map.hpMul || 1) * diff.hp,
     unlocked: unlocked.filter((id) => TOWER_IDS.includes(id)),
-    gold: START_GOLD,
-    lives: START_LIVES,
+    gold: diff.gold,
+    lives: diff.lives,
     wave: 0,
     phase: "idle",          // idle (entre deux vagues) | wave | over
     time: 0,
@@ -275,20 +428,23 @@ export function placeTower(state, typeId, col, row) {
   if (!canPlace(state, col, row)) return { ok: false, reason: "blocked" };
   if (state.gold < def.cost) return { ok: false, reason: "gold" };
   state.gold -= def.cost;
-  const tower = { id: state.nextId++, type: typeId, col, row, level: 0, cooldown: 0 };
+  const tiers = [0, 0, 0];
+  const tower = { id: state.nextId++, type: typeId, col, row, tiers, st: towerStats(def, tiers), cooldown: 0, target: "first", abilityCd: 0, fury: 0, jam: 0 };
   state.towers.push(tower);
   return { ok: true, tower };
 }
 
-export function upgradeTower(state, id) {
+// Améliore un chemin d'une tour. Raisons de refus : unknown, over, max, paths, crossed, gold.
+export function upgradeTower(state, id, path = 0) {
   const tower = state.towers.find((t) => t.id === id);
-  if (!tower) return { ok: false, reason: "unknown" };
+  if (!tower || !(path >= 0 && path < PATH_COUNT)) return { ok: false, reason: "unknown" };
   if (state.phase === "over") return { ok: false, reason: "over" };
-  if (tower.level >= MAX_LEVEL) return { ok: false, reason: "max" };
-  const price = upgradeCost(TOWER_DEFS[tower.type], tower.level);
-  if (state.gold < price) return { ok: false, reason: "gold" };
-  state.gold -= price;
-  tower.level += 1;
+  const info = upgradeInfo(state, tower, path);
+  if (info.locked) return { ok: false, reason: info.locked };
+  if (!info.affordable) return { ok: false, reason: "gold" };
+  state.gold -= info.price;
+  tower.tiers[path] += 1;
+  tower.st = towerStats(TOWER_DEFS[tower.type], tower.tiers);
   return { ok: true, tower };
 }
 
@@ -309,7 +465,7 @@ export const strikeReady = (state) => state.phase === "wave" && state.strikeCd <
 export function orbitalStrike(state) {
   if (!strikeReady(state)) return false;
   const events = { killed: 0, leaked: 0 };
-  const damage = baseHp(state.wave) * 3 * state.map.hpMul;
+  const damage = baseHp(state.wave) * 3 * state.hpMul;
   state.gold -= STRIKE_COST;
   for (const e of state.enemies) if (!e.dead) hit(state, e, damage, events);
   state.strikeCd = STRIKE_COOLDOWN;
@@ -321,19 +477,20 @@ export function startWave(state) {
   if (state.phase !== "idle") return false;
   state.wave += 1;
   state.phase = "wave";
-  state.spawnList = waveSpec(state.wave, state.map.hpMul);
+  state.spawnList = waveSpec(state.wave, state.hpMul);
   state.spawnClock = 0;
   return true;
 }
 
 /* ---------- Simulation ---------- */
 
-function spawn(state, entry) {
+function spawn(state, entry, dist = 0) {
   const def = ENEMY_DEFS[entry.type];
-  const { x, y } = pointAt(0, state.map);
+  const { x, y } = pointAt(dist, state.map);
   state.enemies.push({
     id: state.nextId++, type: entry.type, hp: entry.hp, maxHp: entry.hp,
-    dist: 0, x, y, slow: 0, poison: 0, poisonLeft: 0, stun: 0, dead: false, speed: def.speed * CELL
+    dist, x, y, slow: 0, slowLeft: 0, poison: 0, poisonLeft: 0, stun: 0, stunImmune: 0, dead: false, speed: def.speed * CELL,
+    spawned: 0, clock: 0
   });
 }
 
@@ -344,7 +501,7 @@ function hit(state, enemy, damage, events, pierce = false) {
   enemy.hp -= armor ? Math.max(damage * 0.2, damage - armor) : damage;
   if (enemy.hp <= 0) {
     enemy.dead = true;
-    state.gold += ENEMY_DEFS[enemy.type].gold;
+    state.gold += killGold(enemy.type, state.wave);
     state.kills += 1;
     events.killed += 1;
   }
@@ -352,16 +509,24 @@ function hit(state, enemy, damage, events, pierce = false) {
 
 const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 
-// Étourdissement : les boss y résistent (durée réduite).
+// Étourdissement : refusé si l'ennemi est déjà étourdi ou encore immunisé ; durée plafonnée (réduite pour les boss).
 function stunEnemy(e, time) {
-  if (time <= 0) return;
-  e.stun = Math.max(e.stun || 0, e.type === "boss" ? time * 0.4 : time);
+  if (time <= 0 || e.stun > 0 || e.stunImmune > 0) return false;
+  e.stun = Math.min(time, STUN_CAP) * (isBoss(e) ? 0.4 : 1);
+  return true;
+}
+
+function slowEnemy(e, amount, time) {
+  if (amount <= 0) return;
+  const cap = isBoss(e) ? SLOW_CAP_BOSS : SLOW_CAP;
+  e.slow = Math.max(e.slow, Math.min(amount, cap));
+  e.slowLeft = Math.max(e.slowLeft || 0, time);
 }
 
 // Effets secondaires d'un tir sur un ennemi touché (ralentissement, gel, étourdissement, poison).
 function applyEffects(state, e, st) {
   if (e.dead) return;
-  if (st.slow) { e.slow = Math.max(e.slow, st.slow); e.slowLeft = Math.max(e.slowLeft || 0, st.slowTime); }
+  if (st.slow) slowEnemy(e, st.slow, st.slowTime);
   if (st.freezeChance && (state.rng || Math.random)() < st.freezeChance) stunEnemy(e, st.freezeTime);
   if (st.stun) stunEnemy(e, st.stun);
   if (st.poisonDps) {
@@ -374,44 +539,63 @@ function applyEffects(state, e, st) {
 export function beaconBuff(state, tower) {
   const buff = { damage: 1, rate: 1, range: 1 };
   if (TOWER_DEFS[tower.type].support) return buff;
-  let d = 0, r = 0, g = 0;
+  let d = 0, r = 0, g = 0, surge = false;
   for (const b of state.towers) {
     if (b.type !== "beacon") continue;
-    const st = towerStats(TOWER_DEFS.beacon, b.level);
-    const reach = st.range;
+    const reach = b.st.range;
     const dx = (b.col - tower.col) * CELL, dy = (b.row - tower.row) * CELL;
     if (dx * dx + dy * dy > reach * reach) continue;
-    d += st.boostDamage; r += st.boostRate; g = Math.max(g, st.boostRange);
+    d += b.st.boostDamage; r += b.st.boostRate; g = Math.max(g, b.st.boostRange);
+    if (b.fury > 0) { surge = true; d += 0.4; r += 0.4; }
   }
-  buff.damage += Math.min(1, d);
-  buff.rate += Math.min(0.6, r);
+  buff.damage += Math.min(surge ? 1.4 : 1, d);
+  buff.rate += Math.min(surge ? 1 : 0.6, r);
   buff.range += g;
   return buff;
 }
 
+// Cadence réelle d'une tour (tirs par seconde) : améliorations, beacons, capacité en cours.
+export function towerRate(state, tower) {
+  const ab = tower.st.ability && ABILITIES[tower.st.ability];
+  const fury = tower.fury > 0 && ab && ab.fury && ab.fury.rate ? ab.fury.rate : 1;
+  return tower.st.rate * beaconBuff(state, tower).rate * fury;
+}
+
+function explode(state, x, y, radius, damage, events, st, color) {
+  state.fx.push({ kind: "boom", x, y, r: radius, ttl: 0.25, max: 0.25, color });
+  const c = { x, y };
+  for (const e of state.enemies) {
+    if (e.dead || dist2(c, e) > radius * radius) continue;
+    hit(state, e, damage, events, st.pierce);
+    applyEffects(state, e, st);
+  }
+}
+
 function fire(state, tower, events) {
   const def = TOWER_DEFS[tower.type];
-  const st = towerStats(def, tower.level);
+  const st = { ...tower.st };
   const buff = beaconBuff(state, tower);
-  st.damage *= buff.damage;
+  const ab = st.ability && ABILITIES[st.ability];
+  const fury = tower.fury > 0 && ab && ab.fury ? ab.fury : null;
+  st.damage *= buff.damage * (fury && fury.dmg ? fury.dmg : 1);
   st.range *= buff.range;
+  if (fury && fury.pierce) st.pierce = true;
   const range = st.range;
   const cx = (tower.col + 0.5) * CELL;
   const cy = (tower.row + 0.5) * CELL;
   const origin = { x: cx, y: cy };
   const rng = state.rng || Math.random;
 
-  // Cibles : les ennemis à portée les plus avancés sur le chemin.
-  const inRange = state.enemies.filter((e) => !e.dead && dist2(origin, e) <= range * range).sort((a, b) => b.dist - a.dist);
+  // Cibles : les ennemis à portée, triés selon le mode de ciblage de la tour.
+  const inRange = sortTargets(state.enemies.filter((e) => !e.dead && dist2(origin, e) <= range * range), tower.target, origin);
   if (!inRange.length) return false;
-  const target = inRange[0];
 
   const beam = (a, b) => state.fx.push({ kind: "beam", x1: a.x, y1: a.y, x2: b.x, y2: b.y, ttl: 0.1, max: 0.1, color: def.color });
-  // Dégâts d'un coup : critique et exécution (sniper) selon le niveau.
+  // Dégâts d'un coup : critique et exécution (sniper) selon les paliers.
   const strike = (e, base) => {
     let damage = base;
     if (st.crit && rng() < st.crit) damage *= st.critMul;
-    if (st.execute && e.type !== "boss" && e.hp - damage <= e.maxHp * st.execute) damage = Math.max(damage, e.hp);
+    if (st.execute && !isBoss(e) && e.hp - damage <= e.maxHp * st.execute) damage = Math.max(damage, e.hp);
     hit(state, e, damage, events, st.pierce);
   };
 
@@ -419,7 +603,7 @@ function fire(state, tower, events) {
     state.fx.push({ kind: "boom", x: cx, y: cy, r: range, ttl: 0.3, max: 0.3, color: def.color });
     for (const e of inRange) {
       strike(e, st.damage);
-      if (st.pulseSlow && !e.dead) { e.slow = Math.max(e.slow, st.pulseSlow); e.slowLeft = Math.max(e.slowLeft || 0, st.pulseSlowTime); }
+      if (st.pulseSlow && !e.dead) slowEnemy(e, st.pulseSlow, st.pulseSlowTime);
       applyEffects(state, e, { stun: st.stun });
     }
     return true;
@@ -472,6 +656,136 @@ function fire(state, tower, events) {
   return true;
 }
 
+/* ---------- Capacités actives (palier 4 du chemin 3) ---------- */
+
+// Chaque capacité a un temps de recharge propre à la tour. Utilisable seulement pendant une vague.
+const alive = (state) => state.enemies.filter((e) => !e.dead);
+const strongest = (state, n) => alive(state).sort((a, b) => b.hp - a.hp).slice(0, n);
+const around = (state, tower, reach) => {
+  const o = { x: (tower.col + 0.5) * CELL, y: (tower.row + 0.5) * CELL };
+  return alive(state).filter((e) => dist2(o, e) <= reach * reach);
+};
+const origin = (tower) => ({ x: (tower.col + 0.5) * CELL, y: (tower.row + 0.5) * CELL });
+const abilityStats = (state, tower) => {
+  const buff = beaconBuff(state, tower);
+  return { ...tower.st, damage: tower.st.damage * buff.damage, range: tower.st.range * buff.range };
+};
+
+export const ABILITIES = {
+  overdrive: { name: "Surcharge", cd: 45, desc: "6 s : cadence ×2,5 et dégâts ×1,5.", fury: { time: 6, rate: 2.5, dmg: 1.5 } },
+  frenzy:    { name: "Furie", cd: 40, desc: "5 s : cadence ×3, dégâts ×1,5, balles perforantes.", fury: { time: 5, rate: 3, dmg: 1.5, pierce: true } },
+  surge:     { name: "Surtension", cd: 60, desc: "8 s : les tours dans l'aura gagnent +40 % de dégâts et de cadence en plus.", fury: { time: 8 } },
+  absolute: {
+    name: "Zéro absolu", cd: 50, desc: "Gèle 1 s, ralentit de 70 % et inflige 3× les dégâts à tous les ennemis proches.",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", x: origin(tower).x, y: origin(tower).y, r: st.range * 1.5, ttl: 0.5, max: 0.5, color: "#7fd8ff" });
+      for (const e of around(state, tower, st.range * 1.5)) { stunEnemy(e, 1); slowEnemy(e, 0.7, 3); hit(state, e, st.damage * 3, events, true); }
+    }
+  },
+  barrage: {
+    name: "Salve", cd: 40, desc: "6 explosions sur les ennemis les plus avancés à portée (3× dégâts).",
+    run(state, tower, st, events) {
+      const targets = around(state, tower, st.range * 1.6).sort((a, b) => b.dist - a.dist).slice(0, 6);
+      for (const e of targets) explode(state, e.x, e.y, (st.splash || 1.2) * CELL, st.damage * 3, events, st, "#ff8a3d");
+    }
+  },
+  headshot: {
+    name: "Tir fatal", cd: 35, desc: "Un tir à 12× les dégâts sur l'ennemi le plus solide de la carte.",
+    run(state, tower, st, events) {
+      const [target] = strongest(state, 1);
+      if (!target) return;
+      state.fx.push({ kind: "beam", x1: origin(tower).x, y1: origin(tower).y, x2: target.x, y2: target.y, ttl: 0.35, max: 0.35, color: "#fcee0a" });
+      state.fx.push({ kind: "boom", x: target.x, y: target.y, r: CELL, ttl: 0.3, max: 0.3, color: "#fcee0a" });
+      hit(state, target, st.damage * 12, events, true);
+    }
+  },
+  storm: {
+    name: "Tempête", cd: 40, desc: "Foudroie les 8 ennemis les plus solides de la carte (3× dégâts, étourdit 0,5 s).",
+    run(state, tower, st, events) {
+      for (const e of strongest(state, 8)) {
+        state.fx.push({ kind: "beam", x1: origin(tower).x, y1: origin(tower).y, x2: e.x, y2: e.y, ttl: 0.3, max: 0.3, color: "#b58cff" });
+        hit(state, e, st.damage * 3, events, true);
+        stunEnemy(e, 0.5);
+      }
+    }
+  },
+  plague: {
+    name: "Pandémie", cd: 45, desc: "Empoisonne tous les ennemis de la carte (poison ×1,5 pendant 8 s).",
+    run(state, tower, st) {
+      for (const e of alive(state)) { e.poison = Math.max(e.poison, st.poisonDps * 1.5); e.poisonLeft = Math.max(e.poisonLeft, 8); }
+      state.fx.push({ kind: "boom", x: (COLS * CELL) / 2, y: (ROWS * CELL) / 2, r: (COLS * CELL) / 2, ttl: 0.5, max: 0.5, color: "#3ddc84" });
+    }
+  },
+  carpet: {
+    name: "Pilonnage", cd: 45, desc: "10 obus tombent sur des ennemis à portée (2× dégâts de zone).",
+    run(state, tower, st, events) {
+      const pool = around(state, tower, st.range * 1.5);
+      if (!pool.length) return;
+      const rng = state.rng || Math.random;
+      for (let i = 0; i < 10; i++) {
+        const e = pool[Math.floor(rng() * pool.length)];
+        explode(state, e.x + (rng() - 0.5) * 24, e.y + (rng() - 0.5) * 24, (st.splash || 1.7) * CELL, st.damage * 2, events, st, "#ffb347");
+      }
+    }
+  },
+  shock: {
+    name: "Choc sismique", cd: 50, desc: "Onde géante : 4× dégâts et ralentissement de 50 % sur tous les ennemis de la carte.",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", x: (COLS * CELL) / 2, y: (ROWS * CELL) / 2, r: (COLS * CELL) / 2, ttl: 0.5, max: 0.5, color: "#ff6bd6" });
+      for (const e of alive(state)) { hit(state, e, st.damage * 4, events, true); slowEnemy(e, 0.5, 3); }
+    }
+  },
+  dividend: {
+    name: "Dividende", cd: 60, desc: "Verse tout de suite deux fois la production d'énergie de la tour.",
+    run(state, tower, st) { state.gold += Math.round(st.income * 2); }
+  }
+};
+
+export const abilityOf = (tower) => (tower.st.ability ? ABILITIES[tower.st.ability] : null);
+
+// Déclenche la capacité d'une tour. Raisons de refus : unknown, none, idle (hors vague), cd.
+export function useAbility(state, id) {
+  const tower = state.towers.find((t) => t.id === id);
+  if (!tower || state.phase === "over") return { ok: false, reason: "unknown" };
+  const ab = abilityOf(tower);
+  if (!ab) return { ok: false, reason: "none" };
+  if (state.phase !== "wave") return { ok: false, reason: "idle" };
+  if (tower.abilityCd > 0) return { ok: false, reason: "cd" };
+  const events = { killed: 0, leaked: 0 };
+  if (ab.fury) tower.fury = ab.fury.time;
+  if (ab.run) ab.run(state, tower, abilityStats(state, tower), events);
+  tower.abilityCd = ab.cd;
+  state.fx.push({ kind: "boom", x: origin(tower).x, y: origin(tower).y, r: CELL * 0.9, ttl: 0.35, max: 0.35, color: TOWER_DEFS[tower.type].color });
+  return { ok: true, name: ab.name };
+}
+
+/* ---------- Pouvoirs des boss ---------- */
+
+function bossTick(state, e, def, dt) {
+  if (def.spawnAt) {
+    const ratio = e.hp / e.maxHp;
+    while (e.spawned < def.spawnAt.length && ratio <= def.spawnAt[e.spawned]) {
+      e.spawned += 1;
+      const n = 5 + Math.floor(state.wave / 5);
+      const hp = baseHp(state.wave) * state.hpMul * ENEMY_DEFS.drone.hp * 0.8;
+      for (let k = 0; k < n; k++) spawn(state, { type: "drone", hp }, Math.max(0, e.dist - 10 - k * 9));
+      state.fx.push({ kind: "boom", x: e.x, y: e.y, r: CELL * 1.5, ttl: 0.4, max: 0.4, color: "#ffffff" });
+    }
+  }
+  if (def.jam) {
+    e.clock += dt;
+    if (e.clock >= def.jam.every) {
+      e.clock = 0;
+      const reach = def.jam.radius * CELL;
+      for (const t of state.towers) {
+        const o = origin(t);
+        if (dist2(o, e) <= reach * reach) t.jam = def.jam.time;
+      }
+      state.fx.push({ kind: "boom", x: e.x, y: e.y, r: reach, ttl: 0.4, max: 0.4, color: "#ff2a6d" });
+    }
+  }
+}
+
 // Fait avancer la partie de `dt` secondes (petit pas : 1/60 s). Renvoie ce qui s'est passé.
 export function update(state, dt) {
   const events = { killed: 0, leaked: 0, waveCleared: false, credits: 0, over: false };
@@ -487,21 +801,30 @@ export function update(state, dt) {
 
   // Déplacement des ennemis
   for (const e of state.enemies) {
+    const def = ENEMY_DEFS[e.type];
     if (e.slowLeft > 0) {
       e.slowLeft -= dt;
       if (e.slowLeft <= 0) e.slow = 0;
     }
-    if (e.stun > 0) e.stun = Math.max(0, e.stun - dt);
+    if (e.stunImmune > 0) e.stunImmune = Math.max(0, e.stunImmune - dt);
+    if (e.stun > 0) {
+      e.stun -= dt;
+      if (e.stun <= 0) { e.stun = 0; e.stunImmune = def.boss ? STUN_IMMUNITY_BOSS : STUN_IMMUNITY; }
+    }
     if (e.poisonLeft > 0) {
       e.poisonLeft -= dt;
       hit(state, e, e.poison * dt, events, true);
       if (e.dead) continue;
     }
-    if (e.stun <= 0) e.dist += e.speed * (1 - e.slow) * dt;
+    if (def.boss) bossTick(state, e, def, dt);
+    if (e.stun <= 0) {
+      const rage = def.rage && e.hp <= e.maxHp * 0.5 ? def.rage : 1;
+      e.dist += e.speed * rage * (1 - e.slow) * dt;
+    }
     if (e.dist >= state.map.length) {
       e.dead = true;
       e.leaked = true;
-      state.lives -= ENEMY_DEFS[e.type].lives;
+      state.lives -= def.lives;
       events.leaked += 1;
       continue;
     }
@@ -513,10 +836,13 @@ export function update(state, dt) {
   // Tirs des tours
   for (const tower of state.towers) {
     tower.cooldown -= dt;
+    if (tower.abilityCd > 0) tower.abilityCd = Math.max(0, tower.abilityCd - dt);
+    if (tower.fury > 0) tower.fury = Math.max(0, tower.fury - dt);
+    if (tower.jam > 0) { tower.jam = Math.max(0, tower.jam - dt); continue; }      // brouillée par un Rootkit
     if (tower.cooldown > 0) continue;
     const tdef = TOWER_DEFS[tower.type];
     if (tdef.support || tdef.income) continue;   // Beacon et Data Miner ne tirent pas
-    if (fire(state, tower, events)) tower.cooldown = 1 / (towerStats(tdef, tower.level).rate * beaconBuff(state, tower).rate);
+    if (fire(state, tower, events)) tower.cooldown = 1 / towerRate(state, tower);
     else tower.cooldown = 0;   // rien à portée : elle tirera dès qu'un ennemi arrive
   }
 
@@ -540,11 +866,13 @@ export function update(state, dt) {
     // Data Miners : de l'énergie en plus à la fin de la vague (les Beacons voisins l'augmentent un peu).
     let mined = 0;
     for (const t of state.towers) {
-      if (t.type === "miner") mined += Math.round(towerStats(TOWER_DEFS.miner, t.level).income * (1 + (beaconBuff(state, t).damage - 1) * 0.5));
+      if (t.type !== "miner") continue;
+      const base = t.st.income + Math.min(state.gold, 3000) * t.st.interest;
+      mined += Math.round(base * (1 + (beaconBuff(state, t).damage - 1) * 0.5));
     }
     state.gold += waveBonusGold(state.wave) + mined;
     events.mined = mined;
-    const credits = waveCredits(state.wave, state.map);
+    const credits = waveCredits(state.wave, state.map, state.diff);
     state.creditsEarned += credits;
     events.waveCleared = true;
     events.credits = credits;

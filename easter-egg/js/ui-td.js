@@ -3,28 +3,37 @@
 // coûte de l'ÉNERGIE, gagnée pendant la partie.
 
 import {
-  COLS, ROWS, CELL, MAX_LEVEL, MAPS, FREE_MAP, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
-  createState, canPlace, placeTower, upgradeTower, sellTower, startWave, orbitalStrike, update, towerAt,
-  towerRange, towerDamage, towerStats, upgradeCost, TOWER_PERKS, STRIKE_COST, invested, waveCredits, SELL_RATIO, START_LIVES
+  COLS, ROWS, CELL, MAX_TIER, PATH_COUNT, MAPS, FREE_MAP, DIFFICULTIES, DEFAULT_DIFFICULTY, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
+  PATH_NAMES, ABILITIES, TARGET_LABELS,
+  createState, canPlace, placeTower, upgradeTower, upgradeInfo, sellTower, startWave, orbitalStrike, useAbility, cycleTargetMode,
+  update, towerAt, towerStats, beaconBuff, describeFx, ownedUpgrades, STRIKE_COST, invested, SELL_RATIO, START_LIVES, waveBonusGold, isBoss
 } from "./td.js";
 import { wealthBonus, wavePct } from "./rewards.js";
 import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
 
 const W = COLS * CELL;
 const H = ROWS * CELL;
-const STEP = 1 / 60;          // pas de simulation (secondes)
+const STEP = 1 / 60;                       // pas de simulation (secondes)
+const SPEEDS = [1, 2, 3, 5, 10];           // vitesses de jeu (×5 et ×10 pour les longues parties)
+const MAX_STEPS = 40;                      // pas de simulation par image, au maximum
+const PATH_COLORS = ["#00f0ff", "#ff6bd6", "#fcee0a"];
 
 const REASONS = {
   gold: "Pas assez d'énergie.",
   blocked: "Impossible de poser une tour ici (chemin ou case occupée).",
   locked: "Cette tour n'est pas encore débloquée.",
-  max: "Cette tour est déjà au niveau maximum."
+  max: "Ce chemin est déjà au palier maximum.",
+  paths: "Une tour n'utilise que 2 chemins d'amélioration.",
+  crossed: "Un seul chemin peut dépasser le palier 2.",
+  idle: "Les capacités s'utilisent pendant une vague.",
+  cd: "Capacité en recharge.",
+  none: "Cette tour n'a pas de capacité (palier 4 du chemin 3)."
 };
 
 // Chiffres clés d'une tour, affichés à côté de son nom dans la palette.
 const num = (n, d = 1) => Number(n).toFixed(d).replace(".", ",").replace(/,0$/, "");
 function towerBrief(def) {
-  const st = towerStats(def, 0);
+  const st = towerStats(def, [0, 0, 0]);
   if (def.support) return `Aura ${num(st.range / CELL)} · +${Math.round(st.boostDamage * 100)} % dég. · +${Math.round(st.boostRate * 100)} % cad.`;
   if (def.income) return `+${st.income} énergie / vague`;
   return `Dég ${Math.round(st.damage)} · Port ${num(st.range / CELL)} · ${num(st.rate)}/s`;
@@ -33,7 +42,8 @@ function towerBrief(def) {
 export function createTowerDefenseUI(root, wallet) {
   let active = false;
   let mapId = FREE_MAP;
-  let state = createState(wallet.data.towers, mapId);
+  let diffId = DEFAULT_DIFFICULTY;
+  let state = createState(wallet.data.towers, mapId, diffId);
   let status = "idle";           // idle | running | paused | over
   let placing = null;            // type de tour en cours de pose
   let selectedId = null;         // tour sélectionnée (pour améliorer ou vendre)
@@ -45,6 +55,7 @@ export function createTowerDefenseUI(root, wallet) {
   let lastTime = 0;
   let acc = 0;
   let toastTimer = 0;
+  let panelSig = "";             // signature du panneau de la tour (on ne le reconstruit que s'il change)
 
   /* ---------- Squelette ---------- */
 
@@ -63,13 +74,19 @@ export function createTowerDefenseUI(root, wallet) {
 
   const waveButton = h("button", { class: "button button-primary", id: "td-wave", type: "button", onclick: () => launchWave() }, "Lancer la vague 1");
   const strikeButton = h("button", { class: "button button-secondary", id: "td-strike", type: "button", title: `Touche tous les ennemis (3 × les PV de base). Coûte ${STRIKE_COST} énergie. Recharge : 30 s.`, onclick: () => doStrike() }, `Frappe orbitale (F) · ${STRIKE_COST}`);
-  const speedButton = h("button", { class: "button button-secondary", id: "td-speed", type: "button", onclick: () => toggleSpeed() }, "Vitesse ×1");
+  const speedButton = h("button", { class: "button button-secondary", id: "td-speed", type: "button", title: "Vitesse du jeu (S)", onclick: () => toggleSpeed() }, "Vitesse ×1");
 
   const mapButtons = MAPS.map((m) => {
     const button = h("button", { class: "map-button", type: "button", "data-map": m.id, onclick: () => onMap(m.id) });
     return { m, button };
   });
   const mapBar = h("div", { class: "td-maps", role: "group", "aria-label": "Carte" }, mapButtons.map((x) => x.button));
+
+  const diffButtons = DIFFICULTIES.map((d) => {
+    const button = h("button", { class: "map-button", type: "button", "data-diff": d.id, title: d.desc, onclick: () => onDifficulty(d.id) }, d.name);
+    return { d, button };
+  });
+  const diffBar = h("div", { class: "td-maps", role: "group", "aria-label": "Difficulté" }, diffButtons.map((x) => x.button));
 
   const palette = TOWER_IDS.map((id, index) => {
     const def = TOWER_DEFS[id];
@@ -85,18 +102,24 @@ export function createTowerDefenseUI(root, wallet) {
 
   const selTitle = h("strong", { class: "sel-title" });
   const selStats = h("span", { class: "sel-stats" });
-  const selPerks = h("ul", { class: "sel-perks" });
-  const upgradeButton = h("button", { class: "button button-secondary", id: "td-upgrade", type: "button", onclick: () => doUpgrade() });
+  const selOwned = h("span", { class: "sel-owned" });
+  const targetButton = h("button", { class: "button button-secondary", id: "td-target", type: "button", title: "Choisit quel ennemi la tour vise en priorité (T)", onclick: () => doTarget() });
+  const abilityButton = h("button", { class: "button button-secondary", id: "td-ability", type: "button", onclick: () => doAbility() });
+  const selPaths = h("div", { class: "sel-paths" });
   const sellButton = h("button", { class: "button button-secondary", id: "td-sell", type: "button", onclick: () => doSell() });
   const selection = h("div", { class: "td-selection chamfer", id: "td-selection", hidden: true },
-    selTitle, selStats, selPerks, h("div", { class: "sel-buttons" }, upgradeButton, sellButton));
+    selTitle, selStats, selOwned,
+    h("div", { class: "sel-buttons" }, targetButton, abilityButton),
+    selPaths,
+    h("div", { class: "sel-buttons" }, sellButton));
 
   root.replaceChildren(
     h("p", { class: "game-rules" },
-      `Des ennemis suivent le chemin : arrête-les avant la sortie (${START_LIVES} vies). Pose des tours avec l'énergie gagnée en jeu. Débloque de nouvelles tours et de nouvelles cartes avec tes crédits ; chaque vague repoussée t'en rapporte.`),
+      `Des ennemis suivent le chemin : arrête-les avant la sortie (${START_LIVES} vies en Normal). Pose des tours avec l'énergie gagnée en jeu, puis améliore-les : 3 chemins par tour, 2 au maximum, un seul au-delà du palier 2. Le palier 4 du 3e chemin donne une capacité active. Un boss arrive toutes les 10 vagues. Débloque de nouvelles tours et cartes avec tes crédits.`),
     h("div", { class: "td-layout" },
       h("div", { class: "td-main" },
         mapBar,
+        diffBar,
         h("div", { class: "td-board-wrap chamfer" },
           h("div", { class: "game-stage td-stage" }, board, toast, overlay)),
         h("div", { class: "td-actions" }, waveButton, speedButton, strikeButton, stateEl)),
@@ -109,7 +132,8 @@ export function createTowerDefenseUI(root, wallet) {
         h("ul", { class: "game-help" },
           h("li", {}, "Clique une case pour poser, une tour pour la sélectionner"),
           h("li", {}, h("kbd", {}, "1"), "–", h("kbd", {}, "0"), " choisir · ", h("kbd", {}, "←↑↓→"), " curseur · ", h("kbd", {}, "Espace"), " poser"),
-          h("li", {}, h("kbd", {}, "Entrée"), " vague · ", h("kbd", {}, "U"), " améliorer · ", h("kbd", {}, "V"), " vendre · ", h("kbd", {}, "P"), " pause"))))
+          h("li", {}, h("kbd", {}, "Entrée"), " vague · ", h("kbd", {}, "U"), " améliorer · ", h("kbd", {}, "T"), " ciblage · ", h("kbd", {}, "A"), " capacité"),
+          h("li", {}, h("kbd", {}, "S"), " vitesse · ", h("kbd", {}, "F"), " frappe · ", h("kbd", {}, "V"), " vendre · ", h("kbd", {}, "P"), " pause"))))
   );
 
   function stat(label, el) {
@@ -123,6 +147,9 @@ export function createTowerDefenseUI(root, wallet) {
   board.height = H * dpr;
   const ctx = board.getContext("2d");
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const towerRangePx = (tower) => tower.st.range * beaconBuff(state, tower).range;
+  const enemyRadius = (e) => (e.type === "boss3" ? 14 : isBoss(e) ? 13 : e.type === "tank" ? 10 : e.type === "runner" ? 6 : 8);
 
   function draw() {
     ctx.shadowBlur = 0;
@@ -157,11 +184,11 @@ export function createTowerDefenseUI(root, wallet) {
     const selected = state.towers.find((t) => t.id === selectedId);
     if (selected) {
       const def = TOWER_DEFS[selected.type];
-      drawRange((selected.col + 0.5) * CELL, (selected.row + 0.5) * CELL, towerRange(def, selected.level), def.color);
+      if (def.range) drawRange((selected.col + 0.5) * CELL, (selected.row + 0.5) * CELL, towerRangePx(selected), def.color);
     } else if (placing && target) {
       const def = TOWER_DEFS[placing];
       const ok = canPlace(state, target.col, target.row) && state.gold >= def.cost;
-      drawRange((target.col + 0.5) * CELL, (target.row + 0.5) * CELL, towerRange(def, 0), ok ? def.color : "#ff3b5c");
+      drawRange((target.col + 0.5) * CELL, (target.row + 0.5) * CELL, towerStats(def, [0, 0, 0]).range, ok ? def.color : "#ff3b5c");
     }
 
     // Tours
@@ -169,37 +196,54 @@ export function createTowerDefenseUI(root, wallet) {
       const def = TOWER_DEFS[tower.type];
       const x = tower.col * CELL;
       const y = tower.row * CELL;
+      const total = tower.tiers.reduce((a, b) => a + b, 0);
+      const maxed = tower.tiers.some((t) => t >= MAX_TIER);
       ctx.fillStyle = "#14141f";
       ctx.fillRect(x + 3, y + 3, CELL - 6, CELL - 6);
-      ctx.strokeStyle = def.color;
+      ctx.strokeStyle = tower.jam > 0 ? "#ff2a6d" : def.color;
       ctx.lineWidth = tower.id === selectedId ? 3 : 1.5;
+      if (tower.jam > 0) ctx.setLineDash([3, 3]);
       ctx.strokeRect(x + 3.5, y + 3.5, CELL - 7, CELL - 7);
+      ctx.setLineDash([]);
       if (def.support) {
-        // Aura du Beacon : anneau qui pulse doucement autour de la tour
-        ctx.globalAlpha = 0.12 + 0.08 * Math.sin(state.time * 3);
+        // Aura du Beacon : disque qui pulse doucement autour de la tour
+        ctx.globalAlpha = (tower.fury > 0 ? 0.22 : 0.12) + 0.08 * Math.sin(state.time * 3);
         ctx.fillStyle = def.color;
         ctx.beginPath();
-        ctx.arc(x + CELL / 2, y + CELL / 2, towerRange(def, tower.level), 0, Math.PI * 2);
+        ctx.arc(x + CELL / 2, y + CELL / 2, tower.st.range, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
       }
-      ctx.fillStyle = def.color;
+      ctx.fillStyle = tower.jam > 0 ? "#6b6b7a" : def.color;
       ctx.shadowColor = def.color;
-      ctx.shadowBlur = 8;
+      ctx.shadowBlur = tower.fury > 0 ? 16 : 8;
       ctx.beginPath();
-      if (def.income) ctx.rect(x + CELL / 2 - 7 - tower.level, y + CELL / 2 - 7 - tower.level, 14 + tower.level * 2, 14 + tower.level * 2);
+      const grow = Math.min(total, 6) * 0.7;
+      if (def.income) ctx.rect(x + CELL / 2 - 7 - grow, y + CELL / 2 - 7 - grow, 14 + grow * 2, 14 + grow * 2);
       else if (def.support) { ctx.moveTo(x + CELL / 2, y + 6); ctx.lineTo(x + CELL - 8, y + CELL - 8); ctx.lineTo(x + 8, y + CELL - 8); ctx.closePath(); }
-      else ctx.arc(x + CELL / 2, y + CELL / 2, 7 + tower.level, 0, Math.PI * 2);
+      else ctx.arc(x + CELL / 2, y + CELL / 2, 7 + grow, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
-      for (let i = 0; i < tower.level; i++) ctx.fillRect(x + 5 + i * 6, y + CELL - 9, 4, 3);
-      if (tower.level >= MAX_LEVEL) { ctx.strokeStyle = "#fcee0a"; ctx.lineWidth = 1.5; ctx.strokeRect(x + 1.5, y + 1.5, CELL - 3, CELL - 3); }   // un trait par niveau
+      // Paliers : une rangée de petits carrés par chemin, de la couleur du chemin
+      for (let p = 0; p < PATH_COUNT; p++) {
+        ctx.fillStyle = PATH_COLORS[p];
+        for (let i = 0; i < tower.tiers[p]; i++) ctx.fillRect(x + 5 + p * 12 + i * 2.5, y + CELL - 9, 2, 4);
+      }
+      if (maxed) { ctx.strokeStyle = "#fcee0a"; ctx.lineWidth = 1.5; ctx.strokeRect(x + 1.5, y + 1.5, CELL - 3, CELL - 3); }
+      // Capacité : pastille verte quand elle est prête
+      if (tower.st.ability) {
+        const ready = tower.abilityCd <= 0 && state.phase === "wave";
+        ctx.fillStyle = ready ? "#3ddc84" : tower.abilityCd > 0 ? "#6b6b7a" : "#9aa5b1";
+        ctx.beginPath();
+        ctx.arc(x + CELL - 8, y + 8, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     // Ennemis
     for (const e of state.enemies) {
       const def = ENEMY_DEFS[e.type];
-      const r = e.type === "boss" ? 13 : e.type === "tank" ? 10 : e.type === "runner" ? 6 : 8;
+      const r = enemyRadius(e);
       ctx.fillStyle = e.stun > 0 ? "#fcee0a" : e.slow > 0 ? "#7fd8ff" : def.color;
       ctx.shadowColor = ctx.fillStyle;
       ctx.shadowBlur = 8;
@@ -207,11 +251,33 @@ export function createTowerDefenseUI(root, wallet) {
       ctx.arc(e.x, e.y, r, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
+      if (isBoss(e)) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, r + 3, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (e.stunImmune > 0) {
+        // Immunisé à l'étourdissement : fin anneau gris
+        ctx.strokeStyle = "rgba(200, 200, 220, 0.45)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, r + 2, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      const barW = isBoss(e) ? 36 : 24;
       const ratio = Math.max(0, e.hp / e.maxHp);
       ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-      ctx.fillRect(e.x - 12, e.y - r - 7, 24, 4);
+      ctx.fillRect(e.x - barW / 2, e.y - r - 7, barW, 4);
       ctx.fillStyle = ratio > 0.5 ? "#3ddc84" : ratio > 0.25 ? "#fcee0a" : "#ff3b5c";
-      ctx.fillRect(e.x - 12, e.y - r - 7, 24 * ratio, 4);
+      ctx.fillRect(e.x - barW / 2, e.y - r - 7, barW * ratio, 4);
+      if (isBoss(e)) {
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "10px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(def.name, e.x, e.y - r - 11);
+        ctx.textAlign = "start";
+      }
     }
 
     // Tirs et explosions
@@ -285,9 +351,37 @@ export function createTowerDefenseUI(root, wallet) {
     toast.classList.add("is-on");
   }
 
-  const bestWave = () => Math.max(wallet.data.bestWave, clearedWaves());
+  const bestWave = () => Math.max(wallet.data.bestWave, state.diff.record ? clearedWaves() : 0);
   // Vagues repoussées : la vague en cours (ou celle qui a fait perdre) ne compte pas.
   const clearedWaves = () => Math.max(0, state.wave - (state.phase === "idle" ? 0 : 1));
+
+  // Panneau de la tour sélectionnée : les 3 chemins d'amélioration. Reconstruit seulement quand il change.
+  function renderPaths(tower, def) {
+    selPaths.replaceChildren(...Array.from({ length: PATH_COUNT }, (_, p) => {
+      const tier = tower.tiers[p];
+      const info = upgradeInfo(state, tower, p);
+      const pips = h("span", { class: "path-pips", "aria-label": `Palier ${tier} sur ${MAX_TIER}` },
+        Array.from({ length: MAX_TIER }, (_, i) => h("span", { class: i < tier ? "is-on" : "" })));
+      pips.style.setProperty("--pc", PATH_COLORS[p]);
+      let button;
+      if (info.locked === "max") {
+        button = h("button", { class: "path-btn is-max", type: "button", disabled: true }, h("span", { class: "pb-name" }, "Palier maximum"));
+      } else {
+        const detail = describeFx(info.up.fx);
+        const lockText = info.locked ? REASONS[info.locked] : null;
+        button = h("button", {
+          class: `path-btn${info.locked ? " is-locked" : ""}`, type: "button", title: `${info.up.name} — ${detail}`,
+          disabled: !!info.locked || !info.affordable || state.phase === "over", onclick: () => doUpgrade(p)
+        },
+        h("span", { class: "pb-name" }, `${tier + 1}. ${info.up.name}`),
+        h("span", { class: "pb-desc" }, lockText || detail),
+        info.locked ? null : h("span", { class: "pb-cost" }, `${fmt(info.price)} ⚡`));
+      }
+      const row = h("div", { class: "path-row" }, h("span", { class: "path-name" }, PATH_NAMES[def.id][p]), pips, button);
+      row.style.setProperty("--pc", PATH_COLORS[p]);
+      return row;
+    }));
+  }
 
   function updateHud() {
     setText(goldEl, fmt(state.gold));
@@ -312,6 +406,12 @@ export function createTowerDefenseUI(root, wallet) {
       button.disabled = status === "running" || status === "paused" || (!owned && wallet.credits < m.unlock);
     }
 
+    for (const { d, button } of diffButtons) {
+      button.classList.toggle("is-active", diffId === d.id);
+      button.setAttribute("aria-pressed", String(diffId === d.id));
+      button.disabled = status === "running" || status === "paused";
+    }
+
     for (const { id, def, cost, button } of palette) {
       const unlocked = state.unlocked.includes(id);
       button.classList.toggle("is-locked", !unlocked);
@@ -328,24 +428,40 @@ export function createTowerDefenseUI(root, wallet) {
 
     const tower = state.towers.find((t) => t.id === selectedId);
     selection.hidden = !tower;
-    if (tower) {
-      const def = TOWER_DEFS[tower.type];
-      setText(selTitle, `${def.name} — niveau ${tower.level + 1} / ${MAX_LEVEL + 1}`);
-      const ts = towerStats(def, tower.level);
-      const pct = (v) => `+${Math.round(v * 100)} %`;
-      setText(selStats, def.support
-        ? `Aura ${(ts.range / CELL).toFixed(1).replace(".", ",")} cases · dégâts ${pct(ts.boostDamage)} · cadence ${pct(ts.boostRate)}`
-        : def.income
-          ? `Produit ${fmt(ts.income)} énergie à la fin de chaque vague`
-          : `Dégâts ${Math.round(towerDamage(def, tower.level))} · portée ${(towerRange(def, tower.level) / CELL).toFixed(1).replace(".", ",")} cases`);
-      selPerks.replaceChildren(...(TOWER_PERKS[tower.type] || []).map(([lvl, text]) =>
-        h("li", { class: tower.level + 1 >= lvl ? "is-on" : "" }, `Niv. ${lvl} · ${text}`)));
-      const price = tower.level >= MAX_LEVEL ? null : upgradeCost(def, tower.level);
-      setText(upgradeButton, price === null ? "Niveau maximum" : tower.level + 1 >= MAX_LEVEL ? `Amélioration ULTIME (${fmt(price)})` : `Améliorer (${fmt(price)})`);
-      upgradeButton.disabled = price === null || state.gold < price || state.phase === "over";
-      setText(sellButton, `Vendre (+${fmt(Math.floor(invested(tower) * SELL_RATIO))})`);
-      sellButton.disabled = state.phase === "over";
+    if (!tower) { panelSig = ""; return; }
+
+    const def = TOWER_DEFS[tower.type];
+    const ts = tower.st;
+    const total = tower.tiers.reduce((a, b) => a + b, 0);
+    setText(selTitle, `${def.name} — ${tower.tiers.join(" · ")}`);
+    const pct = (v) => `+${Math.round(v * 100)} %`;
+    const buffed = beaconBuff(state, tower);
+    setText(selStats, def.support
+      ? `Aura ${num(ts.range / CELL)} cases · dégâts ${pct(ts.boostDamage)} · cadence ${pct(ts.boostRate)}`
+      : def.income
+        ? `Produit ${fmt(Math.round(ts.income))} énergie${ts.interest ? ` + ${num(ts.interest * 100)} % d'intérêts` : ""} à la fin de chaque vague`
+        : `Dégâts ${Math.round(ts.damage * buffed.damage)} · portée ${num((ts.range * buffed.range) / CELL)} cases · ${num(ts.rate * buffed.rate)} tirs/s${ts.targets > 1 ? ` · ${ts.targets} cibles` : ""}`);
+    setText(selOwned, total ? ownedUpgrades(tower).map((u) => u.name).join(" · ") : "Aucune amélioration : choisis un chemin ci-dessous.");
+
+    const shoots = !def.support && !def.income;
+    targetButton.hidden = !shoots;
+    if (shoots) setText(targetButton, `Ciblage : ${TARGET_LABELS[tower.target]} (T)`);
+
+    const ab = tower.st.ability ? ABILITIES[tower.st.ability] : null;
+    abilityButton.hidden = !ab;
+    if (ab) {
+      const wait = tower.abilityCd > 0;
+      abilityButton.disabled = wait || state.phase !== "wave" || status !== "running";
+      abilityButton.title = ab.desc;
+      setText(abilityButton, wait ? `${ab.name} : ${Math.ceil(tower.abilityCd)} s` : `${ab.name} (A)`);
     }
+
+    const affordBits = Array.from({ length: PATH_COUNT }, (_, p) => { const i = upgradeInfo(state, tower, p); return i.locked || (i.affordable ? 1 : 0); }).join("");
+    const sig = `${tower.id}|${tower.tiers}|${affordBits}|${state.phase}`;
+    if (sig !== panelSig) { panelSig = sig; renderPaths(tower, def); }
+
+    setText(sellButton, `Vendre (+${fmt(Math.floor(invested(tower) * SELL_RATIO))})`);
+    sellButton.disabled = state.phase === "over";
   }
 
   function showOverlay(title, text, buttonLabel, takeFocus = true) {
@@ -362,6 +478,13 @@ export function createTowerDefenseUI(root, wallet) {
     for (const id of wallet.data.towers) if (!state.unlocked.includes(id)) state.unlocked.push(id);
   }
 
+  function resetState() {
+    state = createState(wallet.data.towers, mapId, diffId);
+    placing = null;
+    selectedId = null;
+    panelSig = "";
+  }
+
   // Choix de la carte : seulement entre deux parties. Une carte verrouillée se débloque avec des crédits.
   function onMap(id) {
     if (status === "running" || status === "paused") return;
@@ -372,10 +495,20 @@ export function createTowerDefenseUI(root, wallet) {
       say(`Carte ${m.name} débloquée !`);
     }
     mapId = id;
-    state = createState(wallet.data.towers, mapId);
-    placing = null;
-    selectedId = null;
+    resetState();
     if (status === "over") { setStatus("idle"); showOverlay("Pare-feu", `Carte ${m.name} : ${m.desc}`, "Commencer", false); }
+    updateHud();
+    draw();
+  }
+
+  // Choix de la difficulté : seulement entre deux parties.
+  function onDifficulty(id) {
+    if (status === "running" || status === "paused") return;
+    diffId = id;
+    resetState();
+    const d = state.diff;
+    if (status === "over") setStatus("idle");
+    showOverlay("Pare-feu", `Difficulté ${d.name} : ${d.desc}`, "Commencer", false);
     updateHud();
     draw();
   }
@@ -413,10 +546,40 @@ export function createTowerDefenseUI(root, wallet) {
     draw();
   }
 
-  function doUpgrade() {
+  function doUpgrade(path) {
     if (selectedId === null) return;
-    const result = upgradeTower(state, selectedId);
+    const result = upgradeTower(state, selectedId, path);
     if (!result.ok) say(REASONS[result.reason] || "Impossible.");
+    else {
+      const ab = result.tower.st.ability;
+      if (ab && result.tower.tiers[path] === MAX_TIER) say(`Capacité débloquée : ${ABILITIES[ab].name} — ${ABILITIES[ab].desc}`);
+    }
+    updateHud();
+    draw();
+  }
+
+  // Raccourci U : améliore le chemin le plus avancé de la tour (ou le premier chemin si elle est neuve).
+  function doUpgradeMain() {
+    const tower = state.towers.find((t) => t.id === selectedId);
+    if (!tower) return;
+    const order = [0, 1, 2].sort((a, b) => tower.tiers[b] - tower.tiers[a] || a - b);
+    const path = order.find((p) => !upgradeInfo(state, tower, p).locked);
+    if (path === undefined) { say(REASONS.max); return; }
+    doUpgrade(path);
+  }
+
+  function doTarget() {
+    if (selectedId === null) return;
+    const mode = cycleTargetMode(state, selectedId);
+    if (mode) say(`Ciblage : ${TARGET_LABELS[mode]}`);
+    updateHud();
+  }
+
+  function doAbility() {
+    if (selectedId === null || status !== "running") return;
+    const result = useAbility(state, selectedId);
+    if (result.ok) say(`${result.name} !`);
+    else say(REASONS[result.reason] || "Impossible.");
     updateHud();
     draw();
   }
@@ -440,19 +603,20 @@ export function createTowerDefenseUI(root, wallet) {
 
   function launchWave() {
     if (status !== "running" || !startWave(state)) return;
+    const boss = state.spawnList.find((e) => ENEMY_DEFS[e.type].boss);
+    if (boss) say(`BOSS : ${ENEMY_DEFS[boss.type].name} — ${ENEMY_DEFS[boss.type].power}`);
     updateHud();
   }
 
   function toggleSpeed() {
-    speed = speed === 1 ? 2 : speed === 2 ? 3 : 1;
+    speed = SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length];
     updateHud();
   }
 
   function startGame() {
     scrollToPlay(root.querySelector(".td-board-wrap"));
-    state = createState(wallet.data.towers, mapId);
-    placing = TOWER_DEFS.laser && state.unlocked.includes("laser") ? "laser" : null;
-    selectedId = null;
+    resetState();
+    placing = state.unlocked.includes("laser") ? "laser" : null;
     setStatus("running");
     overlay.hidden = true;
     updateHud();
@@ -481,7 +645,8 @@ export function createTowerDefenseUI(root, wallet) {
     stopLoop();
     setStatus("over");
     const reached = clearedWaves();
-    const record = wallet.setBest("bestWave", reached);
+    // Le mode Facile ne bat pas le record (sinon il suffirait de le choisir pour gagner des vagues).
+    const record = state.diff.record ? wallet.setBest("bestWave", reached) : false;
     updateHud();
     draw();
     const credits = state.creditsEarned ? ` · +${fmt(state.creditsEarned)} crédits` : "";
@@ -503,22 +668,25 @@ export function createTowerDefenseUI(root, wallet) {
     lastTime = time;
     acc += dt * speed;
 
+    // À ×5 et ×10 on enchaîne beaucoup de pas par image : on s'arrête si l'image prend trop de temps.
+    const t0 = performance.now();
     let steps = 0;
-    while (acc >= STEP && steps < 12 && status === "running") {
+    while (acc >= STEP && steps < MAX_STEPS && status === "running") {
       acc -= STEP;
       steps += 1;
       const events = update(state, STEP);
 
       if (events.credits > 0) {
-        // Crédits de base + pourcentage de la fortune actuelle.
-        const total = events.credits + wealthBonus(wallet.credits, wavePct(state.map.reward));
+        // Crédits de base + pourcentage de la fortune actuelle (le coefficient de la difficulté s'applique aux deux).
+        const total = events.credits + wealthBonus(wallet.credits, wavePct(state.map.reward * state.diff.reward));
         state.creditsEarned += total - events.credits;
         wallet.addCredits(total);
-        say(`Vague ${state.wave} repoussée : +${fmt(total)} crédits, +${fmt(20 + 2 * state.wave + (events.mined || 0))} énergie${events.mined ? ` (dont ${fmt(events.mined)} minés)` : ""}.`);
+        say(`Vague ${state.wave} repoussée : +${fmt(total)} crédits, +${fmt(waveBonusGold(state.wave) + (events.mined || 0))} énergie${events.mined ? ` (dont ${fmt(events.mined)} minés)` : ""}.`);
       }
       if (events.over) { finish(); return; }
+      if (steps % 8 === 0 && performance.now() - t0 > 14) break;
     }
-    if (steps === 12) acc = 0;
+    if (acc >= STEP) acc = 0;     // retard trop grand : on l'abandonne plutôt que d'accélérer ensuite
 
     updateHud();
     draw();
@@ -613,7 +781,10 @@ export function createTowerDefenseUI(root, wallet) {
       return;
     }
     if (key === "f") doStrike();
-    if (key === "u") doUpgrade();
+    if (key === "u") doUpgradeMain();
+    if (key === "t") doTarget();
+    if (key === "a") doAbility();
+    if (key === "s") toggleSpeed();
     if (key === "v" || key === "delete") doSell();
   });
 

@@ -1922,3 +1922,33 @@ kbd {
 .dg-topbar > div { display: flex; flex-direction: column; min-width: 0; }
 .dg-topbar dd { margin: 0; }
 .dg-topbar strong { font-size: 16px; line-height: 1.2; }
+
+/* Pare-feu : chemins d'amélioration, ciblage et capacités */
+.sel-owned { color: var(--muted); font-size: 12px; line-height: 1.4; }
+.sel-paths { display: grid; gap: 10px; margin: 6px 0; }
+.path-row { --pc: var(--cyan); display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; }
+.path-name { color: var(--pc); font-family: var(--font-display); font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
+.path-pips { display: flex; gap: 3px; }
+.path-pips span { width: 14px; height: 6px; border: 1px solid var(--pc); opacity: .5; }
+.path-pips span.is-on { background: var(--pc); opacity: 1; box-shadow: 0 0 6px -1px var(--pc); }
+.path-btn {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  padding: 6px 8px;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--pc);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+}
+.path-btn:hover:not(:disabled) { background: rgba(255, 255, 255, .06); }
+.path-btn:disabled { opacity: .5; cursor: not-allowed; }
+.path-btn.is-max { opacity: .7; border-left-style: dashed; }
+.pb-name { font-weight: 700; }
+.pb-desc { grid-column: 1 / -1; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.pb-cost { grid-row: 1; grid-column: 2; color: var(--yellow); }
