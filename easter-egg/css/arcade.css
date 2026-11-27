@@ -1958,3 +1958,8 @@ kbd {
 .sel-paragon p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
 .sel-paragon-title { color: var(--yellow); font-family: var(--font-display); font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
 .sel-paragon[hidden] { display: none; }
+
+/* Pare-feu : curseur d'investissement du paragon */
+.pg-label { color: var(--text); font-size: 12px; }
+.pg-slider { width: 100%; accent-color: var(--yellow); }
+.pg-note { font-style: italic; }

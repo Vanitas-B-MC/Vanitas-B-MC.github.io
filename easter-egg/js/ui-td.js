@@ -3,17 +3,15 @@
 // coûte de l'ÉNERGIE, gagnée pendant la partie.
 
 import {
-  COLS, ROWS, CELL, MAX_TIER, PATH_COUNT, MAPS, FREE_MAP, DIFFICULTIES, DEFAULT_DIFFICULTY, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
+  W, H, COLS, ROWS, CELL, TOWER_RADIUS, PATH_HALF, MAX_TIER, PATH_COUNT, MAPS, FREE_MAP, DIFFICULTIES, DEFAULT_DIFFICULTY, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
   PATH_NAMES, ABILITIES, TARGET_LABELS,
-  createState, canPlace, placeTower, upgradeTower, upgradeInfo, sellTower, startWave, useAbility, cycleTargetMode,
+  createState, placeIssue, placeTower, upgradeTower, upgradeInfo, sellTower, startWave, useAbility, cycleTargetMode, setAim, setAimMode,
   update, towerAt, towerStats, beaconBuff, describeFx, ownedUpgrades, invested, SELL_RATIO, START_LIVES, waveBonusGold, isBoss,
-  paragonInfo, makeParagon, PARAGON_MAX_DEGREE, PARAGON_COST_MUL
+  paragonInfo, makeParagon, PARAGON_MAX_DEGREE
 } from "./td.js";
 import { wealthBonus, wavePct } from "./rewards.js";
 import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
 
-const W = COLS * CELL;
-const H = ROWS * CELL;
 const STEP = 1 / 60;                       // pas de simulation (secondes)
 const SPEEDS = [1, 2, 3, 5, 10];           // vitesses de jeu (×5 et ×10 pour les longues parties)
 const MAX_STEPS = 40;                      // pas de simulation par image, au maximum
@@ -21,7 +19,10 @@ const PATH_COLORS = ["#00f0ff", "#ff6bd6", "#fcee0a"];
 
 const REASONS = {
   gold: "Pas assez d'énergie.",
-  blocked: "Impossible de poser une tour ici (chemin ou case occupée).",
+  bounds: "Trop près du bord du plateau.",
+  path: "Trop près du chemin : les tours se posent à côté, pas dessus.",
+  obstacle: "Un obstacle (arbre, étang) bloque cet endroit.",
+  tower: "Trop près d'une autre tour.",
   locked: "Cette tour n'est pas encore débloquée.",
   max: "Ce chemin est déjà au palier maximum.",
   paths: "Une tour n'utilise que 2 chemins d'amélioration.",
@@ -40,6 +41,7 @@ function towerBrief(def) {
   const st = towerStats(def, [0, 0, 0]);
   if (def.support) return `Aura ${num(st.range / CELL)} · +${Math.round(st.boostDamage * 100)} % dég. · +${Math.round(st.boostRate * 100)} % cad.`;
   if (def.income) return `+${st.income} énergie / vague`;
+  if (def.line) return `Dég ${Math.round(st.damage)} · Portée ∞ · ${num(st.rate)}/s`;
   return `Dég ${Math.round(st.damage)} · Port ${num(st.range / CELL)} · ${num(st.rate)}/s`;
 }
 
@@ -51,8 +53,10 @@ export function createTowerDefenseUI(root, wallet) {
   let status = "idle";           // idle | running | paused | over
   let placing = null;            // type de tour en cours de pose
   let selectedId = null;         // tour sélectionnée (pour améliorer ou vendre)
-  let hover = null;              // case sous la souris
-  let cursor = { col: Math.floor(COLS / 2), row: Math.floor(ROWS / 2) };
+  let hover = null;              // point (en pixels) sous la souris
+  let cursor = { x: W / 2, y: H / 2 };     // curseur clavier
+  let aimPicking = false;        // le prochain clic définit le point visé du Dartling sélectionné
+  let paragonSteps = 0;          // curseur d'investissement du paragon (nombre de pas)
   let showCursor = false;        // le curseur clavier ne s'affiche qu'après un appui sur une flèche
   let speed = 1;
   let rafId = 0;
@@ -108,6 +112,9 @@ export function createTowerDefenseUI(root, wallet) {
   const selOwned = h("span", { class: "sel-owned" });
   const targetButton = h("button", { class: "button button-secondary", id: "td-target", type: "button", title: "Choisit quel ennemi la tour vise en priorité (T)", onclick: () => doTarget() });
   const abilityButton = h("button", { class: "button button-secondary", id: "td-ability", type: "button", onclick: () => doAbility() });
+  const aimModeButton = h("button", { class: "button button-secondary", id: "td-aimmode", type: "button", title: "Point fixe : la tour tire toujours vers le même endroit. Souris : elle suit ton curseur sur le plateau (M)", onclick: () => doAimMode() });
+  const aimPickButton = h("button", { class: "button button-secondary", id: "td-aimpick", type: "button", title: "Puis clique sur le plateau pour choisir le point visé (C)", onclick: () => doAimPick() });
+  const aimRow = h("div", { class: "sel-buttons", hidden: true }, aimModeButton, aimPickButton);
   const selPaths = h("div", { class: "sel-paths" });
   const paragonBox = h("div", { class: "sel-paragon", hidden: true });
   let paragonConfirm = null;     // tour pour laquelle la fusion attend sa confirmation
@@ -115,13 +122,14 @@ export function createTowerDefenseUI(root, wallet) {
   const selection = h("div", { class: "td-selection chamfer", id: "td-selection", hidden: true },
     selTitle, selStats, selOwned,
     h("div", { class: "sel-buttons" }, targetButton, abilityButton),
+    aimRow,
     selPaths,
     paragonBox,
     h("div", { class: "sel-buttons" }, sellButton));
 
   root.replaceChildren(
     h("p", { class: "game-rules" },
-      `Des ennemis suivent le chemin : arrête-les avant la sortie (${START_LIVES} vies en Normal). Pose des tours avec l'énergie gagnée en jeu, puis améliore-les : 3 chemins par tour, 2 au maximum, un seul au-delà du palier 2. Le palier 4 du 3e chemin donne une capacité active (son temps de recharge ne tourne que pendant les vagues). Trois tours d'un même type au palier 4 peuvent fusionner en un paragon. Un boss arrive toutes les 10 vagues. Débloque de nouvelles tours et cartes avec tes crédits.`),
+      `Des ennemis suivent un ou plusieurs chemins : arrête-les avant la sortie (${START_LIVES} vies en Normal). Pose des tours où tu veux (ni sur le chemin, ni sur un obstacle) avec l'énergie gagnée en jeu, puis améliore-les : 3 chemins par tour, 2 au maximum, un seul au-delà du palier 2. Le palier 4 du 3e chemin donne une capacité active (son temps de recharge ne tourne que pendant les vagues). Trois tours d'un même type au palier 4 peuvent fusionner en un paragon. Un boss arrive toutes les 10 vagues. Débloque de nouvelles tours et cartes avec tes crédits.`),
     h("div", { class: "td-layout" },
       h("div", { class: "td-main" },
         mapBar,
@@ -139,7 +147,8 @@ export function createTowerDefenseUI(root, wallet) {
           h("li", {}, "Clique une case pour poser, une tour pour la sélectionner"),
           h("li", {}, h("kbd", {}, "1"), "–", h("kbd", {}, "0"), " choisir · ", h("kbd", {}, "←↑↓→"), " curseur · ", h("kbd", {}, "Espace"), " poser"),
           h("li", {}, h("kbd", {}, "Entrée"), " vague · ", h("kbd", {}, "U"), " améliorer · ", h("kbd", {}, "T"), " ciblage · ", h("kbd", {}, "A"), " capacité"),
-          h("li", {}, h("kbd", {}, "S"), " vitesse · ", h("kbd", {}, "G"), " paragon · ", h("kbd", {}, "V"), " vendre · ", h("kbd", {}, "P"), " pause · ", h("kbd", {}, ", ."), " tour préc./suiv."))))
+          h("li", {}, h("kbd", {}, "S"), " vitesse · ", h("kbd", {}, "G"), " paragon · ", h("kbd", {}, "V"), " vendre · ", h("kbd", {}, "P"), " pause"),
+          h("li", {}, h("kbd", {}, "M"), " visée souris/point · ", h("kbd", {}, "C"), " choisir le point · ", h("kbd", {}, ", ."), " tour préc./suiv."))))
   );
 
   function stat(label, el) {
@@ -163,79 +172,150 @@ export function createTowerDefenseUI(root, wallet) {
     ctx.fillStyle = "#0a0a12";
     ctx.fillRect(0, 0, W, H);
 
-    // Grille
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+    // Grille légère (simple repère)
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     for (let c = 1; c < COLS; c++) { ctx.moveTo(c * CELL + 0.5, 0); ctx.lineTo(c * CELL + 0.5, H); }
     for (let r = 1; r < ROWS; r++) { ctx.moveTo(0, r * CELL + 0.5); ctx.lineTo(W, r * CELL + 0.5); }
     ctx.stroke();
 
-    // Chemin
-    ctx.lineCap = "square";
+    // Chemins (un ou plusieurs)
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    for (const lane of state.map.lanes) {
+      ctx.beginPath();
+      lane.points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.09)";
+      ctx.lineWidth = PATH_HALF * 2;
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.07)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 10]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.lineCap = "butt";
     ctx.lineJoin = "miter";
-    ctx.beginPath();
-    state.map.points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.09)";
-    ctx.lineWidth = CELL - 4;
-    ctx.stroke();
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.07)";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([6, 10]);
-    ctx.stroke();
-    ctx.setLineDash([]);
 
-    // Portée de la tour sélectionnée ou en cours de pose
+    // Obstacles : on ne peut pas construire dessus
+    for (const o of state.map.obstacles) {
+      ctx.fillStyle = "rgba(61, 220, 132, 0.07)";
+      ctx.strokeStyle = "rgba(61, 220, 132, 0.4)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(o.x, o.y, o.r * 0.45, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Pointes de la Spike Factory
+    ctx.fillStyle = "#c0c0d0";
+    for (const sp of state.spikes) {
+      ctx.beginPath();
+      ctx.moveTo(sp.x, sp.y - 4);
+      ctx.lineTo(sp.x + 3.5, sp.y + 3);
+      ctx.lineTo(sp.x - 3.5, sp.y + 3);
+      ctx.closePath();
+      ctx.fill();
+    }
+
     const target = hover || (showCursor ? cursor : null);
     const selected = state.towers.find((t) => t.id === selectedId);
+
+    // Visée des Dartling : un rayon pointillé jusqu'au bord du plateau, et le point visé
+    for (const t of state.towers) {
+      if (!t.aim) continue;
+      const aim = t.aimMode === "mouse" && state.cursor ? state.cursor : t.aim;
+      const len = Math.hypot(aim.x - t.x, aim.y - t.y);
+      if (len < 2) continue;
+      ctx.strokeStyle = TOWER_DEFS[t.type].color;
+      ctx.globalAlpha = t.id === selectedId ? 0.6 : 0.22;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.moveTo(t.x, t.y);
+      ctx.lineTo(t.x + ((aim.x - t.x) / len) * 1300, t.y + ((aim.y - t.y) / len) * 1300);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (t.aimMode !== "mouse") {
+        ctx.beginPath();
+        ctx.arc(t.aim.x, t.aim.y, 5, 0, Math.PI * 2);
+        ctx.moveTo(t.aim.x - 8, t.aim.y);
+        ctx.lineTo(t.aim.x + 8, t.aim.y);
+        ctx.moveTo(t.aim.x, t.aim.y - 8);
+        ctx.lineTo(t.aim.x, t.aim.y + 8);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Portée de la tour sélectionnée, ou fantôme de la tour en cours de pose
     if (selected) {
       const def = TOWER_DEFS[selected.type];
-      if (def.range) drawRange((selected.col + 0.5) * CELL, (selected.row + 0.5) * CELL, towerRangePx(selected), def.color);
+      if (def.range && !def.line) drawRange(selected.x, selected.y, towerRangePx(selected), def.color);
     } else if (placing && target) {
       const def = TOWER_DEFS[placing];
-      const ok = canPlace(state, target.col, target.row) && state.gold >= def.cost;
-      drawRange((target.col + 0.5) * CELL, (target.row + 0.5) * CELL, towerStats(def, [0, 0, 0]).range, ok ? def.color : "#ff3b5c");
+      const ok = !placeIssue(state, target.x, target.y) && state.gold >= def.cost;
+      const color = ok ? def.color : "#ff3b5c";
+      if (!def.line) drawRange(target.x, target.y, towerStats(def, [0, 0, 0]).range, color);
+      ctx.globalAlpha = 0.7;
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(target.x, target.y, TOWER_RADIUS, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 0.22;
+      ctx.fill();
+      ctx.globalAlpha = 1;
     }
 
     // Tours
     for (const tower of state.towers) {
       const def = TOWER_DEFS[tower.type];
-      const x = tower.col * CELL;
-      const y = tower.row * CELL;
+      const x = tower.x;
+      const y = tower.y;
       const total = tower.tiers.reduce((a, b) => a + b, 0);
       const maxed = tower.tiers.some((t) => t >= MAX_TIER);
-      ctx.fillStyle = "#14141f";
-      ctx.fillRect(x + 3, y + 3, CELL - 6, CELL - 6);
-      ctx.strokeStyle = tower.jam > 0 ? "#ff2a6d" : def.color;
-      ctx.lineWidth = tower.id === selectedId ? 3 : 1.5;
-      if (tower.jam > 0) ctx.setLineDash([3, 3]);
-      ctx.strokeRect(x + 3.5, y + 3.5, CELL - 7, CELL - 7);
-      ctx.setLineDash([]);
       if (def.support) {
         // Aura du Beacon : disque qui pulse doucement autour de la tour
         ctx.globalAlpha = (tower.fury > 0 ? 0.22 : 0.12) + 0.08 * Math.sin(state.time * 3);
         ctx.fillStyle = def.color;
         ctx.beginPath();
-        ctx.arc(x + CELL / 2, y + CELL / 2, tower.st.range, 0, Math.PI * 2);
+        ctx.arc(x, y, tower.st.range, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
       }
+      ctx.fillStyle = "#14141f";
+      ctx.beginPath();
+      ctx.arc(x, y, TOWER_RADIUS, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = tower.jam > 0 ? "#ff2a6d" : def.color;
+      ctx.lineWidth = tower.id === selectedId ? 3 : 1.5;
+      if (tower.jam > 0) ctx.setLineDash([3, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
       ctx.fillStyle = tower.jam > 0 ? "#6b6b7a" : def.color;
       ctx.shadowColor = def.color;
       ctx.shadowBlur = tower.fury > 0 ? 16 : 8;
+      const grow = Math.min(total, 6) * 0.45;
       ctx.beginPath();
-      const grow = Math.min(total, 6) * 0.7;
-      if (def.income) ctx.rect(x + CELL / 2 - 7 - grow, y + CELL / 2 - 7 - grow, 14 + grow * 2, 14 + grow * 2);
-      else if (def.support) { ctx.moveTo(x + CELL / 2, y + 6); ctx.lineTo(x + CELL - 8, y + CELL - 8); ctx.lineTo(x + 8, y + CELL - 8); ctx.closePath(); }
-      else ctx.arc(x + CELL / 2, y + CELL / 2, 7 + grow, 0, Math.PI * 2);
+      if (def.income) ctx.rect(x - 5 - grow, y - 5 - grow, 10 + grow * 2, 10 + grow * 2);
+      else if (def.support) { ctx.moveTo(x, y - 8); ctx.lineTo(x + 8, y + 6); ctx.lineTo(x - 8, y + 6); ctx.closePath(); }
+      else if (def.spikes) { ctx.moveTo(x, y - 8); ctx.lineTo(x + 7, y); ctx.lineTo(x, y + 8); ctx.lineTo(x - 7, y); ctx.closePath(); }
+      else ctx.arc(x, y, 5 + grow, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
       // Paliers : une rangée de petits carrés par chemin, de la couleur du chemin
       for (let p = 0; p < PATH_COUNT; p++) {
         ctx.fillStyle = PATH_COLORS[p];
-        for (let i = 0; i < tower.tiers[p]; i++) ctx.fillRect(x + 5 + p * 12 + i * 2.5, y + CELL - 9, 2, 4);
+        for (let i = 0; i < tower.tiers[p]; i++) ctx.fillRect(x - 16 + p * 11 + i * 2.5, y + TOWER_RADIUS + 3, 2, 4);
       }
-      if (maxed) { ctx.strokeStyle = "#fcee0a"; ctx.lineWidth = 1.5; ctx.strokeRect(x + 1.5, y + 1.5, CELL - 3, CELL - 3); }
+      if (maxed && !tower.paragon) { ctx.strokeStyle = "#fcee0a"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, TOWER_RADIUS + 2.5, 0, Math.PI * 2); ctx.stroke(); }
       if (tower.paragon) {
         // Paragon : anneau doré qui tourne et degré
         ctx.strokeStyle = "#fcee0a";
@@ -243,20 +323,22 @@ export function createTowerDefenseUI(root, wallet) {
         ctx.setLineDash([5, 4]);
         ctx.lineDashOffset = -state.time * 18;
         ctx.beginPath();
-        ctx.arc(x + CELL / 2, y + CELL / 2, CELL / 2 + 1, 0, Math.PI * 2);
+        ctx.arc(x, y, TOWER_RADIUS + 4, 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.lineDashOffset = 0;
         ctx.fillStyle = "#fcee0a";
         ctx.font = "bold 9px monospace";
-        ctx.fillText(`★${tower.st.degree}`, x + 4, y + 12);
+        ctx.textAlign = "center";
+        ctx.fillText(`★${tower.st.degree}`, x, y - TOWER_RADIUS - 7);
+        ctx.textAlign = "start";
       }
       // Capacité : pastille verte quand elle est prête
       if (tower.st.ability) {
         const ready = tower.abilityCd <= 0 && state.phase === "wave";
         ctx.fillStyle = ready ? "#3ddc84" : tower.abilityCd > 0 ? "#6b6b7a" : "#9aa5b1";
         ctx.beginPath();
-        ctx.arc(x + CELL - 8, y + 8, 3.5, 0, Math.PI * 2);
+        ctx.arc(x + TOWER_RADIUS - 1, y - TOWER_RADIUS + 1, 3.5, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -321,11 +403,17 @@ export function createTowerDefenseUI(root, wallet) {
       ctx.globalAlpha = 1;
     }
 
-    // Case visée (clavier ou souris)
-    if (target && target.col >= 0 && target.col < COLS && target.row >= 0 && target.row < ROWS) {
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.55)";
+    // Repère du curseur clavier, ou du point visé en cours de choix
+    const mark = aimPicking && hover ? hover : showCursor ? cursor : null;
+    if (mark) {
+      ctx.strokeStyle = aimPicking ? "#fcee0a" : "rgba(255, 255, 255, 0.7)";
       ctx.lineWidth = 2;
-      ctx.strokeRect(target.col * CELL + 1, target.row * CELL + 1, CELL - 2, CELL - 2);
+      ctx.beginPath();
+      ctx.moveTo(mark.x - 9, mark.y);
+      ctx.lineTo(mark.x + 9, mark.y);
+      ctx.moveTo(mark.x, mark.y - 9);
+      ctx.lineTo(mark.x, mark.y + 9);
+      ctx.stroke();
     }
   }
 
@@ -404,24 +492,42 @@ export function createTowerDefenseUI(root, wallet) {
     }));
   }
 
-  // Bloc « Paragon » : progression vers la fusion, ou degré du paragon.
+  // Bloc « Paragon » : progression vers la fusion, curseur d'investissement (seulement au moment de la fusion) ou degré du paragon.
   function renderParagon(tower, def, info) {
     paragonBox.replaceChildren();
     if (info.is) {
       paragonBox.append(
         h("strong", { class: "sel-paragon-title" }, `★ PARAGON — degré ${info.degree}/${PARAGON_MAX_DEGREE}`),
-        h("p", {}, `${tower.kills} éliminations. Les trois chemins sont au palier 4 ; la capacité recharge deux fois plus vite. Le degré monte avec les éliminations.`));
+        h("p", {}, `${tower.kills} éliminations. Les trois chemins sont au palier 4 ; la capacité recharge deux fois plus vite. Le degré monte encore avec les éliminations (jusqu'à +10), mais on ne peut plus investir d'énergie.`));
       return;
     }
     const need = `${info.ready}/${info.need} tours « ${def.name} » avec un chemin au palier 4`;
-    const lines = [h("strong", { class: "sel-paragon-title" }, "★ Paragon"), h("p", {}, `Fusionne 3 tours : cumule les 3 chemins au palier 4. ${need}. Coût : ${fmt(info.cost)} ⚡ (une seule par type).`)];
-    {
-      const confirm = paragonConfirm === tower.id && !info.reason;
-      lines.push(h("button", {
-        class: "button button-primary", type: "button", disabled: !!info.reason, onclick: () => doParagon(),
-        title: info.reason && info.reason !== "gold" ? REASONS[info.reason] : "Sacrifie les 2 autres tours prêtes (les plus investies)"
-      }, confirm ? "Confirmer : sacrifier 2 tours" : info.reason === "gold" ? `Fusionner (${fmt(info.cost)} ⚡ — énergie insuffisante)` : "Fusionner en paragon (G)"));
+    const lines = [
+      h("strong", { class: "sel-paragon-title" }, "★ Paragon"),
+      h("p", {}, `Fusionne 3 tours : cumule les 3 chemins au palier 4. ${need}. Prix (selon la puissance du type) : ${fmt(info.cost)} ⚡. Une seule par type.`)
+    ];
+    const maxSteps = Math.max(0, Math.min(info.maxSteps, Math.floor((state.gold - info.cost) / info.step)));
+    paragonSteps = Math.min(paragonSteps, maxSteps);
+    const blocked = !!info.reason && info.reason !== "gold";
+    const label = h("span", { class: "pg-label" });
+    const button = h("button", { class: "button button-primary", type: "button", disabled: !!info.reason, onclick: () => doParagon(), title: blocked ? REASONS[info.reason] : "Sacrifie les 2 autres tours prêtes (les plus investies)" });
+    const refresh = () => {
+      const extra = paragonSteps * info.step;
+      const degree = Math.min(PARAGON_MAX_DEGREE, info.base + paragonSteps);
+      label.textContent = `Investissement en plus : ${fmt(extra)} ⚡ → degré ${degree}/${PARAGON_MAX_DEGREE}`;
+      const total = info.cost + extra;
+      button.textContent = paragonConfirm === tower.id && !info.reason
+        ? `Confirmer : sacrifier 2 tours (−${fmt(total)} ⚡)`
+        : info.reason === "gold" ? `Énergie insuffisante (${fmt(total)} ⚡)` : `Fusionner (${fmt(total)} ⚡) · G`;
+    };
+    if (info.maxSteps > 0 && !blocked) {
+      const slider = h("input", { class: "pg-slider", type: "range", min: 0, max: Math.max(0, maxSteps), step: 1, value: paragonSteps, "aria-label": "Énergie investie en plus pour monter le degré du paragon" });
+      slider.disabled = maxSteps === 0;
+      slider.addEventListener("input", () => { paragonSteps = Number(slider.value); paragonConfirm = null; refresh(); });
+      lines.push(label, slider, h("p", { class: "pg-note" }, "Possible uniquement maintenant : une fois fusionné, le degré ne se paie plus."));
     }
+    refresh();
+    lines.push(button);
     paragonBox.append(...lines);
   }
 
@@ -478,13 +584,23 @@ export function createTowerDefenseUI(root, wallet) {
     const buffed = beaconBuff(state, tower);
     setText(selStats, def.support
       ? `Aura ${num(ts.range / CELL)} cases · dégâts ${pct(ts.boostDamage)} · cadence ${pct(ts.boostRate)}`
+      : def.line
+        ? `Dégâts ${Math.round(ts.damage * buffed.damage)} · portée infinie · ${num(ts.rate * buffed.rate)} tirs/s · transperce ${ts.pierceN >= 50 ? "toute la ligne" : `${ts.pierceN} ennemis`}${ts.targets > 1 ? ` · ${ts.targets} rayons` : ""}`
+      : def.spikes
+        ? `Pointes : ${Math.round(ts.damage * buffed.damage)} dégâts × ${ts.pierceN} passages · ${ts.batch} tas toutes les ${num(1 / (ts.rate * buffed.rate))} s · portée ${num((ts.range * buffed.range) / CELL)} cases`
       : def.income
         ? `Produit ${fmt(Math.round(ts.income))} énergie${ts.interest ? ` + ${num(ts.interest * 100)} % d'intérêts` : ""} à la fin de chaque vague`
         : `Dégâts ${Math.round(ts.damage * buffed.damage)} · portée ${num((ts.range * buffed.range) / CELL)} cases · ${num(ts.rate * buffed.rate)} tirs/s${ts.targets > 1 ? ` · ${ts.targets} cibles` : ""}`);
     setText(selOwned, tower.paragon ? "Tous les chemins au palier 4" : total ? ownedUpgrades(tower).map((u) => u.name).join(" · ") : "Aucune amélioration : choisis un chemin ci-dessous.");
 
-    const shoots = !def.support && !def.income;
+    const shoots = !def.support && !def.income && !def.spikes && !def.line;
     targetButton.hidden = !shoots;
+    aimRow.hidden = !tower.aim;
+    if (tower.aim) {
+      setText(aimModeButton, `Visée : ${tower.aimMode === "mouse" ? "souris" : "point fixe"} (M)`);
+      setText(aimPickButton, aimPicking ? "Clique sur le plateau…" : "Choisir le point (C)");
+      aimPickButton.disabled = tower.aimMode === "mouse";
+    }
     if (shoots) setText(targetButton, `Ciblage : ${TARGET_LABELS[tower.target]} (T)`);
 
     const ab = tower.st.ability ? ABILITIES[tower.st.ability] : null;
@@ -580,18 +696,46 @@ export function createTowerDefenseUI(root, wallet) {
     draw();
   }
 
-  function tryPlace(col, row) {
-    const existing = towerAt(state, col, row);
+  function tryPlace(x, y) {
+    const existing = towerAt(state, x, y);
     if (existing) {
-      if (selectedId !== existing.id) paragonConfirm = null;
+      if (selectedId !== existing.id) { paragonConfirm = null; aimPicking = false; }
       selectedId = existing.id;
       placing = null;
     } else if (placing) {
-      const result = placeTower(state, placing, col, row);
+      const result = placeTower(state, placing, x, y);
       if (!result.ok) say(REASONS[result.reason] || "Impossible.");
+      else if (result.tower.aim) {
+        // Dartling : on le sélectionne tout de suite pour régler sa visée.
+        selectedId = result.tower.id;
+        placing = null;
+        say("Dartling posé : choisis son point visé (clic sur « Choisir le point ») ou passe en visée souris (M).");
+      }
     } else {
       selectedId = null;
+      aimPicking = false;
     }
+    updateHud();
+    draw();
+  }
+
+  function doAimMode() {
+    const tower = state.towers.find((t) => t.id === selectedId);
+    if (!tower || !tower.aim) return;
+    aimPicking = false;
+    const mode = tower.aimMode === "mouse" ? "point" : "mouse";
+    setAimMode(state, tower.id, mode);
+    say(mode === "mouse" ? "Visée à la souris : la tour suit ton curseur sur le plateau." : "Visée à point fixe.");
+    updateHud();
+    draw();
+  }
+
+  function doAimPick() {
+    const tower = state.towers.find((t) => t.id === selectedId);
+    if (!tower || !tower.aim) return;
+    if (tower.aimMode === "mouse") setAimMode(state, tower.id, "point");
+    aimPicking = !aimPicking;
+    if (aimPicking) say("Clique sur le plateau pour choisir le point visé.");
     updateHud();
     draw();
   }
@@ -648,9 +792,11 @@ export function createTowerDefenseUI(root, wallet) {
       return;
     }
     paragonConfirm = null;
-    const result = makeParagon(state, tower.id);
+    const steps = Math.max(0, Math.min(paragonSteps, info.maxSteps, Math.floor((state.gold - info.cost) / info.step)));
+    const result = makeParagon(state, tower.id, steps);
     if (result.ok) say(`PARAGON ! ${TOWER_DEFS[tower.type].name} — degré ${result.tower.st.degree}`);
     else say(REASONS[result.reason] || "Impossible.");
+    paragonSteps = 0;
     panelSig = "";
     updateHud();
     draw();
@@ -779,24 +925,32 @@ export function createTowerDefenseUI(root, wallet) {
 
   /* ---------- Souris, doigt, clavier ---------- */
 
-  function cellFromEvent(event) {
+  function pointFromEvent(event) {
     const rect = board.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * W;
-    const y = ((event.clientY - rect.top) / rect.height) * H;
-    return { col: Math.floor(x / CELL), row: Math.floor(y / CELL) };
+    return { x: ((event.clientX - rect.left) / rect.width) * W, y: ((event.clientY - rect.top) / rect.height) * H };
   }
 
   board.addEventListener("pointermove", (event) => {
-    hover = cellFromEvent(event);
+    hover = pointFromEvent(event);
+    state.cursor = hover;                   // le Dartling en visée souris suit ce point
     showCursor = false;
     if (status !== "running") draw();
   });
   board.addEventListener("pointerleave", () => { hover = null; if (status !== "running") draw(); });
   board.addEventListener("pointerdown", (event) => {
     if (status !== "running") return;
-    const { col, row } = cellFromEvent(event);
-    hover = { col, row };
-    tryPlace(col, row);
+    const point = pointFromEvent(event);
+    hover = point;
+    state.cursor = point;
+    if (aimPicking && selectedId !== null) {
+      setAim(state, selectedId, point.x, point.y);
+      aimPicking = false;
+      say("Point visé défini.");
+      updateHud();
+      draw();
+      return;
+    }
+    tryPlace(point.x, point.y);
   });
 
   startButton.addEventListener("click", primaryAction);
@@ -809,7 +963,8 @@ export function createTowerDefenseUI(root, wallet) {
     const onButton = event.target instanceof Element && event.target.closest("a, button");
 
     if (key === "p" || key === "escape") {
-      if (key === "escape" && status === "running" && (placing || selectedId !== null)) {
+      if (key === "escape" && status === "running" && (placing || selectedId !== null || aimPicking)) {
+        aimPicking = false;
         placing = null;
         selectedId = null;
         updateHud();
@@ -835,8 +990,8 @@ export function createTowerDefenseUI(root, wallet) {
       showCursor = true;
       hover = null;
       cursor = {
-        col: Math.min(COLS - 1, Math.max(0, cursor.col + moves[key][0])),
-        row: Math.min(ROWS - 1, Math.max(0, cursor.row + moves[key][1]))
+        x: Math.min(W - 1, Math.max(1, cursor.x + moves[key][0] * 12)),
+        y: Math.min(H - 1, Math.max(1, cursor.y + moves[key][1] * 12))
       };
       draw();
       return;
@@ -849,12 +1004,14 @@ export function createTowerDefenseUI(root, wallet) {
     }
     if (key === " " && !onButton) {
       event.preventDefault();
-      tryPlace(cursor.col, cursor.row);
+      tryPlace(cursor.x, cursor.y);
       showCursor = true;
       return;
     }
     if (key === "u") doUpgradeMain();
     if (key === "g") doParagon();
+    if (key === "m") doAimMode();
+    if (key === "c") doAimPick();
     if (key === "," ) stepPalette(-1);
     if (key === ".") stepPalette(1);
     if (key === "t") doTarget();

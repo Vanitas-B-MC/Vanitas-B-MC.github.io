@@ -19,7 +19,6 @@ export const SELL_RATIO = 0.6;
 
 // Paragon (comme Bloons TD6) : on fusionne 3 tours d'un même type ayant un chemin au palier 4. Une seule par type.
 export const PARAGON_NEED = 3;
-export const PARAGON_COST_MUL = 25;      // coût = coût de pose × 25
 export const PARAGON_MAX_DEGREE = 20;
 
 export const PATH_COUNT = 3;        // chemins d'amélioration par tour
@@ -36,27 +35,68 @@ export const DIFFICULTIES = [
 export const DEFAULT_DIFFICULTY = "normal";
 export const diffById = (id) => DIFFICULTIES.find((d) => d.id === id) || DIFFICULTIES[1];
 
-/* ---------- Cartes et chemins des ennemis ---------- */
+/* ---------- Plateau, cartes et chemins des ennemis ---------- */
 
-// Points de passage en cases (le chemin entre et sort hors de l'écran ou s'arrête au centre).
+export const W = COLS * CELL;            // taille du plateau en pixels
+export const H = ROWS * CELL;
+
+// Placement libre (comme dans BTD6) : une tour est un disque posé n'importe où, sauf sur le chemin,
+// sur un obstacle (arbre, étang…) ou sur une autre tour.
+export const TOWER_RADIUS = 13;
+export const TOWER_GAP = 30;             // distance minimale entre deux tours (centre à centre)
+export const PATH_CLEAR = 31;            // distance minimale entre le centre d'une tour et l'axe du chemin
+export const PATH_HALF = 18;             // demi-largeur dessinée du chemin
+
+// lanes : un ou plusieurs chemins, chacun en points de passage (en cases, décimales permises ; hors plateau = entrée ou sortie).
+// smooth : coins arrondis. obstacles : [colonne, ligne, rayon en cases].
 // unlock : crédits pour débloquer la carte. hpMul : solidité des ennemis. reward : multiplicateur de crédits.
 export const MAPS = [
   { id: "serpent",    name: "Serpent",    desc: "Le classique : trois virages.",              unlock: 0,    hpMul: 1,    reward: 1,
-    waypoints: [[-1, 1], [11, 1], [11, 4], [2, 4], [2, 7], [14, 7]] },
+    lanes: [[[-1, 1], [11, 1], [11, 4], [2, 4], [2, 7], [14, 7]]], obstacles: [[7, 5.5, 0.7], [12.7, 2.6, 0.55]] },
+  { id: "prairie",    name: "Prairie",    desc: "Un grand chemin en S aux courbes douces, parsemé d'arbres.", unlock: 600, hpMul: 0.65, reward: 1.2, smooth: true,
+    lanes: [[[-1, 6], [2, 6], [4, 3], [7, 3], [9, 6], [12, 6], [12, 2], [14, 2]]], obstacles: [[6.2, 5.6, 0.75], [1.6, 1.9, 0.7], [10.6, 3.9, 0.6]] },
   { id: "spirale",    name: "Spirale",    desc: "Un long chemin qui s'enroule vers le cœur.", unlock: 1500, hpMul: 1.15, reward: 1.5,
-    waypoints: [[-1, 7], [12, 7], [12, 1], [1, 1], [1, 5], [8, 5]] },
-  { id: "zigzag",     name: "Zigzag",     desc: "Sept virages serrés : peu de place pour les tours.", unlock: 5000, hpMul: 1.3,  reward: 2,
-    waypoints: [[-1, 4], [3, 4], [3, 1], [8, 1], [8, 7], [12, 7], [12, 4], [14, 4]] },
-  { id: "labyrinthe", name: "Labyrinthe", desc: "Un très long chemin : beaucoup d'ennemis, beaucoup de crédits.", unlock: 15000, hpMul: 1.5, reward: 2.6,
-    waypoints: [[-1, 1], [12, 1], [12, 3], [1, 3], [1, 5], [12, 5], [12, 7], [14, 7]] }
+    lanes: [[[-1, 7], [12, 7], [12, 1], [1, 1], [1, 5], [8, 5]]], obstacles: [] },
+  { id: "fourche",    name: "Fourche",    desc: "Deux entrées qui fusionnent : il faut couvrir les deux chemins.", unlock: 3000, hpMul: 0.45, reward: 1.8, smooth: true, bonusGold: 60,
+    lanes: [[[-1, 1], [8, 1], [8, 4], [14, 4]], [[-1, 7], [8, 7], [8, 4]]], obstacles: [[11.3, 1.4, 0.8], [11.3, 6.8, 0.8]] },
+  { id: "zigzag",     name: "Zigzag",     desc: "Sept virages serrés : peu de place pour les tours.", unlock: 5000, hpMul: 1,  reward: 2,
+    lanes: [[[-1, 4], [3, 4], [3, 1], [8, 1], [8, 7], [12, 7], [12, 4], [14, 4]]], obstacles: [] },
+  { id: "riviere",    name: "Rivière",    desc: "Des étangs empêchent de construire au centre.", unlock: 8000, hpMul: 0.7, reward: 2.3, smooth: true,
+    lanes: [[[-1, 2], [4, 2], [4, 6], [9, 6], [9, 2], [14, 2]]], obstacles: [[6.5, 3.7, 1.25], [11.9, 5.2, 1.0], [1.6, 5.5, 0.9]] },
+  { id: "labyrinthe", name: "Labyrinthe", desc: "Un très long chemin : beaucoup d'ennemis, beaucoup de crédits.", unlock: 15000, hpMul: 1.4, reward: 2.6,
+    lanes: [[[-1, 1], [12, 1], [12, 3], [1, 3], [1, 5], [12, 5], [12, 7], [14, 7]]], obstacles: [] },
+  { id: "infernal",   name: "Infernal",   desc: "Trois chemins qui se croisent puis fusionnent : le défi ultime.", unlock: 25000, hpMul: 0.4, reward: 3.2, smooth: true, bonusGold: 160,
+    lanes: [[[-1, 1], [12, 1], [12, 4], [14, 4]], [[-1, 7], [12, 7], [12, 4]], [[7, -1], [7, 4], [12, 4]]], obstacles: [[3.5, 4, 0.9], [9.6, 2.7, 0.55], [9.6, 5.4, 0.55]] }
 ];
 export const MAP_IDS = MAPS.map((m) => m.id);
 export const FREE_MAP = "serpent";
 export const mapById = (id) => MAPS.find((m) => m.id === id) || MAPS[0];
 
-// Prépare un chemin : points en pixels, segments, longueur et cases interdites.
-function buildMap(def) {
-  const points = def.waypoints.map(([c, r]) => [(c + 0.5) * CELL, (r + 0.5) * CELL]);
+// Coins arrondis : remplace chaque virage par une courbe de Bézier de rayon `radius`.
+function roundCorners(points, radius) {
+  if (points.length < 3) return points;
+  const out = [points[0]];
+  for (let i = 1; i < points.length - 1; i++) {
+    const [px, py] = points[i - 1];
+    const [cx, cy] = points[i];
+    const [nx, ny] = points[i + 1];
+    const d1 = Math.hypot(cx - px, cy - py);
+    const d2 = Math.hypot(nx - cx, ny - cy);
+    const r = Math.min(radius, d1 / 2, d2 / 2);
+    const a = [cx + ((px - cx) / d1) * r, cy + ((py - cy) / d1) * r];
+    const b = [cx + ((nx - cx) / d2) * r, cy + ((ny - cy) / d2) * r];
+    for (let k = 0; k <= 6; k++) {
+      const t = k / 6;
+      const u = 1 - t;
+      out.push([u * u * a[0] + 2 * u * t * cx + t * t * b[0], u * u * a[1] + 2 * u * t * cy + t * t * b[1]]);
+    }
+  }
+  out.push(points[points.length - 1]);
+  return out;
+}
+
+// Un chemin prêt à l'emploi : points, segments, longueur, et échantillons réguliers (pour les pointes de la Spike Factory).
+function buildLane(points) {
   const segments = [];
   let total = 0;
   for (let i = 0; i < points.length - 1; i++) {
@@ -66,34 +106,53 @@ function buildMap(def) {
     segments.push({ x1, y1, x2, y2, length, start: total });
     total += length;
   }
-  const cells = new Set();
-  for (let i = 0; i < def.waypoints.length - 1; i++) {
-    const [c1, r1] = def.waypoints[i];
-    const [c2, r2] = def.waypoints[i + 1];
-    for (let c = Math.min(c1, c2); c <= Math.max(c1, c2); c++) {
-      for (let r = Math.min(r1, r2); r <= Math.max(r1, r2); r++) cells.add(`${c},${r}`);
-    }
-  }
-  return { ...def, points, segments, length: total, cells };
+  const lane = { points, segments, length: total, samples: [] };
+  for (let d = 0; d <= total; d += 14) lane.samples.push({ dist: d, ...pointAt(d, lane) });
+  return lane;
+}
+
+function buildMap(def) {
+  const lanes = def.lanes.map((wp) => {
+    let pts = wp.map(([c, r]) => [(c + 0.5) * CELL, (r + 0.5) * CELL]);
+    if (def.smooth) pts = roundCorners(pts, CELL * 1.3);
+    return buildLane(pts);
+  });
+  const obstacles = (def.obstacles || []).map(([c, r, rad]) => ({ x: (c + 0.5) * CELL, y: (r + 0.5) * CELL, r: rad * CELL }));
+  const first = lanes[0];
+  return { ...def, lanes, laneCount: lanes.length, obstacles, points: first.points, segments: first.segments, length: first.length };
 }
 
 const BUILT = Object.fromEntries(MAPS.map((m) => [m.id, buildMap(m)]));
 export const builtMap = (id) => BUILT[id] || BUILT[FREE_MAP];
 
-// Compatibilité : chemin de la première carte.
-export const WAYPOINTS = MAPS[0].waypoints;
-export const PATH_LENGTH = BUILT[FREE_MAP].length;
-export const PATH_POINTS = BUILT[FREE_MAP].points;
-
-export const isPathCell = (col, row, map = BUILT[FREE_MAP]) => map.cells.has(`${col},${row}`);
-
-// Position (en pixels) d'un ennemi qui a parcouru `dist` pixels du chemin.
-export function pointAt(dist, map = BUILT[FREE_MAP]) {
-  const d = Math.min(Math.max(dist, 0), map.length);
-  const seg = map.segments.find((s) => d <= s.start + s.length) || map.segments[map.segments.length - 1];
+// Position (en pixels) d'un ennemi qui a parcouru `dist` pixels d'un chemin (un « lane » ou une carte, qui a les mêmes champs).
+export function pointAt(dist, lane = BUILT[FREE_MAP]) {
+  const d = Math.min(Math.max(dist, 0), lane.length);
+  const seg = lane.segments.find((s) => d <= s.start + s.length) || lane.segments[lane.segments.length - 1];
   const t = seg.length === 0 ? 0 : (d - seg.start) / seg.length;
   return { x: seg.x1 + (seg.x2 - seg.x1) * t, y: seg.y1 + (seg.y2 - seg.y1) * t };
 }
+
+function projectOnSegment(px, py, s) {
+  const dx = s.x2 - s.x1;
+  const dy = s.y2 - s.y1;
+  const l2 = dx * dx + dy * dy;
+  const t = l2 ? Math.max(0, Math.min(1, ((px - s.x1) * dx + (py - s.y1) * dy) / l2)) : 0;
+  const x = s.x1 + t * dx;
+  const y = s.y1 + t * dy;
+  return { x, y, d: Math.hypot(px - x, py - y) };
+}
+
+// Point du chemin (de n'importe quel chemin de la carte) le plus proche de (x, y).
+export function nearestPathPoint(map, x, y) {
+  let best = null;
+  for (const lane of map.lanes) for (const seg of lane.segments) {
+    const q = projectOnSegment(x, y, seg);
+    if (!best || q.d < best.d) best = q;
+  }
+  return best;
+}
+export const distToPath = (map, x, y) => nearestPathPoint(map, x, y).d;
 
 /* ---------- Tours ---------- */
 
@@ -113,8 +172,13 @@ export const TOWER_DEFS = {
   pulsar: { id: "pulsar", name: "Pulsar",          desc: "Onde qui touche tous les ennemis proches.",            cost: 160, unlock: 3000, range: 2.2, rate: 0.7,  dmg: 24, color: "#ff6bd6", pulse: true },
   beacon: { id: "beacon", name: "Beacon",         desc: "Ne tire pas : booste les tours voisines (dégâts, cadence). Plusieurs beacons se cumulent.", cost: 120, unlock: 9000,  range: 2.2, rate: 0, dmg: 0, color: "#4dffd2", support: true },
   miner:  { id: "miner",  name: "Data Miner",      desc: "Ne tire pas : produit de l'énergie à la fin de chaque vague.",  cost: 100, unlock: 4000,  range: 0,   rate: 0, dmg: 0, color: "#5b9bff", income: true },
-  dartling: { id: "dartling", name: "Dartling", desc: "Tir en ligne : chaque salve transperce plusieurs ennemis alignés. Au bout du chemin 1, le Rayon de la mort.", cost: 110, unlock: 6000, range: 3, rate: 5, dmg: 7, color: "#ffe14d", line: true },
-  desperado: { id: "desperado", name: "Desperado", desc: "Duelliste : tire d'autant plus vite qu'il y a peu d'ennemis à portée. Critiques à longue distance, salves de revolver.", cost: 150, unlock: 12000, range: 3.2, rate: 1.5, dmg: 26, color: "#ff9f5a" }
+  dartling: { id: "dartling", name: "Dartling", desc: "Portée infinie, tir continu : vise la souris ou un point fixe. Chaque salve transperce les ennemis alignés. Au bout du chemin 1, le Rayon de la mort.", cost: 1200, upScale: 0.35, unlock: 6000, range: 99, rate: 5, dmg: 14, color: "#ffe14d", line: true },
+  desperado: { id: "desperado", name: "Desperado", desc: "Duelliste : tire d'autant plus vite qu'il y a peu d'ennemis à portée. Critiques à longue distance, salves de revolver.", cost: 150, unlock: 12000, range: 3.2, rate: 1.5, dmg: 26, color: "#ff9f5a" },
+  tack:      { id: "tack",      name: "Tack Shooter", desc: "Tire une couronne de pointes dans toutes les directions. Portée courte, idéal dans les virages.", cost: 90,  unlock: 300,   range: 1.7, rate: 1.3, dmg: 14,  color: "#ff7a7a", radial: 8 },
+  boomerang: { id: "boomerang", name: "Boomerang",    desc: "Un boomerang qui transperce plusieurs ennemis et revient : chaque ennemi touché l'est deux fois.", cost: 100, unlock: 700,   range: 3.2, rate: 1.1, dmg: 14, color: "#7ad7ff", boom: true },
+  wizard:    { id: "wizard",    name: "Wizard",       desc: "Magie : ignore le blindage. Boules de feu qui brûlent, éclairs, invocations.", cost: 120, unlock: 2500,  range: 3.3, rate: 1.6, dmg: 12, color: "#b06bff", magic: true },
+  spikes:    { id: "spikes",    name: "Spike Factory", desc: "Pose des tas de pointes sur le chemin : chaque tas blesse les ennemis qui passent dessus.", cost: 130, unlock: 3500,  range: 3.4, rate: 0.6, dmg: 12, color: "#c0c0d0", spikes: true },
+  super:     { id: "super",     name: "Super Monkey", desc: "Cadence démesurée et longue portée. Très cher, très puissant.", cost: 450, unlock: 20000, range: 4.2, rate: 12, dmg: 6, color: "#6bd0ff" }
 };
 export const TOWER_IDS = Object.keys(TOWER_DEFS);
 export const LINE_WIDTH = 11;           // demi-largeur (px) du tir en ligne du Dartling
@@ -143,7 +207,12 @@ export const PATH_NAMES = {
   beacon:  ["Dégâts", "Cadence", "Réseau"],
   miner:   ["Rendement", "Intérêts", "Surcadence"],
   dartling: ["Perforation", "Cadence", "Armement"],
-  desperado: ["Duel", "Précision", "Barillet"]
+  desperado: ["Duel", "Précision", "Barillet"],
+  tack:      ["Pointes", "Lames", "Feu"],
+  boomerang: ["Glaives", "Vitesse", "Puissance"],
+  wizard:    ["Feu", "Arcane", "Invocation"],
+  spikes:    ["Fabrication", "Pointes", "Zone"],
+  super:     ["Lasers", "Portée", "Pouvoirs"]
 };
 
 export const UPGRADES = {
@@ -204,20 +273,45 @@ export const UPGRADES = {
   ],
   // Dartling : chemin 1 = perforation jusqu'au Rayon de la mort (touche tous les ennemis de la ligne)
   dartling: [
-    [U("Ailettes", 0.6, { pierceN: 2, dmg: 1.2 }), U("Pointes de tungstène", 1.2, { pierceN: 3, dmg: 1.3 }), U("Faisceau laser", 2.5, { pierceN: 5, dmg: 1.5, range: 1.1 }), U("Rayon de la mort", 5.5, { pierceN: 99, dmg: 2.5, rate: 1.5 })],
-    [U("Moteur", 0.6, { rate: 1.3 }), U("Barillet rapide", 1.2, { rate: 1.3 }), U("Mitrailleuse", 2.4, { rate: 1.4, range: 1.1 }), U("Hyper-rafale", 5, { rate: 1.6, dmg: 1.3 })],
+    [U("Ailettes", 0.6, { pierceN: 2, dmg: 1.2 }), U("Pointes de tungstène", 1.2, { pierceN: 3, dmg: 1.3 }), U("Faisceau laser", 2.5, { pierceN: 5, dmg: 1.5 }), U("Rayon de la mort", 5.5, { pierceN: 99, dmg: 2.5, rate: 1.5 })],
+    [U("Moteur", 0.6, { rate: 1.3 }), U("Barillet rapide", 1.2, { rate: 1.3 }), U("Mitrailleuse", 2.4, { rate: 1.4, dmg: 1.1 }), U("Hyper-rafale", 5, { rate: 1.6, dmg: 1.3 })],
     [U("Gros calibre", 0.7, { dmg: 1.5 }), U("Canons jumeaux", 1.4, { targets: 1 }), U("Triple canon", 2.6, { targets: 1, dmg: 1.3 }), U("Rayon fatal", 5.5, { targets: 1, dmg: 1.6, ability: "deathbeam" })]
   ],
   // Desperado : duel (cadence selon le nombre d'ennemis), critiques à distance, salves
   desperado: [
     [U("Dégaine rapide", 0.6, { quick: 0.5 }), U("Colt long", 1.2, { dmg: 1.3, rate: 1.1 }), U("Gros calibre", 2.4, { duel: 1.2, dmg: 1.2 }), U("Soleil de plomb", 5.2, { dmg: 2, duel: 0.6, rate: 1.2 })],
-    [U("Visée", 0.6, { critFar: 0.1, critMul: 2.5 }), U("Mouche", 1.2, { critFar: 0.15, range: 1.1 }), U("Œil de lynx", 2.5, { critFar: 0.2, critMul: 3.5, pierce: true }), U("Fantôme du désert", 5, { crit: 0.15, critFar: 0.25, execute: 0.2, range: 1.2 })],
+    [U("Visée", 0.6, { critFar: 0.1, critMul: 2.5 }), U("Mouche", 1.2, { critFar: 0.15, range: 1.1 }), U("Œil de lynx", 2.5, { critFar: 0.2, critMul: 3.5, pierce: true, bounty: 0.5 }), U("Fantôme du désert", 5, { crit: 0.15, critFar: 0.25, execute: 0.2, range: 1.2, bounty: 0.5 })],
     [U("Errant", 0.7, { burst: 1 }), U("Face à face", 1.3, { burst: 1, rate: 1.2 }), U("Six coups", 2.6, { burst: 2, rate: 1.1 }), U("Twin Sixes", 5.6, { burst: 4, dmg: 1.2, ability: "highnoon" })]
+  ],
+  tack: [
+    [U("Plus de pointes", 0.6, { radial: 2 }), U("Encore plus", 1.2, { radial: 2, rate: 1.15 }), U("Arroseur", 2.4, { radial: 4, rate: 1.2 }), U("Pluie de clous", 5, { radial: 8, rate: 1.3 })],
+    [U("Pointes longues", 0.6, { range: 1.2 }), U("Super portée", 1.2, { range: 1.2, pierceN: 1 }), U("Lames", 2.5, { dmg: 2, pierceN: 2, pierce: true }), U("Tempête de lames", 5.2, { dmg: 2, pierceN: 3, rate: 1.25 })],
+    [U("Pointes chaudes", 0.7, { burn: 10, burnTime: 2 }), U("Cercle de feu", 1.3, { burn: 18, burnTime: 1, dmg: 1.2 }), U("Anneau ardent", 2.6, { burn: 30, burnTime: 2, rate: 1.2 }), U("Anneau infernal", 5.5, { burn: 50, burnTime: 2, ability: "inferno" })]
+  ],
+  boomerang: [
+    [U("Rangs améliorés", 0.6, { pierceN: 2 }), U("Glaives", 1.2, { pierceN: 2, dmg: 1.3 }), U("Ricochet", 2.4, { returns: 1, dmg: 1.2 }), U("Glaive Lord", 5.2, { returns: 1, pierceN: 4, dmg: 1.6 })],
+    [U("Lancer rapide", 0.6, { rate: 1.3 }), U("Bionique", 1.2, { rate: 1.3 }), U("Turbo", 2.4, { rate: 1.4, range: 1.1 }), U("Turbo-charge", 5, { rate: 1.7 })],
+    [U("Acier trempé", 0.7, { dmg: 1.4 }), U("Lames rotatives", 1.3, { dmg: 1.4, pierce: true }), U("Tranchant", 2.6, { dmg: 1.5 }), U("Tornade", 5.5, { dmg: 1.6, ability: "tornado" })]
+  ],
+  wizard: [
+    [U("Boule de feu", 0.7, { splash: 0.5, burn: 12, burnTime: 2 }), U("Flammes", 1.3, { burn: 25, burnTime: 1, splash: 0.2 }), U("Souffle ardent", 2.6, { burn: 45, splash: 0.4, dmg: 1.3 }), U("Dragon", 5.5, { burn: 80, splash: 0.6, dmg: 1.5, burnTime: 2 })],
+    [U("Éclair arcanique", 0.6, { dmg: 1.4 }), U("Maîtrise", 1.2, { dmg: 1.3, range: 1.15, rate: 1.2 }), U("Éclair en chaîne", 2.5, { chain: 3, dmg: 1.2 }), U("Arcane suprême", 5.2, { chain: 4, dmg: 1.6, rate: 1.2 })],
+    [U("Familier", 0.8, { targets: 1 }), U("Phénix", 1.5, { targets: 1, dmg: 1.2 }), U("Armée", 2.8, { targets: 1, rate: 1.3 }), U("Maître des invocations", 5.6, { targets: 2, dmg: 1.5, ability: "dragon" })]
+  ],
+  spikes: [
+    [U("Cadence", 0.6, { rate: 1.4 }), U("Deux tas", 1.2, { batch: 1 }), U("Chaîne de montage", 2.4, { rate: 1.4 }), U("Usine géante", 5, { batch: 2, rate: 1.4 })],
+    [U("Pointes lourdes", 0.6, { dmg: 1.5 }), U("Pointes solides", 1.2, { pierceN: 2, dmg: 1.2 }), U("Pointes en acier", 2.5, { pierceN: 2, dmg: 1.5 }), U("Pointes mortelles", 5.2, { pierceN: 4, dmg: 2, pierce: true })],
+    [U("Portée", 0.7, { range: 1.2 }), U("Grand rayon", 1.3, { range: 1.2, batch: 1 }), U("Tapis de pointes", 2.6, { range: 1.3, batch: 2 }), U("Tempête de pointes", 5.5, { batch: 3, rate: 1.3, ability: "spikestorm" })]
+  ],
+  super: [
+    [U("Lasers", 0.6, { dmg: 1.4 }), U("Plasma", 1.2, { dmg: 1.4, pierce: true }), U("Rayons solaires", 2.5, { dmg: 1.6, splash: 0.3 }), U("Avatar du soleil", 5.2, { dmg: 2, rate: 1.3, splash: 0.4 })],
+    [U("Longue portée", 0.6, { range: 1.2 }), U("Portée épique", 1.2, { range: 1.2, rate: 1.15 }), U("Robo", 2.5, { targets: 1, rate: 1.2 }), U("Technicien", 5, { targets: 1, dmg: 1.4, rate: 1.2 })],
+    [U("Réflexes", 0.7, { rate: 1.3 }), U("Surrégime", 1.3, { rate: 1.3 }), U("Coups critiques", 2.6, { crit: 0.15, critMul: 3 }), U("Fureur solaire", 5.5, { rate: 1.5, dmg: 1.5, ability: "sunburst" })]
   ]
 };
 
 const MUL = { dmg: "damage", rate: "rate", range: "range", poisonDps: "poisonDps", income: "income", boostDamage: "boostDamage", boostRate: "boostRate" };
-const ADD = new Set(["burst", "duel", "quick", "critFar", "pierceN", "targets", "splash", "chain", "chainReach", "spreadCount", "spreadRadius", "crit", "boostRange", "poisonTime", "slowTime", "pulseSlowTime", "interest"]);
+const ADD = new Set(["radial", "returns", "batch", "burnTime", "bounty", "burst", "duel", "quick", "critFar", "pierceN", "targets", "splash", "chain", "chainReach", "spreadCount", "spreadRadius", "crit", "boostRange", "poisonTime", "slowTime", "pulseSlowTime", "interest"]);
 
 function applyFx(st, fx) {
   for (const [k, v] of Object.entries(fx)) {
@@ -235,8 +329,9 @@ export function towerStats(def, tiers = [0, 0, 0]) {
     targets: 1, splash: def.splash || 0, chain: def.chain || 0, chainFalloff: 0.85, chainReach: 2,
     stun: 0, slow: def.slow || 0, slowTime: def.slowTime || 0, freezeChance: 0, freezeTime: 0,
     poisonDps: def.poisonDps || 0, poisonTime: def.poisonTime || 0,
-    spreadCount: 0, spreadRadius: 0, crit: 0, critMul: 2, pierce: false, execute: 0,
-    pulseSlow: 0, pulseSlowTime: 0, pierceN: def.line ? 3 : 0, burst: 0, duel: 0, quick: 0, critFar: 0,
+    spreadCount: 0, spreadRadius: 0, crit: 0, critMul: 2, pierce: !!def.magic, execute: 0,
+    pulseSlow: 0, pulseSlowTime: 0, pierceN: def.line ? 3 : def.radial ? 1 : def.boom ? 4 : def.spikes ? 4 : 0, burst: 0, duel: 0, quick: 0, critFar: 0,
+    radial: def.radial || 0, returns: def.boom ? 1 : 0, batch: def.spikes ? 1 : 0, burn: 0, burnTime: 0, bounty: 0,
     boostDamage: def.id === "beacon" ? 0.2 : 0, boostRate: def.id === "beacon" ? 0.15 : 0, boostRange: 0,
     income: def.id === "miner" ? 24 : 0, interest: 0, ability: null
   };
@@ -250,7 +345,7 @@ export function towerStats(def, tiers = [0, 0, 0]) {
 
 export const towerDamage = (def, tiers) => towerStats(def, tiers).damage;
 export const towerRange = (def, tiers) => towerStats(def, tiers).range;
-export const upgradeCostOf = (def, path, tier) => Math.round(def.cost * UPGRADES[def.id][path][tier].cost);
+export const upgradeCostOf = (def, path, tier) => Math.round(def.cost * (def.upScale || 1) * UPGRADES[def.id][path][tier].cost);
 
 // Description automatique d'une amélioration (affichée sur le bouton).
 export function describeFx(fx) {
@@ -275,6 +370,12 @@ export function describeFx(fx) {
   if (fx.critMul) out.push(`critiques ×${String(fx.critMul).replace(".", ",")}`);
   if (fx.execute) out.push(`exécute sous ${Math.round(fx.execute * 100)} % PV`);
   if (fx.pierce) out.push("ignore le blindage");
+  if (fx.radial) out.push(`+${fx.radial} pointes`);
+  if (fx.returns) out.push("revient : touche une fois de plus");
+  if (fx.batch) out.push(`+${fx.batch} tas de pointes par fabrication`);
+  if (fx.burn) out.push(`brûlure ${fx.burn}/s`);
+  if (fx.burnTime) out.push(`+${fx.burnTime} s de brûlure`);
+  if (fx.bounty) out.push(`+${Math.round(fx.bounty * 100)} % d'énergie par élimination`);
   if (fx.pierceN) out.push(fx.pierceN >= 50 ? "transperce toute la ligne" : `transperce +${fx.pierceN} ennemis`);
   if (fx.burst) out.push(`+${fx.burst} tir${fx.burst > 1 ? "s" : ""} par salve`);
   if (fx.duel) out.push(`jusqu'à +${Math.round(fx.duel * 100)} % cadence si peu d'ennemis`);
@@ -386,7 +487,7 @@ export const waveBonusGold = (wave) => 20 + 2 * wave;                           
 export const killGold = (type, wave) => Math.round(ENEMY_DEFS[type].gold * (1 + 0.03 * (wave - 1)));
 
 // Liste des ennemis d'une vague, avec l'instant de leur apparition (en secondes).
-export function waveSpec(wave, hpMul = 1) {
+export function waveSpec(wave, hpMul = 1, laneCount = 1) {
   const count = Math.min(6 + 2 * wave, 56);
   const gap = Math.max(0.32, 0.95 - 0.025 * wave);
   const hp = baseHp(wave) * hpMul;
@@ -396,18 +497,18 @@ export function waveSpec(wave, hpMul = 1) {
     if (wave >= 3 && i % 3 === 2) type = "runner";
     if (wave >= 5 && i % 5 === 4) type = "tank";
     if (wave >= 7 && i % 6 === 5) type = "armored";
-    list.push({ type, hp: hp * ENEMY_DEFS[type].hp, at: i * gap });
+    list.push({ type, hp: hp * ENEMY_DEFS[type].hp, at: i * gap, lane: i % laneCount });
   }
   // Une rafale d'essaim toutes les 4 vagues
   if (wave >= 4 && wave % 4 === 0) {
-    for (let k = 0; k < 8 + wave / 2; k++) list.push({ type: "swarm", hp: hp * ENEMY_DEFS.swarm.hp, at: count * gap * 0.4 + k * 0.18 });
+    for (let k = 0; k < 8 + wave / 2; k++) list.push({ type: "swarm", hp: hp * ENEMY_DEFS.swarm.hp, at: count * gap * 0.4 + k * 0.18, lane: k % laneCount });
   }
   // Boss toutes les 10 vagues : Virus, Rootkit, Ver, puis on recommence avec un boss de plus tous les 3 cycles.
   if (wave % 10 === 0) {
     const k = wave / 10;
     const type = BOSS_ORDER[(k - 1) % BOSS_ORDER.length];
     const n = 1 + Math.floor((k - 1) / BOSS_ORDER.length);
-    for (let b = 0; b < n; b++) list.push({ type, hp: hp * ENEMY_DEFS[type].hp, at: count * gap + 1 + b * 4 });
+    for (let b = 0; b < n; b++) list.push({ type, hp: hp * ENEMY_DEFS[type].hp, at: count * gap + 1 + b * 4, lane: b % laneCount });
   }
   return list.sort((x, y) => x.at - y.at);
 }
@@ -422,7 +523,7 @@ export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP, diffId = 
     diff,
     hpMul: (map.hpMul || 1) * diff.hp,
     unlocked: unlocked.filter((id) => TOWER_IDS.includes(id)),
-    gold: diff.gold,
+    gold: diff.gold + (map.bonusGold || 0),      // les cartes à plusieurs chemins offrent un peu d'énergie de départ
     lives: diff.lives,
     wave: 0,
     phase: "idle",          // idle (entre deux vagues) | wave | over
@@ -435,31 +536,70 @@ export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP, diffId = 
     nextId: 1,
     creditsEarned: 0,
     kills: 0,
-    src: null               // tour qui est en train de tirer (sert à compter les éliminations des paragons)
+    src: null,              // tour qui est en train de tirer (sert à compter les éliminations des paragons)
+    spikes: [],             // pointes posées sur le chemin par les Spike Factory
+    cursor: null            // position de la souris sur le plateau (visée du Dartling), mise à jour par l'interface
   };
 }
 
-export const towerAt = (state, col, row) => state.towers.find((t) => t.col === col && t.row === row) || null;
-
-export function canPlace(state, col, row) {
-  if (!Number.isInteger(col) || !Number.isInteger(row)) return false;
-  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return false;
-  return !isPathCell(col, row, state.map) && !towerAt(state, col, row);
+// La tour la plus proche du point (x, y), si le point est sur elle (clic pour la sélectionner).
+export function towerAt(state, x, y) {
+  let best = null;
+  let bestD = (TOWER_RADIUS + 5) ** 2;
+  for (const t of state.towers) {
+    const d = (t.x - x) ** 2 + (t.y - y) ** 2;
+    if (d <= bestD) { bestD = d; best = t; }
+  }
+  return best;
 }
 
-// Pose une tour. Renvoie { ok: true, tower } ou { ok: false, reason }.
-export function placeTower(state, typeId, col, row) {
+// Pourquoi on ne peut pas poser une tour en (x, y) : bounds (hors plateau) | path | obstacle | tower | null si c'est possible.
+export function placeIssue(state, x, y) {
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return "bounds";
+  if (x < TOWER_RADIUS || x > W - TOWER_RADIUS || y < TOWER_RADIUS || y > H - TOWER_RADIUS) return "bounds";
+  if (distToPath(state.map, x, y) < PATH_CLEAR) return "path";
+  for (const o of state.map.obstacles) if (Math.hypot(x - o.x, y - o.y) < o.r + TOWER_RADIUS) return "obstacle";
+  for (const t of state.towers) if (Math.hypot(x - t.x, y - t.y) < TOWER_GAP) return "tower";
+  return null;
+}
+export const canPlace = (state, x, y) => placeIssue(state, x, y) === null;
+
+// Pose une tour en (x, y) (pixels). Renvoie { ok: true, tower } ou { ok: false, reason }.
+export function placeTower(state, typeId, x, y) {
   const def = TOWER_DEFS[typeId];
   if (!def) return { ok: false, reason: "unknown" };
   if (state.phase === "over") return { ok: false, reason: "over" };
   if (!state.unlocked.includes(typeId)) return { ok: false, reason: "locked" };
-  if (!canPlace(state, col, row)) return { ok: false, reason: "blocked" };
+  x = Math.round(x);
+  y = Math.round(y);
+  const issue = placeIssue(state, x, y);
+  if (issue) return { ok: false, reason: issue };
   if (state.gold < def.cost) return { ok: false, reason: "gold" };
   state.gold -= def.cost;
   const tiers = [0, 0, 0];
-  const tower = { id: state.nextId++, type: typeId, col, row, tiers, st: towerStats(def, tiers), cooldown: 0, target: "first", abilityCd: 0, fury: 0, jam: 0, kills: 0, paragon: null, dyn: 1 };
+  const tower = { id: state.nextId++, type: typeId, x, y, tiers, st: towerStats(def, tiers), cooldown: 0, target: "first", abilityCd: 0, fury: 0, jam: 0, kills: 0, paragon: null, dyn: 1 };
+  if (def.line) {
+    // Dartling : il vise un point fixe, par défaut le point du chemin le plus proche ; le joueur peut aussi le faire suivre la souris.
+    const near = nearestPathPoint(state.map, x, y);
+    tower.aim = { x: near.x, y: near.y };
+    tower.aimMode = "point";
+  }
   state.towers.push(tower);
   return { ok: true, tower };
+}
+
+// Visée du Dartling : un point fixe, ou la souris (state.cursor, mis à jour par l'interface).
+export function setAim(state, id, x, y) {
+  const tower = state.towers.find((t) => t.id === id);
+  if (!tower || !tower.aim) return false;
+  tower.aim = { x: Math.max(0, Math.min(W, x)), y: Math.max(0, Math.min(H, y)) };
+  return true;
+}
+export function setAimMode(state, id, mode) {
+  const tower = state.towers.find((t) => t.id === id);
+  if (!tower || !tower.aim || !["point", "mouse"].includes(mode)) return false;
+  tower.aimMode = mode;
+  return true;
 }
 
 // Améliore un chemin d'une tour. Raisons de refus : unknown, over, max, paths, crossed, gold.
@@ -489,7 +629,7 @@ export function startWave(state) {
   if (state.phase !== "idle") return false;
   state.wave += 1;
   state.phase = "wave";
-  state.spawnList = waveSpec(state.wave, state.hpMul);
+  state.spawnList = waveSpec(state.wave, state.hpMul, state.map.laneCount);
   state.spawnClock = 0;
   return true;
 }
@@ -498,9 +638,10 @@ export function startWave(state) {
 
 function spawn(state, entry, dist = 0) {
   const def = ENEMY_DEFS[entry.type];
-  const { x, y } = pointAt(dist, state.map);
+  const lane = entry.lane || 0;
+  const { x, y } = pointAt(dist, state.map.lanes[lane]);
   state.enemies.push({
-    id: state.nextId++, type: entry.type, hp: entry.hp, maxHp: entry.hp,
+    id: state.nextId++, type: entry.type, hp: entry.hp, maxHp: entry.hp, lane,
     dist, x, y, slow: 0, slowLeft: 0, poison: 0, poisonLeft: 0, stun: 0, stunImmune: 0, dead: false, speed: def.speed * CELL,
     spawned: 0, clock: 0
   });
@@ -513,11 +654,15 @@ function hit(state, enemy, damage, events, pierce = false) {
   enemy.hp -= armor ? Math.max(damage * 0.2, damage - armor) : damage;
   if (enemy.hp <= 0) {
     enemy.dead = true;
-    state.gold += killGold(enemy.type, state.wave);
+    const src = state.src;
+    const gain = killGold(enemy.type, state.wave);
+    state.gold += src && src.st.bounty ? Math.round(gain * (1 + src.st.bounty)) : gain;      // prime d'énergie (Desperado)
     state.kills += 1;
     events.killed += 1;
-    const src = state.src;
-    if (src) { src.kills += 1; if (src.paragon) refreshParagon(src); }
+    if (src) {
+      src.kills += 1;
+      if (src.paragon) refreshParagon(src);
+    }
   }
 }
 
@@ -543,6 +688,11 @@ function applyEffects(state, e, st) {
   if (st.slow) slowEnemy(e, st.slow, st.slowTime);
   if (st.freezeChance && (state.rng || Math.random)() < st.freezeChance) stunEnemy(e, st.freezeTime);
   if (st.stun) stunEnemy(e, st.stun);
+  if (st.burn) {
+    e.poison = Math.max(e.poison, st.burn);
+    e.poisonLeft = Math.max(e.poisonLeft, st.burnTime || 3);
+    e.poisonBy = state.src || e.poisonBy || null;
+  }
   if (st.poisonDps) {
     e.poison = Math.max(e.poison, st.poisonDps);
     e.poisonLeft = Math.max(e.poisonLeft, st.poisonTime);
@@ -558,7 +708,7 @@ export function beaconBuff(state, tower) {
   for (const b of state.towers) {
     if (b.type !== "beacon") continue;
     const reach = b.st.range;
-    const dx = (b.col - tower.col) * CELL, dy = (b.row - tower.row) * CELL;
+    const dx = b.x - tower.x, dy = b.y - tower.y;
     if (dx * dx + dy * dy > reach * reach) continue;
     d += b.st.boostDamage; r += b.st.boostRate; g = Math.max(g, b.st.boostRange);
     if (b.fury > 0) { surge = true; d += 0.4; r += 0.4; }
@@ -595,6 +745,56 @@ function fire(state, tower, events) {
   return fired;
 }
 
+const RAY_LENGTH = 1300;
+
+// Ennemis touchés par un rayon qui part de (x, y) dans la direction (ux, uy) sur `length` pixels, du plus proche au plus lointain.
+function rayEnemies(state, x, y, ux, uy, length, width) {
+  const hits = [];
+  for (const e of state.enemies) {
+    if (e.dead) continue;
+    const rx = e.x - x;
+    const ry = e.y - y;
+    const along = rx * ux + ry * uy;
+    if (along < 0 || along > length || Math.abs(rx * uy - ry * ux) > width) continue;
+    hits.push({ e, along });
+  }
+  return hits.sort((a, b) => a.along - b.along).map((h) => h.e);
+}
+
+// Spike Factory : pose `count` tas de pointes sur le chemin, à portée de la tour.
+function addSpikes(state, tower, st, count) {
+  const spots = [];
+  state.map.lanes.forEach((lane, li) => {
+    for (const smp of lane.samples) if ((smp.x - tower.x) ** 2 + (smp.y - tower.y) ** 2 <= st.range ** 2) spots.push({ lane: li, ...smp });
+  });
+  if (!spots.length) return 0;
+  const rng = state.rng || Math.random;
+  for (let k = 0; k < count; k++) {
+    const sp = spots[Math.floor(rng() * spots.length)];
+    state.spikes.push({ lane: sp.lane, dist: sp.dist + (rng() - 0.5) * 10, x: sp.x, y: sp.y, pierce: Math.max(1, Math.round(st.pierceN)), dmg: st.damage, ignore: st.pierce, src: tower });
+  }
+  if (state.spikes.length > 240) state.spikes.splice(0, state.spikes.length - 240);
+  return count;
+}
+
+// Un ennemi qui avance de `before` à e.dist franchit les pointes posées entre les deux sur son chemin.
+function crossSpikes(state, e, before, events) {
+  for (const sp of state.spikes) {
+    if (sp.pierce <= 0 || sp.lane !== e.lane || sp.dist <= before || sp.dist > e.dist) continue;
+    state.src = sp.src;
+    hit(state, e, sp.dmg, events, sp.ignore);
+    state.src = null;
+    sp.pierce -= 1;
+    if (e.dead) break;
+  }
+}
+
+function burnEnemy(e, dps, time, src) {
+  e.poison = Math.max(e.poison, dps);
+  e.poisonLeft = Math.max(e.poisonLeft, time);
+  e.poisonBy = src || e.poisonBy || null;
+}
+
 function fireShots(state, tower, events) {
   const def = TOWER_DEFS[tower.type];
   const st = { ...tower.st };
@@ -609,19 +809,30 @@ function fireShots(state, tower, events) {
     if (fury.pierceN) st.pierceN = Math.max(st.pierceN, fury.pierceN);
   }
   const range = st.range;
-  const cx = (tower.col + 0.5) * CELL;
-  const cy = (tower.row + 0.5) * CELL;
+  const cx = tower.x;
+  const cy = tower.y;
   const origin = { x: cx, y: cy };
   const rng = state.rng || Math.random;
 
+  // Spike Factory : fabrique des pointes sur le chemin pendant les vagues.
+  if (def.spikes) {
+    if (state.phase !== "wave") return false;
+    return addSpikes(state, tower, st, st.batch) > 0;
+  }
+
+  // Dartling : portée infinie, il tire dès qu'il reste des ennemis, vers son point visé ou la souris.
+  if (def.line && !state.enemies.some((e) => !e.dead)) { tower.dyn = 1; return false; }
+
   // Cibles : les ennemis à portée, triés selon le mode de ciblage de la tour.
-  const inRange = sortTargets(state.enemies.filter((e) => !e.dead && dist2(origin, e) <= range * range), tower.target, origin);
-  if (!inRange.length) { tower.dyn = 1; return false; }
+  const inRange = def.line ? [] : sortTargets(state.enemies.filter((e) => !e.dead && dist2(origin, e) <= range * range), tower.target, origin);
+  if (!def.line && !inRange.length) { tower.dyn = 1; return false; }
 
   // Desperado : cadence selon le nombre d'ennemis à portée (duel) et la distance de la cible (dégaine rapide).
   let dyn = 1;
-  if (st.duel) dyn += st.duel * Math.max(0, (5 - inRange.length) / 4);
-  if (st.quick) dyn += st.quick * Math.min(1, Math.sqrt(dist2(origin, inRange[0])) / range);
+  if (inRange.length) {
+    if (st.duel) dyn += st.duel * Math.max(0, (5 - inRange.length) / 4);
+    if (st.quick) dyn += st.quick * Math.min(1, Math.sqrt(dist2(origin, inRange[0])) / range);
+  }
   tower.dyn = dyn;
 
   const maxChance = fury && fury.crit >= 1 ? 1 : 0.95;
@@ -629,7 +840,7 @@ function fireShots(state, tower, events) {
   // Dégâts d'un coup : critique (plus fréquent de loin pour le Desperado) et exécution selon les paliers.
   const strike = (e, base) => {
     let damage = base;
-    const chance = Math.min(maxChance, st.crit + (st.critFar ? st.critFar * Math.min(1, Math.sqrt(dist2(origin, e)) / range) : 0));
+    const chance = Math.min(maxChance, st.crit + (st.critFar && !def.line ? st.critFar * Math.min(1, Math.sqrt(dist2(origin, e)) / range) : 0));
     if (chance > 0 && rng() < chance) damage *= st.critMul;
     if (st.execute && !isBoss(e) && e.hp - damage <= e.maxHp * st.execute) damage = Math.max(damage, e.hp);
     hit(state, e, damage, events, st.pierce);
@@ -648,25 +859,53 @@ function fireShots(state, tower, events) {
   const list = inRange.slice(0, st.targets);
 
   if (def.line) {
-    // Dartling : un rayon par cible ; il touche les `pierceN` premiers ennemis alignés (tous avec le Rayon de la mort).
+    // Un rayon par cible (écartés de quelques degrés) ; chacun touche les `pierceN` premiers ennemis de la ligne (tous avec le Rayon de la mort).
+    const aim = tower.aimMode === "mouse" && state.cursor ? state.cursor : tower.aim;
+    const len = Math.hypot(aim.x - cx, aim.y - cy);
+    if (len < 2) return false;
+    const ux0 = (aim.x - cx) / len;
+    const uy0 = (aim.y - cy) / len;
     const all = st.pierceN >= 50;
-    for (const aim of list) {
-      const len = Math.max(1, Math.sqrt(dist2(origin, aim)));
-      const ux = (aim.x - cx) / len;
-      const uy = (aim.y - cy) / len;
-      const hits = [];
-      for (const e of state.enemies) {
-        if (e.dead) continue;
-        const rx = e.x - cx, ry = e.y - cy;
-        const along = rx * ux + ry * uy;
-        if (along < 0 || along > range || Math.abs(rx * uy - ry * ux) > LINE_WIDTH) continue;
-        hits.push({ e, along });
+    const n = Math.round(st.targets);
+    for (let k = 0; k < n; k++) {
+      const a = (k - (n - 1) / 2) * 0.06;
+      const ux = ux0 * Math.cos(a) - uy0 * Math.sin(a);
+      const uy = ux0 * Math.sin(a) + uy0 * Math.cos(a);
+      const hits = rayEnemies(state, cx, cy, ux, uy, RAY_LENGTH, LINE_WIDTH);
+      state.fx.push({ kind: "beam", x1: cx, y1: cy, x2: cx + ux * RAY_LENGTH, y2: cy + uy * RAY_LENGTH, ttl: all ? 0.16 : 0.08, max: all ? 0.16 : 0.08, color: def.color, w: all ? 7 : 2 });
+      for (const e of hits.slice(0, st.pierceN)) { strike(e, st.damage); applyEffects(state, e, st); }
+    }
+    return true;
+  }
+
+  if (def.radial) {
+    // Tack Shooter : une couronne de pointes qui tourne un peu à chaque salve.
+    const n = Math.max(1, Math.round(st.radial));
+    tower.spin = (tower.spin || 0) + Math.PI / n;
+    for (let k = 0; k < n; k++) {
+      const a = tower.spin + (k * 2 * Math.PI) / n;
+      const ux = Math.cos(a);
+      const uy = Math.sin(a);
+      const hits = rayEnemies(state, cx, cy, ux, uy, range, LINE_WIDTH + 6);
+      state.fx.push({ kind: "beam", x1: cx, y1: cy, x2: cx + ux * range, y2: cy + uy * range, ttl: 0.08, max: 0.08, color: def.color });
+      for (const e of hits.slice(0, st.pierceN)) { strike(e, st.damage); applyEffects(state, e, st); }
+    }
+    return true;
+  }
+
+  if (def.boom) {
+    // Boomerang : va vers la cible, transperce, revient : chaque ennemi touché l'est (1 + returns) fois.
+    for (const target of list) {
+      const len = Math.max(1, Math.hypot(target.x - cx, target.y - cy));
+      const ux = (target.x - cx) / len;
+      const uy = (target.y - cy) / len;
+      const hits = rayEnemies(state, cx, cy, ux, uy, range, 15);
+      const aimed = hits.indexOf(target);
+      if (aimed > 0) { hits.splice(aimed, 1); hits.unshift(target); }
+      state.fx.push({ kind: "beam", x1: cx, y1: cy, x2: cx + ux * range, y2: cy + uy * range, ttl: 0.14, max: 0.14, color: def.color, w: 3 });
+      for (const e of hits.slice(0, st.pierceN)) {
+        for (let r = 0; r <= st.returns && !e.dead; r++) { strike(e, st.damage); applyEffects(state, e, st); }
       }
-      hits.sort((a, b) => a.along - b.along);
-      const aimed = hits.findIndex((h) => h.e === aim);
-      if (aimed > 0) hits.unshift(hits.splice(aimed, 1)[0]);      // la cible visée est toujours touchée
-      state.fx.push({ kind: "beam", x1: cx, y1: cy, x2: cx + ux * range, y2: cy + uy * range, ttl: all ? 0.16 : 0.08, max: all ? 0.16 : 0.08, color: def.color, w: all ? 7 : 2 });
-      for (const { e } of hits.slice(0, st.pierceN)) { strike(e, st.damage); applyEffects(state, e, st); }
     }
     return true;
   }
@@ -727,10 +966,10 @@ function fireShots(state, tower, events) {
 const alive = (state) => state.enemies.filter((e) => !e.dead);
 const strongest = (state, n) => alive(state).sort((a, b) => b.hp - a.hp).slice(0, n);
 const around = (state, tower, reach) => {
-  const o = { x: (tower.col + 0.5) * CELL, y: (tower.row + 0.5) * CELL };
+  const o = { x: tower.x, y: tower.y };
   return alive(state).filter((e) => dist2(o, e) <= reach * reach);
 };
-const origin = (tower) => ({ x: (tower.col + 0.5) * CELL, y: (tower.row + 0.5) * CELL });
+const origin = (tower) => ({ x: tower.x, y: tower.y });
 const abilityStats = (state, tower) => {
   const buff = beaconBuff(state, tower);
   return { ...tower.st, damage: tower.st.damage * buff.damage, range: tower.st.range * buff.range };
@@ -741,6 +980,32 @@ export const ABILITIES = {
   frenzy:    { name: "Furie", cd: 40, desc: "5 s : cadence ×3, dégâts ×1,5, balles perforantes.", fury: { time: 5, rate: 3, dmg: 1.5, pierce: true } },
   highnoon:  { name: "Midi pile", cd: 45, desc: "5 s : cadence ×3, dégâts ×2, tous les tirs sont critiques et perforants.", fury: { time: 5, rate: 3, dmg: 2, crit: 1, pierce: true } },
   deathbeam: { name: "Rayon fatal", cd: 40, desc: "4 s : le rayon transperce toute la ligne, dégâts ×3 et cadence ×2.", fury: { time: 4, rate: 2, dmg: 3, pierceN: 99 } },
+  sunburst:  { name: "Avatar solaire", cd: 45, desc: "6 s : cadence ×2,5, dégâts ×2,5, tirs perforants.", fury: { time: 6, rate: 2.5, dmg: 2.5, pierce: true } },
+  inferno: {
+    name: "Anneau infernal", cd: 40, desc: "Nova de feu : 5× dégâts et brûlure (60/s pendant 4 s) à tous les ennemis proches.",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", x: tower.x, y: tower.y, r: st.range * 2, ttl: 0.5, max: 0.5, color: "#ff7a7a" });
+      for (const e of around(state, tower, st.range * 2)) { hit(state, e, st.damage * 5, events, true); if (!e.dead) burnEnemy(e, 60, 4, tower); }
+    }
+  },
+  tornado: {
+    name: "Tornade", cd: 45, desc: "Un vortex de lames : 4× dégâts et étourdit (0,6 s) tous les ennemis proches.",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", x: tower.x, y: tower.y, r: st.range * 1.8, ttl: 0.5, max: 0.5, color: "#7ad7ff" });
+      for (const e of around(state, tower, st.range * 1.8)) { hit(state, e, st.damage * 4, events, true); stunEnemy(e, 0.6); }
+    }
+  },
+  dragon: {
+    name: "Souffle du dragon", cd: 45, desc: "3× dégâts et brûlure (40/s pendant 5 s) à tous les ennemis proches.",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", x: tower.x, y: tower.y, r: st.range * 2, ttl: 0.5, max: 0.5, color: "#ff8a3d" });
+      for (const e of around(state, tower, st.range * 2)) { hit(state, e, st.damage * 3, events, true); if (!e.dead) burnEnemy(e, 40, 5, tower); }
+    }
+  },
+  spikestorm: {
+    name: "Tempête de pointes", cd: 40, desc: "Pose 40 tas de pointes d'un coup sur le chemin à portée.",
+    run(state, tower, st) { addSpikes(state, tower, st, 40); }
+  },
   surge:     { name: "Surtension", cd: 60, desc: "8 s : les tours dans l'aura gagnent +40 % de dégâts et de cadence en plus.", fury: { time: 8 } },
   absolute: {
     name: "Zéro absolu", cd: 50, desc: "Gèle 1 s, ralentit de 70 % et inflige 3× les dégâts à tous les ennemis proches.",
@@ -837,7 +1102,7 @@ function bossTick(state, e, def, dt) {
       e.spawned += 1;
       const n = 5 + Math.floor(state.wave / 5);
       const hp = baseHp(state.wave) * state.hpMul * ENEMY_DEFS.drone.hp * 0.8;
-      for (let k = 0; k < n; k++) spawn(state, { type: "drone", hp }, Math.max(0, e.dist - 10 - k * 9));
+      for (let k = 0; k < n; k++) spawn(state, { type: "drone", hp, lane: e.lane }, Math.max(0, e.dist - 10 - k * 9));
       state.fx.push({ kind: "boom", x: e.x, y: e.y, r: CELL * 1.5, ttl: 0.4, max: 0.4, color: "#ffffff" });
     }
   }
@@ -889,16 +1154,19 @@ export function update(state, dt) {
     if (def.boss) bossTick(state, e, def, dt);
     if (e.stun <= 0) {
       const rage = def.rage && e.hp <= e.maxHp * 0.5 ? def.rage : 1;
+      const before = e.dist;
       e.dist += e.speed * rage * (1 - e.slow) * dt;
+      if (state.spikes.length) { crossSpikes(state, e, before, events); if (e.dead) continue; }
     }
-    if (e.dist >= state.map.length) {
+    const lane = state.map.lanes[e.lane || 0];
+    if (e.dist >= lane.length) {
       e.dead = true;
       e.leaked = true;
       state.lives -= def.lives;
       events.leaked += 1;
       continue;
     }
-    const p = pointAt(e.dist, state.map);
+    const p = pointAt(e.dist, lane);
     e.x = p.x;
     e.y = p.y;
   }
@@ -922,6 +1190,7 @@ export function update(state, dt) {
   }
 
   state.enemies = state.enemies.filter((e) => !e.dead);
+  if (state.spikes.length) state.spikes = state.spikes.filter((sp) => sp.pierce > 0);
 
   // Effets visuels
   for (const f of state.fx) f.ttl -= dt;
@@ -939,6 +1208,7 @@ export function update(state, dt) {
   if (state.phase === "wave" && state.spawnList.length === 0 && state.enemies.length === 0) {
     state.phase = "idle";
     for (const t of state.towers) t.jam = 0;      // le brouillage s'arrête avec la vague
+    state.spikes = [];
     // Data Miners : de l'énergie en plus à la fin de la vague (les Beacons voisins l'augmentent un peu).
     let mined = 0;
     for (const t of state.towers) {
@@ -959,15 +1229,39 @@ export function update(state, dt) {
 
 /* ---------- Paragons ---------- */
 // Fusion de 3 tours d'un même type (chacune avec un chemin au palier 4) : une tour qui cumule les 3 chemins au palier 4,
-// avec une capacité qui recharge deux fois plus vite. Son degré (1 à 20) monte avec l'énergie investie et ses éliminations.
+// avec une capacité qui recharge deux fois plus vite. Une seule par type.
+//  - Le prix dépend de la puissance du type de tour (towerPower), pas d'un multiple fixe.
+//  - Au moment de la fusion (et seulement alors), le joueur peut investir de l'énergie en plus pour monter le degré (1 à 20).
+//  - Le degré monte aussi avec la valeur des tours sacrifiées et, ensuite, avec les éliminations.
 
-export const paragonCost = (def) => def.cost * PARAGON_COST_MUL;
+// Estimation de la puissance d'un type de tour avec ses 3 chemins au palier 4 (dégâts par seconde « équivalents »).
+export function towerPower(def, tiers = [MAX_TIER, MAX_TIER, MAX_TIER]) {
+  const st = towerStats(def, tiers);
+  if (def.support) return 2600 * (st.boostDamage + st.boostRate);
+  if (def.income) return 10 * st.income * (1 + st.interest * 8);
+  const crit = Math.min(0.95, st.crit + st.critFar * 0.5);
+  let dps = st.damage * (1 + crit * (st.critMul - 1)) * st.rate * (1 + st.burst);
+  let reach = st.targets;
+  if (def.pulse) reach *= 3;
+  if (st.splash) reach *= 1 + st.splash * 1.3;
+  if (st.chain) reach *= 1 + (st.chain - 1) * 0.5;
+  if (def.line || def.boom || def.radial) reach *= Math.min(st.pierceN, 8) * 0.6 + 0.4;
+  if (def.radial) reach *= Math.max(1, st.radial / 3);
+  if (def.boom) dps *= 1 + st.returns;
+  if (def.spikes) { dps = st.damage * st.pierceN * st.rate * st.batch; reach = 1; }
+  dps *= reach;
+  dps += (st.poisonDps + st.burn) * 0.6 * Math.min(reach, 4);
+  return dps;
+}
 
+export const paragonCost = (def) => Math.round((def.cost * 3 + 1000 * Math.log(1 + towerPower(def) / 300)) / 50) * 50;
+
+// Le degré (1 à 20) : tours sacrifiées + énergie investie à la fusion + éliminations ensuite (jusqu'à +10).
 export function paragonDegree(tower) {
-  if (!tower.paragon) return 0;
-  const def = TOWER_DEFS[tower.type];
-  const worth = tower.paragon.spent / def.cost + Math.min(60, (tower.kills || 0) / 25);
-  return Math.max(1, Math.min(PARAGON_MAX_DEGREE, 1 + Math.floor((worth - 40) / 4)));
+  const pg = tower.paragon;
+  if (!pg) return 0;
+  const killBonus = Math.min(10, Math.floor((tower.kills || 0) / 150));
+  return Math.max(1, Math.min(PARAGON_MAX_DEGREE, pg.base + Math.floor(pg.extra / pg.step) + killBonus));
 }
 
 export function paragonStats(def, tower) {
@@ -985,40 +1279,46 @@ function refreshParagon(tower) {
   if (paragonDegree(tower) !== tower.st.degree) tower.st = paragonStats(def, tower);
 }
 
-// État d'une tour face aux paragons : { is: true, degree } si c'en est un, sinon le coût, le nombre de tours prêtes et la raison
-// du blocage : have (ce type a déjà un paragon) | notmax (aucun chemin au palier 4) | need (pas assez de tours prêtes) | gold.
+// Tout ce qu'il faut savoir avant de fusionner : { is: true, degree } si c'en est un déjà ; sinon le prix, le pas du curseur
+// d'investissement (step = énergie pour +1 degré, maxSteps = nombre de pas utiles), le degré de départ, et la raison du blocage :
+// have (ce type a déjà un paragon) | notmax (aucun chemin au palier 4) | need (pas assez de tours prêtes) | gold.
 export function paragonInfo(state, tower) {
   const def = TOWER_DEFS[tower.type];
   if (tower.paragon) return { is: true, degree: paragonDegree(tower) };
   const cost = paragonCost(def);
+  const step = Math.max(10, Math.round((cost * 0.1) / 10) * 10);
   const ready = state.towers.filter((t) => t.type === tower.type && !t.paragon && t.tiers.some((x) => x >= MAX_TIER));
+  const others = ready.filter((t) => t !== tower).sort((a, b) => invested(b) - invested(a)).slice(0, PARAGON_NEED - 1);
+  const sacrificed = invested(tower) + others.reduce((sum, t) => sum + invested(t), 0);
+  const base = Math.min(PARAGON_MAX_DEGREE, 1 + Math.floor(sacrificed / (cost * 0.6)));
+  const maxSteps = Math.max(0, PARAGON_MAX_DEGREE - base);
   let reason = null;
   if (state.towers.some((t) => t.type === tower.type && t.paragon)) reason = "have";
   else if (!tower.tiers.some((x) => x >= MAX_TIER)) reason = "notmax";
   else if (ready.length < PARAGON_NEED) reason = "need";
   else if (state.gold < cost) reason = "gold";
-  return { is: false, cost, ready: ready.length, need: PARAGON_NEED, reason };
+  return { is: false, cost, step, base, maxSteps, sacrificed, others, ready: ready.length, need: PARAGON_NEED, reason };
 }
 
 // Fusionne : la tour choisie devient le paragon, les 2 autres tours prêtes (les plus investies) sont sacrifiées.
-export function makeParagon(state, id) {
+// steps : nombre de pas d'investissement supplémentaire (chacun coûte info.step et ajoute 1 degré), possible seulement ici.
+export function makeParagon(state, id, steps = 0) {
   const tower = state.towers.find((t) => t.id === id);
   if (!tower || state.phase === "over") return { ok: false, reason: "unknown" };
   const info = paragonInfo(state, tower);
   if (info.is) return { ok: false, reason: "have" };
   if (info.reason) return { ok: false, reason: info.reason };
+  const n = Math.max(0, Math.min(info.maxSteps, Math.floor(Number(steps) || 0)));
+  const extra = n * info.step;
+  if (state.gold < info.cost + extra) return { ok: false, reason: "gold" };
   const def = TOWER_DEFS[tower.type];
-  const others = state.towers
-    .filter((t) => t !== tower && t.type === tower.type && !t.paragon && t.tiers.some((x) => x >= MAX_TIER))
-    .sort((a, b) => invested(b) - invested(a))
-    .slice(0, PARAGON_NEED - 1);
-  const spent = invested(tower) + others.reduce((sum, t) => sum + invested(t), 0) + info.cost;
-  state.gold -= info.cost;
-  state.towers = state.towers.filter((t) => !others.includes(t));
-  tower.paragon = { spent };
+  const spent = info.sacrificed + info.cost + extra;
+  state.gold -= info.cost + extra;
+  state.towers = state.towers.filter((t) => !info.others.includes(t));
+  tower.paragon = { spent, base: info.base, extra, step: info.step };
   tower.tiers = [MAX_TIER, MAX_TIER, MAX_TIER];
   tower.st = paragonStats(def, tower);
   tower.abilityCd = 0;
-  state.fx.push({ kind: "boom", x: (tower.col + 0.5) * CELL, y: (tower.row + 0.5) * CELL, r: CELL * 2, ttl: 0.6, max: 0.6, color: "#fcee0a" });
-  return { ok: true, tower, sacrificed: others.map((t) => t.id) };
+  state.fx.push({ kind: "boom", x: tower.x, y: tower.y, r: CELL * 2, ttl: 0.6, max: 0.6, color: "#fcee0a" });
+  return { ok: true, tower, sacrificed: info.others.map((t) => t.id), paid: info.cost + extra };
 }
