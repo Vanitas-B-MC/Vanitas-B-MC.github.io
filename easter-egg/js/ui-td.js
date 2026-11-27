@@ -7,7 +7,7 @@ import {
   PATH_NAMES, ABILITIES, TARGET_LABELS,
   createState, placeIssue, placeTower, upgradeTower, upgradeInfo, sellTower, startWave, useAbility, cycleTargetMode, setAim, setAimMode,
   update, towerAt, towerStats, beaconBuff, describeFx, ownedUpgrades, invested, SELL_RATIO, START_LIVES, waveBonusGold, isBoss,
-  paragonInfo, makeParagon, PARAGON_MAX_DEGREE
+  paragonInfo, makeParagon, PARAGON_MAX_DEGREE, PARAGON_COMPLETE_BONUS, PARAGONS
 } from "./td.js";
 import { wealthBonus, wavePct } from "./rewards.js";
 import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
@@ -16,6 +16,7 @@ const STEP = 1 / 60;                       // pas de simulation (secondes)
 const SPEEDS = [1, 2, 3, 5, 10];           // vitesses de jeu (×5 et ×10 pour les longues parties)
 const MAX_STEPS = 40;                      // pas de simulation par image, au maximum
 const PATH_COLORS = ["#00f0ff", "#ff6bd6", "#fcee0a"];
+const SPIKE_COLORS = ["#9aa5b1", "#d6d6e6", "#7fd8ff", "#ff9f5a", "#ff2a6d", "#fcee0a"];
 
 const REASONS = {
   gold: "Pas assez d'énergie.",
@@ -212,15 +213,22 @@ export function createTowerDefenseUI(root, wallet) {
       ctx.stroke();
     }
 
-    // Pointes de la Spike Factory
-    ctx.fillStyle = "#c0c0d0";
+    // Pointes de la Spike Factory : l'aspect suit les améliorations du chemin « Pointes », la taille l'empilement
     for (const sp of state.spikes) {
+      const n = 3 + Math.min(sp.look, 4);
+      const r = 3.5 + sp.stack * 0.9 + Math.min(sp.look, 4) * 0.4;
+      ctx.fillStyle = SPIKE_COLORS[sp.look] || SPIKE_COLORS[0];
+      ctx.shadowColor = ctx.fillStyle;
+      ctx.shadowBlur = sp.look >= 3 ? 7 : 0;
       ctx.beginPath();
-      ctx.moveTo(sp.x, sp.y - 4);
-      ctx.lineTo(sp.x + 3.5, sp.y + 3);
-      ctx.lineTo(sp.x - 3.5, sp.y + 3);
+      for (let i = 0; i < n * 2; i++) {
+        const ang = (i * Math.PI) / n - Math.PI / 2;
+        const rad = i % 2 === 0 ? r : r * 0.4;
+        ctx.lineTo(sp.x + Math.cos(ang) * rad, sp.y + Math.sin(ang) * rad);
+      }
       ctx.closePath();
       ctx.fill();
+      ctx.shadowBlur = 0;
     }
 
     const target = hover || (showCursor ? cursor : null);
@@ -304,7 +312,15 @@ export function createTowerDefenseUI(root, wallet) {
       ctx.shadowBlur = tower.fury > 0 ? 16 : 8;
       const grow = Math.min(total, 6) * 0.45;
       ctx.beginPath();
-      if (def.income) ctx.rect(x - 5 - grow, y - 5 - grow, 10 + grow * 2, 10 + grow * 2);
+      if (tower.paragon) {
+        for (let i = 0; i < 16; i++) {
+          const ang = (i * Math.PI) / 8 - Math.PI / 2;
+          const rad = i % 2 === 0 ? 10 : 4.5;
+          ctx.lineTo(x + Math.cos(ang) * rad, y + Math.sin(ang) * rad);
+        }
+        ctx.closePath();
+      }
+      else if (def.income) ctx.rect(x - 5 - grow, y - 5 - grow, 10 + grow * 2, 10 + grow * 2);
       else if (def.support) { ctx.moveTo(x, y - 8); ctx.lineTo(x + 8, y + 6); ctx.lineTo(x - 8, y + 6); ctx.closePath(); }
       else if (def.spikes) { ctx.moveTo(x, y - 8); ctx.lineTo(x + 7, y); ctx.lineTo(x, y + 8); ctx.lineTo(x - 7, y); ctx.closePath(); }
       else ctx.arc(x, y, 5 + grow, 0, Math.PI * 2);
@@ -381,6 +397,23 @@ export function createTowerDefenseUI(root, wallet) {
         ctx.fillText(def.name, e.x, e.y - r - 11);
         ctx.textAlign = "start";
       }
+    }
+
+    // Boomerangs en vol
+    for (const pr of state.projs) {
+      ctx.save();
+      ctx.translate(pr.x, pr.y);
+      ctx.rotate(pr.theta * 5);
+      ctx.strokeStyle = pr.color;
+      ctx.shadowColor = pr.color;
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-8, -3);
+      ctx.quadraticCurveTo(0, 6, 8, -3);
+      ctx.stroke();
+      ctx.restore();
     }
 
     // Tirs et explosions
@@ -497,14 +530,17 @@ export function createTowerDefenseUI(root, wallet) {
     paragonBox.replaceChildren();
     if (info.is) {
       paragonBox.append(
-        h("strong", { class: "sel-paragon-title" }, `★ PARAGON — degré ${info.degree}/${PARAGON_MAX_DEGREE}`),
-        h("p", {}, `${tower.kills} éliminations. Les trois chemins sont au palier 4 ; la capacité recharge deux fois plus vite. Le degré monte encore avec les éliminations (jusqu'à +10), mais on ne peut plus investir d'énergie.`));
+        h("strong", { class: "sel-paragon-title" }, `★ ${PARAGONS[tower.type].name} — degré ${info.degree}/${PARAGON_MAX_DEGREE}`),
+        h("p", {}, `${PARAGONS[tower.type].desc} ${tower.kills} éliminations. Sa capacité recharge deux fois plus vite. Le degré monte encore avec les éliminations (jusqu'à +10), mais on ne peut plus investir d'énergie.`));
       return;
     }
-    const need = `${info.ready}/${info.need} tours « ${def.name} » avec un chemin au palier 4`;
+    const spec = PARAGONS[tower.type];
+    const marks = info.covered.map((c, i) => `${PATH_NAMES[def.id][i]} ${c ? "✓" : "✗"}`).join(" · ");
     const lines = [
-      h("strong", { class: "sel-paragon-title" }, "★ Paragon"),
-      h("p", {}, `Fusionne 3 tours : cumule les 3 chemins au palier 4. ${need}. Prix (selon la puissance du type) : ${fmt(info.cost)} ⚡. Une seule par type.`)
+      h("strong", { class: "sel-paragon-title" }, `★ Paragon : ${spec.name}`),
+      h("p", {}, `${spec.desc} Une tour à part, pas la somme des chemins.`),
+      h("p", {}, `Fusionne 3 tours « ${def.name} » au palier max (prêtes : ${info.ready}/${info.need}). Chemins couverts : ${marks}. ${info.complete ? `Fusion complète : +${PARAGON_COMPLETE_BONUS} degrés.` : `Une tour par chemin donne +${PARAGON_COMPLETE_BONUS} degrés ; trois tours du même chemin marchent aussi.`}`),
+      h("p", {}, `Prix (selon la puissance) : ${fmt(info.cost)} ⚡. Une seule par type.`)
     ];
     const maxSteps = Math.max(0, Math.min(info.maxSteps, Math.floor((state.gold - info.cost) / info.step)));
     paragonSteps = Math.min(paragonSteps, maxSteps);
@@ -579,7 +615,7 @@ export function createTowerDefenseUI(root, wallet) {
     const def = TOWER_DEFS[tower.type];
     const ts = tower.st;
     const total = tower.tiers.reduce((a, b) => a + b, 0);
-    setText(selTitle, tower.paragon ? `★ ${def.name} Paragon` : `${def.name} — ${tower.tiers.join(" · ")}`);
+    setText(selTitle, tower.paragon ? `★ ${PARAGONS[tower.type].name}` : `${def.name} — ${tower.tiers.join(" · ")}`);
     const pct = (v) => `+${Math.round(v * 100)} %`;
     const buffed = beaconBuff(state, tower);
     setText(selStats, def.support
@@ -591,7 +627,7 @@ export function createTowerDefenseUI(root, wallet) {
       : def.income
         ? `Produit ${fmt(Math.round(ts.income))} énergie${ts.interest ? ` + ${num(ts.interest * 100)} % d'intérêts` : ""} à la fin de chaque vague`
         : `Dégâts ${Math.round(ts.damage * buffed.damage)} · portée ${num((ts.range * buffed.range) / CELL)} cases · ${num(ts.rate * buffed.rate)} tirs/s${ts.targets > 1 ? ` · ${ts.targets} cibles` : ""}`);
-    setText(selOwned, tower.paragon ? "Tous les chemins au palier 4" : total ? ownedUpgrades(tower).map((u) => u.name).join(" · ") : "Aucune amélioration : choisis un chemin ci-dessous.");
+    setText(selOwned, tower.paragon ? `Paragon ${def.name} : ${PARAGONS[tower.type].desc}` : total ? ownedUpgrades(tower).map((u) => u.name).join(" · ") : "Aucune amélioration : choisis un chemin ci-dessous.");
 
     const shoots = !def.support && !def.income && !def.spikes && !def.line;
     targetButton.hidden = !shoots;

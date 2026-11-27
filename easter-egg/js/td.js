@@ -20,6 +20,7 @@ export const SELL_RATIO = 0.6;
 // Paragon (comme Bloons TD6) : on fusionne 3 tours d'un même type ayant un chemin au palier 4. Une seule par type.
 export const PARAGON_NEED = 3;
 export const PARAGON_MAX_DEGREE = 20;
+export const PARAGON_COMPLETE_BONUS = 3;     // degrés offerts quand les 3 tours sacrifiées couvrent les 3 chemins
 
 export const PATH_COUNT = 3;        // chemins d'amélioration par tour
 export const MAX_TIER = 4;          // paliers par chemin ; le palier 4 est l'amélioration ultime du chemin
@@ -172,12 +173,12 @@ export const TOWER_DEFS = {
   pulsar: { id: "pulsar", name: "Pulsar",          desc: "Onde qui touche tous les ennemis proches.",            cost: 160, unlock: 3000, range: 2.2, rate: 0.7,  dmg: 24, color: "#ff6bd6", pulse: true },
   beacon: { id: "beacon", name: "Beacon",         desc: "Ne tire pas : booste les tours voisines (dégâts, cadence). Plusieurs beacons se cumulent.", cost: 120, unlock: 9000,  range: 2.2, rate: 0, dmg: 0, color: "#4dffd2", support: true },
   miner:  { id: "miner",  name: "Data Miner",      desc: "Ne tire pas : produit de l'énergie à la fin de chaque vague.",  cost: 100, unlock: 4000,  range: 0,   rate: 0, dmg: 0, color: "#5b9bff", income: true },
-  dartling: { id: "dartling", name: "Dartling", desc: "Portée infinie, tir continu : vise la souris ou un point fixe. Chaque salve transperce les ennemis alignés. Au bout du chemin 1, le Rayon de la mort.", cost: 1200, upScale: 0.35, unlock: 6000, range: 99, rate: 5, dmg: 14, color: "#ffe14d", line: true },
+  dartling: { id: "dartling", name: "Dartling", desc: "Portée infinie, tir continu : vise la souris ou un point fixe. Chaque salve transperce les ennemis alignés. Au bout du chemin 1, le Rayon de la mort.", cost: 1200, upScale: 0.35, unlock: 6000, range: 99, rate: 5, dmg: 14, color: "#ffe14d", line: true, paragonMul: 2 },
   desperado: { id: "desperado", name: "Desperado", desc: "Duelliste : tire d'autant plus vite qu'il y a peu d'ennemis à portée. Critiques à longue distance, salves de revolver.", cost: 150, unlock: 12000, range: 3.2, rate: 1.5, dmg: 26, color: "#ff9f5a" },
   tack:      { id: "tack",      name: "Tack Shooter", desc: "Tire une couronne de pointes dans toutes les directions. Portée courte, idéal dans les virages.", cost: 90,  unlock: 300,   range: 1.7, rate: 1.3, dmg: 14,  color: "#ff7a7a", radial: 8 },
-  boomerang: { id: "boomerang", name: "Boomerang",    desc: "Un boomerang qui transperce plusieurs ennemis et revient : chaque ennemi touché l'est deux fois.", cost: 100, unlock: 700,   range: 3.2, rate: 1.1, dmg: 14, color: "#7ad7ff", boom: true },
+  boomerang: { id: "boomerang", name: "Boomerang",    desc: "Lance un vrai boomerang : il traverse plusieurs ennemis à l'aller et au retour (chaque ennemi touché l'est deux fois).", cost: 100, unlock: 700,   range: 3.2, rate: 1.1, dmg: 14, color: "#7ad7ff", boom: true },
   wizard:    { id: "wizard",    name: "Wizard",       desc: "Magie : ignore le blindage. Boules de feu qui brûlent, éclairs, invocations.", cost: 120, unlock: 2500,  range: 3.3, rate: 1.6, dmg: 12, color: "#b06bff", magic: true },
-  spikes:    { id: "spikes",    name: "Spike Factory", desc: "Pose des tas de pointes sur le chemin : chaque tas blesse les ennemis qui passent dessus.", cost: 130, unlock: 3500,  range: 3.4, rate: 0.6, dmg: 12, color: "#c0c0d0", spikes: true },
+  spikes:    { id: "spikes",    name: "Spike Factory", desc: "Pose des tas de pointes sur le chemin : chaque tas blesse les ennemis qui passent dessus.", cost: 130, unlock: 3500,  range: 2.2, rate: 0.6, dmg: 12, color: "#c0c0d0", spikes: true },
   super:     { id: "super",     name: "Super Monkey", desc: "Cadence démesurée et longue portée. Très cher, très puissant.", cost: 450, unlock: 20000, range: 4.2, rate: 12, dmg: 6, color: "#6bd0ff" }
 };
 export const TOWER_IDS = Object.keys(TOWER_DEFS);
@@ -301,7 +302,7 @@ export const UPGRADES = {
   spikes: [
     [U("Cadence", 0.6, { rate: 1.4 }), U("Deux tas", 1.2, { batch: 1 }), U("Chaîne de montage", 2.4, { rate: 1.4 }), U("Usine géante", 5, { batch: 2, rate: 1.4 })],
     [U("Pointes lourdes", 0.6, { dmg: 1.5 }), U("Pointes solides", 1.2, { pierceN: 2, dmg: 1.2 }), U("Pointes en acier", 2.5, { pierceN: 2, dmg: 1.5 }), U("Pointes mortelles", 5.2, { pierceN: 4, dmg: 2, pierce: true })],
-    [U("Portée", 0.7, { range: 1.2 }), U("Grand rayon", 1.3, { range: 1.2, batch: 1 }), U("Tapis de pointes", 2.6, { range: 1.3, batch: 2 }), U("Tempête de pointes", 5.5, { batch: 3, rate: 1.3, ability: "spikestorm" })]
+    [U("Portée", 0.7, { range: 1.12 }), U("Grand rayon", 1.3, { range: 1.12, batch: 1 }), U("Tapis de pointes", 2.6, { range: 1.15, batch: 2 }), U("Tempête de pointes", 5.5, { batch: 3, rate: 1.3, ability: "spikestorm" })]
   ],
   super: [
     [U("Lasers", 0.6, { dmg: 1.4 }), U("Plasma", 1.2, { dmg: 1.4, pierce: true }), U("Rayons solaires", 2.5, { dmg: 1.6, splash: 0.3 }), U("Avatar du soleil", 5.2, { dmg: 2, rate: 1.3, splash: 0.4 })],
@@ -371,7 +372,7 @@ export function describeFx(fx) {
   if (fx.execute) out.push(`exécute sous ${Math.round(fx.execute * 100)} % PV`);
   if (fx.pierce) out.push("ignore le blindage");
   if (fx.radial) out.push(`+${fx.radial} pointes`);
-  if (fx.returns) out.push("revient : touche une fois de plus");
+  if (fx.returns) out.push(`+${fx.returns} aller-retour`);
   if (fx.batch) out.push(`+${fx.batch} tas de pointes par fabrication`);
   if (fx.burn) out.push(`brûlure ${fx.burn}/s`);
   if (fx.burnTime) out.push(`+${fx.burnTime} s de brûlure`);
@@ -538,6 +539,7 @@ export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP, diffId = 
     kills: 0,
     src: null,              // tour qui est en train de tirer (sert à compter les éliminations des paragons)
     spikes: [],             // pointes posées sur le chemin par les Spike Factory
+    projs: [],              // projectiles en vol (boomerangs)
     cursor: null            // position de la souris sur le plateau (visée du Dartling), mise à jour par l'interface
   };
 }
@@ -762,19 +764,69 @@ function rayEnemies(state, x, y, ux, uy, length, width) {
 }
 
 // Spike Factory : pose `count` tas de pointes sur le chemin, à portée de la tour.
+// Deux tas au même endroit s'empilent (plus de passages possibles, tas plus gros, jusqu'à 6) ; l'aspect (look) suit le niveau du chemin « Pointes ».
 function addSpikes(state, tower, st, count) {
   const spots = [];
   state.map.lanes.forEach((lane, li) => {
     for (const smp of lane.samples) if ((smp.x - tower.x) ** 2 + (smp.y - tower.y) ** 2 <= st.range ** 2) spots.push({ lane: li, ...smp });
   });
   if (!spots.length) return 0;
+  spots.sort((a, b) => (a.x - tower.x) ** 2 + (a.y - tower.y) ** 2 - ((b.x - tower.x) ** 2 + (b.y - tower.y) ** 2));
   const rng = state.rng || Math.random;
+  const look = tower.paragon ? 5 : Math.min(4, tower.tiers[1]);
+  const pierce = Math.max(1, Math.round(st.pierceN));
   for (let k = 0; k < count; k++) {
-    const sp = spots[Math.floor(rng() * spots.length)];
-    state.spikes.push({ lane: sp.lane, dist: sp.dist + (rng() - 0.5) * 10, x: sp.x, y: sp.y, pierce: Math.max(1, Math.round(st.pierceN)), dmg: st.damage, ignore: st.pierce, src: tower });
+    const sp = spots[Math.floor(rng() * rng() * rng() * spots.length)];      // les premiers tas tombent au même endroit, donc ils s'empilent
+    const dist = sp.dist + (rng() - 0.5) * 10;
+    const near = state.spikes.find((p) => p.lane === sp.lane && Math.abs(p.dist - dist) < 9 && p.pierce > 0);
+    if (near) {
+      if (near.stack >= 6) continue;
+      near.stack += 1;
+      near.pierce += pierce;
+      near.dmg = Math.max(near.dmg, st.damage);
+      near.ignore = near.ignore || st.pierce;
+      near.look = Math.max(near.look, look);
+      near.src = tower;
+    } else {
+      state.spikes.push({ lane: sp.lane, dist, x: sp.x, y: sp.y, pierce, stack: 1, look, dmg: st.damage, ignore: st.pierce, src: tower });
+    }
   }
   if (state.spikes.length > 240) state.spikes.splice(0, state.spikes.length - 240);
   return count;
+}
+
+function projectileHit(state, pr, e, events) {
+  const st = pr.st;
+  const rng = state.rng || Math.random;
+  let damage = st.damage;
+  if (st.crit && rng() < Math.min(0.95, st.crit)) damage *= st.critMul;
+  if (st.execute && !isBoss(e) && e.hp - damage <= e.maxHp * st.execute) damage = Math.max(damage, e.hp);
+  state.src = pr.tower;
+  hit(state, e, damage, events, st.pierce);
+  applyEffects(state, e, st);
+  state.src = null;
+}
+
+// Fait avancer les projectiles : position sur la boucle, et touches (une fois par ennemi et par trajet).
+function stepProjectiles(state, dt, events) {
+  for (const pr of state.projs) {
+    const end = 2 * Math.PI * pr.loops;
+    pr.theta = Math.min(end, pr.theta + pr.omega * dt);
+    const leg = Math.min(pr.loops * 2 - 1, Math.floor(pr.theta / Math.PI));
+    if (leg !== pr.leg) { pr.leg = leg; pr.hitSet = new Set(); pr.count = 0; }
+    const phase = pr.theta % (2 * Math.PI);
+    pr.x = pr.ox + pr.ux * (pr.R / 2) * (1 - Math.cos(phase)) + pr.vx * pr.arc * Math.sin(phase);
+    pr.y = pr.oy + pr.uy * (pr.R / 2) * (1 - Math.cos(phase)) + pr.vy * pr.arc * Math.sin(phase);
+    for (const e of state.enemies) {
+      if (pr.count >= pr.pierceN) break;
+      if (e.dead || pr.hitSet.has(e.id) || (e.x - pr.x) ** 2 + (e.y - pr.y) ** 2 > 18 * 18) continue;
+      pr.hitSet.add(e.id);
+      pr.count += 1;
+      projectileHit(state, pr, e, events);
+    }
+    if (pr.theta >= end) pr.done = true;
+  }
+  state.projs = state.projs.filter((p) => !p.done);
 }
 
 // Un ennemi qui avance de `before` à e.dist franchit les pointes posées entre les deux sur son chemin.
@@ -894,19 +946,21 @@ function fireShots(state, tower, events) {
   }
 
   if (def.boom) {
-    // Boomerang : va vers la cible, transperce, revient : chaque ennemi touché l'est (1 + returns) fois.
+    // Boomerang : un vrai projectile. Il part vers la cible en décrivant une boucle, la dépasse, puis revient vers la tour
+    // (un aller-retour par « returns »). Sur chaque trajet (aller ou retour) il touche au plus `pierceN` ennemis, chacun une fois.
     for (const target of list) {
-      const len = Math.max(1, Math.hypot(target.x - cx, target.y - cy));
-      const ux = (target.x - cx) / len;
-      const uy = (target.y - cy) / len;
-      const hits = rayEnemies(state, cx, cy, ux, uy, range, 15);
-      const aimed = hits.indexOf(target);
-      if (aimed > 0) { hits.splice(aimed, 1); hits.unshift(target); }
-      state.fx.push({ kind: "beam", x1: cx, y1: cy, x2: cx + ux * range, y2: cy + uy * range, ttl: 0.14, max: 0.14, color: def.color, w: 3 });
-      for (const e of hits.slice(0, st.pierceN)) {
-        for (let r = 0; r <= st.returns && !e.dead; r++) { strike(e, st.damage); applyEffects(state, e, st); }
-      }
+      const dx = target.x - cx;
+      const dy = target.y - cy;
+      const dist = Math.max(1, Math.hypot(dx, dy));
+      const reach = Math.max(50, Math.min(range, dist + 20));
+      state.projs.push({
+        kind: "boom", tower, ox: cx, oy: cy, ux: dx / dist, uy: dy / dist, vx: -dy / dist, vy: dx / dist,
+        R: reach, arc: reach * 0.15, omega: 680 / reach, theta: 0, loops: Math.max(1, Math.round(st.returns)),
+        leg: -1, hitSet: new Set(), count: 0, pierceN: Math.max(1, Math.round(st.pierceN)), x: cx, y: cy, color: def.color, done: false,
+        st: { damage: st.damage, crit: st.crit, critMul: st.critMul, pierce: st.pierce, execute: st.execute, stun: st.stun, burn: st.burn, burnTime: st.burnTime, poisonDps: st.poisonDps, poisonTime: st.poisonTime, slow: st.slow, slowTime: st.slowTime, freezeChance: st.freezeChance, freezeTime: st.freezeTime }
+      });
     }
+    if (state.projs.length > 120) state.projs.splice(0, state.projs.length - 120);
     return true;
   }
 
@@ -1189,6 +1243,7 @@ export function update(state, dt) {
     else tower.cooldown = 0;   // rien à portée : elle tirera dès qu'un ennemi arrive
   }
 
+  if (state.projs.length) stepProjectiles(state, dt, events);
   state.enemies = state.enemies.filter((e) => !e.dead);
   if (state.spikes.length) state.spikes = state.spikes.filter((sp) => sp.pierce > 0);
 
@@ -1228,15 +1283,16 @@ export function update(state, dt) {
 
 
 /* ---------- Paragons ---------- */
-// Fusion de 3 tours d'un même type (chacune avec un chemin au palier 4) : une tour qui cumule les 3 chemins au palier 4,
-// avec une capacité qui recharge deux fois plus vite. Une seule par type.
-//  - Le prix dépend de la puissance du type de tour (towerPower), pas d'un multiple fixe.
-//  - Au moment de la fusion (et seulement alors), le joueur peut investir de l'énergie en plus pour monter le degré (1 à 20).
-//  - Le degré monte aussi avec la valeur des tours sacrifiées et, ensuite, avec les éliminations.
+// Comme dans BTD6, un paragon est une tour à part, avec son nom, ses caractéristiques propres et sa capacité propre
+// (ce n'est pas la somme des trois chemins). On le crée en fusionnant 3 tours d'un même type au palier maximum :
+//  - idéalement une par chemin (fusion « complète » : +3 degrés) ; trois tours du même chemin marchent aussi ;
+//  - le prix dépend de la puissance du type de tour ;
+//  - au moment de la fusion (et seulement alors), on peut investir de l'énergie en plus pour monter le degré (1 à 20) ;
+//  - le degré monte aussi avec la valeur des tours sacrifiées et, ensuite, avec les éliminations.
+// Une seule par type.
 
-// Estimation de la puissance d'un type de tour avec ses 3 chemins au palier 4 (dégâts par seconde « équivalents »).
-export function towerPower(def, tiers = [MAX_TIER, MAX_TIER, MAX_TIER]) {
-  const st = towerStats(def, tiers);
+// Estimation de la puissance (dégâts par seconde « équivalents ») à partir des caractéristiques d'une tour.
+export function powerOfStats(def, st) {
   if (def.support) return 2600 * (st.boostDamage + st.boostRate);
   if (def.income) return 10 * st.income * (1 + st.interest * 8);
   const crit = Math.min(0.95, st.crit + st.critFar * 0.5);
@@ -1247,16 +1303,78 @@ export function towerPower(def, tiers = [MAX_TIER, MAX_TIER, MAX_TIER]) {
   if (st.chain) reach *= 1 + (st.chain - 1) * 0.5;
   if (def.line || def.boom || def.radial) reach *= Math.min(st.pierceN, 8) * 0.6 + 0.4;
   if (def.radial) reach *= Math.max(1, st.radial / 3);
-  if (def.boom) dps *= 1 + st.returns;
+  if (def.boom) dps *= 2 * st.returns;
   if (def.spikes) { dps = st.damage * st.pierceN * st.rate * st.batch; reach = 1; }
   dps *= reach;
   dps += (st.poisonDps + st.burn) * 0.6 * Math.min(reach, 4);
   return dps;
 }
+export const towerPower = (def, tiers = [MAX_TIER, MAX_TIER, MAX_TIER]) => powerOfStats(def, towerStats(def, tiers));
 
-export const paragonCost = (def) => Math.round((def.cost * 3 + 1000 * Math.log(1 + towerPower(def) / 300)) / 50) * 50;
+// Les 18 paragons : nom, description, « forme » (ce qui change par rapport à la tour de base), puissance visée (ratio par rapport
+// à 3 tours maximales, au degré 1) et capacité (version renforcée d'une capacité du type, sous un nom propre).
+export const PARAGONS = {
+  laser:    { name: "Prisme Absolu", desc: "7 rayons perforants, critiques fréquents.", ratio: 3, ability: ["overdrive", "Rayon absolu"], shape: { targets: 6, range: 1.4, rate: 1.5, crit: 0.2, critMul: 3, pierce: true } },
+  cryo:     { name: "Zéro Éternel", desc: "Gel de zone fréquent, ralentit presque à l'arrêt.", ratio: 2.5, ability: ["absolute", "Hiver éternel"], shape: { splash: 1.6, slow: 0.75, slowTime: 4, freezeChance: 0.5, freezeTime: 1, rate: 1.6, range: 1.4 } },
+  canon:    { name: "Dévastateur Plasma", desc: "Explosions colossales qui étourdissent.", ratio: 3, ability: ["barrage", "Cataclysme"], shape: { splash: 1.6, stun: 0.9, targets: 2, rate: 1.8, range: 1.3 } },
+  sniper:   { name: "Œil du Juge", desc: "3 tirs perforants, exécute les ennemis affaiblis.", ratio: 3, ability: ["headshot", "Verdict"], shape: { crit: 0.5, critMul: 5, execute: 0.4, targets: 2, rate: 2.5, pierce: true, range: 1.4 } },
+  tesla:    { name: "Colosse Foudroyant", desc: "Éclair de 10 rebonds sans perte, qui étourdit.", ratio: 3, ability: ["storm", "Jugement de la foudre"], shape: { chain: 9, chainFalloff: 1, chainReach: 1.5, stun: 0.8, rate: 2, range: 1.3 } },
+  venin:    { name: "Pandémie Vivante", desc: "Poison foudroyant qui gagne 8 voisins.", ratio: 3, ability: ["plague", "Fléau"], shape: { spreadCount: 8, spreadRadius: 2.2, poisonTime: 6, targets: 2, rate: 2, range: 1.4 } },
+  mortier:  { name: "Titan d'Artillerie", desc: "Obus géants en rafale, qui étourdissent.", ratio: 3, ability: ["carpet", "Pilonnage total"], shape: { splash: 2.3, targets: 2, stun: 0.9, rate: 3, range: 1.3 } },
+  gatling:  { name: "Moissonneuse d'Acier", desc: "4 canons perforants à cadence folle.", ratio: 3, ability: ["frenzy", "Moisson"], shape: { targets: 3, rate: 1.8, range: 1.3, pierce: true, crit: 0.2 } },
+  pulsar:   { name: "Singularité", desc: "Onde géante qui étourdit et fige les ennemis.", ratio: 3, ability: ["shock", "Effondrement"], shape: { range: 1.6, rate: 2, pulseSlow: 0.8, pulseSlowTime: 2, stun: 0.9 } },
+  beacon:   { name: "Nexus Souverain", desc: "Aura énorme : dégâts et cadence des alliés au maximum.", ratio: 2.5, ability: ["surge", "Nexus ardent"], shape: { range: 1.6, boostRange: 0.25 } },
+  miner:    { name: "Banque Centrale", desc: "Production colossale et gros intérêts.", ratio: 2.5, ability: ["dividend", "Krach inversé"], shape: { interest: 0.05 } },
+  dartling: { name: "Rayon du Jugement", desc: "4 rayons qui traversent toute la ligne.", ratio: 3, ability: ["deathbeam", "Rayon final"], shape: { pierceN: 99, targets: 3, rate: 1.8 } },
+  desperado:{ name: "Légende du Désert", desc: "Salves de 9 tirs, duel, critiques lointains, prime d'énergie doublée.", ratio: 3, ability: ["highnoon", "Dernier duel"], shape: { burst: 8, duel: 2, quick: 1, critFar: 0.5, crit: 0.2, critMul: 4, execute: 0.25, pierce: true, bounty: 1, range: 1.3 } },
+  tack:     { name: "Hérisson Infernal", desc: "24 pointes brûlantes qui transpercent.", ratio: 3, ability: ["inferno", "Hérisson ardent"], shape: { radial: 16, pierceN: 3, burn: 80, burnTime: 3, rate: 1.8, range: 1.5, pierce: true } },
+  boomerang:{ name: "Seigneur des Glaives", desc: "Glaives qui font trois allers-retours en transperçant.", ratio: 3, ability: ["tornado", "Tempête de glaives"], shape: { pierceN: 10, returns: 2, targets: 2, rate: 2, range: 1.4, pierce: true } },
+  wizard:   { name: "Archimage", desc: "Boules de feu géantes, brûlure intense, trois sorts à la fois.", ratio: 3, ability: ["dragon", "Cataclysme arcanique"], shape: { splash: 1.2, burn: 100, burnTime: 3, targets: 3, rate: 2, range: 1.3 } },
+  spikes:   { name: "Forge Sans Fin", desc: "Cascade de pointes dorées perforantes, tas empilés.", ratio: 3, ability: ["spikestorm", "Forge ardente"], shape: { batch: 4, rate: 3, pierceN: 8, pierce: true, range: 1.1 } },
+  super:    { name: "Avatar Solaire", desc: "Rayons solaires explosifs sur 6 cibles.", ratio: 3, ability: ["sunburst", "Éclipse solaire"], shape: { targets: 5, rate: 2, range: 1.4, splash: 0.8, pierce: true, crit: 0.2, critMul: 3 } }
+};
 
-// Le degré (1 à 20) : tours sacrifiées + énergie investie à la fusion + éliminations ensuite (jusqu'à +10).
+// Capacité de paragon : la capacité du type, en plus forte, sous un nom propre.
+for (const [id, spec] of Object.entries(PARAGONS)) {
+  const base = ABILITIES[spec.ability[0]];
+  const name = spec.ability[1];
+  const desc = `${base.desc} Version paragon, nettement plus puissante.`;
+  if (base.fury) {
+    const f = base.fury;
+    ABILITIES[`par_${id}`] = { name, desc, cd: base.cd, fury: { ...f, time: f.time * 1.6, ...(f.rate ? { rate: f.rate * 1.3 } : {}), ...(f.dmg ? { dmg: f.dmg * 1.3 } : {}) } };
+  } else {
+    ABILITIES[`par_${id}`] = { name, desc, cd: base.cd, run(state, tower, st, events) { base.run(state, tower, { ...st, damage: st.damage * 2.5, income: st.income * 3 }, events); } };
+  }
+}
+
+// Caractéristiques de base d'un paragon (degré 1) : forme du paragon, puis dégâts mis à l'échelle pour atteindre la puissance visée.
+const paragonBaseCache = {};
+function paragonBase(def) {
+  if (paragonBaseCache[def.id]) return paragonBaseCache[def.id];
+  const spec = PARAGONS[def.id];
+  const st = towerStats(def, [0, 0, 0]);
+  applyFx(st, spec.shape);
+  let ref = 0;
+  for (let p = 0; p < PATH_COUNT; p++) for (let q = 0; q < PATH_COUNT; q++) {
+    if (p === q) continue;
+    const tiers = [0, 0, 0];
+    tiers[p] = MAX_TIER;
+    tiers[q] = 2;
+    ref = Math.max(ref, towerPower(def, tiers));
+  }
+  const p0 = powerOfStats(def, st);
+  const k = p0 > 0 ? (spec.ratio * 3 * ref) / p0 : 1;
+  st.damage *= k; st.poisonDps *= k; st.burn *= k; st.boostDamage *= k; st.boostRate *= k; st.income *= k;
+  st.ability = `par_${def.id}`;
+  st.power = powerOfStats(def, st);
+  paragonBaseCache[def.id] = st;
+  return st;
+}
+
+// Prix : selon la puissance du paragon (et un coefficient propre au type, plus fort pour le Dartling).
+export const paragonCost = (def) => Math.round(((def.cost * 3 + 1000 * Math.log(1 + paragonBase(def).power / 300)) * (def.paragonMul || 1)) / 50) * 50;
+
+// Le degré (1 à 20) : tours sacrifiées + fusion complète + énergie investie à la fusion + éliminations ensuite (jusqu'à +10).
 export function paragonDegree(tower) {
   const pg = tower.paragon;
   if (!pg) return 0;
@@ -1265,12 +1383,12 @@ export function paragonDegree(tower) {
 }
 
 export function paragonStats(def, tower) {
-  const st = towerStats(def, [MAX_TIER, MAX_TIER, MAX_TIER]);
+  const st = { ...paragonBase(def) };
   const d = paragonDegree(tower);
   st.degree = d;
   if (def.support) { st.boostDamage *= 1 + 0.1 * (d - 1); st.boostRate *= 1 + 0.1 * (d - 1); }
   else if (def.income) st.income *= 1 + 0.15 * (d - 1);
-  else { st.damage *= 1 + 0.15 * (d - 1); st.rate *= 1 + 0.03 * (d - 1); st.range *= 1 + 0.01 * (d - 1); }
+  else { st.damage *= 1 + 0.15 * (d - 1); st.rate *= 1 + 0.03 * (d - 1); st.range *= 1 + 0.01 * (d - 1); st.poisonDps *= 1 + 0.15 * (d - 1); st.burn *= 1 + 0.15 * (d - 1); }
   return st;
 }
 
@@ -1279,28 +1397,42 @@ function refreshParagon(tower) {
   if (paragonDegree(tower) !== tower.st.degree) tower.st = paragonStats(def, tower);
 }
 
+const maxedPaths = (t) => t.tiers.map((x, i) => (x >= MAX_TIER ? i : -1)).filter((i) => i >= 0);
+
 // Tout ce qu'il faut savoir avant de fusionner : { is: true, degree } si c'en est un déjà ; sinon le prix, le pas du curseur
-// d'investissement (step = énergie pour +1 degré, maxSteps = nombre de pas utiles), le degré de départ, et la raison du blocage :
-// have (ce type a déjà un paragon) | notmax (aucun chemin au palier 4) | need (pas assez de tours prêtes) | gold.
+// d'investissement (step = énergie pour +1 degré, maxSteps = nombre de pas utiles), le degré de départ, les chemins couverts
+// par les tours prêtes (covered), si la fusion est complète (3 chemins), et la raison du blocage :
+// have (ce type a déjà un paragon) | notmax (aucun chemin au palier max) | need (pas assez de tours prêtes) | gold.
 export function paragonInfo(state, tower) {
   const def = TOWER_DEFS[tower.type];
   if (tower.paragon) return { is: true, degree: paragonDegree(tower) };
   const cost = paragonCost(def);
   const step = Math.max(10, Math.round((cost * 0.1) / 10) * 10);
   const ready = state.towers.filter((t) => t.type === tower.type && !t.paragon && t.tiers.some((x) => x >= MAX_TIER));
-  const others = ready.filter((t) => t !== tower).sort((a, b) => invested(b) - invested(a)).slice(0, PARAGON_NEED - 1);
+  // Les 2 autres tours sacrifiées : d'abord celles qui apportent un chemin différent, puis les plus investies.
+  const covered = new Set(maxedPaths(tower));
+  const pool = ready.filter((t) => t !== tower);
+  const others = [];
+  while (others.length < PARAGON_NEED - 1 && pool.length) {
+    const fresh = (t) => maxedPaths(t).filter((p) => !covered.has(p)).length;
+    pool.sort((a, b) => fresh(b) - fresh(a) || invested(b) - invested(a));
+    const t = pool.shift();
+    others.push(t);
+    maxedPaths(t).forEach((p) => covered.add(p));
+  }
+  const complete = covered.size >= PATH_COUNT && others.length >= PARAGON_NEED - 1;
   const sacrificed = invested(tower) + others.reduce((sum, t) => sum + invested(t), 0);
-  const base = Math.min(PARAGON_MAX_DEGREE, 1 + Math.floor(sacrificed / (cost * 0.6)));
+  const base = Math.min(PARAGON_MAX_DEGREE, 1 + Math.floor(sacrificed / (cost * 0.6)) + (complete ? PARAGON_COMPLETE_BONUS : 0));
   const maxSteps = Math.max(0, PARAGON_MAX_DEGREE - base);
   let reason = null;
   if (state.towers.some((t) => t.type === tower.type && t.paragon)) reason = "have";
   else if (!tower.tiers.some((x) => x >= MAX_TIER)) reason = "notmax";
   else if (ready.length < PARAGON_NEED) reason = "need";
   else if (state.gold < cost) reason = "gold";
-  return { is: false, cost, step, base, maxSteps, sacrificed, others, ready: ready.length, need: PARAGON_NEED, reason };
+  return { is: false, cost, step, base, maxSteps, sacrificed, others, ready: ready.length, need: PARAGON_NEED, complete, covered: [0, 1, 2].map((p) => covered.has(p)), reason };
 }
 
-// Fusionne : la tour choisie devient le paragon, les 2 autres tours prêtes (les plus investies) sont sacrifiées.
+// Fusionne : la tour choisie devient le paragon, les 2 autres tours prêtes sont sacrifiées.
 // steps : nombre de pas d'investissement supplémentaire (chacun coûte info.step et ajoute 1 degré), possible seulement ici.
 export function makeParagon(state, id, steps = 0) {
   const tower = state.towers.find((t) => t.id === id);
@@ -1315,7 +1447,7 @@ export function makeParagon(state, id, steps = 0) {
   const spent = info.sacrificed + info.cost + extra;
   state.gold -= info.cost + extra;
   state.towers = state.towers.filter((t) => !info.others.includes(t));
-  tower.paragon = { spent, base: info.base, extra, step: info.step };
+  tower.paragon = { spent, base: info.base, extra, step: info.step, complete: info.complete };
   tower.tiers = [MAX_TIER, MAX_TIER, MAX_TIER];
   tower.st = paragonStats(def, tower);
   tower.abilityCd = 0;
