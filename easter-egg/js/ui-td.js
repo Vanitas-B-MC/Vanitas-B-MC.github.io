@@ -7,10 +7,11 @@ import {
   PATH_NAMES, ABILITIES, TARGET_LABELS,
   createState, placeIssue, placeTower, upgradeTower, upgradeInfo, sellTower, startWave, useAbility, cycleTargetMode, setAim, setAimMode,
   update, towerAt, towerStats, beaconBuff, describeFx, ownedUpgrades, invested, SELL_RATIO, START_LIVES, waveBonusGold, isBoss,
-  paragonInfo, makeParagon, PARAGON_MAX_DEGREE, PARAGON_COMPLETE_BONUS, PARAGONS
+  paragonInfo, makeParagon, PARAGON_MAX_DEGREE, PARAGON_COMPLETE_BONUS, PARAGONS, SPIKE_SPOT, LINE_WIDTH
 } from "./td.js";
+import { drawTower, towerIcon } from "./td-art.js";
 import { wealthBonus, wavePct } from "./rewards.js";
-import { h, fmt, scrollToPlay, prefersReducedMotion } from "./ui.js";
+import { h, fmt, prefersReducedMotion } from "./ui.js";
 
 const STEP = 1 / 60;                       // pas de simulation (secondes)
 const SPEEDS = [1, 2, 3, 5, 10];           // vitesses de jeu (×5 et ×10 pour les longues parties)
@@ -43,6 +44,7 @@ function towerBrief(def) {
   if (def.support) return `Aura ${num(st.range / CELL)} · +${Math.round(st.boostDamage * 100)} % dég. · +${Math.round(st.boostRate * 100)} % cad.`;
   if (def.income) return `+${st.income} énergie / vague`;
   if (def.line) return `Dég ${Math.round(st.damage)} · Portée ∞ · ${num(st.rate)}/s`;
+  if (def.spikes) return `Dég ${Math.round(st.damage)} · Port ${num(st.range / CELL)} · ${num(st.rate)} tas/s`;
   return `Dég ${Math.round(st.damage)} · Port ${num(st.range / CELL)} · ${num(st.rate)}/s`;
 }
 
@@ -99,16 +101,24 @@ export function createTowerDefenseUI(root, wallet) {
   const palette = TOWER_IDS.map((id, index) => {
     const def = TOWER_DEFS[id];
     const main = h("span", { class: "tw-main" },
-      h("strong", {}, `${index + 1}. ${def.name}`),
+      h("strong", {}, index < 10 ? h("span", { class: "tw-key" }, `${(index + 1) % 10}`) : null, def.name),
       h("span", { class: "tw-stats" }, towerBrief(def)));
     const cost = h("span", { class: "tw-cost" });
-    // La description complète est dans l'infobulle ; les chiffres clés sont affichés à côté du nom.
-    const button = h("button", { class: "tower-button", type: "button", "data-tower": id, title: def.desc, onclick: () => onPalette(id) }, main, cost);
+    // Icône (le dessin de la tour), nom et prix ; la description et les chiffres clés sont dans l'infobulle et sous la liste.
+    const button = h("button", { class: "tower-button", type: "button", "data-tower": id, title: `${def.desc}\n${towerBrief(def)}`, onclick: () => onPalette(id) },
+      towerIcon(id, def.color), main, cost);
     button.style.setProperty("--tw", def.color);
+    button.addEventListener("pointerenter", () => { hoverTower = id; updateShopInfo(); });
+    button.addEventListener("pointerleave", () => { hoverTower = null; updateShopInfo(); });
     return { id, def, cost, button };
   });
+  let hoverTower = null;         // tour survolée dans la palette (sa description s'affiche sous la liste)
+  const shopInfo = h("p", { class: "td-shop-info", "aria-live": "polite" });
 
   const selTitle = h("strong", { class: "sel-title" });
+  const selIconBox = h("span", { class: "sel-icon" });
+  let selIconType = null;
+  const closeButton = h("button", { class: "sel-close", type: "button", title: "Fermer et revenir aux tours (Échap)", "aria-label": "Fermer", onclick: () => closeSelection() }, "✕");
   const selStats = h("span", { class: "sel-stats" });
   const selOwned = h("span", { class: "sel-owned" });
   const targetButton = h("button", { class: "button button-secondary", id: "td-target", type: "button", title: "Choisit quel ennemi la tour vise en priorité (T)", onclick: () => doTarget() });
@@ -121,39 +131,62 @@ export function createTowerDefenseUI(root, wallet) {
   let paragonConfirm = null;     // tour pour laquelle la fusion attend sa confirmation
   const sellButton = h("button", { class: "button button-secondary", id: "td-sell", type: "button", onclick: () => doSell() });
   const selection = h("div", { class: "td-selection chamfer", id: "td-selection", hidden: true },
-    selTitle, selStats, selOwned,
+    h("div", { class: "sel-head" }, selIconBox, selTitle, closeButton),
+    selStats, selOwned,
     h("div", { class: "sel-buttons" }, targetButton, abilityButton),
     aimRow,
     selPaths,
     paragonBox,
     h("div", { class: "sel-buttons" }, sellButton));
 
+  // En partie, le choix de la carte et de la difficulté laisse la place aux compteurs (énergie, vies, vague, record).
+  const setupBox = h("div", { class: "td-setup" }, mapBar, diffBar);
+  const hud = h("dl", { class: "td-hud", hidden: true },
+    stat("Énergie", goldEl, "⚡"), stat("Vies", livesEl, "♥"), stat("Vague", waveEl, "≋"), stat("Record", bestEl, "★"));
+  // Panneau de droite : la liste des tours, remplacée par le panneau d'amélioration quand une tour est sélectionnée
+  // (comme dans BTD6) : rien ne se décale, on n'a plus besoin de faire défiler la page.
+  const shopBox = h("div", { class: "td-shop" },
+    h("h3", { class: "subhead" }, "Tours"),
+    h("ul", { class: "tower-list" }, palette.map((p) => h("li", {}, p.button))),
+    shopInfo,
+    h("ul", { class: "game-help" },
+      h("li", {}, "Clique sur le plateau pour poser, sur une tour pour l'améliorer"),
+      h("li", {}, h("kbd", {}, "1"), "–", h("kbd", {}, "0"), " choisir · ", h("kbd", {}, "←↑↓→"), " curseur · ", h("kbd", {}, "Espace"), " poser"),
+      h("li", {}, h("kbd", {}, "Entrée"), " vague · ", h("kbd", {}, "U"), " améliorer · ", h("kbd", {}, "T"), " ciblage · ", h("kbd", {}, "A"), " capacité"),
+      h("li", {}, h("kbd", {}, "S"), " vitesse · ", h("kbd", {}, "G"), " paragon · ", h("kbd", {}, "V"), " vendre · ", h("kbd", {}, "P"), " pause"),
+      h("li", {}, h("kbd", {}, "M"), " visée souris/point · ", h("kbd", {}, "C"), " choisir le point · ", h("kbd", {}, ", ."), " tour préc./suiv.")));
+  const layout = h("div", { class: "td-layout" },
+    h("div", { class: "td-main" },
+      setupBox,
+      hud,
+      h("div", { class: "td-board-wrap chamfer" },
+        h("div", { class: "game-stage td-stage" }, board, toast, overlay)),
+      h("div", { class: "td-actions" }, waveButton, speedButton, stateEl)),
+    h("aside", { class: "td-side" }, selection, shopBox));
+
   root.replaceChildren(
     h("p", { class: "game-rules" },
       `Des ennemis suivent un ou plusieurs chemins : arrête-les avant la sortie (${START_LIVES} vies en Normal). Pose des tours où tu veux (ni sur le chemin, ni sur un obstacle) avec l'énergie gagnée en jeu, puis améliore-les : 3 chemins par tour, 2 au maximum, un seul au-delà du palier 2. Le palier 4 du 3e chemin donne une capacité active (son temps de recharge ne tourne que pendant les vagues). Trois tours d'un même type au palier 4 peuvent fusionner en un paragon. Un boss arrive toutes les 10 vagues. Débloque de nouvelles tours et cartes avec tes crédits.`),
-    h("div", { class: "td-layout" },
-      h("div", { class: "td-main" },
-        mapBar,
-        diffBar,
-        h("div", { class: "td-board-wrap chamfer" },
-          h("div", { class: "game-stage td-stage" }, board, toast, overlay)),
-        h("div", { class: "td-actions" }, waveButton, speedButton, stateEl)),
-      h("aside", { class: "td-side" },
-        h("dl", { class: "td-stats" },
-          stat("Énergie", goldEl), stat("Vies", livesEl), stat("Vague", waveEl), stat("Record", bestEl)),
-        selection,
-        h("h3", { class: "subhead" }, "Tours"),
-        h("ul", { class: "tower-list" }, palette.map((p) => h("li", {}, p.button))),
-        h("ul", { class: "game-help" },
-          h("li", {}, "Clique une case pour poser, une tour pour la sélectionner"),
-          h("li", {}, h("kbd", {}, "1"), "–", h("kbd", {}, "0"), " choisir · ", h("kbd", {}, "←↑↓→"), " curseur · ", h("kbd", {}, "Espace"), " poser"),
-          h("li", {}, h("kbd", {}, "Entrée"), " vague · ", h("kbd", {}, "U"), " améliorer · ", h("kbd", {}, "T"), " ciblage · ", h("kbd", {}, "A"), " capacité"),
-          h("li", {}, h("kbd", {}, "S"), " vitesse · ", h("kbd", {}, "G"), " paragon · ", h("kbd", {}, "V"), " vendre · ", h("kbd", {}, "P"), " pause"),
-          h("li", {}, h("kbd", {}, "M"), " visée souris/point · ", h("kbd", {}, "C"), " choisir le point · ", h("kbd", {}, ", ."), " tour préc./suiv."))))
+    layout
   );
 
-  function stat(label, el) {
-    return h("div", {}, h("dt", {}, label), h("dd", {}, el));
+  function stat(label, el, icon = "") {
+    return h("div", {}, h("dt", {}, icon ? h("span", { class: "hud-icon", "aria-hidden": "true" }, icon) : null, label), h("dd", {}, el));
+  }
+
+  function updateShopInfo() {
+    const id = hoverTower || placing;
+    if (!id) { setText(shopInfo, "Choisis une tour, puis clique sur le plateau pour la poser."); return; }
+    const def = TOWER_DEFS[id];
+    setText(shopInfo, `${def.name} · ${towerBrief(def)} — ${def.desc}`);
+  }
+
+  function closeSelection() {
+    selectedId = null;
+    aimPicking = false;
+    paragonConfirm = null;
+    updateHud();
+    draw();
   }
 
   /* ---------- Canvas ---------- */
@@ -234,9 +267,27 @@ export function createTowerDefenseUI(root, wallet) {
     const target = hover || (showCursor ? cursor : null);
     const selected = state.towers.find((t) => t.id === selectedId);
 
+    // Spike Factory ciblée : la zone où tombent les pointes
+    for (const t of state.towers) {
+      if (!t.aim || !TOWER_DEFS[t.type].spikes || !t.st.aimSpikes) continue;
+      ctx.strokeStyle = TOWER_DEFS[t.type].color;
+      ctx.globalAlpha = t.id === selectedId ? 0.8 : 0.3;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(t.aim.x, t.aim.y, SPIKE_SPOT * CELL, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(t.aim.x - 5, t.aim.y); ctx.lineTo(t.aim.x + 5, t.aim.y);
+      ctx.moveTo(t.aim.x, t.aim.y - 5); ctx.lineTo(t.aim.x, t.aim.y + 5);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
     // Visée des Dartling : un rayon pointillé jusqu'au bord du plateau, et le point visé
     for (const t of state.towers) {
-      if (!t.aim) continue;
+      if (!t.aim || !TOWER_DEFS[t.type].line) continue;
       const aim = t.aimMode === "mouse" && state.cursor ? state.cursor : t.aim;
       const len = Math.hypot(aim.x - t.x, aim.y - t.y);
       if (len < 2) continue;
@@ -270,16 +321,16 @@ export function createTowerDefenseUI(root, wallet) {
       const ok = !placeIssue(state, target.x, target.y) && state.gold >= def.cost;
       const color = ok ? def.color : "#ff3b5c";
       if (!def.line) drawRange(target.x, target.y, towerStats(def, [0, 0, 0]).range, color);
-      ctx.globalAlpha = 0.7;
-      ctx.fillStyle = color;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(target.x, target.y, TOWER_RADIUS, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.globalAlpha = 0.22;
-      ctx.fill();
+      ctx.globalAlpha = 0.75;
+      drawTower(ctx, placing, { x: target.x, y: target.y, color: def.color, time: state.time, jam: !ok });
       ctx.globalAlpha = 1;
+      if (!ok) {
+        ctx.strokeStyle = "#ff3b5c";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, TOWER_RADIUS + 2, 0, Math.PI * 2);
+        ctx.stroke();
+      }
     }
 
     // Tours
@@ -287,7 +338,6 @@ export function createTowerDefenseUI(root, wallet) {
       const def = TOWER_DEFS[tower.type];
       const x = tower.x;
       const y = tower.y;
-      const total = tower.tiers.reduce((a, b) => a + b, 0);
       const maxed = tower.tiers.some((t) => t >= MAX_TIER);
       if (def.support) {
         // Aura du Beacon : disque qui pulse doucement autour de la tour
@@ -298,34 +348,39 @@ export function createTowerDefenseUI(root, wallet) {
         ctx.fill();
         ctx.globalAlpha = 1;
       }
-      ctx.fillStyle = "#14141f";
-      ctx.beginPath();
-      ctx.arc(x, y, TOWER_RADIUS, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = tower.jam > 0 ? "#ff2a6d" : def.color;
-      ctx.lineWidth = tower.id === selectedId ? 3 : 1.5;
-      if (tower.jam > 0) ctx.setLineDash([3, 3]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = tower.jam > 0 ? "#6b6b7a" : def.color;
-      ctx.shadowColor = def.color;
-      ctx.shadowBlur = tower.fury > 0 ? 16 : 8;
-      const grow = Math.min(total, 6) * 0.45;
-      ctx.beginPath();
-      if (tower.paragon) {
-        for (let i = 0; i < 16; i++) {
-          const ang = (i * Math.PI) / 8 - Math.PI / 2;
-          const rad = i % 2 === 0 ? 10 : 4.5;
-          ctx.lineTo(x + Math.cos(ang) * rad, y + Math.sin(ang) * rad);
-        }
-        ctx.closePath();
+      // Capacité en cours (fureur) : halo de la couleur de la tour
+      if (tower.fury > 0) {
+        ctx.fillStyle = def.color;
+        ctx.globalAlpha = 0.25 + 0.15 * Math.sin(state.time * 12);
+        ctx.beginPath();
+        ctx.arc(x, y, TOWER_RADIUS + 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
       }
-      else if (def.income) ctx.rect(x - 5 - grow, y - 5 - grow, 10 + grow * 2, 10 + grow * 2);
-      else if (def.support) { ctx.moveTo(x, y - 8); ctx.lineTo(x + 8, y + 6); ctx.lineTo(x - 8, y + 6); ctx.closePath(); }
-      else if (def.spikes) { ctx.moveTo(x, y - 8); ctx.lineTo(x + 7, y); ctx.lineTo(x, y + 8); ctx.lineTo(x - 7, y); ctx.closePath(); }
-      else ctx.arc(x, y, 5 + grow, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
+      if (tower.id === selectedId) {
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 3]);
+        ctx.lineDashOffset = -state.time * 10;
+        ctx.beginPath();
+        ctx.arc(x, y, TOWER_RADIUS + 5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.lineDashOffset = 0;
+      }
+      drawTower(ctx, tower.type, {
+        x, y, angle: tower.angle ?? -Math.PI / 2, tiers: tower.tiers, time: state.time, spin: tower.spin,
+        jam: tower.jam > 0, fury: tower.fury > 0, color: tower.paragon ? "#fcee0a" : def.color
+      });
+      if (tower.jam > 0) {
+        ctx.strokeStyle = "#ff2a6d";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.arc(x, y, TOWER_RADIUS + 1, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
       // Paliers : une rangée de petits carrés par chemin, de la couleur du chemin
       for (let p = 0; p < PATH_COUNT; p++) {
         ctx.fillStyle = PATH_COLORS[p];
@@ -399,8 +454,59 @@ export function createTowerDefenseUI(root, wallet) {
       }
     }
 
-    // Boomerangs en vol
+    // Lasers continus des Dartling (chemin 1 au palier 3 ou 4)
+    for (const t of state.towers) {
+      if (!t.st.beam || !(t.beamUntil > state.time) || !t.aim) continue;
+      const aim = t.aimMode === "mouse" && state.cursor ? state.cursor : t.aim;
+      const len = Math.hypot(aim.x - t.x, aim.y - t.y);
+      if (len < 2) continue;
+      const ux0 = (aim.x - t.x) / len;
+      const uy0 = (aim.y - t.y) / len;
+      const n = Math.round(t.st.targets);
+      const wide = t.st.beam >= 2;
+      const flick = 0.85 + 0.15 * Math.sin(state.time * 40 + t.id);
+      for (let k = 0; k < n; k++) {
+        const a = (k - (n - 1) / 2) * 0.06;
+        const ux = ux0 * Math.cos(a) - uy0 * Math.sin(a);
+        const uy = ux0 * Math.sin(a) + uy0 * Math.cos(a);
+        const sx = t.x + ux * 16, sy = t.y + uy * 16;
+        const ex = t.x + ux * 1300, ey = t.y + uy * 1300;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = wide ? "#ff2a4a" : "#ff5a6e";
+        ctx.shadowColor = ctx.strokeStyle;
+        ctx.shadowBlur = 14;
+        ctx.globalAlpha = 0.55 * flick;
+        ctx.lineWidth = (wide ? LINE_WIDTH + 7 : LINE_WIDTH) * 1.2;
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = "#fff4f6";
+        ctx.lineWidth = wide ? 5 : 2.5;
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+        ctx.lineCap = "butt";
+      }
+    }
+
+    // Projectiles en vol : fléchettes du Dartling et boomerangs
     for (const pr of state.projs) {
+      if (pr.kind === "dart") {
+        ctx.save();
+        ctx.translate(pr.x, pr.y);
+        ctx.rotate(Math.atan2(pr.uy, pr.ux));
+        ctx.strokeStyle = "#0d0d16";
+        ctx.lineWidth = 4;
+        ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(5, 0); ctx.stroke();
+        ctx.strokeStyle = pr.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(5, 0); ctx.stroke();
+        ctx.fillStyle = "#e6e6e6";
+        ctx.beginPath(); ctx.moveTo(9, 0); ctx.lineTo(4, -2.5); ctx.lineTo(4, 2.5); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#ff2a6d";
+        ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-12, -3.5); ctx.lineTo(-6, 0); ctx.lineTo(-12, 3.5); ctx.closePath(); ctx.fill();
+        ctx.restore();
+        continue;
+      }
       ctx.save();
       ctx.translate(pr.x, pr.y);
       ctx.rotate(pr.theta * 5);
@@ -478,6 +584,10 @@ export function createTowerDefenseUI(root, wallet) {
   function setStatus(next) {
     status = next;
     setText(stateEl, STATUS_LABELS[next]);
+    const playing = next === "running" || next === "paused";
+    setupBox.hidden = playing;
+    hud.hidden = !playing;
+    root.classList.toggle("is-playing", playing);
   }
 
   function say(text) {
@@ -609,10 +719,14 @@ export function createTowerDefenseUI(root, wallet) {
     }
 
     const tower = state.towers.find((t) => t.id === selectedId);
+    if (!tower && selectedId !== null) selectedId = null;       // tour vendue ou sacrifiée
     selection.hidden = !tower;
+    shopBox.hidden = !!tower;
+    updateShopInfo();
     if (!tower) { panelSig = ""; return; }
 
     const def = TOWER_DEFS[tower.type];
+    if (selIconType !== tower.type) { selIconType = tower.type; selIconBox.replaceChildren(towerIcon(tower.type, def.color, 34)); }
     const ts = tower.st;
     const total = tower.tiers.reduce((a, b) => a + b, 0);
     setText(selTitle, tower.paragon ? `★ ${PARAGONS[tower.type].name}` : `${def.name} — ${tower.tiers.join(" · ")}`);
@@ -620,10 +734,12 @@ export function createTowerDefenseUI(root, wallet) {
     const buffed = beaconBuff(state, tower);
     setText(selStats, def.support
       ? `Aura ${num(ts.range / CELL)} cases · dégâts ${pct(ts.boostDamage)} · cadence ${pct(ts.boostRate)}`
+      : def.line && ts.beam
+        ? `Laser continu : ${Math.round(ts.damage * buffed.damage * buffed.rate)} dégâts toutes les 0,13 s à tous les ennemis de la ligne${ts.targets > 1 ? ` · ${ts.targets} rayons` : ""}`
       : def.line
         ? `Dégâts ${Math.round(ts.damage * buffed.damage)} · portée infinie · ${num(ts.rate * buffed.rate)} tirs/s · transperce ${ts.pierceN >= 50 ? "toute la ligne" : `${ts.pierceN} ennemis`}${ts.targets > 1 ? ` · ${ts.targets} rayons` : ""}`
       : def.spikes
-        ? `Pointes : ${Math.round(ts.damage * buffed.damage)} dégâts × ${ts.pierceN} passages · ${ts.batch} tas toutes les ${num(1 / (ts.rate * buffed.rate))} s · portée ${num((ts.range * buffed.range) / CELL)} cases`
+        ? `Pointes : ${Math.round(ts.damage * buffed.damage)} dégâts × ${ts.pierceN} passages · ${ts.batch} tas toutes les ${num(1 / (ts.rate * buffed.rate))} s · portée ${num((ts.range * buffed.range) / CELL)} cases${ts.aimSpikes ? " · zone choisie" : ""}`
       : def.income
         ? `Produit ${fmt(Math.round(ts.income))} énergie${ts.interest ? ` + ${num(ts.interest * 100)} % d'intérêts` : ""} à la fin de chaque vague`
         : `Dégâts ${Math.round(ts.damage * buffed.damage)} · portée ${num((ts.range * buffed.range) / CELL)} cases · ${num(ts.rate * buffed.rate)} tirs/s${ts.targets > 1 ? ` · ${ts.targets} cibles` : ""}`);
@@ -633,8 +749,9 @@ export function createTowerDefenseUI(root, wallet) {
     targetButton.hidden = !shoots;
     aimRow.hidden = !tower.aim;
     if (tower.aim) {
+      aimModeButton.hidden = !def.line;
       setText(aimModeButton, `Visée : ${tower.aimMode === "mouse" ? "souris" : "point fixe"} (M)`);
-      setText(aimPickButton, aimPicking ? "Clique sur le plateau…" : "Choisir le point (C)");
+      setText(aimPickButton, aimPicking ? "Clique sur le plateau…" : def.spikes ? "Choisir où tombent les pointes (C)" : "Choisir le point (C)");
       aimPickButton.disabled = tower.aimMode === "mouse";
     }
     if (shoots) setText(targetButton, `Ciblage : ${TARGET_LABELS[tower.target]} (T)`);
@@ -783,6 +900,10 @@ export function createTowerDefenseUI(root, wallet) {
     else {
       const ab = result.tower.st.ability;
       if (ab && result.tower.tiers[path] === MAX_TIER) say(`Capacité débloquée : ${ABILITIES[ab].name} — ${ABILITIES[ab].desc}`);
+      else if (TOWER_DEFS[result.tower.type].spikes && path === 2 && result.tower.tiers[2] === 1) {
+        aimPicking = true;
+        say("Lance-pointes : clique sur le plateau (dans la portée) pour choisir où tombent les pointes.");
+      }
     }
     updateHud();
     draw();
@@ -869,14 +990,26 @@ export function createTowerDefenseUI(root, wallet) {
   }
 
   function startGame() {
-    scrollToPlay(root.querySelector(".td-board-wrap"));
     resetState();
     placing = state.unlocked.includes("laser") ? "laser" : null;
     setStatus("running");
     overlay.hidden = true;
+    scrollToGame();
     updateHud();
     draw();
     startLoop();
+  }
+
+  // Au lancement : on cale le jeu (compteurs en haut, plateau, panneau) juste sous ce qui reste collé en haut de l'écran
+  // (en-tête du site, barre du portefeuille sur PC), pour jouer sans faire défiler la page.
+  function scrollToGame() {
+    let offset = 0;
+    for (const el of document.querySelectorAll("header, .wallet-bar")) {
+      const pos = getComputedStyle(el).position;
+      if (pos === "sticky" || pos === "fixed") offset = Math.max(offset, el.getBoundingClientRect().bottom);
+    }
+    const top = layout.getBoundingClientRect().top + window.scrollY - offset - 8;
+    window.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
   }
 
   function pauseGame(showScreen = true) {

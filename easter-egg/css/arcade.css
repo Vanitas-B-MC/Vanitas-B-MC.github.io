@@ -1963,3 +1963,86 @@ kbd {
 .pg-label { color: var(--text); font-size: 12px; }
 .pg-slider { width: 100%; accent-color: var(--yellow); }
 .pg-note { font-style: italic; }
+
+/* =========================
+   Pare-feu : compteurs en partie, palette avec icônes, panneau d'amélioration
+========================= */
+
+.td-setup[hidden], .td-hud[hidden], .td-shop[hidden], .td-selection[hidden] { display: none; }
+
+/* En partie : énergie, vies, vague et record en haut, à la place du choix de carte et de difficulté */
+.td-hud { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0 0 10px; }
+.td-hud > div {
+  --hc: var(--yellow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--hc);
+}
+.td-hud > div:nth-child(2) { --hc: var(--pink); }
+.td-hud > div:nth-child(3) { --hc: var(--cyan); }
+.td-hud dt { color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.td-hud dd { margin: 0; }
+.td-hud strong { color: var(--hc); font-family: var(--font-display); font-size: 22px; line-height: 1; }
+.hud-icon { margin-right: 6px; color: var(--hc); }
+
+/* Palette : dessin de la tour, nom, prix (la description s'affiche sous la liste) */
+.tower-button { grid-template-columns: 36px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 8px; align-items: center; }
+.tw-icon { grid-row: 1 / span 2; width: 36px; height: 36px; display: block; }
+.tower-button .tw-stats { display: none; }
+.tower-button { position: relative; padding: 6px 7px; }
+.tw-main { min-width: 0; }
+.tw-main strong { font-size: 11px; line-height: 1.2; letter-spacing: 0; overflow-wrap: break-word; hyphens: auto; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tw-key {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  opacity: .7;
+}
+.tower-button .tw-cost { font-size: 11px; white-space: nowrap; }
+.td-shop { display: grid; gap: 10px; }
+.td-shop-info { margin: 0; min-height: 3.2em; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+/* Panneau de la tour sélectionnée */
+.sel-head { display: flex; align-items: center; gap: 10px; }
+.sel-icon canvas { display: block; width: 34px; height: 34px; }
+.sel-close {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+.sel-close:hover { border-color: var(--pink); color: var(--pink); }
+
+@media (min-width: 761px) {
+  .tower-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* PC : le plateau est limité à la hauteur de l'écran, pour que compteurs, plateau et boutons tiennent sans défiler */
+@media (min-width: 901px) {
+  .td-layout { grid-template-columns: minmax(0, 1fr) 420px; }
+  .td-board-wrap { max-width: max(520px, calc((100vh - 340px) * 14 / 9 + 20px)); margin-inline: auto; }
+  .td-side { top: 150px; max-height: calc(100vh - 160px); }
+}
+
+@media (max-width: 760px) {
+  .td-hud { gap: 4px; margin-bottom: 8px; }
+  .td-hud > div { flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 8px; }
+  .td-hud dt { font-size: 9px; letter-spacing: .06em; }
+  .td-hud strong { font-size: 17px; }
+  .tower-list { grid-auto-columns: minmax(140px, 1fr); }
+  .tower-button { min-height: 56px; }
+}

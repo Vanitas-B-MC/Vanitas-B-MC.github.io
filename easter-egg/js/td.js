@@ -173,16 +173,19 @@ export const TOWER_DEFS = {
   pulsar: { id: "pulsar", name: "Pulsar",          desc: "Onde qui touche tous les ennemis proches.",            cost: 160, unlock: 3000, range: 2.2, rate: 0.7,  dmg: 24, color: "#ff6bd6", pulse: true },
   beacon: { id: "beacon", name: "Beacon",         desc: "Ne tire pas : booste les tours voisines (dégâts, cadence). Plusieurs beacons se cumulent.", cost: 120, unlock: 9000,  range: 2.2, rate: 0, dmg: 0, color: "#4dffd2", support: true },
   miner:  { id: "miner",  name: "Data Miner",      desc: "Ne tire pas : produit de l'énergie à la fin de chaque vague.",  cost: 100, unlock: 4000,  range: 0,   rate: 0, dmg: 0, color: "#5b9bff", income: true },
-  dartling: { id: "dartling", name: "Dartling", desc: "Portée infinie, tir continu : vise la souris ou un point fixe. Chaque salve transperce les ennemis alignés. Au bout du chemin 1, le Rayon de la mort.", cost: 1200, upScale: 0.35, unlock: 6000, range: 99, rate: 5, dmg: 14, color: "#ffe14d", line: true, paragonMul: 2 },
+  dartling: { id: "dartling", name: "Dartling", desc: "Portée infinie : tire des fléchettes vers la souris ou un point fixe ; chaque fléchette transperce les ennemis sur sa route. Le chemin 1 mène au laser continu, puis au Rayon de la mort.", cost: 1200, upScale: 0.35, unlock: 6000, range: 99, rate: 5, dmg: 14, color: "#ffe14d", line: true, paragonMul: 2 },
   desperado: { id: "desperado", name: "Desperado", desc: "Duelliste : tire d'autant plus vite qu'il y a peu d'ennemis à portée. Critiques à longue distance, salves de revolver.", cost: 150, unlock: 12000, range: 3.2, rate: 1.5, dmg: 26, color: "#ff9f5a" },
   tack:      { id: "tack",      name: "Tack Shooter", desc: "Tire une couronne de pointes dans toutes les directions. Portée courte, idéal dans les virages.", cost: 90,  unlock: 300,   range: 1.7, rate: 1.3, dmg: 14,  color: "#ff7a7a", radial: 8 },
   boomerang: { id: "boomerang", name: "Boomerang",    desc: "Lance un vrai boomerang : il traverse plusieurs ennemis à l'aller et au retour (chaque ennemi touché l'est deux fois).", cost: 100, unlock: 700,   range: 3.2, rate: 1.1, dmg: 14, color: "#7ad7ff", boom: true },
   wizard:    { id: "wizard",    name: "Wizard",       desc: "Magie : ignore le blindage. Boules de feu qui brûlent, éclairs, invocations.", cost: 120, unlock: 2500,  range: 3.3, rate: 1.6, dmg: 12, color: "#b06bff", magic: true },
-  spikes:    { id: "spikes",    name: "Spike Factory", desc: "Pose des tas de pointes sur le chemin : chaque tas blesse les ennemis qui passent dessus.", cost: 130, unlock: 3500,  range: 2.2, rate: 0.6, dmg: 12, color: "#c0c0d0", spikes: true },
+  spikes:    { id: "spikes",    name: "Spike Factory", desc: "Pose des tas de pointes sur le chemin : chaque tas blesse les ennemis qui passent dessus.", cost: 130, unlock: 3500,  range: 1.5, rate: 0.6, dmg: 12, color: "#c0c0d0", spikes: true },
   super:     { id: "super",     name: "Super Monkey", desc: "Cadence démesurée et longue portée. Très cher, très puissant.", cost: 450, unlock: 20000, range: 4.2, rate: 12, dmg: 6, color: "#6bd0ff" }
 };
 export const TOWER_IDS = Object.keys(TOWER_DEFS);
 export const LINE_WIDTH = 11;           // demi-largeur (px) du tir en ligne du Dartling
+export const BEAM_TICK = 0.13;          // laser continu du Dartling : un coup toutes les 0,13 s
+export const DART_SPEED = 900;          // vitesse des fléchettes du Dartling (px/s)
+export const SPIKE_SPOT = 0.9;          // Spike Factory ciblée : les pointes tombent à moins de 0,9 case du point choisi
 
 /* ---------- Chemins d'amélioration ---------- */
 // Règles (comme Bloons TD6) : une tour utilise au plus 2 chemins, et un seul chemin peut dépasser le palier 2.
@@ -193,7 +196,8 @@ export const LINE_WIDTH = 11;           // demi-largeur (px) du tir en ligne du 
 //               poisonTime, slowTime, pulseSlowTime, interest
 //      minimums (on garde le plus haut) : stun, slow, freezeChance, freezeTime, pulseSlow, critMul, execute, chainFalloff
 //      pierce (vrai/faux), ability (nom d'une capacité de ABILITIES)
-const U = (name, cost, fx) => ({ name, cost, fx });
+// price (facultatif) : prix fixe en énergie, au lieu de « coût de pose × cost ».
+const U = (name, cost, fx, price) => ({ name, cost, fx, price });
 
 export const PATH_NAMES = {
   laser:   ["Optique", "Cadence", "Puissance"],
@@ -212,7 +216,7 @@ export const PATH_NAMES = {
   tack:      ["Pointes", "Lames", "Feu"],
   boomerang: ["Glaives", "Vitesse", "Puissance"],
   wizard:    ["Feu", "Arcane", "Invocation"],
-  spikes:    ["Fabrication", "Pointes", "Zone"],
+  spikes:    ["Fabrication", "Pointes", "Ciblage"],
   super:     ["Lasers", "Portée", "Pouvoirs"]
 };
 
@@ -274,7 +278,7 @@ export const UPGRADES = {
   ],
   // Dartling : chemin 1 = perforation jusqu'au Rayon de la mort (touche tous les ennemis de la ligne)
   dartling: [
-    [U("Ailettes", 0.6, { pierceN: 2, dmg: 1.2 }), U("Pointes de tungstène", 1.2, { pierceN: 3, dmg: 1.3 }), U("Faisceau laser", 2.5, { pierceN: 5, dmg: 1.5 }), U("Rayon de la mort", 5.5, { pierceN: 99, dmg: 2.5, rate: 1.5 })],
+    [U("Ailettes", 0.6, { pierceN: 2, dmg: 1.2 }), U("Pointes de tungstène", 1.2, { pierceN: 3, dmg: 1.3 }), U("Faisceau laser", 0, { beam: 1, dmg: 1.5 }, 10000), U("Rayon de la mort", 0, { beam: 2, dmg: 2.5, rate: 1.5 }, 25000)],
     [U("Moteur", 0.6, { rate: 1.3 }), U("Barillet rapide", 1.2, { rate: 1.3 }), U("Mitrailleuse", 2.4, { rate: 1.4, dmg: 1.1 }), U("Hyper-rafale", 5, { rate: 1.6, dmg: 1.3 })],
     [U("Gros calibre", 0.7, { dmg: 1.5 }), U("Canons jumeaux", 1.4, { targets: 1 }), U("Triple canon", 2.6, { targets: 1, dmg: 1.3 }), U("Rayon fatal", 5.5, { targets: 1, dmg: 1.6, ability: "deathbeam" })]
   ],
@@ -302,7 +306,7 @@ export const UPGRADES = {
   spikes: [
     [U("Cadence", 0.6, { rate: 1.4 }), U("Deux tas", 1.2, { batch: 1 }), U("Chaîne de montage", 2.4, { rate: 1.4 }), U("Usine géante", 5, { batch: 2, rate: 1.4 })],
     [U("Pointes lourdes", 0.6, { dmg: 1.5 }), U("Pointes solides", 1.2, { pierceN: 2, dmg: 1.2 }), U("Pointes en acier", 2.5, { pierceN: 2, dmg: 1.5 }), U("Pointes mortelles", 5.2, { pierceN: 4, dmg: 2, pierce: true })],
-    [U("Portée", 0.7, { range: 1.12 }), U("Grand rayon", 1.3, { range: 1.12, batch: 1 }), U("Tapis de pointes", 2.6, { range: 1.15, batch: 2 }), U("Tempête de pointes", 5.5, { batch: 3, rate: 1.3, ability: "spikestorm" })]
+    [U("Lance-pointes", 0.7, { aimSpikes: 1, range: 1.2 }), U("Grand rayon", 1.3, { range: 1.1, batch: 1 }), U("Tapis de pointes", 2.6, { range: 1.1, batch: 2 }), U("Tempête de pointes", 5.5, { batch: 3, rate: 1.3, ability: "spikestorm" })]
   ],
   super: [
     [U("Lasers", 0.6, { dmg: 1.4 }), U("Plasma", 1.2, { dmg: 1.4, pierce: true }), U("Rayons solaires", 2.5, { dmg: 1.6, splash: 0.3 }), U("Avatar du soleil", 5.2, { dmg: 2, rate: 1.3, splash: 0.4 })],
@@ -334,7 +338,9 @@ export function towerStats(def, tiers = [0, 0, 0]) {
     pulseSlow: 0, pulseSlowTime: 0, pierceN: def.line ? 3 : def.radial ? 1 : def.boom ? 4 : def.spikes ? 4 : 0, burst: 0, duel: 0, quick: 0, critFar: 0,
     radial: def.radial || 0, returns: def.boom ? 1 : 0, batch: def.spikes ? 1 : 0, burn: 0, burnTime: 0, bounty: 0,
     boostDamage: def.id === "beacon" ? 0.2 : 0, boostRate: def.id === "beacon" ? 0.15 : 0, boostRange: 0,
-    income: def.id === "miner" ? 24 : 0, interest: 0, ability: null
+    income: def.id === "miner" ? 24 : 0, interest: 0, ability: null,
+    beam: 0,          // Dartling : 1 = laser continu, 2 = Rayon de la mort (plus large)
+    aimSpikes: 0      // Spike Factory : le joueur choisit où tombent les pointes
   };
   const paths = UPGRADES[def.id];
   for (let p = 0; p < PATH_COUNT; p++) {
@@ -346,7 +352,10 @@ export function towerStats(def, tiers = [0, 0, 0]) {
 
 export const towerDamage = (def, tiers) => towerStats(def, tiers).damage;
 export const towerRange = (def, tiers) => towerStats(def, tiers).range;
-export const upgradeCostOf = (def, path, tier) => Math.round(def.cost * (def.upScale || 1) * UPGRADES[def.id][path][tier].cost);
+export const upgradeCostOf = (def, path, tier) => {
+  const up = UPGRADES[def.id][path][tier];
+  return up.price || Math.round(def.cost * (def.upScale || 1) * up.cost);
+};
 
 // Description automatique d'une amélioration (affichée sur le bouton).
 export function describeFx(fx) {
@@ -388,6 +397,9 @@ export function describeFx(fx) {
   if (fx.boostRange) out.push(`alliés +${Math.round(fx.boostRange * 100)} % portée`);
   if (fx.income) out.push(`${pct(fx.income)} énergie`);
   if (fx.interest) out.push(`+${String(fx.interest * 100).replace(".", ",")} % d'intérêts`);
+  if (fx.beam === 1) out.push(`laser continu : touche toute la ligne toutes les ${String(BEAM_TICK).replace(".", ",")} s`);
+  if (fx.beam === 2) out.push("rayon continu géant");
+  if (fx.aimSpikes) out.push("choisis où tombent les pointes");
   if (fx.ability) out.push(`CAPACITÉ : ${ABILITIES[fx.ability].name}`);
   return out.join(" · ");
 }
@@ -590,16 +602,32 @@ export function placeTower(state, typeId, x, y) {
   return { ok: true, tower };
 }
 
+// Spike Factory ciblée : par défaut, le point du chemin le plus proche de la tour.
+function aimSpikesDefault(state, tower) {
+  const near = nearestPathPoint(state.map, tower.x, tower.y);
+  tower.aim = { x: near.x, y: near.y };
+  tower.aimMode = "point";
+}
+
 // Visée du Dartling : un point fixe, ou la souris (state.cursor, mis à jour par l'interface).
+// Spike Factory : un point fixe, ramené dans la portée de la tour si on clique trop loin.
 export function setAim(state, id, x, y) {
   const tower = state.towers.find((t) => t.id === id);
   if (!tower || !tower.aim) return false;
-  tower.aim = { x: Math.max(0, Math.min(W, x)), y: Math.max(0, Math.min(H, y)) };
+  x = Math.max(0, Math.min(W, x));
+  y = Math.max(0, Math.min(H, y));
+  if (TOWER_DEFS[tower.type].spikes) {
+    const reach = tower.st.range * beaconBuff(state, tower).range;
+    const d = Math.hypot(x - tower.x, y - tower.y);
+    if (d > reach) { x = tower.x + ((x - tower.x) / d) * reach; y = tower.y + ((y - tower.y) / d) * reach; }
+  }
+  tower.aim = { x, y };
   return true;
 }
 export function setAimMode(state, id, mode) {
   const tower = state.towers.find((t) => t.id === id);
   if (!tower || !tower.aim || !["point", "mouse"].includes(mode)) return false;
+  if (mode === "mouse" && !TOWER_DEFS[tower.type].line) return false;     // la souris : seulement pour le Dartling
   tower.aimMode = mode;
   return true;
 }
@@ -615,6 +643,7 @@ export function upgradeTower(state, id, path = 0) {
   state.gold -= info.price;
   tower.tiers[path] += 1;
   tower.st = towerStats(TOWER_DEFS[tower.type], tower.tiers);
+  if (tower.st.aimSpikes && !tower.aim) aimSpikesDefault(state, tower);
   return { ok: true, tower };
 }
 
@@ -766,12 +795,20 @@ function rayEnemies(state, x, y, ux, uy, length, width) {
 // Spike Factory : pose `count` tas de pointes sur le chemin, à portée de la tour.
 // Deux tas au même endroit s'empilent (plus de passages possibles, tas plus gros, jusqu'à 6) ; l'aspect (look) suit le niveau du chemin « Pointes ».
 function addSpikes(state, tower, st, count) {
-  const spots = [];
+  let spots = [];
   state.map.lanes.forEach((lane, li) => {
     for (const smp of lane.samples) if ((smp.x - tower.x) ** 2 + (smp.y - tower.y) ** 2 <= st.range ** 2) spots.push({ lane: li, ...smp });
   });
   if (!spots.length) return 0;
-  spots.sort((a, b) => (a.x - tower.x) ** 2 + (a.y - tower.y) ** 2 - ((b.x - tower.x) ** 2 + (b.y - tower.y) ** 2));
+  // Ciblée (Lance-pointes) : seulement les morceaux de chemin autour du point choisi, s'il y en a.
+  const aim = st.aimSpikes && tower.aim ? tower.aim : null;
+  if (aim) {
+    const reach = (SPIKE_SPOT * CELL) ** 2;
+    const near = spots.filter((p) => (p.x - aim.x) ** 2 + (p.y - aim.y) ** 2 <= reach);
+    if (near.length) spots = near;
+  }
+  const from = aim || tower;
+  spots.sort((a, b) => (a.x - from.x) ** 2 + (a.y - from.y) ** 2 - ((b.x - from.x) ** 2 + (b.y - from.y) ** 2));
   const rng = state.rng || Math.random;
   const look = tower.paragon ? 5 : Math.min(4, tower.tiers[1]);
   const pierce = Math.max(1, Math.round(st.pierceN));
@@ -810,6 +847,7 @@ function projectileHit(state, pr, e, events) {
 // Fait avancer les projectiles : position sur la boucle, et touches (une fois par ennemi et par trajet).
 function stepProjectiles(state, dt, events) {
   for (const pr of state.projs) {
+    if (pr.kind === "dart") { stepDart(state, pr, dt, events); continue; }
     const end = 2 * Math.PI * pr.loops;
     pr.theta = Math.min(end, pr.theta + pr.omega * dt);
     const leg = Math.min(pr.loops * 2 - 1, Math.floor(pr.theta / Math.PI));
@@ -827,6 +865,32 @@ function stepProjectiles(state, dt, events) {
     if (pr.theta >= end) pr.done = true;
   }
   state.projs = state.projs.filter((p) => !p.done);
+}
+
+// Fléchette du Dartling : ligne droite ; elle touche chaque ennemi croisé une seule fois, jusqu'à `pierceN` ennemis.
+// On teste le segment parcouru pendant le pas (pas seulement le point d'arrivée) : à 900 px/s, rien ne passe au travers.
+function stepDart(state, pr, dt, events) {
+  const x0 = pr.x, y0 = pr.y;
+  const step = DART_SPEED * dt;
+  pr.x += pr.ux * step;
+  pr.y += pr.uy * step;
+  const hits = [];
+  for (const e of state.enemies) {
+    if (e.dead || pr.hitSet.has(e.id)) continue;
+    const rx = e.x - x0, ry = e.y - y0;
+    const along = rx * pr.ux + ry * pr.uy;
+    if (along < -LINE_WIDTH || along > step + LINE_WIDTH) continue;
+    if (Math.abs(rx * pr.uy - ry * pr.ux) > LINE_WIDTH) continue;
+    hits.push({ e, along });
+  }
+  hits.sort((a, b) => a.along - b.along);
+  for (const { e } of hits) {
+    if (pr.count >= pr.pierceN) break;
+    pr.hitSet.add(e.id);
+    pr.count += 1;
+    projectileHit(state, pr, e, events);
+  }
+  if (pr.count >= pr.pierceN || pr.x < -20 || pr.x > W + 20 || pr.y < -20 || pr.y > H + 20) pr.done = true;
 }
 
 // Un ennemi qui avance de `before` à e.dist franchit les pointes posées entre les deux sur son chemin.
@@ -909,24 +973,40 @@ function fireShots(state, tower, events) {
   }
 
   const list = inRange.slice(0, st.targets);
+  if (list.length) tower.angle = Math.atan2(list[0].y - cy, list[0].x - cx);
 
   if (def.line) {
-    // Un rayon par cible (écartés de quelques degrés) ; chacun touche les `pierceN` premiers ennemis de la ligne (tous avec le Rayon de la mort).
     const aim = tower.aimMode === "mouse" && state.cursor ? state.cursor : tower.aim;
     const len = Math.hypot(aim.x - cx, aim.y - cy);
     if (len < 2) return false;
     const ux0 = (aim.x - cx) / len;
     const uy0 = (aim.y - cy) / len;
-    const all = st.pierceN >= 50;
+    tower.angle = Math.atan2(uy0, ux0);
     const n = Math.round(st.targets);
-    for (let k = 0; k < n; k++) {
+    const dirs = Array.from({ length: n }, (_, k) => {
       const a = (k - (n - 1) / 2) * 0.06;
-      const ux = ux0 * Math.cos(a) - uy0 * Math.sin(a);
-      const uy = ux0 * Math.sin(a) + uy0 * Math.cos(a);
-      const hits = rayEnemies(state, cx, cy, ux, uy, RAY_LENGTH, LINE_WIDTH);
-      state.fx.push({ kind: "beam", x1: cx, y1: cy, x2: cx + ux * RAY_LENGTH, y2: cy + uy * RAY_LENGTH, ttl: all ? 0.16 : 0.08, max: all ? 0.16 : 0.08, color: def.color, w: all ? 7 : 2 });
-      for (const e of hits.slice(0, st.pierceN)) { strike(e, st.damage); applyEffects(state, e, st); }
+      return [ux0 * Math.cos(a) - uy0 * Math.sin(a), ux0 * Math.sin(a) + uy0 * Math.cos(a)];
+    });
+    if (st.beam) {
+      // Laser continu : un coup toutes les BEAM_TICK s sur TOUS les ennemis de la ligne. Les bonus de cadence
+      // (améliorations, Beacons, capacité) augmentent les dégâts de chaque coup au lieu de la fréquence.
+      const per = st.damage * (towerRate(state, tower) / def.rate);
+      const width = st.beam >= 2 ? LINE_WIDTH + 7 : LINE_WIDTH;
+      tower.beamUntil = state.time + BEAM_TICK * 1.6;
+      for (const [ux, uy] of dirs) {
+        for (const e of rayEnemies(state, cx, cy, ux, uy, RAY_LENGTH, width)) { strike(e, per); applyEffects(state, e, st); }
+      }
+      return true;
     }
+    // Fléchettes : un vrai projectile par canon, qui file en ligne droite et transperce `pierceN` ennemis.
+    const pierceN = Math.max(1, Math.round(st.pierceN));
+    for (const [ux, uy] of dirs) {
+      state.projs.push({
+        kind: "dart", tower, x: cx + ux * 14, y: cy + uy * 14, ux, uy, hitSet: new Set(), count: 0, pierceN, color: def.color, done: false,
+        st: { damage: st.damage, crit: st.crit, critMul: st.critMul, pierce: st.pierce, execute: st.execute, stun: st.stun }
+      });
+    }
+    if (state.projs.length > 400) state.projs.splice(0, state.projs.length - 400);
     return true;
   }
 
@@ -1033,7 +1113,7 @@ export const ABILITIES = {
   overdrive: { name: "Surcharge", cd: 45, desc: "6 s : cadence ×2,5 et dégâts ×1,5.", fury: { time: 6, rate: 2.5, dmg: 1.5 } },
   frenzy:    { name: "Furie", cd: 40, desc: "5 s : cadence ×3, dégâts ×1,5, balles perforantes.", fury: { time: 5, rate: 3, dmg: 1.5, pierce: true } },
   highnoon:  { name: "Midi pile", cd: 45, desc: "5 s : cadence ×3, dégâts ×2, tous les tirs sont critiques et perforants.", fury: { time: 5, rate: 3, dmg: 2, crit: 1, pierce: true } },
-  deathbeam: { name: "Rayon fatal", cd: 40, desc: "4 s : le rayon transperce toute la ligne, dégâts ×3 et cadence ×2.", fury: { time: 4, rate: 2, dmg: 3, pierceN: 99 } },
+  deathbeam: { name: "Rayon fatal", cd: 40, desc: "4 s : les tirs transpercent toute la ligne, dégâts ×3 et cadence ×2.", fury: { time: 4, rate: 2, dmg: 3, pierceN: 99 } },
   sunburst:  { name: "Avatar solaire", cd: 45, desc: "6 s : cadence ×2,5, dégâts ×2,5, tirs perforants.", fury: { time: 6, rate: 2.5, dmg: 2.5, pierce: true } },
   inferno: {
     name: "Anneau infernal", cd: 40, desc: "Nova de feu : 5× dégâts et brûlure (60/s pendant 4 s) à tous les ennemis proches.",
@@ -1239,7 +1319,7 @@ export function update(state, dt) {
     if (tower.cooldown > 0) continue;
     const tdef = TOWER_DEFS[tower.type];
     if (tdef.support || tdef.income) continue;   // Beacon et Data Miner ne tirent pas
-    if (fire(state, tower, events)) tower.cooldown = 1 / towerRate(state, tower);
+    if (fire(state, tower, events)) tower.cooldown = tower.st.beam ? BEAM_TICK : 1 / towerRate(state, tower);
     else tower.cooldown = 0;   // rien à portée : elle tirera dès qu'un ennemi arrive
   }
 
@@ -1305,6 +1385,7 @@ export function powerOfStats(def, st) {
   if (def.radial) reach *= Math.max(1, st.radial / 3);
   if (def.boom) dps *= 2 * st.returns;
   if (def.spikes) { dps = st.damage * st.pierceN * st.rate * st.batch; reach = 1; }
+  if (st.beam) { reach = st.targets * 8 * (st.beam >= 2 ? 1.3 : 1); dps /= def.rate * BEAM_TICK; }   // laser continu : toute la ligne, un coup toutes les 0,13 s
   dps *= reach;
   dps += (st.poisonDps + st.burn) * 0.6 * Math.min(reach, 4);
   return dps;
@@ -1330,7 +1411,7 @@ export const PARAGONS = {
   tack:     { name: "Hérisson Infernal", desc: "24 pointes brûlantes qui transpercent.", ratio: 3, ability: ["inferno", "Hérisson ardent"], shape: { radial: 16, pierceN: 3, burn: 80, burnTime: 3, rate: 1.8, range: 1.5, pierce: true } },
   boomerang:{ name: "Seigneur des Glaives", desc: "Glaives qui font trois allers-retours en transperçant.", ratio: 3, ability: ["tornado", "Tempête de glaives"], shape: { pierceN: 10, returns: 2, targets: 2, rate: 2, range: 1.4, pierce: true } },
   wizard:   { name: "Archimage", desc: "Boules de feu géantes, brûlure intense, trois sorts à la fois.", ratio: 3, ability: ["dragon", "Cataclysme arcanique"], shape: { splash: 1.2, burn: 100, burnTime: 3, targets: 3, rate: 2, range: 1.3 } },
-  spikes:   { name: "Forge Sans Fin", desc: "Cascade de pointes dorées perforantes, tas empilés.", ratio: 3, ability: ["spikestorm", "Forge ardente"], shape: { batch: 4, rate: 3, pierceN: 8, pierce: true, range: 1.1 } },
+  spikes:   { name: "Forge Sans Fin", desc: "Cascade de pointes dorées perforantes, tas empilés, où tu veux dans sa portée.", ratio: 3, ability: ["spikestorm", "Forge ardente"], shape: { batch: 4, rate: 3, pierceN: 8, pierce: true, range: 1.3, aimSpikes: 1 } },
   super:    { name: "Avatar Solaire", desc: "Rayons solaires explosifs sur 6 cibles.", ratio: 3, ability: ["sunburst", "Éclipse solaire"], shape: { targets: 5, rate: 2, range: 1.4, splash: 0.8, pierce: true, crit: 0.2, critMul: 3 } }
 };
 
@@ -1451,6 +1532,7 @@ export function makeParagon(state, id, steps = 0) {
   tower.tiers = [MAX_TIER, MAX_TIER, MAX_TIER];
   tower.st = paragonStats(def, tower);
   tower.abilityCd = 0;
+  if (tower.st.aimSpikes && !tower.aim) aimSpikesDefault(state, tower);
   state.fx.push({ kind: "boom", x: tower.x, y: tower.y, r: CELL * 2, ttl: 0.6, max: 0.6, color: "#fcee0a" });
   return { ok: true, tower, sacrificed: info.others.map((t) => t.id), paid: info.cost + extra };
 }
