@@ -1054,7 +1054,7 @@ function fireShots(state, tower, events) {
       // Laser continu : un coup toutes les BEAM_TICK s sur TOUS les ennemis de la ligne. Les bonus de cadence
       // (améliorations, Beacons, capacité) augmentent les dégâts de chaque coup au lieu de la fréquence.
       const per = st.damage * (towerRate(state, tower) / def.rate);
-      const width = st.beam >= 2 ? LINE_WIDTH + 7 : LINE_WIDTH;
+      const width = st.beam >= 3 ? LINE_WIDTH + 22 : st.beam >= 2 ? LINE_WIDTH + 7 : LINE_WIDTH;     // 3 = paragon : énorme
       tower.beamUntil = state.time + BEAM_TICK * 1.6;
       for (const [ux, uy] of dirs) {
         for (const e of rayEnemies(state, cx, cy, ux, uy, RAY_LENGTH, width)) { strike(e, per); applyEffects(state, e, st); }
@@ -1448,7 +1448,7 @@ export function powerOfStats(def, st) {
   if (def.radial) reach *= Math.max(1, st.radial / 3);
   if (def.boom) dps *= 2 * st.returns;
   if (def.spikes) { dps = st.damage * st.pierceN * st.rate * st.batch; reach = 1; }
-  if (st.beam) { reach = st.targets * 8 * (st.beam >= 2 ? 1.3 : 1); dps /= def.rate * BEAM_TICK; }   // laser continu : toute la ligne, un coup toutes les 0,13 s
+  if (st.beam) { reach = st.targets * 8 * (st.beam >= 3 ? 1.8 : st.beam >= 2 ? 1.3 : 1); dps /= def.rate * BEAM_TICK; }   // laser continu : toute la ligne, un coup toutes les 0,13 s
   dps *= reach;
   dps += (st.poisonDps + st.burn) * 0.6 * Math.min(reach, 4);
   return dps;
@@ -1469,7 +1469,7 @@ export const PARAGONS = {
   pulsar:   { name: "Singularité", desc: "Onde géante qui étourdit et fige les ennemis.", ratio: 3, ability: ["shock", "Effondrement"], shape: { range: 1.6, rate: 2, pulseSlow: 0.8, pulseSlowTime: 2, stun: 0.9 } },
   beacon:   { name: "Nexus Souverain", desc: "Aura énorme : dégâts et cadence des alliés au maximum.", ratio: 2.5, ability: ["surge", "Nexus ardent"], shape: { range: 1.6, boostRange: 0.25 } },
   miner:    { name: "Banque Centrale", desc: "Production colossale et gros intérêts.", ratio: 2.5, ability: ["dividend", "Krach inversé"], shape: { interest: 0.05 } },
-  dartling: { name: "Rayon du Jugement", desc: "4 rayons qui traversent toute la ligne.", ratio: 3, ability: ["deathbeam", "Rayon final"], shape: { pierceN: 99, targets: 3, rate: 1.8 } },
+  dartling: { name: "Rayon du Jugement", desc: "Un laser colossal et continu qui traverse toute la carte et brûle tout sur sa ligne.", ratio: 3, ability: ["deathbeam", "Rayon final"], shape: { beam: 3, rate: 1.8 } },
   desperado:{ name: "Légende du Désert", desc: "Salves de 9 tirs, duel, critiques lointains, prime d'énergie doublée.", ratio: 3, ability: ["highnoon", "Dernier duel"], shape: { burst: 8, duel: 2, quick: 1, critFar: 0.5, crit: 0.2, critMul: 4, execute: 0.25, pierce: true, bounty: 1, range: 1.3 } },
   tack:     { name: "Hérisson Infernal", desc: "24 pointes brûlantes qui transpercent.", ratio: 3, ability: ["inferno", "Hérisson ardent"], shape: { radial: 16, pierceN: 3, burn: 80, burnTime: 3, rate: 1.8, range: 1.5, pierce: true } },
   boomerang:{ name: "Seigneur des Glaives", desc: "Glaives qui font trois allers-retours en transperçant.", ratio: 3, ability: ["tornado", "Tempête de glaives"], shape: { pierceN: 10, returns: 2, targets: 2, rate: 2, range: 1.4, pierce: true } },

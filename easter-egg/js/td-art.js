@@ -278,6 +278,19 @@ const DRAW = {
   dartling(ctx, o, c) {
     base(ctx, c, { shape: "square" });
     ctx.rotate(o.angle);
+    if (o.paragon) {
+      // Paragon : un seul canon laser colossal, bobines dorées, lentille rouge incandescente
+      rrect(ctx, -2, -7, 24, 14, 4, "#2a2d36");
+      for (const x of [4, 9, 14]) rrect(ctx, x, -8.5, 3, 17, 1.2, GOLD, INK, 1.2);
+      rrect(ctx, 20, -8, 6, 16, 2.5, "#3a2a2a");
+      glow(ctx, 25, 0, 5, "#ff3b2a", 1);
+      circle(ctx, 25, 0, 2.6, "#fff3d0", null);
+      rrect(ctx, -12, -10, 16, 20, 5, "#4a4f60");
+      circle(ctx, -4, 0, 5, "#ff3b2a", INK, 1.8);
+      glow(ctx, -4, 0, 2.5, "#ffd23a", 1);
+      shine(ctx, -4, 0, 9);
+      return;
+    }
     const n = 1 + Math.min(2, o.tiers[2] >= 2 ? (o.tiers[2] >= 3 ? 2 : 1) : 0);
     const laser = o.tiers[0] >= 3;
     for (let k = 0; k < n; k++) {

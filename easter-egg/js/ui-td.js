@@ -411,7 +411,7 @@ export function createTowerDefenseUI(root, wallet) {
       }
       drawTower(ctx, tower.type, { scale: art,
         x, y, angle: tower.angle ?? -Math.PI / 2, tiers: tower.tiers, time: state.time, spin: tower.spin,
-        jam: tower.jam > 0, fury: tower.fury > 0, color: tower.paragon ? "#fcee0a" : def.color
+        jam: tower.jam > 0, fury: tower.fury > 0, paragon: !!tower.paragon, color: tower.paragon ? "#fcee0a" : def.color
       });
       if (tower.jam > 0) {
         ctx.strokeStyle = "#ff2a6d";
@@ -509,6 +509,38 @@ export function createTowerDefenseUI(root, wallet) {
       const n = Math.round(t.st.targets);
       const wide = t.st.beam >= 2;
       const flick = 0.85 + 0.15 * Math.sin(state.time * 40 + t.id);
+      if (t.st.beam >= 3) {
+        // Paragon : un laser colossal, en couches (halo rouge, flamme dorée, cœur blanc), qui ondule et lâche des étincelles
+        const ex = t.x + ux0 * 1300, ey = t.y + uy0 * 1300;
+        const sx = t.x + ux0 * 22, sy = t.y + uy0 * 22;
+        const pulse = 1 + 0.12 * Math.sin(state.time * 18);
+        ctx.lineCap = "round";
+        for (const [color, w, a, blur] of [["#ff2a4a", 46, 0.28, 30], ["#ff7a2a", 30, 0.55, 20], ["#ffd23a", 17, 0.9, 14], ["#fff8e6", 7, 1, 0]]) {
+          ctx.strokeStyle = color;
+          ctx.globalAlpha = a * flick;
+          ctx.lineWidth = w * pulse;
+          ctx.shadowColor = color;
+          ctx.shadowBlur = blur;
+          ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+        // étincelles le long du rayon
+        ctx.fillStyle = "#fff1b0";
+        for (let i = 0; i < 14; i++) {
+          const d = ((state.time * 520 + i * 97) % 900) + 20;
+          const off = Math.sin(i * 12.9 + state.time * 9) * 20;
+          ctx.globalAlpha = 0.8;
+          ctx.beginPath(); ctx.arc(t.x + ux0 * d - uy0 * off, t.y + uy0 * d + ux0 * off, 1.8, 0, Math.PI * 2); ctx.fill();
+        }
+        // anneau d'énergie à la sortie du canon
+        ctx.globalAlpha = 0.9;
+        ctx.strokeStyle = "#ffd23a";
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(sx, sy, 14 * pulse, 0, Math.PI * 2); ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.lineCap = "butt";
+        continue;
+      }
       for (let k = 0; k < n; k++) {
         const a = (k - (n - 1) / 2) * 0.06;
         const ux = ux0 * Math.cos(a) - uy0 * Math.sin(a);
