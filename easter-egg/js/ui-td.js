@@ -3,13 +3,15 @@
 // coûte de l'ÉNERGIE, gagnée pendant la partie.
 
 import {
-  W, H, COLS, ROWS, CELL, TOWER_RADIUS, PATH_HALF, MAX_TIER, PATH_COUNT, MAPS, FREE_MAP, DIFFICULTIES, DEFAULT_DIFFICULTY, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
+  W, H, COLS, ROWS, CELL, PATH_HALF, MAX_TIER, PATH_COUNT, MAPS, FREE_MAP, DIFFICULTIES, DEFAULT_DIFFICULTY, TOWER_DEFS, TOWER_IDS, ENEMY_DEFS,
   PATH_NAMES, ABILITIES, TARGET_LABELS,
   createState, placeIssue, placeTower, upgradeTower, upgradeInfo, sellTower, startWave, useAbility, cycleTargetMode, setAim, setAimMode,
   update, towerAt, towerStats, beaconBuff, describeFx, ownedUpgrades, invested, SELL_RATIO, START_LIVES, waveBonusGold, isBoss,
-  paragonInfo, makeParagon, PARAGON_MAX_DEGREE, PARAGON_COMPLETE_BONUS, PARAGONS, SPIKE_SPOT, LINE_WIDTH
+  paragonInfo, makeParagon, addTotem, PARAGON_MAX_DEGREE, TOTEM_POWER, POWER_CAPS, PARAGONS, SPIKE_SPOT, LINE_WIDTH,
+  towerRadius, snapPlacement, degreeFromPower as degreeOf, powerForDegree as powerFor
 } from "./td.js";
 import { drawTower, towerIcon } from "./td-art.js";
+import { drawFx } from "./td-fx.js";
 import { wealthBonus, wavePct } from "./rewards.js";
 import { h, fmt, prefersReducedMotion } from "./ui.js";
 
@@ -34,7 +36,8 @@ const REASONS = {
   none: "Cette tour n'a pas de capacité (palier 4 du chemin 3).",
   have: "Ce type de tour a déjà un paragon.",
   notmax: "Il faut un chemin au palier 4 pour fusionner en paragon.",
-  need: "Il faut 3 tours de ce type avec un chemin au palier 4."
+  maxdeg: "Ce paragon est déjà au degré 100.",
+  need: "Il faut une tour de ce type au palier 4 sur chacun des 3 chemins."
 };
 
 // Chiffres clés d'une tour, affichés à côté de son nom dans la palette.
@@ -59,7 +62,7 @@ export function createTowerDefenseUI(root, wallet) {
   let hover = null;              // point (en pixels) sous la souris
   let cursor = { x: W / 2, y: H / 2 };     // curseur clavier
   let aimPicking = false;        // le prochain clic définit le point visé du Dartling sélectionné
-  let paragonSteps = 0;          // curseur d'investissement du paragon (nombre de pas)
+  let paragonSteps = 0;          // totems de puissance achetés à la fusion du paragon
   let showCursor = false;        // le curseur clavier ne s'affiche qu'après un appui sur une flèche
   let speed = 1;
   let rafId = 0;
@@ -85,6 +88,10 @@ export function createTowerDefenseUI(root, wallet) {
 
   const waveButton = h("button", { class: "button button-primary", id: "td-wave", type: "button", onclick: () => launchWave() }, "Lancer la vague 1");
   const speedButton = h("button", { class: "button button-secondary", id: "td-speed", type: "button", title: "Vitesse du jeu (S)", onclick: () => toggleSpeed() }, "Vitesse ×1");
+  // Aimant : une tour posée près d'une autre vient se coller contre elle (ou dans le creux entre deux tours).
+  let magnet = true;
+  try { magnet = localStorage.getItem("mc-td-magnet") !== "0"; } catch { /* stockage indisponible */ }
+  const magnetButton = h("button", { class: "button button-secondary", id: "td-magnet", type: "button", title: "Coller les tours les unes aux autres en les posant (X)", onclick: () => toggleMagnet() });
 
   const mapButtons = MAPS.map((m) => {
     const button = h("button", { class: "map-button", type: "button", "data-map": m.id, onclick: () => onMap(m.id) });
@@ -154,19 +161,20 @@ export function createTowerDefenseUI(root, wallet) {
       h("li", {}, h("kbd", {}, "1"), "–", h("kbd", {}, "0"), " choisir · ", h("kbd", {}, "←↑↓→"), " curseur · ", h("kbd", {}, "Espace"), " poser"),
       h("li", {}, h("kbd", {}, "Entrée"), " vague · ", h("kbd", {}, "U"), " améliorer · ", h("kbd", {}, "T"), " ciblage · ", h("kbd", {}, "A"), " capacité"),
       h("li", {}, h("kbd", {}, "S"), " vitesse · ", h("kbd", {}, "G"), " paragon · ", h("kbd", {}, "V"), " vendre · ", h("kbd", {}, "P"), " pause"),
-      h("li", {}, h("kbd", {}, "M"), " visée souris/point · ", h("kbd", {}, "C"), " choisir le point · ", h("kbd", {}, ", ."), " tour préc./suiv.")));
+      h("li", {}, h("kbd", {}, "M"), " visée souris/point · ", h("kbd", {}, "C"), " choisir le point · ", h("kbd", {}, ", ."), " tour préc./suiv."),
+      h("li", {}, h("kbd", {}, "X"), " aimant (coller les tours) · ", h("kbd", {}, "G"), " paragon / totem")));
   const layout = h("div", { class: "td-layout" },
     h("div", { class: "td-main" },
       setupBox,
       hud,
       h("div", { class: "td-board-wrap chamfer" },
         h("div", { class: "game-stage td-stage" }, board, toast, overlay)),
-      h("div", { class: "td-actions" }, waveButton, speedButton, stateEl)),
+      h("div", { class: "td-actions" }, waveButton, speedButton, magnetButton, stateEl)),
     h("aside", { class: "td-side" }, selection, shopBox));
 
   root.replaceChildren(
     h("p", { class: "game-rules" },
-      `Des ennemis suivent un ou plusieurs chemins : arrête-les avant la sortie (${START_LIVES} vies en Normal). Pose des tours où tu veux (ni sur le chemin, ni sur un obstacle) avec l'énergie gagnée en jeu, puis améliore-les : 3 chemins par tour, 2 au maximum, un seul au-delà du palier 2. Le palier 4 du 3e chemin donne une capacité active (son temps de recharge ne tourne que pendant les vagues). Trois tours d'un même type au palier 4 peuvent fusionner en un paragon. Un boss arrive toutes les 10 vagues. Débloque de nouvelles tours et cartes avec tes crédits.`),
+      `Des ennemis suivent un ou plusieurs chemins : arrête-les avant la sortie (${START_LIVES} vies en Normal). Pose des tours où tu veux (ni sur le chemin, ni sur un obstacle) avec l'énergie gagnée en jeu, puis améliore-les : 3 chemins par tour, 2 au maximum, un seul au-delà du palier 2. Le palier 4 du 3e chemin donne une capacité active (son temps de recharge ne tourne que pendant les vagues). Avec une tour d'un même type au palier 4 sur chacun des 3 chemins, tu peux créer son paragon : il sacrifie toutes les tours de ce type et son degré (1 à 100) dépend de leur puissance. Un boss arrive toutes les 10 vagues. Débloque de nouvelles tours et cartes avec tes crédits.`),
     layout
   );
 
@@ -316,21 +324,36 @@ export function createTowerDefenseUI(root, wallet) {
     if (selected) {
       const def = TOWER_DEFS[selected.type];
       if (def.range && !def.line) drawRange(selected.x, selected.y, towerRangePx(selected), def.color);
-    } else if (placing && target) {
+    } else if (placing && target && !towerAt(state, target.x, target.y)) {
       const def = TOWER_DEFS[placing];
-      const ok = !placeIssue(state, target.x, target.y) && state.gold >= def.cost;
+      const spot = placeSpot(placing, target.x, target.y);
+      const at = spot || target;
+      const ok = !!spot && state.gold >= def.cost;
       const color = ok ? def.color : "#ff3b5c";
-      if (!def.line) drawRange(target.x, target.y, towerStats(def, [0, 0, 0]).range, color);
-      ctx.globalAlpha = 0.75;
-      drawTower(ctx, placing, { x: target.x, y: target.y, color: def.color, time: state.time, jam: !ok });
-      ctx.globalAlpha = 1;
-      if (!ok) {
-        ctx.strokeStyle = "#ff3b5c";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(target.x, target.y, TOWER_RADIUS + 2, 0, Math.PI * 2);
-        ctx.stroke();
+      const r = towerRadius(placing);
+      if (!def.line) drawRange(at.x, at.y, towerStats(def, [0, 0, 0]).range, color);
+      if (spot && spot.snapped) {
+        // L'aimant a déplacé la tour : petit trait jusqu'au curseur et contour des tours touchées
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(target.x, target.y); ctx.lineTo(at.x, at.y); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.strokeStyle = "#4dffd2";
+        ctx.lineWidth = 1.5;
+        for (const t of state.towers) {
+          const rt = towerRadius(t.type);
+          if (Math.hypot(t.x - at.x, t.y - at.y) <= r + rt + 1.5) { ctx.beginPath(); ctx.arc(t.x, t.y, rt + 1.5, 0, Math.PI * 2); ctx.stroke(); }
+        }
       }
+      ctx.globalAlpha = 0.8;
+      drawTower(ctx, placing, { x: at.x, y: at.y, color: def.color, time: state.time, jam: !ok, scale: r / 13 });
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = ok ? (spot.snapped ? "#4dffd2" : "rgba(255, 255, 255, 0.35)") : "#ff3b5c";
+      ctx.lineWidth = ok ? 1.5 : 2;
+      ctx.beginPath();
+      ctx.arc(at.x, at.y, r + 1.5, 0, Math.PI * 2);
+      ctx.stroke();
     }
 
     // Tours
@@ -339,6 +362,8 @@ export function createTowerDefenseUI(root, wallet) {
       const x = tower.x;
       const y = tower.y;
       const maxed = tower.tiers.some((t) => t >= MAX_TIER);
+      const R = towerRadius(tower.type);
+      const art = (R / 13) * (tower.paragon ? 1.35 : 1);       // un paragon est nettement plus gros
       if (def.support) {
         // Aura du Beacon : disque qui pulse doucement autour de la tour
         ctx.globalAlpha = (tower.fury > 0 ? 0.22 : 0.12) + 0.08 * Math.sin(state.time * 3);
@@ -353,7 +378,7 @@ export function createTowerDefenseUI(root, wallet) {
         ctx.fillStyle = def.color;
         ctx.globalAlpha = 0.25 + 0.15 * Math.sin(state.time * 12);
         ctx.beginPath();
-        ctx.arc(x, y, TOWER_RADIUS + 6, 0, Math.PI * 2);
+        ctx.arc(x, y, R * (tower.paragon ? 1.35 : 1) + 6, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
       }
@@ -363,12 +388,28 @@ export function createTowerDefenseUI(root, wallet) {
         ctx.setLineDash([4, 3]);
         ctx.lineDashOffset = -state.time * 10;
         ctx.beginPath();
-        ctx.arc(x, y, TOWER_RADIUS + 5, 0, Math.PI * 2);
+        ctx.arc(x, y, R * (tower.paragon ? 1.35 : 1) + 5, 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.lineDashOffset = 0;
       }
-      drawTower(ctx, tower.type, {
+      if (tower.paragon) {
+        // Paragon : halo doré en étoile qui tourne sous la tour
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(state.time * 0.8);
+        ctx.fillStyle = "rgba(252, 238, 10, 0.16)";
+        ctx.beginPath();
+        for (let i = 0; i < 16; i++) {
+          const a = (i * Math.PI) / 8;
+          const rr = i % 2 ? R * 1.5 : R * 2.1;
+          ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      drawTower(ctx, tower.type, { scale: art,
         x, y, angle: tower.angle ?? -Math.PI / 2, tiers: tower.tiers, time: state.time, spin: tower.spin,
         jam: tower.jam > 0, fury: tower.fury > 0, color: tower.paragon ? "#fcee0a" : def.color
       });
@@ -377,16 +418,16 @@ export function createTowerDefenseUI(root, wallet) {
         ctx.lineWidth = 1.5;
         ctx.setLineDash([3, 3]);
         ctx.beginPath();
-        ctx.arc(x, y, TOWER_RADIUS + 1, 0, Math.PI * 2);
+        ctx.arc(x, y, R + 1, 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
       }
       // Paliers : une rangée de petits carrés par chemin, de la couleur du chemin
       for (let p = 0; p < PATH_COUNT; p++) {
         ctx.fillStyle = PATH_COLORS[p];
-        for (let i = 0; i < tower.tiers[p]; i++) ctx.fillRect(x - 16 + p * 11 + i * 2.5, y + TOWER_RADIUS + 3, 2, 4);
+        if (!tower.paragon) for (let i = 0; i < tower.tiers[p]; i++) ctx.fillRect(x - 16 + p * 11 + i * 2.5, y + R + 3, 2, 4);
       }
-      if (maxed && !tower.paragon) { ctx.strokeStyle = "#fcee0a"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, TOWER_RADIUS + 2.5, 0, Math.PI * 2); ctx.stroke(); }
+      if (maxed && !tower.paragon) { ctx.strokeStyle = "#fcee0a"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, R + 2.5, 0, Math.PI * 2); ctx.stroke(); }
       if (tower.paragon) {
         // Paragon : anneau doré qui tourne et degré
         ctx.strokeStyle = "#fcee0a";
@@ -394,14 +435,17 @@ export function createTowerDefenseUI(root, wallet) {
         ctx.setLineDash([5, 4]);
         ctx.lineDashOffset = -state.time * 18;
         ctx.beginPath();
-        ctx.arc(x, y, TOWER_RADIUS + 4, 0, Math.PI * 2);
+        ctx.arc(x, y, R * 1.35 + 4, 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.lineDashOffset = 0;
         ctx.fillStyle = "#fcee0a";
         ctx.font = "bold 9px monospace";
         ctx.textAlign = "center";
-        ctx.fillText(`★${tower.st.degree}`, x, y - TOWER_RADIUS - 7);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#0a0a12";
+        ctx.strokeText(`★${tower.st.degree}`, x, y - R * 1.35 - 7);
+        ctx.fillText(`★${tower.st.degree}`, x, y - R * 1.35 - 7);
         ctx.textAlign = "start";
       }
       // Capacité : pastille verte quand elle est prête
@@ -409,7 +453,7 @@ export function createTowerDefenseUI(root, wallet) {
         const ready = tower.abilityCd <= 0 && state.phase === "wave";
         ctx.fillStyle = ready ? "#3ddc84" : tower.abilityCd > 0 ? "#6b6b7a" : "#9aa5b1";
         ctx.beginPath();
-        ctx.arc(x + TOWER_RADIUS - 1, y - TOWER_RADIUS + 1, 3.5, 0, Math.PI * 2);
+        ctx.arc(x + R * art - 1, y - R * art + 1, 3.5, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -522,25 +566,9 @@ export function createTowerDefenseUI(root, wallet) {
       ctx.restore();
     }
 
-    // Tirs et explosions
-    for (const f of state.fx) {
-      const k = Math.max(0, f.ttl / f.max);
-      ctx.globalAlpha = k;
-      if (f.kind === "beam") {
-        ctx.strokeStyle = f.color;
-        ctx.lineWidth = f.w || 2;
-        ctx.beginPath();
-        ctx.moveTo(f.x1, f.y1);
-        ctx.lineTo(f.x2, f.y2);
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = f.color;
-        ctx.beginPath();
-        ctx.arc(f.x, f.y, f.r * (1.2 - k * 0.4), 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    }
+    // Tirs et explosions (dessinés par td-fx.js)
+    for (const f of state.fx) drawFx(ctx, f);
+    ctx.globalAlpha = 1;
 
     // Repère du curseur clavier, ou du point visé en cours de choix
     const mark = aimPicking && hover ? hover : showCursor ? cursor : null;
@@ -635,42 +663,63 @@ export function createTowerDefenseUI(root, wallet) {
     }));
   }
 
-  // Bloc « Paragon » : progression vers la fusion, curseur d'investissement (seulement au moment de la fusion) ou degré du paragon.
+  // Bloc « Paragon » (comme BTD6) : conditions, tours sacrifiées, puissance → degré, totems ; ou degré du paragon et achat de totems.
+  const fmtK = (n) => (n >= 10000 ? `${fmt(Math.round(n / 1000))} k` : fmt(n));
+  function powerBar(value, from, to) {
+    const fill = h("span", {});
+    fill.style.width = `${Math.max(0, Math.min(100, ((value - from) / Math.max(1, to - from)) * 100))}%`;
+    return h("span", { class: "pg-bar", "aria-hidden": "true" }, fill);
+  }
+
   function renderParagon(tower, def, info) {
     paragonBox.replaceChildren();
+    const spec = PARAGONS[tower.type];
     if (info.is) {
+      const button = h("button", { class: "button button-primary", type: "button", disabled: info.maxed || !info.affordable || state.phase === "over", onclick: () => doParagon() },
+        info.maxed ? "Degré maximum atteint" : `Totem de puissance (+${fmt(TOTEM_POWER)}) · ${fmt(info.totemCost)} ⚡ · G`);
       paragonBox.append(
-        h("strong", { class: "sel-paragon-title" }, `★ ${PARAGONS[tower.type].name} — degré ${info.degree}/${PARAGON_MAX_DEGREE}`),
-        h("p", {}, `${PARAGONS[tower.type].desc} ${tower.kills} éliminations. Sa capacité recharge deux fois plus vite. Le degré monte encore avec les éliminations (jusqu'à +10), mais on ne peut plus investir d'énergie.`));
+        h("strong", { class: "sel-paragon-title" }, `★ ${spec.name} — degré ${info.degree}/${PARAGON_MAX_DEGREE}`),
+        h("p", {}, `${spec.desc} Sa capacité recharge deux fois plus vite. Chaque degré : +2 % dégâts, +0,5 % cadence, +1 % contre les boss ; au degré 100, +25 % de dégâts en plus.`),
+        h("p", { class: "pg-power" }, info.maxed ? `Puissance ${fmt(info.power)} : degré maximum.` : `Puissance ${fmt(info.power)} / ${fmt(info.next)} pour le degré ${info.degree + 1}`),
+        info.maxed ? null : powerBar(info.power, powerFor(info.degree), info.next),
+        button);
       return;
     }
-    const spec = PARAGONS[tower.type];
-    const marks = info.covered.map((c, i) => `${PATH_NAMES[def.id][i]} ${c ? "✓" : "✗"}`).join(" · ");
+    const marks = info.covered.map((c, i) => h("span", { class: c ? "pg-ok" : "pg-ko" }, `${c ? "✓" : "✗"} ${PATH_NAMES[def.id][i]}`));
     const lines = [
       h("strong", { class: "sel-paragon-title" }, `★ Paragon : ${spec.name}`),
       h("p", {}, `${spec.desc} Une tour à part, pas la somme des chemins.`),
-      h("p", {}, `Fusionne 3 tours « ${def.name} » au palier max (prêtes : ${info.ready}/${info.need}). Chemins couverts : ${marks}. ${info.complete ? `Fusion complète : +${PARAGON_COMPLETE_BONUS} degrés.` : `Une tour par chemin donne +${PARAGON_COMPLETE_BONUS} degrés ; trois tours du même chemin marchent aussi.`}`),
-      h("p", {}, `Prix (selon la puissance) : ${fmt(info.cost)} ⚡. Une seule par type.`)
+      h("p", { class: "pg-req" }, "Une tour au palier 4 sur chaque chemin : ", ...marks),
+      h("p", {}, info.sacrifice.length
+        ? `La fusion sacrifie toutes les autres tours « ${def.name} » (${info.sacrifice.length}). Leur puissance donne le degré :`
+        : `Aucune autre tour « ${def.name} » à sacrifier. Puissance :`),
+      h("ul", { class: "pg-sources" },
+        h("li", {}, `Énergie investie : ${fmtK(info.power.spent)}`, h("small", {}, ` / ${fmtK(POWER_CAPS.spent)}`)),
+        h("li", {}, `Éliminations : ${fmtK(info.power.kills)}`, h("small", {}, ` / ${fmtK(POWER_CAPS.kills)}`)),
+        h("li", {}, `Améliorations : ${fmtK(info.power.upgrades)}`, h("small", {}, ` / ${fmtK(POWER_CAPS.upgrades)}`)))
     ];
-    const maxSteps = Math.max(0, Math.min(info.maxSteps, Math.floor((state.gold - info.cost) / info.step)));
-    paragonSteps = Math.min(paragonSteps, maxSteps);
     const blocked = !!info.reason && info.reason !== "gold";
+    const maxTotems = Math.max(0, Math.min(info.maxTotems, Math.floor((state.gold - info.cost) / info.totemCost)));
+    paragonSteps = Math.min(paragonSteps, maxTotems);
     const label = h("span", { class: "pg-label" });
-    const button = h("button", { class: "button button-primary", type: "button", disabled: !!info.reason, onclick: () => doParagon(), title: blocked ? REASONS[info.reason] : "Sacrifie les 2 autres tours prêtes (les plus investies)" });
+    const button = h("button", { class: "button button-primary", type: "button", disabled: !!info.reason, onclick: () => doParagon(), title: blocked ? REASONS[info.reason] : "Sacrifie toutes les autres tours de ce type" });
     const refresh = () => {
-      const extra = paragonSteps * info.step;
-      const degree = Math.min(PARAGON_MAX_DEGREE, info.base + paragonSteps);
-      label.textContent = `Investissement en plus : ${fmt(extra)} ⚡ → degré ${degree}/${PARAGON_MAX_DEGREE}`;
-      const total = info.cost + extra;
-      button.textContent = paragonConfirm === tower.id && !info.reason
-        ? `Confirmer : sacrifier 2 tours (−${fmt(total)} ⚡)`
-        : info.reason === "gold" ? `Énergie insuffisante (${fmt(total)} ⚡)` : `Fusionner (${fmt(total)} ⚡) · G`;
+      const power = info.power.total + paragonSteps * TOTEM_POWER;
+      const degree = degreeOf(power);
+      label.textContent = `Totems achetés à la fusion : ${paragonSteps} (${fmt(paragonSteps * info.totemCost)} ⚡) → puissance ${fmtK(power)}, degré ${degree}/${PARAGON_MAX_DEGREE}`;
+      const total = info.cost + paragonSteps * info.totemCost;
+      button.textContent = blocked ? REASONS[info.reason]
+        : paragonConfirm === tower.id && !info.reason
+          ? `Confirmer : sacrifier ${info.sacrifice.length} tour${info.sacrifice.length > 1 ? "s" : ""} (−${fmt(total)} ⚡)`
+          : info.reason === "gold" ? `Énergie insuffisante (${fmt(total)} ⚡)` : `Créer le paragon (${fmt(total)} ⚡) · G`;
     };
-    if (info.maxSteps > 0 && !blocked) {
-      const slider = h("input", { class: "pg-slider", type: "range", min: 0, max: Math.max(0, maxSteps), step: 1, value: paragonSteps, "aria-label": "Énergie investie en plus pour monter le degré du paragon" });
-      slider.disabled = maxSteps === 0;
+    if (!blocked) {
+      const slider = h("input", { class: "pg-slider", type: "range", min: 0, max: maxTotems, step: 1, value: paragonSteps, "aria-label": "Totems de puissance achetés à la fusion" });
+      slider.disabled = maxTotems === 0;
       slider.addEventListener("input", () => { paragonSteps = Number(slider.value); paragonConfirm = null; refresh(); });
-      lines.push(label, slider, h("p", { class: "pg-note" }, "Possible uniquement maintenant : une fois fusionné, le degré ne se paie plus."));
+      lines.push(label, slider, h("p", { class: "pg-note" }, `Un totem coûte ${fmt(info.totemCost)} ⚡ et ajoute ${fmt(TOTEM_POWER)} de puissance ; tu pourras aussi en acheter plus tard.`));
+    } else {
+      lines.push(h("p", { class: "pg-note" }, `Degré prévu avec les tours actuelles : ${info.degree}/${PARAGON_MAX_DEGREE}.`));
     }
     refresh();
     lines.push(button);
@@ -687,6 +736,8 @@ export function createTowerDefenseUI(root, wallet) {
     waveButton.disabled = status !== "running" || inWave || state.phase === "over";
     setText(waveButton, inWave ? `Vague ${state.wave} en cours…` : `Lancer la vague ${state.wave + 1}`);
     setText(speedButton, `Vitesse ×${speed}`);
+    setText(magnetButton, `Aimant : ${magnet ? "oui" : "non"}`);
+    magnetButton.setAttribute("aria-pressed", String(magnet));
 
     for (const { m, button } of mapButtons) {
       const owned = wallet.data.maps.includes(m.id);
@@ -769,7 +820,7 @@ export function createTowerDefenseUI(root, wallet) {
     const affordBits = Array.from({ length: PATH_COUNT }, (_, p) => { const i = upgradeInfo(state, tower, p); return i.locked || (i.affordable ? 1 : 0); }).join("");
     const pinfo = paragonInfo(state, tower);
     const showParagon = pinfo.is || tower.tiers.some((t) => t >= MAX_TIER) || pinfo.reason === "have";
-    const sig = `${tower.id}|${tower.tiers}|${affordBits}|${state.phase}|${pinfo.is ? pinfo.degree + "/" + Math.floor(tower.kills / 10) : `${pinfo.reason}${pinfo.ready}`}|${paragonConfirm === tower.id}`;
+    const sig = `${tower.id}|${tower.tiers}|${affordBits}|${state.phase}|${pinfo.is ? `${pinfo.degree}/${pinfo.power}/${pinfo.affordable}` : `${pinfo.reason}${pinfo.covered}${pinfo.sacrifice.length}/${pinfo.power.total}/${Math.floor((state.gold - pinfo.cost) / pinfo.totemCost)}`}|${paragonConfirm === tower.id}`;
     if (sig !== panelSig) {
       panelSig = sig;
       selPaths.hidden = pinfo.is;
@@ -850,13 +901,15 @@ export function createTowerDefenseUI(root, wallet) {
   }
 
   function tryPlace(x, y) {
+    // Cliquer SUR une tour la sélectionne toujours ; l'aimant agit quand on vise à côté d'une tour (la nouvelle vient s'y coller).
     const existing = towerAt(state, x, y);
+    const spot = placing && !existing ? placeSpot(placing, x, y) : null;
     if (existing) {
       if (selectedId !== existing.id) { paragonConfirm = null; aimPicking = false; }
       selectedId = existing.id;
       placing = null;
     } else if (placing) {
-      const result = placeTower(state, placing, x, y);
+      const result = placeTower(state, placing, spot ? spot.x : x, spot ? spot.y : y);
       if (!result.ok) say(REASONS[result.reason] || "Impossible.");
       else if (result.tower.aim) {
         // Dartling : on le sélectionne tout de suite pour régler sa visée.
@@ -939,19 +992,28 @@ export function createTowerDefenseUI(root, wallet) {
     const tower = state.towers.find((t) => t.id === selectedId);
     if (!tower) return;
     const info = paragonInfo(state, tower);
-    if (info.is) return;
+    if (info.is) {
+      // Déjà paragon : G achète un totem de puissance
+      const r = addTotem(state, tower.id);
+      if (!r.ok) say(REASONS[r.reason] || "Pas assez d'énergie.");
+      else say(r.up ? `Totem : degré ${r.degree} !` : `Totem : +${fmt(TOTEM_POWER)} de puissance.`);
+      panelSig = "";
+      updateHud();
+      draw();
+      return;
+    }
     if (info.reason) { say(REASONS[info.reason] || "Pas assez d'énergie."); return; }
     if (paragonConfirm !== tower.id) {
       paragonConfirm = tower.id;
-      say("Confirme pour fusionner : 2 autres tours seront sacrifiées.");
+      say(`Confirme : ${info.sacrifice.length} tour${info.sacrifice.length > 1 ? "s" : ""} « ${TOWER_DEFS[tower.type].name} » seront sacrifiées.`);
       panelSig = "";
       updateHud();
       return;
     }
     paragonConfirm = null;
-    const steps = Math.max(0, Math.min(paragonSteps, info.maxSteps, Math.floor((state.gold - info.cost) / info.step)));
-    const result = makeParagon(state, tower.id, steps);
-    if (result.ok) say(`PARAGON ! ${TOWER_DEFS[tower.type].name} — degré ${result.tower.st.degree}`);
+    const totems = Math.max(0, Math.min(paragonSteps, info.maxTotems, Math.floor((state.gold - info.cost) / info.totemCost)));
+    const result = makeParagon(state, tower.id, totems);
+    if (result.ok) say(`PARAGON ! ${PARAGONS[tower.type].name} — degré ${result.degree}`);
     else say(REASONS[result.reason] || "Impossible.");
     paragonSteps = 0;
     panelSig = "";
@@ -982,6 +1044,20 @@ export function createTowerDefenseUI(root, wallet) {
     const boss = state.spawnList.find((e) => ENEMY_DEFS[e.type].boss);
     if (boss) say(`BOSS : ${ENEMY_DEFS[boss.type].name} — ${ENEMY_DEFS[boss.type].power}`);
     updateHud();
+  }
+
+  function toggleMagnet() {
+    magnet = !magnet;
+    try { localStorage.setItem("mc-td-magnet", magnet ? "1" : "0"); } catch { /* pas grave */ }
+    say(magnet ? "Aimant activé : les tours se collent les unes aux autres." : "Aimant désactivé : placement libre.");
+    updateHud();
+    draw();
+  }
+
+  // Où la tour en cours de pose irait vraiment (aimant compris) : { x, y, snapped } ou null.
+  function placeSpot(type, x, y) {
+    if (!magnet) return placeIssue(state, x, y, type) ? null : { x, y, snapped: false };
+    return snapPlacement(state, type, x, y);
   }
 
   function toggleSpeed() {
@@ -1186,6 +1262,7 @@ export function createTowerDefenseUI(root, wallet) {
     if (key === "t") doTarget();
     if (key === "a") doAbility();
     if (key === "s") toggleSpeed();
+    if (key === "x") toggleMagnet();
     if (key === "v" || key === "delete") doSell();
   });
 

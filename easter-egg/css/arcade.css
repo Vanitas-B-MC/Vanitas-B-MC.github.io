@@ -2046,3 +2046,14 @@ kbd {
   .tower-list { grid-auto-columns: minmax(140px, 1fr); }
   .tower-button { min-height: 56px; }
 }
+
+/* Pare-feu : paragons façon BTD6 (conditions, sources de puissance, barre de degré) */
+.pg-req { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.pg-ok { color: #3ddc84; }
+.pg-ko { color: var(--pink); }
+.pg-sources { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; color: var(--text); font-family: var(--font-mono); font-size: 11px; }
+.pg-sources small { color: var(--muted); }
+.pg-power { color: var(--text) !important; font-family: var(--font-mono); }
+.pg-bar { display: block; height: 6px; background: var(--surface-2); border: 1px solid var(--line-strong); }
+.pg-bar > span { display: block; height: 100%; background: var(--yellow); box-shadow: 0 0 8px -1px var(--yellow); }
+#td-magnet[aria-pressed="true"] { border-color: #4dffd2; color: #4dffd2; }
