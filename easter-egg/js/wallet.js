@@ -155,6 +155,21 @@ export function createWallet(storage = defaultStorage()) {
 
   const listeners = new Set();
 
+  // Un autre onglet de l'arcade vient de sauvegarder : on reprend sa version. Sans ça, notre
+  // prochaine sauvegarde (le gain passif du Clicker en fait 4 par seconde) écraserait ses
+  // changements avec nos vieilles données : tours, cartes, achats… perdus.
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", (event) => {
+      if (event.key !== KEY || event.storageArea !== storage) return;
+      try {
+        data = event.newValue ? sanitize(JSON.parse(event.newValue)) : freshData();
+      } catch {
+        return;
+      }
+      listeners.forEach((fn) => fn(data));
+    });
+  }
+
   function commit() {
     try { storage?.setItem(KEY, JSON.stringify(data)); } catch { /* pas grave */ }
     listeners.forEach((fn) => fn(data));
