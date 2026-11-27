@@ -8,7 +8,7 @@
 import { UPGRADES, BLUE_UPGRADES, SKILLS, CORE } from "./clicker.js";
 import { CHARACTER_IDS, FREE_CHARACTER } from "./survivors.js";
 import { MONSTERS, FAMILIES, FAMILY_IDS, MAX_TIER, freshHunt } from "./hunt.js";
-import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP } from "./td.js";
+import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP, HERO_IDS, FREE_HERO } from "./td.js";
 import { freshFarm, sanitizeFarm } from "./farm.js";
 import { LEVEL_IDS } from "./mines.js";
 import { QUEST_IDS, questById, applyRunToQuests } from "./hub.js";
@@ -47,6 +47,7 @@ function freshData() {
     blueLevels: Object.fromEntries(BLUE_IDS.map((id) => [id, 0])),
     towers: [FREE_TOWER],  // tours du Tower Defense débloquées
     maps: [FREE_MAP],      // cartes du Tower Defense débloquées
+    heroes: [FREE_HERO],   // héros du Tower Defense débloqués
     chars: [FREE_CHARACTER], // personnages de Survivor Arena débloqués
     achievements: [],
     hunt: freshHunt(),     // équipement, matériaux et victoires du RPG « Chasse aux Titans »
@@ -124,6 +125,9 @@ export function sanitize(raw) {
   }
   if (Array.isArray(raw.maps)) {
     for (const id of raw.maps) if (MAP_IDS.includes(id) && !data.maps.includes(id)) data.maps.push(id);
+  }
+  if (Array.isArray(raw.heroes)) {
+    for (const id of raw.heroes) if (HERO_IDS.includes(id) && !data.heroes.includes(id)) data.heroes.push(id);
   }
   if (Array.isArray(raw.achievements)) {
     for (const id of raw.achievements.slice(0, 200)) {
@@ -415,6 +419,13 @@ export function createWallet(storage = defaultStorage()) {
       return true;
     },
     hasMap(id) { return data.maps.includes(id); },
+    unlockHero(id, price) {
+      if (!HERO_IDS.includes(id) || data.heroes.includes(id)) return false;
+      if (!this.spendCredits(price)) return false;
+      data.heroes.push(id);
+      commit();
+      return true;
+    },
     unlockMap(id, price) {
       if (!MAP_IDS.includes(id) || data.maps.includes(id)) return false;
       if (!this.spendCredits(price)) return false;

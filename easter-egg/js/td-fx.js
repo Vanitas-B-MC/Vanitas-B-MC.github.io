@@ -255,6 +255,113 @@ function drawShot(ctx, f, p) {
       ctx.setLineDash([]);
       break;
     }
+    case "glue": {
+      // Paquet de glu qui s'étire en vol, avec des filaments
+      const [x, y] = at(p);
+      const [tx, ty] = at(Math.max(0, p - 0.18));
+      ctx.lineCap = "round";
+      line(ctx, tx, ty, x, y, "rgba(212, 255, 58, 0.45)", 3);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(ang);
+      ctx.fillStyle = "#d4ff3a";
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.ellipse(0, 0, 6.5, 4.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#f6ffd0";
+      ctx.beginPath(); ctx.arc(2, -1.5, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      if (p > 0.85) flash(ctx, f.x2, f.y2, 7, "#d4ff3a", (1 - p) / 0.15);
+      break;
+    }
+    case "alchemist": {
+      // Fiole d'acide qui tournoie en cloche, gouttes vertes derrière
+      const dist = Math.hypot(f.x2 - f.x1, f.y2 - f.y1);
+      const hgt = Math.sin(Math.PI * p) * Math.min(30, dist * 0.25);
+      const [x, y] = at(p);
+      for (let k = 1; k <= 3; k++) {
+        const [tx, ty] = at(Math.max(0, p - k * 0.08));
+        ctx.globalAlpha = 0.45 / k;
+        ctx.fillStyle = "#9cff6b";
+        ctx.beginPath(); ctx.arc(tx, ty - Math.sin(Math.PI * Math.max(0, p - k * 0.08)) * Math.min(30, dist * 0.25), 2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.save();
+      ctx.translate(x, y - hgt);
+      ctx.rotate(p * 12);
+      ctx.fillStyle = "#cfd6e2";
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect(-1.5, -7, 3, 4, 1); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = f.color;
+      ctx.beginPath(); ctx.arc(0, 0, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath(); ctx.arc(-1.5, -1.5, 1.2, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      break;
+    }
+    case "potion": {
+      // Potion lancée à une tour alliée : arc rose et étincelles à l'arrivée
+      const hgt = Math.sin(Math.PI * p) * 22;
+      const [x, y] = at(p);
+      ctx.fillStyle = "#f07cff";
+      ctx.shadowColor = "#f07cff";
+      ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(x, y - hgt, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      if (p > 0.8) {
+        const r = rand(f.seed || 3);
+        ctx.globalAlpha = (1 - p) / 0.2;
+        ctx.fillStyle = "#ffd6fb";
+        for (let i = 0; i < 6; i++) { const a = r() * Math.PI * 2, d = 6 + r() * 8; ctx.beginPath(); ctx.arc(f.x2 + Math.cos(a) * d, f.y2 + Math.sin(a) * d, 1.4, 0, Math.PI * 2); ctx.fill(); }
+        ctx.globalAlpha = 1;
+      }
+      break;
+    }
+    case "satellite": {
+      // Rayon orbital : il tombe du haut de l'écran sur la cible
+      const sx = f.x2, sy = -20;
+      const w = (f.paragon ? 12 : 8) * (1 - p * 0.6);
+      ctx.globalAlpha = 1 - p * 0.8;
+      ctx.lineCap = "round";
+      line(ctx, sx, sy, f.x2, f.y2, "#8fb3ff", w * 1.8, 16);
+      line(ctx, sx, sy, f.x2, f.y2, "#e0e6ff", w * 0.8, 8);
+      line(ctx, sx, sy, f.x2, f.y2, "#ffffff", w * 0.3);
+      flash(ctx, f.x2, f.y2, 10 * (1 - p) + 4, "#ffffff", 1 - p);
+      break;
+    }
+    case "sonic": {
+      // Onde de choc : trois arcs qui filent le long de la ligne
+      const w = (f.w || 14) + 2;
+      for (let k = 0; k < 3; k++) {
+        const q = Math.min(1, p * 1.3 + k * 0.12);
+        if (q >= 1) continue;
+        const [x, y] = at(q);
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(ang);
+        ctx.globalAlpha = (1 - q) * 0.9;
+        ctx.strokeStyle = f.color;
+        ctx.shadowColor = f.color;
+        ctx.shadowBlur = 8;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(-w * 0.6, 0, w, -0.9, 0.9);
+        ctx.stroke();
+        ctx.restore();
+      }
+      break;
+    }
+    case "drone": {
+      // Rafale de mitrailleuse du drone
+      const t1 = Math.min(1, p * 1.5), t0 = Math.max(0, t1 - 0.35);
+      const [ax, ay] = at(t0), [bx, by] = at(t1);
+      ctx.lineCap = "round";
+      if (t1 < 1) line(ctx, ax, ay, bx, by, "#cfe0ff", 1.8, 6);
+      if (p < 0.3) flash(ctx, f.x1, f.y1, 3.5, "#ffe08a", 1 - p / 0.3);
+      if (t1 >= 1) flash(ctx, f.x2, f.y2, 3.5, "#ffffff", fade);
+      break;
+    }
     default: {
       ctx.globalAlpha = fade;
       line(ctx, f.x1, f.y1, f.x2, f.y2, f.color, 2.5, 6);
@@ -289,7 +396,7 @@ function drawTack(ctx, f, p) {
   ctx.globalAlpha = 1;
 }
 
-const BOOM_COLORS = { canon: ["#fff1c1", "#ff8a3d"], mortier: ["#fff1c1", "#ff6a1f"], wizard: ["#ffe2a8", "#ff5a1f"], cryo: ["#ffffff", "#7fd8ff"], super: ["#ffffff", "#6bd0ff"] };
+const BOOM_COLORS = { glue: ["#f6ffd0", "#b8e62a"], alchemist: ["#e8ffd6", "#7be04a"], canon: ["#fff1c1", "#ff8a3d"], mortier: ["#fff1c1", "#ff6a1f"], wizard: ["#ffe2a8", "#ff5a1f"], cryo: ["#ffffff", "#7fd8ff"], super: ["#ffffff", "#6bd0ff"] };
 
 function drawBoom(ctx, f, p) {
   const fade = 1 - p;
@@ -364,6 +471,27 @@ function drawBoom(ctx, f, p) {
   ctx.globalAlpha = 1;
 }
 
+// Cône de flammes du Lance-flammes : langues de feu (orange, ou bleues en plasma) dans l'angle du tir.
+function drawCone(ctx, f, p) {
+  const r = rand(f.seed || 1);
+  const n = 14;
+  const hot = f.plasma ? ["#e8f8ff", "#6bd0ff", "#3a6bff"] : ["#fff1c1", "#ffb347", "#ff5a1f"];
+  for (let i = 0; i < n; i++) {
+    const a = f.a + (r() - 0.5) * 2 * f.spread;
+    const d = f.r * (0.35 + 0.65 * Math.min(1, p * 1.8 + r() * 0.3));
+    const x = f.x + Math.cos(a) * d, y = f.y + Math.sin(a) * d;
+    const size = 3 + r() * 5 * (0.5 + d / f.r);
+    ctx.globalAlpha = (1 - p) * 0.75;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, size);
+    g.addColorStop(0, hot[0]);
+    g.addColorStop(0.5, hot[1]);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
 export function drawFx(ctx, f) {
   const elapsed = f.max - f.ttl;
   const delay = f.delay || 0;
@@ -372,6 +500,7 @@ export function drawFx(ctx, f) {
   ctx.save();
   if (f.kind === "shot") drawShot(ctx, f, p);
   else if (f.kind === "tack") drawTack(ctx, f, p);
+  else if (f.kind === "cone") drawCone(ctx, f, p);
   else if (f.kind === "boom") drawBoom(ctx, f, p);
   else if (f.kind === "beam") {
     // Rayons des capacités (Tir fatal, Tempête…)

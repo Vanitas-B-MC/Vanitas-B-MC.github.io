@@ -8,9 +8,10 @@ import {
   createState, placeIssue, placeTower, upgradeTower, upgradeInfo, sellTower, startWave, useAbility, cycleTargetMode, setAim, setAimMode,
   update, towerAt, towerStats, beaconBuff, describeFx, ownedUpgrades, invested, SELL_RATIO, START_LIVES, waveBonusGold, isBoss,
   paragonInfo, makeParagon, addTotem, PARAGON_MAX_DEGREE, TOTEM_POWER, POWER_CAPS, PARAGONS, SPIKE_SPOT, LINE_WIDTH,
-  towerRadius, snapPlacement, degreeFromPower as degreeOf, powerForDegree as powerFor
+  towerRadius, snapPlacement, degreeFromPower as degreeOf, powerForDegree as powerFor, POWERS, usePower, powerCost, dronePos,
+  HERO_DEFS, HERO_IDS, FREE_HERO, HERO_ABILITY_LEVELS, HERO_MAX_LEVEL, xpForLevel, heroTower, useHeroAbility, pointAt
 } from "./td.js";
-import { drawTower, towerIcon } from "./td-art.js";
+import { drawTower, towerIcon, drawDrone, drawEnemy } from "./td-art.js";
 import { drawFx } from "./td-fx.js";
 import { wealthBonus, wavePct } from "./rewards.js";
 import { h, fmt, prefersReducedMotion } from "./ui.js";
@@ -37,7 +38,10 @@ const REASONS = {
   have: "Ce type de tour a déjà un paragon.",
   notmax: "Il faut un chemin au palier 4 pour fusionner en paragon.",
   maxdeg: "Ce paragon est déjà au degré 100.",
-  need: "Il faut une tour de ce type au palier 4 sur chacun des 3 chemins."
+  need: "Il faut une tour de ce type au palier 4 sur chacun des 3 chemins.",
+  hero: "Ton héros est déjà sur le plateau (un seul héros par partie).",
+  heroUp: "Un héros ne s'améliore pas : il gagne des niveaux en combattant.",
+  level: "Capacité pas encore débloquée."
 };
 
 // Chiffres clés d'une tour, affichés à côté de son nom dans la palette.
@@ -53,8 +57,18 @@ function towerBrief(def) {
 
 export function createTowerDefenseUI(root, wallet) {
   let active = false;
+  let rulesEl = null;
+  function closeRules(remember) {
+    if (!rulesEl) return;
+    rulesEl.open = false;
+    if (remember) try { localStorage.setItem("mc-td-rules-read", "1"); } catch { /* pas grave */ }
+  }
   let mapId = FREE_MAP;
   let diffId = DEFAULT_DIFFICULTY;
+  // Héros choisi (un seul par partie) : mémorisé d'une partie à l'autre.
+  let heroId = FREE_HERO;
+  try { const saved = localStorage.getItem("mc-td-hero"); if (HERO_IDS.includes(saved)) heroId = saved; } catch { /* stockage indisponible */ }
+  if (!(wallet.data.heroes || [FREE_HERO]).includes(heroId)) heroId = FREE_HERO;
   let state = createState(wallet.data.towers, mapId, diffId);
   let status = "idle";           // idle | running | paused | over
   let placing = null;            // type de tour en cours de pose
@@ -137,22 +151,64 @@ export function createTowerDefenseUI(root, wallet) {
   const paragonBox = h("div", { class: "sel-paragon", hidden: true });
   let paragonConfirm = null;     // tour pour laquelle la fusion attend sa confirmation
   const sellButton = h("button", { class: "button button-secondary", id: "td-sell", type: "button", onclick: () => doSell() });
+  // Détail du héros dans le panneau de sélection (perks par niveau, capacités)
+  const heroPanel = h("div", { class: "sel-hero", hidden: true });
+  let heroPanelSig = "";
   const selection = h("div", { class: "td-selection chamfer", id: "td-selection", hidden: true },
     h("div", { class: "sel-head" }, selIconBox, selTitle, closeButton),
     selStats, selOwned,
     h("div", { class: "sel-buttons" }, targetButton, abilityButton),
     aimRow,
+    heroPanel,
     selPaths,
     paragonBox,
     h("div", { class: "sel-buttons" }, sellButton));
 
+  // Choix du héros (avant la partie) : un seul héros par partie ; les autres se débloquent avec des crédits.
+  const heroButtons = HERO_IDS.map((id) => {
+    const d = HERO_DEFS[id];
+    const label = h("span", {});
+    const button = h("button", { class: "map-button hero-button", type: "button", "data-hero": id, title: `${d.title} — ${d.desc}`, onclick: () => onHero(id) },
+      towerIcon(id, d.color, 22), label);
+    button.style.setProperty("--tw", d.color);
+    return { id, d, button, label };
+  });
+  const heroChoice = h("div", { class: "td-maps td-heroes", role: "group", "aria-label": "Héros" }, h("span", { class: "td-heroes-label" }, "Héros"), heroButtons.map((x) => x.button));
+
   // En partie, le choix de la carte et de la difficulté laisse la place aux compteurs (énergie, vies, vague, record).
-  const setupBox = h("div", { class: "td-setup" }, mapBar, diffBar);
+  const setupBox = h("div", { class: "td-setup" }, mapBar, diffBar, heroChoice);
+
+  // Carte du héros dans la liste : poser le héros (touche H), ou le sélectionner une fois posé.
+  const heroCardIcon = h("span", { class: "hero-card-icon" });
+  const heroCardName = h("strong", {});
+  const heroCardInfo = h("span", { class: "hero-card-info" });
+  const heroCard = h("button", { class: "hero-card", type: "button", id: "td-hero-card", title: "Poser ou sélectionner ton héros (H)", onclick: () => onHeroCard() },
+    heroCardIcon, h("span", { class: "hero-card-text" }, heroCardName, heroCardInfo));
+  let heroCardFor = null;
+
+  // Barre du héros en jeu : niveau, XP et ses deux capacités (touches F et J).
+  const heroBarIcon = h("span", { class: "hero-card-icon" });
+  const heroBarName = h("strong", {});
+  const heroXpFill = h("span", {});
+  const heroBarXp = h("span", { class: "hero-xp" }, heroXpFill);
+  const heroAbilityButtons = [0, 1].map((slot) => h("button", { class: "td-power hero-ability", type: "button", onclick: () => doHeroAbility(slot) },
+    h("kbd", {}, slot ? "J" : "F"), h("span", { class: "pw-name" }), h("span", { class: "pw-info" })));
+  // Liste rapide des capacités des tours : un bouton par tour qui en a une, prête ou en recharge (touche Z = la 1re prête).
+  const abilityStrip = h("div", { class: "td-abilities", hidden: true, role: "group", "aria-label": "Capacités des tours" });
+  let stripSig = "";
+  let stripButtons = [];
+  let hoverAbility = null;
+  const heroBar = h("div", { class: "td-hero-bar", hidden: true },
+    h("div", { class: "hero-bar-id" }, heroBarIcon, h("span", { class: "hero-card-text" }, heroBarName, heroBarXp)), ...heroAbilityButtons);
+  let heroBarFor = null;
+
   const hud = h("dl", { class: "td-hud", hidden: true },
     stat("Énergie", goldEl, "⚡"), stat("Vies", livesEl, "♥"), stat("Vague", waveEl, "≋"), stat("Record", bestEl, "★"));
   // Panneau de droite : la liste des tours, remplacée par le panneau d'amélioration quand une tour est sélectionnée
   // (comme dans BTD6) : rien ne se décale, on n'a plus besoin de faire défiler la page.
   const shopBox = h("div", { class: "td-shop" },
+    h("h3", { class: "subhead" }, "Héros"),
+    heroCard,
     h("h3", { class: "subhead" }, "Tours"),
     h("ul", { class: "tower-list" }, palette.map((p) => h("li", {}, p.button))),
     shopInfo,
@@ -162,21 +218,66 @@ export function createTowerDefenseUI(root, wallet) {
       h("li", {}, h("kbd", {}, "Entrée"), " vague · ", h("kbd", {}, "U"), " améliorer · ", h("kbd", {}, "T"), " ciblage · ", h("kbd", {}, "A"), " capacité"),
       h("li", {}, h("kbd", {}, "S"), " vitesse · ", h("kbd", {}, "G"), " paragon · ", h("kbd", {}, "V"), " vendre · ", h("kbd", {}, "P"), " pause"),
       h("li", {}, h("kbd", {}, "M"), " visée souris/point · ", h("kbd", {}, "C"), " choisir le point · ", h("kbd", {}, ", ."), " tour préc./suiv."),
-      h("li", {}, h("kbd", {}, "X"), " aimant (coller les tours) · ", h("kbd", {}, "G"), " paragon / totem")));
+      h("li", {}, h("kbd", {}, "X"), " aimant (coller les tours) · ", h("kbd", {}, "G"), " paragon / totem"),
+      h("li", {}, h("kbd", {}, "Q"), h("kbd", {}, "W"), h("kbd", {}, "E"), h("kbd", {}, "R"), " pouvoirs · ", h("kbd", {}, "H"), " héros · ", h("kbd", {}, "F"), h("kbd", {}, "J"), " capacités du héros · ", h("kbd", {}, "Z"), " 1re capacité prête")),
+    bestiary());
+  // Pouvoirs : achetés en énergie pendant une vague, avec une recharge (touches Q, W, E, R).
+  const powerButtons = POWERS.map((pw) => {
+    const label = h("span", { class: "pw-name" }, pw.name);
+    const info = h("span", { class: "pw-info" });
+    const button = h("button", { class: "td-power", type: "button", "data-power": pw.id, title: `${pw.desc} (${pw.key.toUpperCase()})`, onclick: () => doPower(pw.id) },
+      h("kbd", {}, pw.key.toUpperCase()), label, info);
+    button.style.setProperty("--pw", pw.color);
+    return { pw, button, info };
+  });
+  const powersRow = h("div", { class: "td-powers", role: "group", "aria-label": "Pouvoirs" }, powerButtons.map((x) => x.button));
+
   const layout = h("div", { class: "td-layout" },
     h("div", { class: "td-main" },
       setupBox,
       hud,
       h("div", { class: "td-board-wrap chamfer" },
         h("div", { class: "game-stage td-stage" }, board, toast, overlay)),
-      h("div", { class: "td-actions" }, waveButton, speedButton, magnetButton, stateEl)),
+      h("div", { class: "td-actions" }, waveButton, speedButton, magnetButton, stateEl),
+      powersRow,
+      heroBar,
+      abilityStrip),
     h("aside", { class: "td-side" }, selection, shopBox));
 
   root.replaceChildren(
-    h("p", { class: "game-rules" },
-      `Des ennemis suivent un ou plusieurs chemins : arrête-les avant la sortie (${START_LIVES} vies en Normal). Pose des tours où tu veux (ni sur le chemin, ni sur un obstacle) avec l'énergie gagnée en jeu, puis améliore-les : 3 chemins par tour, 2 au maximum, un seul au-delà du palier 2. Le palier 4 du 3e chemin donne une capacité active (son temps de recharge ne tourne que pendant les vagues). Avec une tour d'un même type au palier 4 sur chacun des 3 chemins, tu peux créer son paragon : il sacrifie toutes les tours de ce type et son degré (1 à 100) dépend de leur puissance. Un boss arrive toutes les 10 vagues. Débloque de nouvelles tours et cartes avec tes crédits.`),
+    rulesBox(
+      `Des ennemis suivent un ou plusieurs chemins : arrête-les avant la sortie (${START_LIVES} vies en Normal). Pose des tours où tu veux (ni sur le chemin, ni sur un obstacle) avec l'énergie gagnée en jeu, puis améliore-les : 3 chemins par tour, 2 au maximum, un seul au-delà du palier 2. Le palier 4 du 3e chemin donne une capacité active (son temps de recharge ne tourne que pendant les vagues). Avec une tour d'un même type au palier 4 sur chacun des 3 chemins, tu peux créer son paragon : il sacrifie toutes les tours de ce type et son degré (1 à 100) dépend de leur puissance. Un boss arrive toutes les 10 vagues (5 boss différents). Attention aux Furtifs : seules les tours qui détectent peuvent les viser. Choisis un héros avant de jouer (un seul par partie) : il gagne de l'expérience, monte jusqu'au niveau 20 et débloque deux capacités. Pendant une vague, tu peux aussi acheter des pouvoirs (frappe orbitale, gel…) avec ton énergie. Débloque de nouvelles tours et cartes avec tes crédits.`),
     layout
   );
+
+  // Règles : ouvertes la première fois ; « J'ai compris » les replie (et on s'en souvient). Elles se replient aussi
+  // au lancement d'une partie. Un clic sur « Règles du jeu » les rouvre.
+  function rulesBox(text) {
+    let read = false;
+    try { read = localStorage.getItem("mc-td-rules-read") === "1"; } catch { /* stockage indisponible */ }
+    const box = h("details", { class: "td-rules" },
+      h("summary", {}, "Règles du jeu"),
+      h("p", { class: "game-rules" }, text),
+      h("button", { class: "button button-secondary td-rules-ok", type: "button", onclick: () => closeRules(true) }, "J'ai compris"));
+    box.open = !read;
+    rulesEl = box;
+    return box;
+  }
+
+  // Bestiaire : tous les ennemis et boss, avec leurs particularités.
+  function bestiary() {
+    const items = Object.entries(ENEMY_DEFS).map(([id, d]) => {
+      const dot = h("span", { class: "bst-dot", "aria-hidden": "true" });
+      dot.style.background = d.color;
+      const traits = [`PV ×${String(d.hp).replace(".", ",")}`, `vitesse ${String(d.speed).replace(".", ",")}`, `${d.lives} vie${d.lives > 1 ? "s" : ""}`];
+      if (d.armor) traits.push(`blindage ${d.armor}`);
+      return h("li", { class: d.boss ? "is-boss" : "" }, dot,
+        h("strong", {}, d.boss ? `Boss : ${d.name}` : d.name),
+        h("small", {}, traits.join(" · ")),
+        d.power || d.info ? h("span", {}, d.power || d.info) : null);
+    });
+    return h("details", { class: "td-bestiary" }, h("summary", {}, `Bestiaire (${items.length} ennemis)`), h("ul", {}, items));
+  }
 
   function stat(label, el, icon = "") {
     return h("div", {}, h("dt", {}, icon ? h("span", { class: "hud-icon", "aria-hidden": "true" }, icon) : null, label), h("dd", {}, el));
@@ -206,13 +307,24 @@ export function createTowerDefenseUI(root, wallet) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   const towerRangePx = (tower) => tower.st.range * beaconBuff(state, tower).range;
-  const enemyRadius = (e) => (e.type === "boss3" ? 14 : isBoss(e) ? 13 : e.type === "tank" ? 10 : e.type === "runner" ? 6 : 8);
+  const ENEMY_R = { boss3: 14, boss5: 15, cargo: 15, tank: 10, shield: 9, runner: 6, swarm: 6, ghost: 7 };
+  const enemyRadius = (e) => ENEMY_R[e.type] || (isBoss(e) ? 13 : 8);
 
   function draw() {
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
-    ctx.fillStyle = "#0a0a12";
+    ctx.fillStyle = state.map.space ? "#05050d" : "#0a0a12";
     ctx.fillRect(0, 0, W, H);
+    if (state.map.space) {
+      // Orbite : champ d'étoiles qui scintillent
+      for (let i = 0; i < 70; i++) {
+        const x = (i * 97.3) % W, y = (i * 53.7 + (i % 7) * 11) % H;
+        ctx.globalAlpha = 0.25 + 0.35 * Math.abs(Math.sin(state.time * 1.5 + i));
+        ctx.fillStyle = i % 9 === 0 ? "#b58cff" : "#e0e6ff";
+        ctx.fillRect(x, y, i % 5 === 0 ? 2 : 1, i % 5 === 0 ? 2 : 1);
+      }
+      ctx.globalAlpha = 1;
+    }
 
     // Grille légère (simple repère)
     ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
@@ -242,6 +354,35 @@ export function createTowerDefenseUI(root, wallet) {
 
     // Obstacles : on ne peut pas construire dessus
     for (const o of state.map.obstacles) {
+      if (state.map.rocks) {
+        // Canyon : rochers anguleux
+        ctx.fillStyle = "#4a3f36";
+        ctx.strokeStyle = "#1c1612";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) { const a = (i * Math.PI) / 4 + o.x; const rr = o.r * (0.8 + 0.2 * Math.sin(i * 2.7 + o.y)); ctx.lineTo(o.x + Math.cos(a) * rr, o.y + Math.sin(a) * rr); }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+        ctx.beginPath(); ctx.arc(o.x - o.r * 0.3, o.y - o.r * 0.3, o.r * 0.35, 0, Math.PI * 2); ctx.fill();
+        continue;
+      }
+      if (state.map.lava) {
+        // Volcan : coulées de lave qui pulsent
+        const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+        g.addColorStop(0, "#ffd166");
+        g.addColorStop(0.5, `rgba(255, 90, 31, ${0.75 + 0.15 * Math.sin(state.time * 2 + o.x)})`);
+        g.addColorStop(1, "rgba(120, 20, 10, 0.6)");
+        ctx.fillStyle = g;
+        ctx.strokeStyle = "#3a1208";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        continue;
+      }
       ctx.fillStyle = "rgba(61, 220, 132, 0.07)";
       ctx.strokeStyle = "rgba(61, 220, 132, 0.4)";
       ctx.lineWidth = 1.5;
@@ -323,7 +464,8 @@ export function createTowerDefenseUI(root, wallet) {
     // Portée de la tour sélectionnée, ou fantôme de la tour en cours de pose
     if (selected) {
       const def = TOWER_DEFS[selected.type];
-      if (def.range && !def.line) drawRange(selected.x, selected.y, towerRangePx(selected), def.color);
+      if (def.patrol) drawRange(selected.x, selected.y, selected.st.patrolR * CELL + towerRangePx(selected), def.color);
+      else if (def.range && !def.line && def.range < 20) drawRange(selected.x, selected.y, towerRangePx(selected), def.color);
     } else if (placing && target && !towerAt(state, target.x, target.y)) {
       const def = TOWER_DEFS[placing];
       const spot = placeSpot(placing, target.x, target.y);
@@ -331,7 +473,7 @@ export function createTowerDefenseUI(root, wallet) {
       const ok = !!spot && state.gold >= def.cost;
       const color = ok ? def.color : "#ff3b5c";
       const r = towerRadius(placing);
-      if (!def.line) drawRange(at.x, at.y, towerStats(def, [0, 0, 0]).range, color);
+      if (!def.line && def.range < 20) drawRange(at.x, at.y, towerStats(def, [0, 0, 0]).range, color);
       if (spot && spot.snapped) {
         // L'aimant a déplacé la tour : petit trait jusqu'au curseur et contour des tours touchées
         ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
@@ -413,6 +555,22 @@ export function createTowerDefenseUI(root, wallet) {
         x, y, angle: tower.angle ?? -Math.PI / 2, tiers: tower.tiers, time: state.time, spin: tower.spin,
         jam: tower.jam > 0, fury: tower.fury > 0, paragon: !!tower.paragon, color: tower.paragon ? "#fcee0a" : def.color
       });
+      if (def.hero) {
+        // Héros : anneau doré et niveau au-dessus
+        ctx.strokeStyle = "#fcee0a";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([2, 2]);
+        ctx.beginPath(); ctx.arc(x, y, R + 3, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = "bold 10px monospace";
+        ctx.textAlign = "center";
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#0a0a12";
+        ctx.strokeText(`★${tower.level}`, x, y - R - 6);
+        ctx.fillStyle = "#fcee0a";
+        ctx.fillText(`★${tower.level}`, x, y - R - 6);
+        ctx.textAlign = "start";
+      }
       if (tower.jam > 0) {
         ctx.strokeStyle = "#ff2a6d";
         ctx.lineWidth = 1.5;
@@ -462,13 +620,43 @@ export function createTowerDefenseUI(root, wallet) {
     for (const e of state.enemies) {
       const def = ENEMY_DEFS[e.type];
       const r = enemyRadius(e);
-      ctx.fillStyle = e.stun > 0 ? "#fcee0a" : e.slow > 0 ? "#7fd8ff" : def.color;
-      ctx.shadowColor = ctx.fillStyle;
-      ctx.shadowBlur = 8;
-      ctx.beginPath();
-      ctx.arc(e.x, e.y, r, 0, Math.PI * 2);
-      ctx.fill();
+      // Silhouette propre à chaque ennemi, tournée dans le sens de la marche
+      const lane = state.map.lanes[e.lane || 0];
+      const ahead = pointAt(Math.min(lane.length, e.dist + 4), lane);
+      const heading = Math.hypot(ahead.x - e.x, ahead.y - e.y) > 0.1 ? Math.atan2(ahead.y - e.y, ahead.x - e.x) : (e.heading || 0);
+      e.heading = heading;
+      if (e.camo) ctx.globalAlpha = 0.45 + 0.1 * Math.sin(state.time * 6 + e.id);     // furtif : à moitié transparent
+      ctx.shadowColor = def.color;
+      ctx.shadowBlur = isBoss(e) ? 14 : 6;
+      drawEnemy(ctx, e.type, e.x, e.y, r, { angle: heading, time: state.time, color: def.color, slow: e.slow > 0, stun: e.stun > 0, seed: e.id });
       ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+      if (e.camo) {
+        ctx.globalAlpha = 0.8;
+        ctx.strokeStyle = "#c9d6ff";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.arc(e.x, e.y, r + 2, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+      }
+
+      if (e.shield > 0) {
+        // Bouclier : hexagone doré, d'autant plus épais qu'il reste de bouclier
+        ctx.strokeStyle = "#ffd166";
+        ctx.globalAlpha = 0.5 + 0.4 * (e.shield / Math.max(1, e.maxShield || e.shield));
+        ctx.lineWidth = 1 + 2.5 * (e.shield / Math.max(1, e.maxShield || e.shield));
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) { const a = (i * Math.PI) / 3 + state.time; ctx.lineTo(e.x + Math.cos(a) * (r + 4), e.y + Math.sin(a) * (r + 4)); }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      if (e.shred > 0) {
+        // Rongé par l'acide : gouttes vertes
+        ctx.fillStyle = "#9cff6b";
+        for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.arc(e.x + (i ? 3 : -3), e.y + r - ((state.time * 12 + i * 5) % 6), 1.3, 0, Math.PI * 2); ctx.fill(); }
+      }
       if (isBoss(e)) {
         ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
         ctx.lineWidth = 2;
@@ -496,6 +684,58 @@ export function createTowerDefenseUI(root, wallet) {
         ctx.fillText(def.name, e.x, e.y - r - 11);
         ctx.textAlign = "start";
       }
+    }
+
+    // Tour survolée dans la liste des capacités : on la montre sur le plateau
+    if (hoverAbility !== null) {
+      const t = state.towers.find((x) => x.id === hoverAbility);
+      if (t) {
+        ctx.strokeStyle = "#fcee0a";
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([5, 4]);
+        ctx.lineDashOffset = -state.time * 20;
+        ctx.beginPath(); ctx.arc(t.x, t.y, towerRadius(t.type) * (t.paragon ? 1.35 : 1) + 8, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.lineDashOffset = 0;
+      }
+    }
+
+    // Drones de patrouille (au-dessus des ennemis), potions des Alchimistes sur les tours boostées
+    for (const t of state.towers) {
+      const tdef = TOWER_DEFS[t.type];
+      if (tdef.patrol) {
+        const n = Math.max(1, Math.round(t.st.drones));
+        if (t.id === selectedId) {
+          ctx.strokeStyle = tdef.color;
+          ctx.globalAlpha = 0.35;
+          ctx.setLineDash([3, 5]);
+          ctx.beginPath(); ctx.arc(t.x, t.y, t.st.patrolR * CELL, 0, Math.PI * 2); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.globalAlpha = 1;
+        }
+        for (let k = 0; k < n; k++) {
+          const p = dronePos(t, k, state.time);
+          drawDrone(ctx, p.x, p.y, { angle: p.a + Math.PI / 2, time: state.time, color: t.paragon ? "#fcee0a" : tdef.color, big: !!t.paragon, armed: t.tiers[0] });
+        }
+      }
+      if (t.brew && t.brew.until > state.time) {
+        const R = towerRadius(t.type);
+        ctx.fillStyle = "#f07cff";
+        ctx.shadowColor = "#f07cff";
+        ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.arc(t.x - R + 1, t.y - R + 1, 3.2, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(t.x - R, t.y - R - 4.5, 2, 3);
+      }
+    }
+    if (state.elixirUntil > state.time || state.overclockUntil > state.time) {
+      // Élixir ou Surcadence : liseré coloré autour du plateau
+      ctx.strokeStyle = state.elixirUntil > state.time ? "#f07cff" : "#fcee0a";
+      ctx.globalAlpha = 0.5 + 0.3 * Math.sin(state.time * 8);
+      ctx.lineWidth = 4;
+      ctx.strokeRect(2, 2, W - 4, H - 4);
+      ctx.globalAlpha = 1;
     }
 
     // Lasers continus des Dartling (chemin 1 au palier 3 ou 4)
@@ -770,6 +1010,14 @@ export function createTowerDefenseUI(root, wallet) {
     setText(speedButton, `Vitesse ×${speed}`);
     setText(magnetButton, `Aimant : ${magnet ? "oui" : "non"}`);
     magnetButton.setAttribute("aria-pressed", String(magnet));
+    for (const { pw, button, info } of powerButtons) {
+      const cd = state.powerCd[pw.id] || 0;
+      const cost = powerCost(state, pw.id);
+      const active = pw.id === "overclock" && state.overclockUntil > state.time;
+      setText(info, active ? `actif ${Math.ceil(state.overclockUntil - state.time)} s` : cd > 0 ? `${Math.ceil(cd)} s` : `${fmt(cost)} ⚡`);
+      button.disabled = status !== "running" || state.phase !== "wave" || cd > 0 || state.gold < cost;
+      button.classList.toggle("is-cd", cd > 0);
+    }
 
     for (const { m, button } of mapButtons) {
       const owned = wallet.data.maps.includes(m.id);
@@ -780,6 +1028,17 @@ export function createTowerDefenseUI(root, wallet) {
       button.setAttribute("aria-pressed", String(owned && mapId === m.id));
       button.disabled = status === "running" || status === "paused" || (!owned && wallet.credits < m.unlock);
     }
+
+    for (const { id, d, button, label } of heroButtons) {
+      const owned = wallet.data.heroes.includes(id);
+      setText(label, owned ? d.name : `${d.name} · ${fmt(d.unlock)} ¤`);
+      button.classList.toggle("is-active", owned && heroId === id);
+      button.classList.toggle("is-locked", !owned);
+      button.setAttribute("aria-pressed", String(owned && heroId === id));
+      button.disabled = status === "running" || status === "paused" || (!owned && wallet.credits < d.unlock);
+    }
+    updateHeroWidgets();
+    updateAbilityStrip();
 
     for (const { d, button } of diffButtons) {
       button.classList.toggle("is-active", diffId === d.id);
@@ -811,6 +1070,25 @@ export function createTowerDefenseUI(root, wallet) {
     const def = TOWER_DEFS[tower.type];
     if (selIconType !== tower.type) { selIconType = tower.type; selIconBox.replaceChildren(towerIcon(tower.type, def.color, 34)); }
     const ts = tower.st;
+    heroPanel.hidden = !def.hero;
+    if (def.hero) {
+      const buffedH = beaconBuff(state, tower);
+      const aura = [ts.auraDmg ? `+${Math.round(ts.auraDmg * 100)} % dégâts` : "", ts.auraRate ? `+${Math.round(ts.auraRate * 100)} % cadence` : "", ts.auraRange ? `+${Math.round(ts.auraRange * 100)} % portée` : ""].filter(Boolean).join(", ");
+      setText(selTitle, `★ ${def.name} — niveau ${tower.level}`);
+      setText(selStats, `Dégâts ${Math.round(ts.damage * buffedH.damage)} · portée ${num((ts.range * buffedH.range) / CELL)} cases · ${num(ts.rate * buffedH.rate)} tirs/s${ts.targets > 1 ? ` · ${ts.targets} cibles` : ""}${ts.chain ? ` · ${ts.chain} rebonds` : ""}${ts.detect ? " · voit les furtifs" : ""}`);
+      setText(selOwned, `${def.title}${aura ? ` · aura : ${aura} pour les tours à portée` : ""}${ts.goldGen ? ` · +${fmt(Math.round(ts.goldGen))} énergie par vague` : ""}`);
+      targetButton.hidden = false;
+      setText(targetButton, `Ciblage : ${TARGET_LABELS[tower.target]} (T)`);
+      abilityButton.hidden = true;
+      aimRow.hidden = true;
+      selPaths.hidden = true;
+      paragonBox.hidden = true;
+      renderHeroPanel(tower, def);
+      panelSig = "";
+      setText(sellButton, `Vendre (+${fmt(Math.floor(invested(tower) * SELL_RATIO))}) · garde son XP`);
+      sellButton.disabled = state.phase === "over";
+      return;
+    }
     const total = tower.tiers.reduce((a, b) => a + b, 0);
     setText(selTitle, tower.paragon ? `★ ${PARAGONS[tower.type].name}` : `${def.name} — ${tower.tiers.join(" · ")}`);
     const pct = (v) => `+${Math.round(v * 100)} %`;
@@ -865,6 +1143,100 @@ export function createTowerDefenseUI(root, wallet) {
     sellButton.disabled = state.phase === "over";
   }
 
+  function updateAbilityStrip() {
+    const list = state.towers.filter((t) => t.st.ability && !TOWER_DEFS[t.type].hero);
+    const sig = list.map((t) => `${t.id}:${t.st.ability}:${t.paragon ? 1 : 0}`).join(",");
+    abilityStrip.hidden = !list.length;
+    if (sig !== stripSig) {
+      stripSig = sig;
+      stripButtons = list.map((t) => {
+        const def = TOWER_DEFS[t.type];
+        const ab = ABILITIES[t.st.ability];
+        const info = h("span", { class: "pw-info" });
+        const button = h("button", { class: "td-power ab-chip", type: "button", title: `${ab.name} (${t.paragon ? PARAGONS[t.type].name : def.name}) — ${ab.desc}`, onclick: () => fireAbility(t.id) },
+          towerIcon(t.type, t.paragon ? "#fcee0a" : def.color, 22), h("span", { class: "pw-name" }, ab.name), info);
+        button.style.setProperty("--pw", t.paragon ? "#fcee0a" : def.color);
+        button.addEventListener("pointerenter", () => { hoverAbility = t.id; });
+        button.addEventListener("pointerleave", () => { hoverAbility = null; });
+        return { id: t.id, button, info };
+      });
+      abilityStrip.replaceChildren(h("span", { class: "td-abilities-label" }, "Capacités", h("kbd", {}, "Z")), ...stripButtons.map((x) => x.button));
+    }
+    for (const { id, button, info } of stripButtons) {
+      const t = state.towers.find((x) => x.id === id);
+      if (!t) continue;
+      const cd = t.abilityCd;
+      setText(info, cd > 0 ? `${Math.ceil(cd)} s${state.phase === "wave" ? "" : " ⏸"}` : "prête");
+      button.disabled = cd > 0 || state.phase !== "wave" || status !== "running";
+      button.classList.toggle("is-ready", !(cd > 0) && state.phase === "wave");
+    }
+  }
+
+  function fireAbility(id) {
+    if (status !== "running") return;
+    const r = useAbility(state, id);
+    say(r.ok ? `${r.name} !` : REASONS[r.reason] || "Impossible.");
+    updateHud();
+    draw();
+  }
+
+  // Touche Z : la première capacité prête de la liste.
+  function fireFirstReady() {
+    const t = stripButtons.map((x) => state.towers.find((y) => y.id === x.id)).find((y) => y && !(y.abilityCd > 0));
+    if (t) fireAbility(t.id);
+    else say(stripButtons.length ? "Aucune capacité prête." : "Aucune tour n'a de capacité (palier 4 du 3e chemin).");
+  }
+
+  function updateHeroWidgets() {
+    const hs = state.hero;
+    heroCard.hidden = !hs;
+    if (!hs) { heroBar.hidden = true; return; }
+    const d = HERO_DEFS[hs.id];
+    const placed = heroTower(state);
+    if (heroCardFor !== hs.id) {
+      heroCardFor = hs.id;
+      heroCardIcon.replaceChildren(towerIcon(hs.id, d.color, 40));
+      heroCard.style.setProperty("--tw", d.color);
+    }
+    setText(heroCardName, `${d.name} — ${d.title}`);
+    setText(heroCardInfo, placed ? `Niveau ${placed.level} · sur le plateau (clic pour le voir)` : `${fmt(d.cost)} ⚡ · un seul par partie · touche H`);
+    heroCard.classList.toggle("is-active", placing === hs.id);
+    heroCard.classList.toggle("is-placed", !!placed);
+    heroCard.disabled = !placed && status !== "running" && status !== "idle";
+    heroBar.hidden = !placed;
+    if (!placed) return;
+    if (heroBarFor !== hs.id) { heroBarFor = hs.id; heroBarIcon.replaceChildren(towerIcon(hs.id, d.color, 34)); heroBar.style.setProperty("--tw", d.color); }
+    const lvl = placed.level;
+    const from = xpForLevel(lvl), to = xpForLevel(lvl + 1);
+    setText(heroBarName, lvl >= HERO_MAX_LEVEL ? `${d.name} · niveau MAX` : `${d.name} · niveau ${lvl} · ${fmt(hs.xp - from)}/${fmt(to - from)} XP`);
+    heroXpFill.style.width = `${lvl >= HERO_MAX_LEVEL ? 100 : Math.max(0, Math.min(100, ((hs.xp - from) / (to - from)) * 100))}%`;
+    heroAbilityButtons.forEach((button, slot) => {
+      const ab = ABILITIES[d.abilities[slot]];
+      const need = HERO_ABILITY_LEVELS[slot];
+      const cd = placed.heroCd[slot];
+      setText(button.children[1], ab.name);
+      setText(button.children[2], lvl < need ? `niveau ${need}` : cd > 0 ? `${Math.ceil(cd)} s` : "prête");
+      button.title = `${ab.desc} (${slot ? "J" : "F"})`;
+      button.disabled = lvl < need || cd > 0 || state.phase !== "wave" || status !== "running";
+      button.classList.toggle("is-cd", lvl < need || cd > 0);
+    });
+  }
+
+  function renderHeroPanel(tower, d) {
+    const sig = `${tower.id}|${tower.level}`;
+    if (sig === heroPanelSig) return;
+    heroPanelSig = sig;
+    heroPanel.replaceChildren(
+      h("p", {}, d.desc),
+      h("ul", { class: "hero-perks" },
+        d.perks.filter(([, , name]) => name).map(([lvl, , name]) => h("li", { class: lvl <= tower.level ? "is-on" : "" }, h("span", {}, `Niv. ${lvl}`), name)),
+        d.abilities.map((abId, slot) => {
+          const ab = ABILITIES[abId];
+          const need = HERO_ABILITY_LEVELS[slot];
+          return h("li", { class: `is-ability${need <= tower.level ? " is-on" : ""}` }, h("span", {}, `Niv. ${need}`), `Capacité (${slot ? "J" : "F"}) : ${ab.name} — ${ab.desc}`);
+        })));
+  }
+
   function showOverlay(title, text, buttonLabel, takeFocus = true) {
     overlayTitle.textContent = title;
     overlayText.textContent = text;
@@ -880,7 +1252,7 @@ export function createTowerDefenseUI(root, wallet) {
   }
 
   function resetState() {
-    state = createState(wallet.data.towers, mapId, diffId);
+    state = createState(wallet.data.towers, mapId, diffId, heroId);
     placing = null;
     selectedId = null;
     panelSig = "";
@@ -898,6 +1270,42 @@ export function createTowerDefenseUI(root, wallet) {
     mapId = id;
     resetState();
     if (status === "over") { setStatus("idle"); showOverlay("Pare-feu", `Carte ${m.name} : ${m.desc}`, "Commencer", false); }
+    updateHud();
+    draw();
+  }
+
+  // Choix du héros : seulement entre deux parties. Un héros verrouillé se débloque avec des crédits.
+  function onHero(id) {
+    if (status === "running" || status === "paused") return;
+    const d = HERO_DEFS[id];
+    if (!wallet.data.heroes.includes(id)) {
+      const price = d.unlock;
+      if (!wallet.unlockHero(id, price)) { say(`Il faut ${fmt(price)} crédits pour débloquer ${d.name}.`); return; }
+      say(`${d.name} débloqué !`);
+    }
+    heroId = id;
+    try { localStorage.setItem("mc-td-hero", id); } catch { /* pas grave */ }
+    resetState();
+    if (status === "over") setStatus("idle");
+    showOverlay("Pare-feu", `Héros : ${d.name}, ${d.title}. ${d.desc}`, "Commencer", false);
+    updateHud();
+    draw();
+  }
+
+  function onHeroCard() {
+    if (!state.hero) return;
+    const placed = heroTower(state);
+    if (placed) { selectedId = placed.id; placing = null; }
+    else { placing = placing === state.hero.id ? null : state.hero.id; selectedId = null; }
+    updateHud();
+    draw();
+  }
+
+  const HERO_REASONS = { none: "Pose d'abord ton héros.", level: "", idle: "Les capacités s'utilisent pendant une vague.", cd: "Capacité en recharge.", unknown: "Impossible." };
+  function doHeroAbility(slot) {
+    if (status !== "running") return;
+    const r = useHeroAbility(state, slot);
+    say(r.ok ? `${r.name} !` : r.reason === "level" ? `Débloquée au niveau ${r.level}.` : HERO_REASONS[r.reason]);
     updateHud();
     draw();
   }
@@ -943,7 +1351,10 @@ export function createTowerDefenseUI(root, wallet) {
     } else if (placing) {
       const result = placeTower(state, placing, spot ? spot.x : x, spot ? spot.y : y);
       if (!result.ok) say(REASONS[result.reason] || "Impossible.");
-      else if (result.tower.aim) {
+      else if (TOWER_DEFS[result.tower.type].hero) {
+        placing = null;
+        say(`${TOWER_DEFS[result.tower.type].name} entre en jeu (niveau ${result.tower.level}) !`);
+      } else if (result.tower.aim) {
         // Dartling : on le sélectionne tout de suite pour régler sa visée.
         selectedId = result.tower.id;
         placing = null;
@@ -998,6 +1409,7 @@ export function createTowerDefenseUI(root, wallet) {
   function doUpgradeMain() {
     const tower = state.towers.find((t) => t.id === selectedId);
     if (!tower) return;
+    if (TOWER_DEFS[tower.type].hero) { say(REASONS.heroUp); return; }
     const order = [0, 1, 2].sort((a, b) => tower.tiers[b] - tower.tiers[a] || a - b);
     const path = order.find((p) => !upgradeInfo(state, tower, p).locked);
     if (path === undefined) { say(REASONS.max); return; }
@@ -1022,7 +1434,7 @@ export function createTowerDefenseUI(root, wallet) {
 
   function doParagon() {
     const tower = state.towers.find((t) => t.id === selectedId);
-    if (!tower) return;
+    if (!tower || TOWER_DEFS[tower.type].hero) return;
     const info = paragonInfo(state, tower);
     if (info.is) {
       // Déjà paragon : G achète un totem de puissance
@@ -1071,11 +1483,24 @@ export function createTowerDefenseUI(root, wallet) {
     draw();
   }
 
+  const seenTypes = new Set();          // ennemis déjà vus dans la partie (pour présenter les nouveaux)
   function launchWave() {
     if (status !== "running" || !startWave(state)) return;
     const boss = state.spawnList.find((e) => ENEMY_DEFS[e.type].boss);
+    const fresh = [...new Set(state.spawnList.map((e) => e.type))].find((t) => !seenTypes.has(t) && ENEMY_DEFS[t].info);
+    for (const e of state.spawnList) seenTypes.add(e.type);
     if (boss) say(`BOSS : ${ENEMY_DEFS[boss.type].name} — ${ENEMY_DEFS[boss.type].power}`);
+    else if (fresh) say(`Nouvel ennemi : ${ENEMY_DEFS[fresh].name} — ${ENEMY_DEFS[fresh].info}`);
     updateHud();
+  }
+
+  const POWER_REASONS = { idle: "Les pouvoirs s'utilisent pendant une vague.", cd: "Ce pouvoir se recharge.", gold: "Pas assez d'énergie.", unknown: "Impossible." };
+  function doPower(id) {
+    if (status !== "running") return;
+    const r = usePower(state, id);
+    say(r.ok ? `${r.name} !` : POWER_REASONS[r.reason]);
+    updateHud();
+    draw();
   }
 
   function toggleMagnet() {
@@ -1098,6 +1523,7 @@ export function createTowerDefenseUI(root, wallet) {
   }
 
   function startGame() {
+    closeRules(true);
     resetState();
     placing = state.unlocked.includes("laser") ? "laser" : null;
     setStatus("running");
@@ -1171,6 +1597,7 @@ export function createTowerDefenseUI(root, wallet) {
       acc -= STEP;
       steps += 1;
       const events = update(state, STEP);
+      if (state.alerts.length) say(state.alerts.splice(0).pop());
 
       if (events.credits > 0) {
         // Crédits de base + pourcentage de la fortune actuelle (le coefficient de la difficulté s'applique aux deux).
@@ -1295,6 +1722,12 @@ export function createTowerDefenseUI(root, wallet) {
     if (key === "a") doAbility();
     if (key === "s") toggleSpeed();
     if (key === "x") toggleMagnet();
+    const pw = POWERS.find((x) => x.key === key);
+    if (pw) doPower(pw.id);
+    if (key === "h") onHeroCard();
+    if (key === "z") fireFirstReady();
+    if (key === "f") doHeroAbility(0);
+    if (key === "j") doHeroAbility(1);
     if (key === "v" || key === "delete") doSell();
   });
 

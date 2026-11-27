@@ -35,7 +35,8 @@ export const MAX_TIER = 4;          // paliers par chemin ; le palier 4 est l'am
 export const DIFFICULTIES = [
   { id: "facile",    name: "Facile",    desc: "Plus de vies et d'énergie, ennemis moins solides. Crédits ×0,6, ne bat pas le record.", lives: 30, gold: 200, hp: 0.75, reward: 0.6, record: false },
   { id: "normal",    name: "Normal",    desc: "L'équilibre prévu.",                                                                     lives: 20, gold: 140, hp: 1,    reward: 1,   record: true },
-  { id: "difficile", name: "Difficile", desc: "Peu de vies, ennemis plus solides. Crédits ×1,5.",                                       lives: 12, gold: 110, hp: 1.3,  reward: 1.5, record: true }
+  { id: "difficile", name: "Difficile", desc: "Peu de vies, ennemis plus solides. Crédits ×1,5.",                                       lives: 12, gold: 110, hp: 1.3,  reward: 1.5, record: true },
+  { id: "cauchemar", name: "Cauchemar", desc: "Une seule vie, ennemis très solides : la moindre fuite est fatale. Crédits ×2,5.",           lives: 1,  gold: 130, hp: 1.6,  reward: 2.5, record: true }
 ];
 export const DEFAULT_DIFFICULTY = "normal";
 export const diffById = (id) => DIFFICULTIES.find((d) => d.id === id) || DIFFICULTIES[1];
@@ -71,7 +72,19 @@ export const MAPS = [
   { id: "labyrinthe", name: "Labyrinthe", desc: "Un très long chemin : beaucoup d'ennemis, beaucoup de crédits.", unlock: 15000, hpMul: 1.4, reward: 2.6,
     lanes: [[[-1, 1], [12, 1], [12, 3], [1, 3], [1, 5], [12, 5], [12, 7], [14, 7]]], obstacles: [] },
   { id: "infernal",   name: "Infernal",   desc: "Trois chemins qui se croisent puis fusionnent : le défi ultime.", unlock: 25000, hpMul: 0.4, reward: 3.2, smooth: true, bonusGold: 160,
-    lanes: [[[-1, 1], [12, 1], [12, 4], [14, 4]], [[-1, 7], [12, 7], [12, 4]], [[7, -1], [7, 4], [12, 4]]], obstacles: [[3.5, 4, 0.9], [9.6, 2.7, 0.55], [9.6, 5.4, 0.55]] }
+    lanes: [[[-1, 1], [12, 1], [12, 4], [14, 4]], [[-1, 7], [12, 7], [12, 4]], [[7, -1], [7, 4], [12, 4]]], obstacles: [[3.5, 4, 0.9], [9.6, 2.7, 0.55], [9.6, 5.4, 0.55]] },
+  { id: "boucle",     name: "Boucle",     desc: "Le chemin se croise lui-même : une tour au croisement couvre deux passages.", unlock: 4000, hpMul: 0.85, reward: 1.7, smooth: true,
+    lanes: [[[-1, 4], [3, 4], [3, 1], [10, 1], [10, 7], [5.5, 7], [5.5, 4], [14, 4]]], obstacles: [[7.7, 2.6, 0.6], [1.3, 7.2, 0.7]] },
+  { id: "carrefour",  name: "Carrefour",  desc: "Deux chemins qui se croisent en plein centre.", unlock: 12000, hpMul: 0.5, reward: 2.4, smooth: true, bonusGold: 80,
+    lanes: [[[-1, 2], [6, 2], [6, 7], [14, 7]], [[-1, 6], [3, 6], [3, 4], [10, 4], [10, 1], [14, 1]]], obstacles: [[12.3, 4.3, 0.7], [8.3, 5.6, 0.55]] },
+  { id: "volcan",     name: "Volcan",     desc: "Un chemin court entre des coulées de lave : très peu de temps pour tirer.", unlock: 35000, hpMul: 1.25, reward: 3.6,
+    lanes: [[[-1, 1.5], [4, 1.5], [4, 7], [9.5, 7], [9.5, 3], [14, 3]]], obstacles: [[1.5, 4.5, 1], [7, 3.5, 1.1], [12, 6.2, 0.9], [6.8, 0.7, 0.6], [12.3, 0.9, 0.6]], lava: true },
+  { id: "canyon",     name: "Canyon",     desc: "Un long chemin sinueux entre les rochers : beaucoup de virages à couvrir.", unlock: 7000, hpMul: 1.1, reward: 2.1, rocks: true,
+    lanes: [[[-1, 1], [4, 1], [4, 4], [1, 4], [1, 7], [8, 7], [8, 2], [11, 2], [11, 7], [14, 7]]], obstacles: [[6, 4.5, 0.8], [13, 4, 0.6], [2.5, 2.5, 0.5]] },
+  { id: "croix",      name: "Croix",      desc: "Un chemin horizontal et un chemin vertical qui se croisent : l'un sort en bas.", unlock: 18000, hpMul: 0.55, reward: 2.6, smooth: true, bonusGold: 80,
+    lanes: [[[-1, 2], [5, 2], [5, 6], [14, 6]], [[9, -1], [9, 9]]], obstacles: [[2.5, 6.5, 0.8], [12, 2.5, 0.8]] },
+  { id: "orbite",     name: "Orbite",     desc: "Une spirale qui s'enroule jusqu'au cœur du plateau : le chemin le plus long, les crédits les plus gros.", unlock: 50000, hpMul: 1.5, reward: 4.2, space: true,
+    lanes: [[[-1, 0.5], [13, 0.5], [13, 8], [1, 8], [1, 2.5], [11, 2.5], [11, 6], [3, 6], [3, 4.2], [8, 4.2]]], obstacles: [] }
 ];
 export const MAP_IDS = MAPS.map((m) => m.id);
 export const FREE_MAP = "serpent";
@@ -169,27 +182,98 @@ export const TOWER_DEFS = {
   laser:  { id: "laser",  name: "Laser",           desc: "Tir rapide, dégâts faibles. Bon partout.",             cost: 50,  unlock: 0,    range: 2.7, rate: 2.2,  dmg: 7,  color: "#00f0ff" },
   cryo:   { id: "cryo",   name: "Tour cryo",       desc: "Ralentit les ennemis de 50 % pendant 2 s. Peut les geler.", cost: 70,  unlock: 150,  range: 2.5, rate: 1.4,  dmg: 3,  color: "#7fd8ff", slow: 0.5,  slowTime: 2 },
   canon:  { id: "canon",  name: "Canon à plasma",  desc: "Dégâts de zone : idéal contre les groupes.",           cost: 95,  unlock: 400,  range: 2.9, rate: 0.8,  dmg: 34, color: "#ff8a3d", splash: 1.15 },
-  sniper: { id: "sniper", name: "Sniper",          desc: "Portée immense et gros dégâts, mais lent.",            cost: 120, unlock: 900,  range: 6,   rate: 0.5,  dmg: 100, color: "#fcee0a" },
-  tesla:  { id: "tesla",  name: "Tesla",           desc: "Un éclair qui rebondit sur 3 ennemis et peut les étourdir.", cost: 140, unlock: 1800, range: 2.7, rate: 1.2,  dmg: 26, color: "#b58cff", chain: 3 },
+  sniper: { id: "sniper", name: "Sniper",          desc: "Portée immense et gros dégâts, mais lent. Repère les furtifs.", cost: 120, unlock: 900,  range: 6,   rate: 0.5,  dmg: 100, color: "#fcee0a", detect: true },
+  tesla:  { id: "tesla",  name: "Tesla",           desc: "Un éclair qui rebondit sur 3 ennemis et peut les étourdir. Repère les furtifs.", cost: 140, unlock: 1800, range: 2.7, rate: 1.2,  dmg: 26, color: "#b58cff", chain: 3, detect: true },
   venin:  { id: "venin",  name: "Injecteur viral", desc: "Empoisonne : dégâts sur la durée, ignore le blindage.", cost: 110, unlock: 1200, range: 2.6, rate: 1.3,  dmg: 6,  color: "#3ddc84", poisonDps: 18, poisonTime: 4 },
   mortier:{ id: "mortier", name: "Mortier",        desc: "Portée énorme, énormes dégâts de zone, très lent.",    cost: 150, unlock: 5000, range: 5,   rate: 0.3,  dmg: 90, color: "#ffb347", splash: 1.7 },
   gatling:{ id: "gatling", name: "Gatling",         desc: "Cadence folle, dégâts minuscules. Achève les essaims.", cost: 130, unlock: 7000, range: 2.4, rate: 6,    dmg: 4,  color: "#e6e6e6" },
   pulsar: { id: "pulsar", name: "Pulsar",          desc: "Onde qui touche tous les ennemis proches.",            cost: 160, unlock: 3000, range: 2.2, rate: 0.7,  dmg: 24, color: "#ff6bd6", pulse: true },
-  beacon: { id: "beacon", name: "Beacon",         desc: "Ne tire pas : booste les tours voisines (dégâts, cadence). Plusieurs beacons se cumulent.", cost: 120, unlock: 9000,  range: 2.2, rate: 0, dmg: 0, color: "#4dffd2", support: true },
+  beacon: { id: "beacon", name: "Beacon",         desc: "Ne tire pas : booste les tours voisines (dégâts, cadence) et leur fait repérer les furtifs (radar). Plusieurs beacons se cumulent.", cost: 120, unlock: 9000,  range: 2.2, rate: 0, dmg: 0, color: "#4dffd2", support: true },
   miner:  { id: "miner",  name: "Data Miner",      desc: "Ne tire pas : produit de l'énergie à la fin de chaque vague.",  cost: 100, unlock: 4000,  range: 0,   rate: 0, dmg: 0, color: "#5b9bff", income: true },
-  dartling: { id: "dartling", name: "Dartling", desc: "Portée infinie : tire des fléchettes vers la souris ou un point fixe ; chaque fléchette transperce les ennemis sur sa route. Le chemin 1 mène au laser continu, puis au Rayon de la mort.", cost: 1200, upScale: 0.35, unlock: 6000, range: 99, rate: 5, dmg: 14, color: "#ffe14d", line: true, paragonMul: 2 },
+  dartling: { id: "dartling", name: "Dartling", desc: "Portée infinie : tire des fléchettes vers la souris ou un point fixe ; chaque fléchette transperce les ennemis sur sa route. Le chemin 1 mène au laser continu, puis au Rayon de la mort.", cost: 1200, upScale: 0.35, unlock: 6000, range: 99, rate: 5, dmg: 14, color: "#ffe14d", line: true, paragonMul: 2, paragonPrice: 100000 },
   desperado: { id: "desperado", name: "Desperado", desc: "Duelliste : tire d'autant plus vite qu'il y a peu d'ennemis à portée. Critiques à longue distance, salves de revolver.", cost: 150, unlock: 12000, range: 3.2, rate: 1.5, dmg: 26, color: "#ff9f5a" },
   tack:      { id: "tack",      name: "Tack Shooter", desc: "Tire une couronne de pointes dans toutes les directions. Portée courte, idéal dans les virages.", cost: 90,  unlock: 300,   range: 1.7, rate: 1.3, dmg: 14,  color: "#ff7a7a", radial: 8 },
   boomerang: { id: "boomerang", name: "Boomerang",    desc: "Lance un vrai boomerang : il traverse plusieurs ennemis à l'aller et au retour (chaque ennemi touché l'est deux fois).", cost: 100, unlock: 700,   range: 3.2, rate: 1.1, dmg: 14, color: "#7ad7ff", boom: true },
   wizard:    { id: "wizard",    name: "Wizard",       desc: "Magie : ignore le blindage. Boules de feu qui brûlent, éclairs, invocations.", cost: 120, unlock: 2500,  range: 3.3, rate: 1.6, dmg: 12, color: "#b06bff", magic: true },
   spikes:    { id: "spikes",    name: "Spike Factory", desc: "Pose des tas de pointes sur le chemin : chaque tas blesse les ennemis qui passent dessus.", cost: 130, unlock: 3500,  range: 1.5, rate: 0.6, dmg: 12, color: "#c0c0d0", spikes: true },
-  super:     { id: "super",     name: "Super Monkey", desc: "Cadence démesurée et longue portée. Très cher, très puissant.", cost: 450, unlock: 20000, range: 4.2, rate: 12, dmg: 6, color: "#6bd0ff" }
+  super:     { id: "super",     name: "Super Monkey", desc: "Cadence démesurée et longue portée. Repère les furtifs. Très cher, très puissant.", cost: 450, unlock: 20000, range: 4.2, rate: 12, dmg: 6, color: "#6bd0ff", detect: true },
+  glue:      { id: "glue",      name: "Lance-glu",    desc: "Englue les ennemis : gros ralentissement, et la colle corrosive les ronge peu à peu.", cost: 85, unlock: 1000, range: 2.6, rate: 1, dmg: 3, color: "#d4ff3a", slow: 0.45, slowTime: 3, poisonDps: 4, poisonTime: 3 },
+  alchemist: { id: "alchemist", name: "Alchimiste",   desc: "Lance de l'acide qui ronge le blindage et fait fondre les boucliers, et renforce les tours voisines avec des potions.", cost: 150, unlock: 8000, range: 2.6, rate: 0.9, dmg: 18, color: "#f07cff", acid: true, brew: true },
+  flame:     { id: "flame",     name: "Lance-flammes", desc: "Crache un cône de feu : touche tous les ennemis devant lui et les brûle. Portée courte.", cost: 110, unlock: 2000, range: 1.8, rate: 4, dmg: 4, color: "#ff5a1f", cone: 0.5, burn: 8, burnTime: 2 },
+  satellite: { id: "satellite", name: "Satellite",     desc: "Frappe depuis l'orbite n'importe où sur la carte : un rayon puissant toutes les 2,5 s. Repère les furtifs.", cost: 300, unlock: 15000, range: 99, rate: 0.4, dmg: 120, color: "#e0e6ff", splash: 0.8, detect: true, orbital: true },
+  sonic:     { id: "sonic",     name: "Canon sonique", desc: "Une onde de choc en ligne qui traverse les ennemis et les repousse en arrière sur le chemin.", cost: 140, unlock: 4500, range: 3, rate: 0.8, dmg: 10, color: "#ffc2e2", sonic: true, knock: 25 },
+  drone:     { id: "drone",     name: "Drone de patrouille", desc: "Des drones tournent autour de la tour et mitraillent ce qu'ils survolent. Repèrent les furtifs.", cost: 175, unlock: 10000, range: 1.9, rate: 3, dmg: 12, color: "#8fa8ff", patrol: 1.6, detect: true }
 };
 export const TOWER_IDS = Object.keys(TOWER_DEFS);
 
+/* ---------- Héros (comme dans BTD6) ----------
+   Un seul héros par partie, choisi avant de jouer. Il se pose comme une tour, mais ne s'améliore pas : il gagne de
+   l'expérience (XP) à chaque ennemi éliminé et à chaque vague, et monte jusqu'au niveau 20. Chaque niveau le renforce,
+   certains niveaux donnent un bonus (perks), et il débloque deux capacités : au niveau 3 et au niveau 10.
+   perks : [niveau, effets, nom] ; le niveau 1 donne les effets de base. aura : bonus pour les tours dans sa portée. */
+export const HERO_MAX_LEVEL = 20;
+export const FREE_HERO = "nova";
+export const HERO_DEFS = {
+  nova: {
+    id: "nova", hero: true, name: "Nova", title: "Tireuse d'élite", desc: "Une androïde rapide et précise : beaucoup de tirs, de plus en plus de cibles, des critiques.",
+    cost: 90, unlock: 0, range: 2.8, rate: 2.2, dmg: 10, color: "#00f0ff", size: 13,
+    abilities: ["h_salve", "h_pluie"],
+    perks: [[2, { rate: 1.15 }, "Réflexes : +15 % cadence"], [4, { detect: 1 }, "Visée thermique : repère les furtifs"], [5, { targets: 1 }, "Double tir : +1 cible"],
+      [7, { crit: 0.15, critMul: 2.5 }, "Point faible : 15 % de critiques ×2,5"], [9, { pierce: true }, "Balles perforantes : ignore le blindage"],
+      [12, { targets: 1, range: 1.1 }, "Triple tir : +1 cible, +10 % portée"], [14, { rate: 1.2 }, "Surcadence : +20 % cadence"],
+      [17, { crit: 0.15, dmg: 1.3 }, "Tueuse : +15 % critiques, +30 % dégâts"], [20, { targets: 2, rate: 1.3 }, "Légende : +2 cibles, +30 % cadence"]]
+  },
+  kael: {
+    id: "kael", hero: true, name: "Kael", title: "Ingénieur hacker", desc: "Rapporte de l'énergie à chaque vague et accélère les tours voisines. Ses capacités piratent les ennemis.",
+    cost: 100, unlock: 5000, range: 2.6, rate: 1.5, dmg: 7, color: "#3ddc84", size: 13,
+    abilities: ["h_piratage", "h_krach"],
+    perks: [[1, { goldGen: 15, auraRate: 0.08 }, ""], [2, { goldGen: 10 }, "Minage : +10 énergie par vague"], [4, { detect: 1 }, "Scanner : repère les furtifs (lui seulement)"],
+      [6, { auraRate: 0.05 }, "Overclock : +5 % cadence pour les tours voisines"], [8, { goldGen: 30 }, "Crypto : +30 énergie par vague"],
+      [11, { auraDmg: 0.1 }, "Optimisation : +10 % dégâts pour les tours voisines"], [14, { goldGen: 50, range: 1.2 }, "Serveur : +50 énergie par vague, +20 % portée"],
+      [17, { auraRate: 0.07 }, "Turbo : +7 % cadence pour les tours voisines"], [20, { goldGen: 120, auraDmg: 0.1 }, "Root : +120 énergie par vague, +10 % dégâts voisins"]]
+  },
+  ignis: {
+    id: "ignis", hero: true, name: "Ignis", title: "Pyromancienne", desc: "Boules de feu qui brûlent en zone ; les tours proches d'elle font plus de dégâts.",
+    cost: 105, unlock: 12000, range: 2.6, rate: 1, dmg: 18, color: "#ff8a3d", size: 13, splash: 0.6,
+    abilities: ["h_cocktail", "h_phenix"],
+    perks: [[1, { burn: 8, burnTime: 2, auraDmg: 0.08 }, ""], [3, { burn: 20 }, "Flammes vives : brûlure 20/s"], [5, { splash: 0.3 }, "Explosion : +0,3 case de zone"],
+      [7, { auraDmg: 0.05 }, "Ardeur : +5 % dégâts pour les tours voisines"], [9, { burn: 40, burnTime: 1 }, "Brasier : brûlure 40/s, +1 s"],
+      [13, { targets: 1 }, "Double boule de feu : +1 cible"], [16, { auraDmg: 0.07, splash: 0.3 }, "Incendie : +7 % dégâts voisins, +0,3 case"],
+      [19, { burn: 90 }, "Fournaise : brûlure 90/s"], [20, { dmg: 1.5, targets: 1 }, "Soleil noir : +50 % dégâts, +1 cible"]]
+  },
+  volta: {
+    id: "volta", hero: true, name: "Volta", title: "Maîtresse des orages", desc: "Éclairs en chaîne qui rebondissent et étourdissent ; voit les furtifs très tôt.",
+    cost: 105, unlock: 20000, range: 2.8, rate: 1.1, dmg: 16, color: "#b58cff", size: 13, chain: 3,
+    abilities: ["h_foudre", "h_surtension"],
+    perks: [[2, { chain: 1 }, "Arc : +1 rebond"], [3, { detect: 1 }, "Champ électrique : repère les furtifs"], [6, { stun: 0.3 }, "Choc : étourdit 0,3 s"],
+      [8, { chain: 2 }, "Foudre en chaîne : +2 rebonds"], [11, { chainFalloff: 1 }, "Supraconducteur : rebonds sans perte"],
+      [14, { rate: 1.25 }, "Haute tension : +25 % cadence"], [17, { chain: 3, stun: 0.5 }, "Tempête : +3 rebonds, étourdit 0,5 s"], [20, { dmg: 1.5, targets: 1 }, "Déesse de l'orage : +50 % dégâts, deux éclairs"]]
+  },
+  atlas: {
+    id: "atlas", hero: true, name: "Atlas", title: "Titan de garde", desc: "Un colosse qui écrase en zone et étourdit ; les tours proches de lui portent plus loin.",
+    cost: 110, unlock: 30000, range: 2.1, rate: 0.7, dmg: 30, color: "#ffcf3a", size: 16, splash: 0.8,
+    abilities: ["h_massue", "h_seisme"],
+    perks: [[1, { stun: 0.3, auraRange: 0.1 }, ""], [3, { auraRange: 0.05 }, "Vigie : +5 % portée pour les tours voisines"], [5, { stun: 0.5 }, "Coup sourd : étourdit 0,5 s"],
+      [7, { splash: 0.4 }, "Onde de choc : +0,4 case de zone"], [9, { pierce: true }, "Brise-blindage : ignore le blindage"],
+      [12, { auraRange: 0.05, auraDmg: 0.05 }, "Bannière : +5 % portée et dégâts voisins"], [15, { stun: 0.8, rate: 1.2 }, "Marteau-pilon : étourdit 0,8 s, +20 % cadence"],
+      [18, { splash: 0.4, dmg: 1.4 }, "Colosse : +0,4 case, +40 % dégâts"], [20, { auraDmg: 0.1, auraRange: 0.1 }, "Titan : +10 % dégâts et portée voisins"]]
+  }
+};
+export const HERO_IDS = Object.keys(HERO_DEFS);
+export const HERO_ABILITY_LEVELS = [3, 10];
+Object.assign(TOWER_DEFS, HERO_DEFS);         // un héros se pose et tire comme une tour (mais n'est pas dans la liste des tours)
+
+// XP totale pour atteindre un niveau (niveau 20 ≈ vague 35 en jouant normalement).
+export const xpForLevel = (level) => 40 * (Math.max(1, level) - 1) ** 2;
+export function levelFromXp(xp) {
+  let l = 1;
+  while (l < HERO_MAX_LEVEL && xpForLevel(l + 1) <= xp) l += 1;
+  return l;
+}
+
 // Rayon (px) de chaque tour sur le plateau : sert aux collisions et au dessin.
 const SIZES = { laser: 12, cryo: 12, canon: 14, sniper: 12, tesla: 13, venin: 12, mortier: 15, gatling: 13, pulsar: 14, beacon: 14,
-  miner: 14, dartling: 16, desperado: 12, tack: 10.5, boomerang: 12, wizard: 13, spikes: 16, super: 18 };
+  miner: 14, dartling: 16, desperado: 12, tack: 10.5, boomerang: 12, wizard: 13, spikes: 16, super: 18, glue: 12, alchemist: 13, drone: 13, flame: 12, satellite: 14, sonic: 14 };
 for (const [id, r] of Object.entries(SIZES)) TOWER_DEFS[id].size = r;
 export const towerRadius = (type) => (TOWER_DEFS[type] && TOWER_DEFS[type].size) || TOWER_RADIUS;
 export const LINE_WIDTH = 11;           // demi-largeur (px) du tir en ligne du Dartling
@@ -227,7 +311,13 @@ export const PATH_NAMES = {
   boomerang: ["Glaives", "Vitesse", "Puissance"],
   wizard:    ["Feu", "Arcane", "Invocation"],
   spikes:    ["Fabrication", "Pointes", "Ciblage"],
-  super:     ["Lasers", "Portée", "Pouvoirs"]
+  super:     ["Lasers", "Portée", "Pouvoirs"],
+  glue:      ["Adhérence", "Corrosion", "Projection"],
+  alchemist: ["Potions", "Acide", "Transmutation"],
+  drone:     ["Armement", "Moteurs", "Escadrille"],
+  flame:     ["Napalm", "Portée", "Chalumeau"],
+  satellite: ["Rayon", "Cadence", "Constellation"],
+  sonic:     ["Onde", "Recul", "Fréquence"]
 };
 
 export const UPGRADES = {
@@ -322,11 +412,57 @@ export const UPGRADES = {
     [U("Lasers", 0.6, { dmg: 1.4 }), U("Plasma", 1.2, { dmg: 1.4, pierce: true }), U("Rayons solaires", 2.5, { dmg: 1.6, splash: 0.3 }), U("Avatar du soleil", 5.2, { dmg: 2, rate: 1.3, splash: 0.4 })],
     [U("Longue portée", 0.6, { range: 1.2 }), U("Portée épique", 1.2, { range: 1.2, rate: 1.15 }), U("Robo", 2.5, { targets: 1, rate: 1.2 }), U("Technicien", 5, { targets: 1, dmg: 1.4, rate: 1.2 })],
     [U("Réflexes", 0.7, { rate: 1.3 }), U("Surrégime", 1.3, { rate: 1.3 }), U("Coups critiques", 2.6, { crit: 0.15, critMul: 3 }), U("Fureur solaire", 5.5, { rate: 1.5, dmg: 1.5, ability: "sunburst" })]
+  ],
+  // Lance-glu : ralentir (chemin 1), ronger (chemin 2), arroser (chemin 3)
+  glue: [
+    [U("Glu épaisse", 0.6, { slow: 0.55, slowTime: 1 }), U("Glu tenace", 1.2, { slow: 0.65, slowTime: 1 }), U("Colle forte", 2.4, { slow: 0.7, freezeChance: 0.2, freezeTime: 0.7 }), U("Glu totale", 5, { slow: 0.75, slowTime: 2, ability: "gluestorm" })],
+    [U("Glu acide", 0.6, { poisonDps: 2.5 }), U("Corrosion", 1.2, { poisonDps: 2, shred: 2 }), U("Dissolution", 2.5, { poisonDps: 2, poisonTime: 2 }), U("Bain d'acide", 5.2, { poisonDps: 2.5, shred: 3, pierce: true })],
+    [U("Jet rapide", 0.6, { rate: 1.3 }), U("Double jet", 1.2, { targets: 1 }), U("Éclaboussure", 2.4, { splash: 0.7 }), U("Déluge de glu", 5, { targets: 2, splash: 0.4, rate: 1.3 })]
+  ],
+  // Alchimiste : potions pour les tours voisines (chemin 1), acide (chemin 2), énergie (chemin 3)
+  alchemist: [
+    [U("Potion de force", 0.6, { brewDmg: 0.15 }), U("Double dose", 1.2, { brewCount: 1, brewRate: 0.1 }), U("Potion stable", 2.4, { brewTime: 3, brewCount: 1, brewDmg: 0.15 }), U("Élixir suprême", 5, { brewCount: 4, brewDmg: 0.2, brewRate: 0.15, ability: "elixir" })],
+    [U("Acide fort", 0.6, { dmg: 1.4, shred: 1 }), U("Flasque explosive", 1.2, { splash: 0.6 }), U("Acide dissolvant", 2.5, { pctDmg: 0.03, dmg: 1.3 }), U("Dissolvant universel", 5.2, { pctDmg: 0.05, splash: 0.4, rate: 1.3 })],
+    [U("Chimie lucrative", 0.7, { bounty: 0.3 }), U("Or liquide", 1.3, { goldGen: 25 }), U("Pierre philosophale", 2.6, { goldGen: 60, bounty: 0.4 }), U("Grand Œuvre", 5.4, { goldGen: 150, bounty: 0.5, ability: "transmute" })]
+  ],
+  // Drone de patrouille : armes (chemin 1), vitesse (chemin 2), nombre de drones (chemin 3)
+  drone: [
+    [U("Balles perforantes", 0.6, { pierce: true, dmg: 1.2 }), U("Roquettes", 1.3, { splash: 0.6, dmg: 1.3 }), U("Missiles guidés", 2.5, { dmg: 1.6, splash: 0.3 }), U("Frappe aérienne", 5.4, { dmg: 1.8, ability: "airstrike" })],
+    [U("Hélices", 0.6, { orbit: 0.4, rate: 1.2 }), U("Turbines", 1.2, { rate: 1.3, range: 1.15 }), U("Réacteurs", 2.4, { orbit: 0.4, rate: 1.4 }), U("Supersonique", 5, { rate: 1.6, range: 1.2, patrolR: 0.6 })],
+    [U("Deuxième drone", 0.9, { drones: 1 }), U("Formation", 1.5, { range: 1.1, dmg: 1.15 }), U("Troisième drone", 2.8, { drones: 1 }), U("Escadrille", 5.6, { drones: 2, dmg: 1.3, ability: "squadron" })]
   ]
 };
 
+// Lance-flammes : brûlure (chemin 1), largeur du cône (chemin 2), puissance (chemin 3)
+UPGRADES.flame = [
+  [U("Carburant", 0.6, { dmg: 1.4, burn: 12, burnTime: 1 }), U("Napalm", 1.2, { burn: 30, burnTime: 1 }), U("Feu grégeois", 2.4, { burn: 60, pierce: true }), U("Enfer", 5, { burn: 120, dmg: 1.5, ability: "firestorm" })],
+  [U("Buse large", 0.6, { cone: 0.2 }), U("Long tuyau", 1.2, { range: 1.25 }), U("Dragon de fer", 2.4, { cone: 0.3, range: 1.15 }), U("Mur de flammes", 5, { cone: 2.6, range: 1.1 })],
+  [U("Pression", 0.6, { rate: 1.3 }), U("Chalumeau", 1.2, { dmg: 1.6, shred: 1.5 }), U("Plasma", 2.5, { dmg: 1.8, rate: 1.2 }), U("Arc de plasma", 5.2, { dmg: 2.2, rate: 1.3, pierce: true })]
+];
+// Satellite : dégâts (chemin 1), cadence (chemin 2), nombre de frappes (chemin 3)
+UPGRADES.satellite = [
+  [U("Lentilles", 0.6, { dmg: 1.4 }), U("Rayon perforant", 1.2, { pierce: true, dmg: 1.3 }), U("Canon ionique", 2.5, { dmg: 1.8, splash: 0.4 }), U("Rayon divin", 5.4, { dmg: 2.5, splash: 0.5, ability: "orbitalstrike" })],
+  [U("Batteries", 0.6, { rate: 1.3 }), U("Panneaux solaires", 1.2, { rate: 1.35 }), U("Réacteur", 2.4, { rate: 1.5 }), U("Mitraille orbitale", 5, { rate: 2 })],
+  [U("Deuxième cible", 0.8, { targets: 1 }), U("Triangulation", 1.4, { targets: 1, crit: 0.1 }), U("Constellation", 2.8, { targets: 2 }), U("Essaim de satellites", 5.6, { targets: 3, dmg: 1.3 })]
+];
+// Canon sonique : puissance de l'onde (chemin 1), recul (chemin 2), cadence (chemin 3)
+UPGRADES.sonic = [
+  [U("Amplis", 0.6, { dmg: 1.5 }), U("Onde large", 1.2, { waveW: 8, dmg: 1.3 }), U("Mur du son", 2.5, { dmg: 1.8, pierce: true }), U("Bang supersonique", 5.2, { dmg: 2.2, waveW: 10, ability: "sonicboom" })],
+  [U("Souffle", 0.6, { knock: 10 }), U("Bourrasque", 1.2, { knock: 15 }), U("Ouragan", 2.4, { knock: 20, stun: 0.3 }), U("Répulseur", 5, { knock: 30, stun: 0.5 })],
+  [U("Résonateur", 0.6, { rate: 1.3 }), U("Basse fréquence", 1.2, { rate: 1.3, range: 1.15 }), U("Double onde", 2.4, { targets: 1 }), U("Infrasons", 5, { targets: 1, rate: 1.5 })]
+];
+
+// Détection des furtifs : quelques améliorations des tours existantes donnent aussi la détection.
+UPGRADES.laser[0][0].fx.detect = 1;          // Lentille focale
+UPGRADES.canon[2][1].fx.detect = 1;          // Canon long
+UPGRADES.wizard[1][1].fx.detect = 1;         // Maîtrise
+UPGRADES.desperado[1][0].fx.detect = 1;      // Visée
+UPGRADES.gatling[1][2].fx.detect = 1;        // Refroidisseur (capteurs thermiques)
+UPGRADES.mortier[2][1].fx.detect = 1;        // Tube long
+
 const MUL = { dmg: "damage", rate: "rate", range: "range", poisonDps: "poisonDps", income: "income", boostDamage: "boostDamage", boostRate: "boostRate" };
-const ADD = new Set(["radial", "returns", "batch", "burnTime", "bounty", "burst", "duel", "quick", "critFar", "pierceN", "targets", "splash", "chain", "chainReach", "spreadCount", "spreadRadius", "crit", "boostRange", "poisonTime", "slowTime", "pulseSlowTime", "interest"]);
+const ADD = new Set(["radial", "returns", "batch", "burnTime", "bounty", "burst", "duel", "quick", "critFar", "pierceN", "targets", "splash", "chain", "chainReach", "spreadCount", "spreadRadius", "crit", "boostRange", "poisonTime", "slowTime", "pulseSlowTime", "interest",
+  "shred", "pctDmg", "goldGen", "brewCount", "brewDmg", "brewRate", "brewTime", "drones", "orbit", "patrolR", "auraDmg", "auraRate", "auraRange", "cone", "knock", "waveW"]);
 
 function applyFx(st, fx) {
   for (const [k, v] of Object.entries(fx)) {
@@ -337,25 +473,53 @@ function applyFx(st, fx) {
   }
 }
 
-// Caractéristiques d'une tour selon ses paliers [chemin 1, chemin 2, chemin 3].
-export function towerStats(def, tiers = [0, 0, 0]) {
-  const st = {
+// Caractéristiques de base d'une tour (avant améliorations).
+function baseStats(def) {
+  return {
     damage: def.dmg, range: def.range * CELL, rate: def.rate,                 // portée en pixels
     targets: 1, splash: def.splash || 0, chain: def.chain || 0, chainFalloff: 0.85, chainReach: 2,
     stun: 0, slow: def.slow || 0, slowTime: def.slowTime || 0, freezeChance: 0, freezeTime: 0,
     poisonDps: def.poisonDps || 0, poisonTime: def.poisonTime || 0,
     spreadCount: 0, spreadRadius: 0, crit: 0, critMul: 2, pierce: !!def.magic, execute: 0,
     pulseSlow: 0, pulseSlowTime: 0, pierceN: def.line ? 3 : def.radial ? 1 : def.boom ? 4 : def.spikes ? 4 : 0, burst: 0, duel: 0, quick: 0, critFar: 0,
-    radial: def.radial || 0, returns: def.boom ? 1 : 0, batch: def.spikes ? 1 : 0, burn: 0, burnTime: 0, bounty: 0,
+    radial: def.radial || 0, returns: def.boom ? 1 : 0, batch: def.spikes ? 1 : 0, burn: def.burn || 0, burnTime: def.burnTime || 0, bounty: 0,
     boostDamage: def.id === "beacon" ? 0.2 : 0, boostRate: def.id === "beacon" ? 0.15 : 0, boostRange: 0,
     income: def.id === "miner" ? 24 : 0, interest: 0, ability: null,
     beam: 0,          // Dartling : 1 = laser continu, 2 = Rayon de la mort (plus large)
-    aimSpikes: 0      // Spike Factory : le joueur choisit où tombent les pointes
+    aimSpikes: 0,     // Spike Factory : le joueur choisit où tombent les pointes
+    detect: def.detect ? 1 : 0,                  // peut viser les ennemis furtifs
+    shred: def.acid ? 1.5 : 0,                   // ronge le blindage (s) ; dégâts ×3 contre les boucliers
+    pctDmg: 0,                                   // dégâts en % des PV max (÷4 contre les boss)
+    goldGen: 0,                                  // énergie produite à la fin de chaque vague
+    brewCount: def.brew ? 1 : 0, brewDmg: def.brew ? 0.25 : 0, brewRate: def.brew ? 0.1 : 0, brewTime: def.brew ? 5 : 0,   // potions (Alchimiste)
+    drones: def.patrol ? 1 : 0, orbit: def.patrol ? 1 : 0, patrolR: def.patrol || 0,                                        // Drone de patrouille
+    auraDmg: 0, auraRate: 0, auraRange: 0,                                                                                    // héros : bonus aux tours voisines
+    cone: def.cone || 0,                         // Lance-flammes : demi-angle du cône (radians)
+    knock: def.knock || 0, waveW: def.sonic ? 14 : 0      // Canon sonique : recul (px) et demi-largeur de l'onde
   };
+}
+
+// Caractéristiques d'une tour selon ses paliers [chemin 1, chemin 2, chemin 3].
+export function towerStats(def, tiers = [0, 0, 0]) {
+  if (def.hero) return heroStats(def, 1);
+  const st = baseStats(def);
   const paths = UPGRADES[def.id];
   for (let p = 0; p < PATH_COUNT; p++) {
     for (let t = 0; t < (tiers[p] || 0); t++) applyFx(st, paths[p][t].fx);
   }
+  st.crit = Math.min(st.crit, 0.9);
+  return st;
+}
+
+// Caractéristiques d'un héros à un niveau : +12 % dégâts, +2,5 % cadence et +1,5 % portée par niveau, plus les perks atteints.
+export function heroStats(def, level = 1) {
+  const st = baseStats(def);
+  const k = Math.max(1, level) - 1;
+  st.damage *= 1 + 0.12 * k;
+  st.rate *= 1 + 0.025 * k;
+  st.range *= 1 + 0.015 * k;
+  for (const [lvl, fx] of def.perks) if (lvl <= level) applyFx(st, fx);
+  st.burn *= 1 + 0.05 * k;
   st.crit = Math.min(st.crit, 0.9);
   return st;
 }
@@ -410,6 +574,20 @@ export function describeFx(fx) {
   if (fx.beam === 1) out.push(`laser continu : touche toute la ligne toutes les ${String(BEAM_TICK).replace(".", ",")} s`);
   if (fx.beam === 2) out.push("rayon continu géant");
   if (fx.aimSpikes) out.push("choisis où tombent les pointes");
+  if (fx.detect) out.push("repère les furtifs");
+  if (fx.shred) out.push(`ronge le blindage ${fx.shred} s de plus`);
+  if (fx.pctDmg) out.push(`+${Math.round(fx.pctDmg * 100)} % des PV max par coup`);
+  if (fx.goldGen) out.push(`+${fx.goldGen} énergie par vague`);
+  if (fx.brewCount) out.push(`potion pour +${fx.brewCount} tour${fx.brewCount > 1 ? "s" : ""}`);
+  if (fx.brewDmg) out.push(`potions +${Math.round(fx.brewDmg * 100)} % dégâts`);
+  if (fx.brewRate) out.push(`potions +${Math.round(fx.brewRate * 100)} % cadence`);
+  if (fx.brewTime) out.push(`potions +${fx.brewTime} s`);
+  if (fx.drones) out.push(`+${fx.drones} drone${fx.drones > 1 ? "s" : ""}`);
+  if (fx.orbit) out.push("drones plus rapides");
+  if (fx.patrolR) out.push("patrouille plus large");
+  if (fx.cone) out.push(fx.cone >= 2 ? "flammes tout autour de la tour" : "cône plus large");
+  if (fx.knock) out.push(`repousse de +${fx.knock} px`);
+  if (fx.waveW) out.push("onde plus large");
   if (fx.ability) out.push(`CAPACITÉ : ${ABILITIES[fx.ability].name}`);
   return out.join(" · ");
 }
@@ -490,12 +668,18 @@ export const ENEMY_DEFS = {
   tank:   { name: "Blindé", hp: 3.4,  speed: 0.9, gold: 10, lives: 2, color: "#a066ff" },
   armored:{ name: "Cuirassé", hp: 2.2, speed: 1.1, gold: 9,  lives: 2, color: "#9aa5b1", armor: 5 },
   swarm:  { name: "Essaim",  hp: 0.25, speed: 2.0, gold: 2,  lives: 1, color: "#ffd1e8" },
+  ghost:  { name: "Furtif", hp: 0.9, speed: 1.7, gold: 6, lives: 1, color: "#c9d6ff", camo: true, info: "Invisible pour les tours sans détection (Sniper, Tesla, Drone, Super, tours près d'un Beacon…)." },
+  regen:  { name: "Régénérant", hp: 1.4, speed: 1.3, gold: 7, lives: 1, color: "#ff9ec7", regen: 0.05, info: "Récupère 5 % de ses PV par seconde s'il n'est pas touché pendant 1 s (le poison et la brûlure l'en empêchent)." },
+  shield: { name: "Bastion", hp: 1.5, speed: 1.0, gold: 11, lives: 2, color: "#ffd166", shield: 1.2, info: "Bouclier qui absorbe les dégâts avant les PV. L'acide (Alchimiste, Lance-glu) le fait fondre trois fois plus vite." },
+  cargo:  { name: "Cargo", hp: 9, speed: 0.6, gold: 30, lives: 4, color: "#8d99ae", armor: 2, children: { type: "tank", n: 3 }, info: "Énorme et lent ; libère 3 Blindés quand il est détruit." },
   // Boss : un type différent toutes les 10 vagues, chacun avec un pouvoir.
   boss:   { name: "Virus",     hp: 10, speed: 0.7,  gold: 70,  lives: 5,  color: "#ffffff", boss: true, spawnAt: [0.66, 0.33], power: "Libère des drones à 66 % et 33 % de PV" },
   boss2:  { name: "Rootkit",   hp: 8, speed: 0.8,  gold: 90,  lives: 5,  color: "#ff6bd6", boss: true, armor: 4, jam: { every: 6, radius: 3, time: 3 }, power: "Brouille les tours proches toutes les 6 s (elles ne tirent plus 3 s)" },
-  boss3:  { name: "Ver",       hp: 12, speed: 0.65, gold: 110, lives: 6, color: "#3ddc84", boss: true, armor: 8, rage: 1.7, power: "Blindage 8 ; accélère de 70 % sous 50 % de PV" }
+  boss3:  { name: "Ver",       hp: 12, speed: 0.65, gold: 110, lives: 6, color: "#3ddc84", boss: true, armor: 8, rage: 1.7, power: "Blindage 8 ; accélère de 70 % sous 50 % de PV" },
+  boss4:  { name: "Ransomware", hp: 13, speed: 0.7, gold: 130, lives: 6, color: "#ff3b3b", boss: true, armor: 3, ransom: { every: 7, shield: 0.15, steal: 0.04, cap: 400 }, power: "Toutes les 7 s : se protège d'un bouclier et te vole 4 % de ton énergie" },
+  boss5:  { name: "Botnet",    hp: 15, speed: 0.55, gold: 150, lives: 7, color: "#7dffb0", boss: true, summon: { every: 3, type: "ghost", n: 3 }, power: "Invoque 3 Furtifs toutes les 3 s : il faut des tours qui détectent" }
 };
-export const BOSS_ORDER = ["boss", "boss2", "boss3"];
+export const BOSS_ORDER = ["boss", "boss2", "boss3", "boss4", "boss5"];
 export const isBoss = (e) => !!ENEMY_DEFS[e.type].boss;
 
 // Solidité de base d'un ennemi à la vague `wave` (croissance douce : la courbe suit celle de la puissance des tours).
@@ -520,13 +704,25 @@ export function waveSpec(wave, hpMul = 1, laneCount = 1) {
     if (wave >= 3 && i % 3 === 2) type = "runner";
     if (wave >= 5 && i % 5 === 4) type = "tank";
     if (wave >= 7 && i % 6 === 5) type = "armored";
+    if (wave >= 9 && i % 8 === 3) type = "regen";
+    if (wave >= 12 && i % 7 === 6) type = "ghost";
+    if (wave >= 15 && i % 9 === 7) type = "shield";
     list.push({ type, hp: hp * ENEMY_DEFS[type].hp, at: i * gap, lane: i % laneCount });
   }
   // Une rafale d'essaim toutes les 4 vagues
   if (wave >= 4 && wave % 4 === 0) {
     for (let k = 0; k < 8 + wave / 2; k++) list.push({ type: "swarm", hp: hp * ENEMY_DEFS.swarm.hp, at: count * gap * 0.4 + k * 0.18, lane: k % laneCount });
   }
-  // Boss toutes les 10 vagues : Virus, Rootkit, Ver, puis on recommence avec un boss de plus tous les 3 cycles.
+  // Commando furtif toutes les 6 vagues à partir de la 18
+  if (wave >= 18 && wave % 6 === 0) {
+    for (let k = 0; k < 6 + Math.floor(wave / 6); k++) list.push({ type: "ghost", hp: hp * ENEMY_DEFS.ghost.hp, at: count * gap * 0.6 + k * 0.3, lane: k % laneCount });
+  }
+  // Cargos à partir de la vague 20 (de plus en plus nombreux)
+  if (wave >= 20) {
+    const n = Math.min(6, Math.floor((wave - 15) / 5));
+    for (let k = 0; k < n; k++) list.push({ type: "cargo", hp: hp * ENEMY_DEFS.cargo.hp, at: count * gap * 0.5 + k * 2.5, lane: k % laneCount });
+  }
+  // Boss toutes les 10 vagues : Virus, Rootkit, Ver, Ransomware, Botnet, puis on recommence avec un boss de plus à chaque cycle.
   if (wave % 10 === 0) {
     const k = wave / 10;
     const type = BOSS_ORDER[(k - 1) % BOSS_ORDER.length];
@@ -538,7 +734,7 @@ export function waveSpec(wave, hpMul = 1, laneCount = 1) {
 
 /* ---------- Partie ---------- */
 
-export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP, diffId = DEFAULT_DIFFICULTY) {
+export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP, diffId = DEFAULT_DIFFICULTY, heroId = null) {
   const map = builtMap(mapId);
   const diff = diffById(diffId);
   return {
@@ -562,7 +758,13 @@ export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP, diffId = 
     src: null,              // tour qui est en train de tirer (sert à compter les éliminations des paragons)
     spikes: [],             // pointes posées sur le chemin par les Spike Factory
     projs: [],              // projectiles en vol (boomerangs)
-    cursor: null            // position de la souris sur le plateau (visée du Dartling), mise à jour par l'interface
+    cursor: null,           // position de la souris sur le plateau (visée du Dartling), mise à jour par l'interface
+    powerCd: {},            // recharge des pouvoirs (s)
+    overclockUntil: 0,      // pouvoir « Surcadence » actif jusqu'à cet instant
+    elixirUntil: 0,         // capacité « Élixir » (Alchimiste) active jusqu'à cet instant
+    alerts: [],             // messages pour l'interface (vol d'énergie du Ransomware…)
+    // Héros choisi pour la partie : id, tour posée (ou null), XP gagnée, XP « en attente » (rattrapage si posé tard)
+    hero: HERO_DEFS[heroId] ? { id: heroId, towerId: null, xp: 0, pool: 0 } : null
   };
 }
 
@@ -635,15 +837,25 @@ export function placeTower(state, typeId, x, y) {
   const def = TOWER_DEFS[typeId];
   if (!def) return { ok: false, reason: "unknown" };
   if (state.phase === "over") return { ok: false, reason: "over" };
-  if (!state.unlocked.includes(typeId)) return { ok: false, reason: "locked" };
+  if (!def.hero && !state.unlocked.includes(typeId)) return { ok: false, reason: "locked" };
   x = Math.round(x);
   y = Math.round(y);
+  if (def.hero && (!state.hero || state.hero.id !== typeId)) return { ok: false, reason: "unknown" };
+  if (def.hero && state.hero.towerId !== null) return { ok: false, reason: "hero" };       // un seul héros
   const issue = placeIssue(state, x, y, typeId);
   if (issue) return { ok: false, reason: issue };
   if (state.gold < def.cost) return { ok: false, reason: "gold" };
   state.gold -= def.cost;
   const tiers = [0, 0, 0];
   const tower = { id: state.nextId++, type: typeId, x, y, tiers, st: towerStats(def, tiers), cooldown: 0, target: "first", abilityCd: 0, fury: 0, jam: 0, kills: 0, paragon: null, dyn: 1 };
+  if (def.hero) {
+    // Posé tard : il récupère la moitié de l'XP qu'il aurait gagnée depuis le début (rattrapage, comme dans BTD6).
+    state.hero.xp = Math.max(state.hero.xp, Math.round(state.hero.pool * 0.5));
+    state.hero.towerId = tower.id;
+    tower.level = levelFromXp(state.hero.xp);
+    tower.st = heroStats(def, tower.level);
+    tower.heroCd = [0, 0];
+  }
   if (def.line) {
     // Dartling : il vise un point fixe, par défaut le point du chemin le plus proche ; le joueur peut aussi le faire suivre la souris.
     const near = nearestPathPoint(state.map, x, y);
@@ -686,6 +898,8 @@ export function setAimMode(state, id, mode) {
 
 // Améliore un chemin d'une tour. Raisons de refus : unknown, over, max, paths, crossed, gold.
 export function upgradeTower(state, id, path = 0) {
+  const ht = state.towers.find((t) => t.id === id);
+  if (ht && TOWER_DEFS[ht.type].hero) return { ok: false, reason: "heroUp" };
   const tower = state.towers.find((t) => t.id === id);
   if (!tower || !(path >= 0 && path < PATH_COUNT)) return { ok: false, reason: "unknown" };
   if (state.phase === "over") return { ok: false, reason: "over" };
@@ -700,6 +914,7 @@ export function upgradeTower(state, id, path = 0) {
 }
 
 export function sellTower(state, id) {
+  if (state.hero && state.hero.towerId === id) state.hero.towerId = null;     // on pourra le reposer (il garde son XP)
   const index = state.towers.findIndex((t) => t.id === id);
   if (index < 0 || state.phase === "over") return { ok: false, reason: "unknown" };
   const refund = Math.floor(invested(state.towers[index]) * SELL_RATIO);
@@ -726,23 +941,42 @@ function spawn(state, entry, dist = 0) {
   state.enemies.push({
     id: state.nextId++, type: entry.type, hp: entry.hp, maxHp: entry.hp, lane,
     dist, x, y, slow: 0, slowLeft: 0, poison: 0, poisonLeft: 0, stun: 0, stunImmune: 0, dead: false, speed: def.speed * CELL,
-    spawned: 0, clock: 0
+    spawned: 0, clock: 0, shred: 0, lastHit: -9, camo: !!def.camo,
+    shield: def.shield ? entry.hp * def.shield : 0, maxShield: def.shield ? entry.hp * def.shield : 0
   });
 }
 
 // pierce : le poison ignore le blindage ; un coup direct perd `armor` points (au moins 20 % passent).
 function hit(state, enemy, damage, events, pierce = false) {
   if (enemy.dead) return;
-  const armor = pierce ? 0 : ENEMY_DEFS[enemy.type].armor || 0;
-  if (state.src && state.src.st.bossMul && ENEMY_DEFS[enemy.type].boss) damage *= state.src.st.bossMul;    // paragon : bonus contre les boss
+  const edef = ENEMY_DEFS[enemy.type];
+  const armor = pierce || enemy.shred > 0 ? 0 : edef.armor || 0;       // l'acide ronge le blindage
+  if (state.src && state.src.st.bossMul && edef.boss) damage *= state.src.st.bossMul;    // paragon : bonus contre les boss
+  enemy.lastHit = state.time;
+  // Bouclier (Bastion, Ransomware) : il absorbe avant les PV ; l'acide le fait fondre 3× plus vite.
+  if (enemy.shield > 0) {
+    const mul = state.src && state.src.st.shred ? 3 : 1;
+    const absorbed = Math.min(enemy.shield, damage * mul);
+    enemy.shield -= absorbed;
+    damage -= absorbed / mul;
+    if (damage <= 0) return;
+  }
   enemy.hp -= armor ? Math.max(damage * 0.2, damage - armor) : damage;
   if (enemy.hp <= 0) {
     enemy.dead = true;
+    // Cargo : libère ses passagers
+    if (edef.children) {
+      const c = edef.children;
+      const hp = baseHp(Math.max(1, state.wave)) * state.hpMul * ENEMY_DEFS[c.type].hp;
+      for (let k = 0; k < c.n; k++) spawn(state, { type: c.type, hp, lane: enemy.lane }, Math.max(0, enemy.dist - k * 12));
+      state.fx.push({ kind: "boom", x: enemy.x, y: enemy.y, r: CELL * 1.2, ttl: 0.4, max: 0.4, color: "#8d99ae" });
+    }
     const src = state.src;
     const gain = killGold(enemy.type, state.wave);
     state.gold += src && src.st.bounty ? Math.round(gain * (1 + src.st.bounty)) : gain;      // prime d'énergie (Desperado)
     state.kills += 1;
     events.killed += 1;
+    if (state.hero) gainXp(state, killGold(enemy.type, Math.max(1, state.wave)));
     if (src) src.kills += 1;
   }
 }
@@ -766,6 +1000,7 @@ function slowEnemy(e, amount, time) {
 // Effets secondaires d'un tir sur un ennemi touché (ralentissement, gel, étourdissement, poison).
 function applyEffects(state, e, st) {
   if (e.dead) return;
+  if (st.shred) e.shred = Math.max(e.shred || 0, st.shred);
   if (st.slow) slowEnemy(e, st.slow, st.slowTime);
   if (st.freezeChance && (state.rng || Math.random)() < st.freezeChance) stunEnemy(e, st.freezeTime);
   if (st.stun) stunEnemy(e, st.stun);
@@ -779,6 +1014,70 @@ function applyEffects(state, e, st) {
     e.poisonLeft = Math.max(e.poisonLeft, st.poisonTime);
     e.poisonBy = state.src || e.poisonBy || null;
   }
+}
+
+// XP du héros : elle s'accumule aussi avant qu'il soit posé (« pool »), pour le rattrapage.
+function gainXp(state, xp) {
+  state.hero.pool += xp;
+  if (state.hero.towerId !== null) state.hero.xp += xp;
+}
+export const heroTower = (state) => (state.hero && state.hero.towerId !== null ? state.towers.find((t) => t.id === state.hero.towerId) || null : null);
+
+// Montée de niveau et recharges des capacités du héros.
+function heroTick(state, dt, waving) {
+  const t = heroTower(state);
+  if (!t) return;
+  const def = TOWER_DEFS[t.type];
+  const level = levelFromXp(state.hero.xp);
+  if (level !== t.level) {
+    const unlocked = HERO_ABILITY_LEVELS.findIndex((l) => l > t.level && l <= level);
+    t.level = level;
+    t.st = heroStats(def, level);
+    const perk = def.perks.find(([l]) => l === level);
+    state.alerts.push(`${def.name} passe niveau ${level} !${unlocked >= 0 ? ` Capacité débloquée : ${ABILITIES[def.abilities[unlocked]].name}.` : perk && perk[2] ? ` ${perk[2]}.` : ""}`);
+    state.fx.push({ kind: "boom", style: "paragon", x: t.x, y: t.y, r: CELL * 1.4, ttl: 0.8, max: 0.8, color: "#fcee0a" });
+  }
+  if (waving) t.heroCd = t.heroCd.map((c) => Math.max(0, c - dt));
+}
+
+// Capacité n° slot (0 ou 1) du héros. Raisons : unknown, none (pas de héros posé), level, idle, cd.
+export function useHeroAbility(state, slot) {
+  const t = heroTower(state);
+  if (!t) return { ok: false, reason: "none" };
+  if (state.phase === "over") return { ok: false, reason: "unknown" };
+  const def = TOWER_DEFS[t.type];
+  const ab = ABILITIES[def.abilities[slot]];
+  if (!ab) return { ok: false, reason: "unknown" };
+  if (t.level < HERO_ABILITY_LEVELS[slot]) return { ok: false, reason: "level", level: HERO_ABILITY_LEVELS[slot] };
+  if (state.phase !== "wave") return { ok: false, reason: "idle" };
+  if (t.heroCd[slot] > 0) return { ok: false, reason: "cd" };
+  const events = { killed: 0, leaked: 0 };
+  if (ab.fury) { t.fury = ab.fury.time; t.furyAbility = def.abilities[slot]; }
+  state.src = t;
+  if (ab.run) ab.run(state, t, abilityStats(state, t), events);
+  state.src = null;
+  t.heroCd[slot] = ab.cd;
+  state.fx.push({ kind: "boom", x: t.x, y: t.y, r: CELL, ttl: 0.4, max: 0.4, color: def.color });
+  return { ok: true, name: ab.name };
+}
+
+// Furtifs : une tour les voit si elle détecte elle-même (type ou amélioration), ou si un Beacon la couvre (radar).
+export function canSee(state, tower) {
+  if (tower.st.detect) return true;
+  for (const b of state.towers) {
+    if (b.type !== "beacon") continue;
+    if ((b.x - tower.x) ** 2 + (b.y - tower.y) ** 2 <= b.st.range ** 2) return true;
+  }
+  return false;
+}
+
+// Position du drone n° k d'un Drone de patrouille (il tourne autour de la tour).
+export function dronePos(tower, k, time) {
+  const st = tower.st;
+  const n = Math.max(1, Math.round(st.drones));
+  const a = time * 0.9 * st.orbit + (k * Math.PI * 2) / n + tower.id;
+  const r = st.patrolR * CELL;
+  return { x: tower.x + Math.cos(a) * r, y: tower.y + Math.sin(a) * r, a };
 }
 
 // Bonus apportés à une tour par les Beacons voisins (les effets se cumulent, avec un plafond).
@@ -798,14 +1097,23 @@ export function beaconBuff(state, tower) {
   buff.damage += Math.min((surge ? 1.4 : 1) + (para ? 1 : 0), d);
   buff.rate += Math.min((surge ? 1 : 0.6) + (para ? 0.6 : 0), r);
   buff.range += g;
+  // Potion de l'Alchimiste et Élixir : en plus des Beacons
+  if (tower.brew && tower.brew.until > state.time) { buff.damage += tower.brew.dmg; buff.rate += tower.brew.rate; }
+  // Aura du héros (Kael, Ignis, Atlas) pour les tours dans sa portée
+  const ht = heroTower(state);
+  if (ht && ht !== tower && (ht.st.auraDmg || ht.st.auraRate || ht.st.auraRange)) {
+    if ((ht.x - tower.x) ** 2 + (ht.y - tower.y) ** 2 <= ht.st.range ** 2) { buff.damage += ht.st.auraDmg; buff.rate += ht.st.auraRate; buff.range += ht.st.auraRange; }
+  }
+  if (state.elixirUntil > state.time) { buff.damage += 0.5; buff.rate += 0.5; }
   return buff;
 }
 
 // Cadence réelle d'une tour (tirs par seconde) : améliorations, beacons, capacité en cours.
 export function towerRate(state, tower) {
-  const ab = tower.st.ability && ABILITIES[tower.st.ability];
+  const ab = (tower.furyAbility && ABILITIES[tower.furyAbility]) || (tower.st.ability && ABILITIES[tower.st.ability]);
   const fury = tower.fury > 0 && ab && ab.fury && ab.fury.rate ? ab.fury.rate : 1;
-  return tower.st.rate * beaconBuff(state, tower).rate * fury * (tower.dyn || 1);
+  const oc = state.overclockUntil > state.time ? 1.5 : 1;          // pouvoir « Surcadence »
+  return tower.st.rate * beaconBuff(state, tower).rate * fury * oc * (tower.dyn || 1);
 }
 
 function explode(state, x, y, radius, damage, events, st, color) {
@@ -829,8 +1137,8 @@ function fire(state, tower, events) {
 const RAY_LENGTH = 1300;
 
 // Projectiles visibles : vitesse (px/s) des tirs qui « voyagent » ; les autres sont instantanés (durée d'affichage SHOT_TTL).
-const SHOT_SPEED = { canon: 650, mortier: 520, cryo: 700, venin: 600, wizard: 560, boomerang: 0 };
-const SHOT_TTL = { laser: 0.12, sniper: 0.16, tesla: 0.16, chain: 0.16, arcane: 0.16, gatling: 0.09, desperado: 0.12, super: 0.1, spread: 0.25 };
+const SHOT_SPEED = { canon: 650, mortier: 520, cryo: 700, venin: 600, wizard: 560, boomerang: 0, glue: 520, alchemist: 460 };
+const SHOT_TTL = { satellite: 0.3, laser: 0.12, sniper: 0.16, tesla: 0.16, chain: 0.16, arcane: 0.16, gatling: 0.09, desperado: 0.12, super: 0.1, spread: 0.25, drone: 0.09, potion: 0.4 };
 
 // Ennemis touchés par un rayon qui part de (x, y) dans la direction (ux, uy) sur `length` pixels, du plus proche au plus lointain.
 function rayEnemies(state, x, y, ux, uy, length, width) {
@@ -921,6 +1229,14 @@ function stepProjectiles(state, dt, events) {
   state.projs = state.projs.filter((p) => !p.done);
 }
 
+// Recul (Canon sonique) : l'ennemi recule sur le chemin. Les boss reculent 5× moins ; une immunité de 0,8 s empêche de
+// bloquer un ennemi indéfiniment.
+function knockBack(state, e, amount) {
+  if (e.dead || !amount || (e.knockImmune || 0) > state.time) return;
+  e.dist = Math.max(0, e.dist - amount * (isBoss(e) ? 0.2 : 1));
+  e.knockImmune = state.time + 0.8;
+}
+
 // Fléchette du Dartling : ligne droite ; elle touche chaque ennemi croisé une seule fois, jusqu'à `pierceN` ennemis.
 // On teste le segment parcouru pendant le pas (pas seulement le point d'arrivée) : à 900 px/s, rien ne passe au travers.
 function stepDart(state, pr, dt, events) {
@@ -969,7 +1285,7 @@ function fireShots(state, tower, events) {
   const def = TOWER_DEFS[tower.type];
   const st = { ...tower.st };
   const buff = beaconBuff(state, tower);
-  const ab = st.ability && ABILITIES[st.ability];
+  const ab = (tower.furyAbility && ABILITIES[tower.furyAbility]) || (st.ability && ABILITIES[st.ability]);
   const fury = tower.fury > 0 && ab && ab.fury ? ab.fury : null;
   st.damage *= buff.damage * (fury && fury.dmg ? fury.dmg : 1);
   st.range *= buff.range;
@@ -977,6 +1293,8 @@ function fireShots(state, tower, events) {
     if (fury.pierce) st.pierce = true;
     if (fury.crit) st.crit = Math.max(st.crit, fury.crit);
     if (fury.pierceN) st.pierceN = Math.max(st.pierceN, fury.pierceN);
+    if (fury.chain) st.chain += fury.chain;
+    if (fury.targets) st.targets += fury.targets;
   }
   const range = st.range;
   const cx = tower.x;
@@ -994,8 +1312,11 @@ function fireShots(state, tower, events) {
   if (def.line && !state.enemies.some((e) => !e.dead)) { tower.dyn = 1; return false; }
 
   // Cibles : les ennemis à portée, triés selon le mode de ciblage de la tour.
-  const inRange = def.line ? [] : sortTargets(state.enemies.filter((e) => !e.dead && dist2(origin, e) <= range * range), tower.target, origin);
-  if (!def.line && !inRange.length) { tower.dyn = 1; return false; }
+  // Les furtifs ne sont visés que par les tours qui les détectent (les explosions et ondes les touchent quand même).
+  const sees = def.patrol || canSee(state, tower);
+  const visible = (e) => !e.dead && (!e.camo || sees || def.pulse || def.radial);
+  const inRange = def.line || def.patrol ? [] : sortTargets(state.enemies.filter((e) => visible(e) && dist2(origin, e) <= range * range), tower.target, origin);
+  if (!def.line && !def.patrol && !inRange.length) { tower.dyn = 1; return false; }
 
   // Desperado : cadence selon le nombre d'ennemis à portée (duel) et la distance de la cible (dégaine rapide).
   let dyn = 1;
@@ -1022,8 +1343,33 @@ function fireShots(state, tower, events) {
     const chance = Math.min(maxChance, st.crit + (st.critFar && !def.line ? st.critFar * Math.min(1, Math.sqrt(dist2(origin, e)) / range) : 0));
     if (chance > 0 && rng() < chance) damage *= st.critMul;
     if (st.execute && !isBoss(e) && e.hp - damage <= e.maxHp * st.execute) damage = Math.max(damage, e.hp);
+    if (st.pctDmg) damage += e.maxHp * st.pctDmg * (isBoss(e) ? 0.25 : 1);
     hit(state, e, damage, events, st.pierce);
   };
+
+  if (def.patrol) {
+    // Drone de patrouille : chaque drone tire sur l'ennemi le plus en avance sous lui (il voit les furtifs).
+    const n = Math.max(1, Math.round(st.drones));
+    let fired = false;
+    for (let k = 0; k < n; k++) {
+      const p = dronePos(tower, k, state.time);
+      const near = sortTargets(state.enemies.filter((e) => !e.dead && dist2(p, e) <= range * range), tower.target, p);
+      const target = near[0];
+      if (!target) continue;
+      fired = true;
+      const travel = beam(p, target, "drone");
+      if (st.splash) {
+        const radius = st.splash * CELL;
+        state.fx.push({ kind: "boom", style: "canon", x: target.x, y: target.y, r: radius, ttl: travel + 0.25, max: travel + 0.25, delay: travel, color: def.color, seed: (rng() * 1e6) | 0 });
+        for (const e of state.enemies) if (!e.dead && dist2(target, e) <= radius * radius) { strike(e, st.damage); applyEffects(state, e, st); }
+      } else {
+        strike(target, st.damage);
+        applyEffects(state, target, st);
+      }
+    }
+    if (!fired) tower.dyn = 1;
+    return fired;
+  }
 
   if (def.pulse) {
     state.fx.push({ kind: "boom", style: "ring", x: cx, y: cy, r: range, ttl: 0.35, max: 0.35, color: def.color });
@@ -1037,6 +1383,36 @@ function fireShots(state, tower, events) {
 
   const list = inRange.slice(0, st.targets);
   if (list.length) tower.angle = Math.atan2(list[0].y - cy, list[0].x - cx);
+
+  if (def.cone) {
+    // Lance-flammes : tous les ennemis visibles à portée dans le cône orienté vers la cible.
+    const a0 = tower.angle;
+    state.fx.push({ kind: "cone", x: cx, y: cy, a: a0, spread: st.cone, r: range, ttl: 0.22, max: 0.22, color: def.color, seed: (rng() * 1e6) | 0, plasma: tower.tiers[2] >= 3 });
+    for (const e of inRange) {
+      let d = Math.atan2(e.y - cy, e.x - cx) - a0;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      if (Math.abs(d) > st.cone) continue;
+      strike(e, st.damage);
+      applyEffects(state, e, st);
+    }
+    return true;
+  }
+
+  if (def.sonic) {
+    // Canon sonique : une onde en ligne vers chaque cible ; elle traverse tout et repousse les ennemis (moins les boss).
+    for (const target of list) {
+      const len = Math.max(1, Math.hypot(target.x - cx, target.y - cy));
+      const ux = (target.x - cx) / len, uy = (target.y - cy) / len;
+      state.fx.push({ kind: "shot", style: "sonic", x1: cx, y1: cy, x2: cx + ux * range, y2: cy + uy * range, ttl: 0.35, max: 0.35, color: def.color, w: st.waveW });
+      for (const e of rayEnemies(state, cx, cy, ux, uy, range, st.waveW)) {
+        if (e.camo && !sees) continue;
+        strike(e, st.damage);
+        applyEffects(state, e, st);
+        knockBack(state, e, st.knock);
+      }
+    }
+    return true;
+  }
 
   if (def.line) {
     const aim = tower.aimMode === "mouse" && state.cursor ? state.cursor : tower.aim;
@@ -1267,8 +1643,195 @@ export const ABILITIES = {
   dividend: {
     name: "Dividende", cd: 60, desc: "Verse tout de suite deux fois la production d'énergie de la tour.",
     run(state, tower, st) { state.gold += Math.round(st.income * 2); }
+  },
+  gluestorm: {
+    name: "Marée de glu", cd: 45, desc: "Englue tous les ennemis de la carte : ralentis au maximum et rongés (corrosion ×2) pendant 5 s.",
+    run(state, tower, st) {
+      for (const e of alive(state)) {
+        slowEnemy(e, 0.75, 5);
+        e.poison = Math.max(e.poison, (st.poisonDps || 4) * 2);
+        e.poisonLeft = Math.max(e.poisonLeft, 5);
+        e.poisonBy = tower;
+        e.shred = Math.max(e.shred || 0, 5);
+      }
+      state.fx.push({ kind: "boom", style: "ring", x: (COLS * CELL) / 2, y: (ROWS * CELL) / 2, r: (COLS * CELL) / 2, ttl: 0.6, max: 0.6, color: "#d4ff3a" });
+    }
+  },
+  elixir: {
+    name: "Élixir", cd: 60, desc: "8 s : TOUTES les tours de la carte gagnent +50 % de dégâts et de cadence.",
+    run(state) {
+      state.elixirUntil = state.time + 8;
+      state.fx.push({ kind: "boom", style: "ring", x: (COLS * CELL) / 2, y: (ROWS * CELL) / 2, r: (COLS * CELL) / 2, ttl: 0.7, max: 0.7, color: "#f07cff" });
+    }
+  },
+  transmute: {
+    name: "Transmutation", cd: 50, desc: "Change en énergie les 6 ennemis (hors boss) les plus avancés à portée : éliminés, prime ×3. Les boss perdent 10 % de leurs PV.",
+    run(state, tower, st, events) {
+      const pool = around(state, tower, st.range * 1.6).sort((a, b) => b.dist - a.dist);
+      let n = 0;
+      for (const e of pool) {
+        if (isBoss(e)) { hit(state, e, e.maxHp * 0.1, events, true); continue; }
+        if (n >= 6) continue;
+        n += 1;
+        state.gold += killGold(e.type, state.wave) * 2;          // + la prime normale = ×3
+        state.fx.push({ kind: "boom", x: e.x, y: e.y, r: CELL * 0.6, ttl: 0.5, max: 0.5, color: "#ffcf3a" });
+        e.shield = 0;
+        hit(state, e, e.hp + 1, events, true);
+      }
+    }
+  },
+  airstrike: {
+    name: "Frappe aérienne", cd: 40, desc: "6 missiles sur les ennemis les plus solides de la carte (4× dégâts de zone).",
+    run(state, tower, st, events) {
+      for (const e of strongest(state, 6)) {
+        state.fx.push({ kind: "shot", style: "mortier", x1: tower.x, y1: tower.y, x2: e.x, y2: e.y, ttl: 0.35, max: 0.35, color: "#8fa8ff" });
+        explode(state, e.x, e.y, CELL * 1.2, st.damage * 4, events, st, "#8fa8ff");
+      }
+    }
+  },
+  squadron:  { name: "Essaim de drones", cd: 40, desc: "6 s : les drones tirent 3× plus vite et font 30 % de dégâts en plus.", fury: { time: 6, rate: 3, dmg: 1.3 } },
+
+  firestorm: {
+    name: "Tempête de feu", cd: 45, desc: "Embrase tout autour : 4× les dégâts et brûlure de 150/s pendant 5 s dans 2× la portée.",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", style: "wizard", x: tower.x, y: tower.y, r: st.range * 2, ttl: 0.6, max: 0.6, color: "#ff5a1f" });
+      for (const e of around(state, tower, st.range * 2)) { hit(state, e, st.damage * 4, events, true); if (!e.dead) burnEnemy(e, 150, 5, tower); }
+    }
+  },
+  orbitalstrike: {
+    name: "Frappe divine", cd: 45, desc: "Le satellite frappe les 12 ennemis les plus solides de la carte : 6× ses dégâts.",
+    run(state, tower, st, events) {
+      for (const e of strongest(state, 12)) {
+        state.fx.push({ kind: "shot", style: "satellite", x1: e.x, y1: -20, x2: e.x, y2: e.y, ttl: 0.4, max: 0.4, color: "#e0e6ff", paragon: true });
+        explode(state, e.x, e.y, CELL * 0.9, st.damage * 6, events, st, "#e0e6ff");
+      }
+    }
+  },
+  sonicboom: {
+    name: "Bang supersonique", cd: 40, desc: "Onde géante : 4× les dégâts dans 2× la portée, repousse fortement (et étourdit) tous les ennemis touchés.",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", style: "ring", x: tower.x, y: tower.y, r: st.range * 2, ttl: 0.6, max: 0.6, color: "#ffc2e2" });
+      for (const e of around(state, tower, st.range * 2)) { hit(state, e, st.damage * 4, events, true); e.knockImmune = 0; knockBack(state, e, 90); stunEnemy(e, 0.6); }
+    }
+  },
+
+  // Capacités des héros (niveau 3 et niveau 10) : leur force suit le niveau du héros.
+  h_salve:    { name: "Salve", cd: 35, desc: "6 s : Nova tire 3× plus vite, +2 cibles, balles perforantes.", fury: { time: 6, rate: 3, dmg: 1.2, pierce: true, targets: 2 } },
+  h_pluie: {
+    name: "Pluie de balles", cd: 60, desc: "Mitraille tous les ennemis dans 2× sa portée : 8× ses dégâts chacun.",
+    run(state, tower, st, events) {
+      for (const e of around(state, tower, st.range * 2)) {
+        state.fx.push({ kind: "shot", style: "gatling", x1: tower.x, y1: tower.y, x2: e.x, y2: e.y, ttl: 0.2, max: 0.2, color: "#00f0ff" });
+        hit(state, e, st.damage * 8, events, true);
+      }
+    }
+  },
+  h_piratage: {
+    name: "Piratage", cd: 45, desc: "Tous les ennemis perdent leur bouclier et leur camouflage ; les non-boss sont étourdis 1 s.",
+    run(state) {
+      for (const e of alive(state)) { e.shield = 0; e.camo = false; if (!isBoss(e)) stunEnemy(e, 1); }
+      state.fx.push({ kind: "boom", style: "ring", x: W / 2, y: H / 2, r: W / 2, ttl: 0.6, max: 0.6, color: "#3ddc84" });
+    }
+  },
+  h_krach: {
+    name: "Krach du serveur", cd: 90, desc: "Les ennemis non-boss perdent 40 % de leurs PV actuels, les boss 15 % de leurs PV max. +100 énergie.",
+    run(state, tower, st, events) {
+      state.gold += 100;
+      for (const e of alive(state)) hit(state, e, isBoss(e) ? e.maxHp * 0.15 : e.hp * 0.4, events, true);
+      state.fx.push({ kind: "boom", style: "ring", x: W / 2, y: H / 2, r: W / 2, ttl: 0.7, max: 0.7, color: "#3ddc84" });
+    }
+  },
+  h_cocktail: {
+    name: "Cocktail incendiaire", cd: 40, desc: "Nova de feu autour d'Ignis : 5× ses dégâts et une forte brûlure (6 s).",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", style: "wizard", x: tower.x, y: tower.y, r: st.range * 1.6, ttl: 0.6, max: 0.6, color: "#ff8a3d" });
+      for (const e of around(state, tower, st.range * 1.6)) { hit(state, e, st.damage * 5, events, true); if (!e.dead) burnEnemy(e, st.damage * 2, 6, tower); }
+    }
+  },
+  h_phenix: {
+    name: "Phénix", cd: 75, desc: "Un phénix survole la carte : tous les ennemis prennent 3× ses dégâts et brûlent 8 s.",
+    run(state, tower, st, events) {
+      for (const e of alive(state)) {
+        state.fx.push({ kind: "boom", style: "wizard", x: e.x, y: e.y, r: CELL * 0.8, ttl: 0.5, max: 0.5, color: "#ff8a3d", seed: e.id });
+        hit(state, e, st.damage * 3, events, true);
+        if (!e.dead) burnEnemy(e, st.damage * 2.5, 8, tower);
+      }
+    }
+  },
+  h_foudre: {
+    name: "Foudre", cd: 35, desc: "Frappe les 8 ennemis les plus solides de la carte : 4× ses dégâts, étourdit 0,6 s.",
+    run(state, tower, st, events) {
+      for (const e of strongest(state, 8)) {
+        state.fx.push({ kind: "shot", style: "tesla", x1: tower.x, y1: tower.y, x2: e.x, y2: e.y, ttl: 0.3, max: 0.3, color: "#b58cff", seed: e.id * 7 });
+        hit(state, e, st.damage * 4, events, true);
+        stunEnemy(e, 0.6);
+      }
+    }
+  },
+  h_surtension: { name: "Surtension", cd: 60, desc: "8 s : +6 rebonds, cadence ×2, dégâts ×1,5.", fury: { time: 8, rate: 2, dmg: 1.5, chain: 6 } },
+  h_massue: {
+    name: "Coup de massue", cd: 35, desc: "Écrase tout autour d'Atlas : 6× ses dégâts et étourdit 1 s.",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", style: "mortier", x: tower.x, y: tower.y, r: st.range * 1.5, ttl: 0.6, max: 0.6, color: "#ffcf3a" });
+      for (const e of around(state, tower, st.range * 1.5)) { hit(state, e, st.damage * 6, events, true); stunEnemy(e, 1); }
+    }
+  },
+  h_seisme: {
+    name: "Séisme", cd: 80, desc: "Toute la carte tremble : 3× ses dégâts à tous les ennemis, ralentis de 60 % pendant 4 s.",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", style: "ring", x: W / 2, y: H / 2, r: W / 2, ttl: 0.8, max: 0.8, color: "#ffcf3a" });
+      for (const e of alive(state)) { hit(state, e, st.damage * 3, events, true); slowEnemy(e, 0.6, 4); }
+    }
   }
 };
+
+/* ---------- Pouvoirs (achetés en énergie pendant une vague, avec une recharge) ---------- */
+
+export const POWERS = [
+  { id: "orbital",   name: "Frappe orbitale", key: "q", cd: 45, color: "#ff3b5c", cost: (w) => 120 + 12 * w, desc: "Frappe toute la carte : chaque ennemi perd 3× les PV d'un drone de la vague (les boss 1×)." },
+  { id: "freeze",    name: "Gel général",     key: "w", cd: 40, color: "#7fd8ff", cost: (w) => 100 + 8 * w,  desc: "Gèle tous les ennemis 2 s (les boss sont ralentis 4 s)." },
+  { id: "overclock", name: "Surcadence",      key: "e", cd: 60, color: "#fcee0a", cost: (w) => 150 + 10 * w, desc: "8 s : toutes les tours tirent 50 % plus vite." },
+  { id: "spikewall", name: "Mur de pointes",  key: "r", cd: 30, color: "#c0c0d0", cost: (w) => 80 + 6 * w,   desc: "Pose un mur de pointes juste avant la sortie de chaque chemin." }
+];
+export const powerById = (id) => POWERS.find((p) => p.id === id);
+export const powerCost = (state, id) => powerById(id).cost(Math.max(1, state.wave));
+
+// Raisons de refus : unknown, idle (hors vague), cd, gold.
+export function usePower(state, id) {
+  const pw = powerById(id);
+  if (!pw || state.phase === "over") return { ok: false, reason: "unknown" };
+  if (state.phase !== "wave") return { ok: false, reason: "idle" };
+  if ((state.powerCd[id] || 0) > 0) return { ok: false, reason: "cd" };
+  const cost = powerCost(state, id);
+  if (state.gold < cost) return { ok: false, reason: "gold" };
+  state.gold -= cost;
+  state.powerCd[id] = pw.cd;
+  const events = { killed: 0, leaked: 0 };
+  const base = baseHp(state.wave) * state.hpMul;
+  if (id === "orbital") {
+    for (const e of alive(state)) {
+      state.fx.push({ kind: "boom", x: e.x, y: e.y, r: CELL * 0.8, ttl: 0.45, max: 0.45, color: pw.color, seed: e.id });
+      hit(state, e, isBoss(e) ? base : base * 3, events, true);
+    }
+  } else if (id === "freeze") {
+    for (const e of alive(state)) {
+      if (isBoss(e)) slowEnemy(e, 0.5, 4);
+      else { e.stun = Math.max(e.stun, 2); e.stunImmune = 0; }
+    }
+    state.fx.push({ kind: "boom", style: "ring", x: W / 2, y: H / 2, r: W / 2, ttl: 0.6, max: 0.6, color: pw.color });
+  } else if (id === "overclock") {
+    state.overclockUntil = state.time + 8;
+  } else if (id === "spikewall") {
+    state.map.lanes.forEach((lane, li) => {
+      for (let k = 0; k < 6; k++) {
+        const dist = lane.length * (0.86 + k * 0.018);
+        const p = pointAt(dist, lane);
+        state.spikes.push({ lane: li, dist, x: p.x, y: p.y, pierce: 8, stack: 3, look: 3, dmg: base * 0.5, ignore: true, src: null });
+      }
+    });
+  }
+  return { ok: true, name: pw.name, killed: events.killed };
+}
 
 export const abilityOf = (tower) => (tower.st.ability ? ABILITIES[tower.st.ability] : null);
 
@@ -1293,6 +1856,27 @@ export function useAbility(state, id) {
 /* ---------- Pouvoirs des boss ---------- */
 
 function bossTick(state, e, def, dt) {
+  if (def.ransom) {
+    e.clock += dt;
+    if (e.clock >= def.ransom.every) {
+      e.clock = 0;
+      e.shield = Math.min(e.maxHp * 0.5, (e.shield || 0) + e.maxHp * def.ransom.shield);
+      e.maxShield = Math.max(e.maxShield || 0, e.shield);
+      const stolen = Math.min(def.ransom.cap, Math.floor(state.gold * def.ransom.steal));
+      state.gold -= stolen;
+      if (stolen > 0) state.alerts.push(`Ransomware : −${stolen} énergie !`);
+      state.fx.push({ kind: "boom", x: e.x, y: e.y, r: CELL * 1.6, ttl: 0.5, max: 0.5, color: "#ff3b3b" });
+    }
+  }
+  if (def.summon) {
+    e.clock += dt;
+    if (e.clock >= def.summon.every) {
+      e.clock = 0;
+      const hp = baseHp(state.wave) * state.hpMul * ENEMY_DEFS[def.summon.type].hp * 0.7;
+      for (let k = 0; k < def.summon.n; k++) spawn(state, { type: def.summon.type, hp, lane: e.lane }, Math.max(0, e.dist - 8 - k * 10));
+      state.fx.push({ kind: "boom", style: "ring", x: e.x, y: e.y, r: CELL * 1.3, ttl: 0.4, max: 0.4, color: def.color });
+    }
+  }
   if (def.spawnAt) {
     const ratio = e.hp / e.maxHp;
     while (e.spawned < def.spawnAt.length && ratio <= def.spawnAt[e.spawned]) {
@@ -1317,6 +1901,26 @@ function bossTick(state, e, def, dt) {
   }
 }
 
+// Alchimiste : toutes les 6 s, une potion pour les tours voisines les plus chères qui n'en ont pas déjà une.
+const BREW_EVERY = 6;
+function brewPotions(state, dt) {
+  for (const a of state.towers) {
+    if (!a.st.brewCount || a.jam > 0) continue;
+    a.brewClock = (a.brewClock || 0) + dt;
+    if (a.brewClock < BREW_EVERY) continue;
+    a.brewClock = 0;
+    const reach = a.st.range * 1.1;
+    const pool = state.towers
+      .filter((t) => t !== a && !TOWER_DEFS[t.type].support && !TOWER_DEFS[t.type].income && (t.x - a.x) ** 2 + (t.y - a.y) ** 2 <= reach * reach)
+      .sort((p, q) => (p.brew && p.brew.until > state.time ? 1 : 0) - (q.brew && q.brew.until > state.time ? 1 : 0) || invested(q) - invested(p))
+      .slice(0, Math.round(a.st.brewCount));
+    for (const t of pool) {
+      t.brew = { until: state.time + a.st.brewTime, dmg: a.st.brewDmg, rate: a.st.brewRate };
+      state.fx.push({ kind: "shot", style: "potion", x1: a.x, y1: a.y, x2: t.x, y2: t.y, ttl: 0.4, max: 0.4, color: "#f07cff", seed: t.id });
+    }
+  }
+}
+
 // Fait avancer la partie de `dt` secondes (petit pas : 1/60 s). Renvoie ce qui s'est passé.
 export function update(state, dt) {
   const events = { killed: 0, leaked: 0, waveCleared: false, credits: 0, over: false };
@@ -1337,6 +1941,9 @@ export function update(state, dt) {
       if (e.slowLeft <= 0) e.slow = 0;
     }
     if (e.stunImmune > 0) e.stunImmune = Math.max(0, e.stunImmune - dt);
+    if (e.shred > 0) e.shred = Math.max(0, e.shred - dt);
+    // Régénérant : reprend des PV s'il n'a pas été touché depuis 1 s et n'est ni empoisonné ni en feu
+    if (def.regen && e.poisonLeft <= 0 && state.time - e.lastHit > 1) e.hp = Math.min(e.maxHp, e.hp + e.maxHp * def.regen * dt);
     if (e.stun > 0) {
       e.stun -= dt;
       if (e.stun <= 0) { e.stun = 0; e.stunImmune = def.boss ? STUN_IMMUNITY_BOSS : STUN_IMMUNITY; }
@@ -1371,6 +1978,9 @@ export function update(state, dt) {
   // Tirs des tours
   // Recharge des capacités, durée des effets et brouillage : ces minuteurs ne tournent que pendant une vague.
   const waving = state.phase === "wave";
+  if (waving) for (const k of Object.keys(state.powerCd)) state.powerCd[k] = Math.max(0, state.powerCd[k] - dt);
+  if (waving) brewPotions(state, dt);
+  if (state.hero) heroTick(state, dt, waving);
   for (const tower of state.towers) {
     tower.cooldown -= dt;
     if (waving) {
@@ -1405,16 +2015,18 @@ export function update(state, dt) {
   // Vague repoussée
   if (state.phase === "wave" && state.spawnList.length === 0 && state.enemies.length === 0) {
     state.phase = "idle";
-    for (const t of state.towers) t.jam = 0;      // le brouillage s'arrête avec la vague
+    for (const t of state.towers) { t.jam = 0; t.brew = null; }      // le brouillage et les potions s'arrêtent avec la vague
     state.spikes = [];
     // Data Miners : de l'énergie en plus à la fin de la vague (les Beacons voisins l'augmentent un peu).
     let mined = 0;
     for (const t of state.towers) {
+      if (t.st.goldGen) mined += Math.round(t.st.goldGen);           // Alchimiste (Transmutation)
       if (t.type !== "miner") continue;
       const base = t.st.income + Math.min(state.gold, 3000) * t.st.interest;
       mined += Math.round(base * (1 + (beaconBuff(state, t).damage - 1) * 0.5));
     }
     state.gold += waveBonusGold(state.wave) + mined;
+    if (state.hero) gainXp(state, 20 + 4 * state.wave);          // XP de fin de vague pour le héros
     events.mined = mined;
     const credits = waveCredits(state.wave, state.map, state.diff);
     state.creditsEarned += credits;
@@ -1448,6 +2060,12 @@ export function powerOfStats(def, st) {
   if (def.radial) reach *= Math.max(1, st.radial / 3);
   if (def.boom) dps *= 2 * st.returns;
   if (def.spikes) { dps = st.damage * st.pierceN * st.rate * st.batch; reach = 1; }
+  if (def.cone) reach *= 1 + st.cone * 4;
+  if (def.sonic) { reach *= 3 + st.waveW / 10; dps *= 1 + st.knock / 60; }
+  if (def.patrol) dps *= Math.max(1, st.drones) * 0.8 * (st.patrolR / 1.6);
+  if (def.brew) dps += 60 * st.brewCount * (st.brewDmg + st.brewRate);
+  if (st.pctDmg) dps += st.pctDmg * 400 * st.rate;
+  if (st.goldGen) dps += st.goldGen * 4;
   if (st.beam) { reach = st.targets * 8 * (st.beam >= 3 ? 1.8 : st.beam >= 2 ? 1.3 : 1); dps /= def.rate * BEAM_TICK; }   // laser continu : toute la ligne, un coup toutes les 0,13 s
   dps *= reach;
   dps += (st.poisonDps + st.burn) * 0.6 * Math.min(reach, 4);
@@ -1475,7 +2093,13 @@ export const PARAGONS = {
   boomerang:{ name: "Seigneur des Glaives", desc: "Glaives qui font trois allers-retours en transperçant.", ratio: 3, ability: ["tornado", "Tempête de glaives"], shape: { pierceN: 10, returns: 2, targets: 2, rate: 2, range: 1.4, pierce: true } },
   wizard:   { name: "Archimage", desc: "Boules de feu géantes, brûlure intense, trois sorts à la fois.", ratio: 3, ability: ["dragon", "Cataclysme arcanique"], shape: { splash: 1.2, burn: 100, burnTime: 3, targets: 3, rate: 2, range: 1.3 } },
   spikes:   { name: "Forge Sans Fin", desc: "Cascade de pointes dorées perforantes, tas empilés, où tu veux dans sa portée.", ratio: 3, ability: ["spikestorm", "Forge ardente"], shape: { batch: 4, rate: 3, pierceN: 8, pierce: true, range: 1.3, aimSpikes: 1 } },
-  super:    { name: "Avatar Solaire", desc: "Rayons solaires explosifs sur 6 cibles.", ratio: 3, ability: ["sunburst", "Éclipse solaire"], shape: { targets: 5, rate: 2, range: 1.4, splash: 0.8, pierce: true, crit: 0.2, critMul: 3 } }
+  super:    { name: "Avatar Solaire", desc: "Rayons solaires explosifs sur 6 cibles.", ratio: 3, ability: ["sunburst", "Éclipse solaire"], shape: { targets: 5, rate: 2, range: 1.4, splash: 0.8, pierce: true, crit: 0.2, critMul: 3 } },
+  glue:     { name: "Marée Gluante", desc: "Arrose 5 ennemis de glu acide : ralentis au maximum, blindage rongé.", ratio: 2.5, ability: ["gluestorm", "Marée noire"], shape: { targets: 4, splash: 1.2, slow: 0.75, slowTime: 5, poisonTime: 3, shred: 4, rate: 2, range: 1.4 } },
+  alchemist:{ name: "Grand Alchimiste", desc: "Acide qui dissout tout, et des potions surpuissantes pour toutes les tours alentour.", ratio: 2.5, ability: ["elixir", "Panacée"], shape: { brewCount: 20, brewDmg: 0.6, brewRate: 0.3, brewTime: 4, splash: 1, pctDmg: 0.06, shred: 4, rate: 1.6, range: 1.4 } },
+  flame:    { name: "Souffle du Léviathan", desc: "Un torrent de flammes tout autour de lui, qui brûle tout jusqu'au blindage.", ratio: 3, ability: ["firestorm", "Apocalypse"], shape: { cone: 3.2, range: 1.6, burn: 200, burnTime: 3, rate: 1.5, pierce: true } },
+  satellite:{ name: "Œil du Ciel", desc: "Sept frappes orbitales explosives à la fois, partout sur la carte.", ratio: 3, ability: ["orbitalstrike", "Jugement céleste"], shape: { targets: 6, splash: 1.2, rate: 2, pierce: true, crit: 0.2, critMul: 3 } },
+  sonic:    { name: "Tonnerre Primordial", desc: "Trois ondes colossales qui renvoient les ennemis loin en arrière.", ratio: 3, ability: ["sonicboom", "Big Bang"], shape: { knock: 60, waveW: 30, targets: 2, rate: 1.6, stun: 0.6, pierce: true, range: 1.3 } },
+  drone:    { name: "Porte-Drones", desc: "Six drones lourds lance-roquettes en large patrouille.", ratio: 3, ability: ["airstrike", "Pluie de missiles"], shape: { drones: 5, splash: 0.8, pierce: true, rate: 1.6, range: 1.3, patrolR: 0.8, orbit: 0.5 } }
 };
 
 // Capacité de paragon : la capacité du type, en plus forte, sous un nom propre.
@@ -1516,7 +2140,7 @@ function paragonBase(def) {
 }
 
 // Prix : selon la puissance du paragon (et un coefficient propre au type, plus fort pour le Dartling).
-export const paragonCost = (def) => Math.round(((def.cost * 3 + 1000 * Math.log(1 + paragonBase(def).power / 300)) * (def.paragonMul || 1)) / 50) * 50;
+export const paragonCost = (def) => def.paragonPrice || Math.round(((def.cost * 3 + 1000 * Math.log(1 + paragonBase(def).power / 300)) * (def.paragonMul || 1)) / 50) * 50;
 export const totemCost = (def) => 500 * (def.paragonMul || 1);
 
 // Degré ↔ puissance : la puissance demandée grandit de plus en plus vite (degré 100 = 200 000).

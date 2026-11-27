@@ -2034,7 +2034,7 @@ kbd {
 /* PC : le plateau est limité à la hauteur de l'écran, pour que compteurs, plateau et boutons tiennent sans défiler */
 @media (min-width: 901px) {
   .td-layout { grid-template-columns: minmax(0, 1fr) 420px; }
-  .td-board-wrap { max-width: max(520px, calc((100vh - 340px) * 14 / 9 + 20px)); margin-inline: auto; }
+  .td-board-wrap { max-width: max(520px, calc((100vh - 425px) * 14 / 9 + 20px)); margin-inline: auto; }
   .td-side { top: 150px; max-height: calc(100vh - 160px); }
 }
 
@@ -2057,3 +2057,104 @@ kbd {
 .pg-bar { display: block; height: 6px; background: var(--surface-2); border: 1px solid var(--line-strong); }
 .pg-bar > span { display: block; height: 100%; background: var(--yellow); box-shadow: 0 0 8px -1px var(--yellow); }
 #td-magnet[aria-pressed="true"] { border-color: #4dffd2; color: #4dffd2; }
+
+/* Pare-feu : pouvoirs (Q W E R) et bestiaire */
+.td-powers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.td-power {
+  --pw: var(--yellow);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  align-items: center;
+  padding: 7px 10px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--pw);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.td-power kbd { grid-row: 1 / span 2; color: var(--pw); }
+.td-power .pw-name { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-power .pw-info { color: var(--pw); font-family: var(--font-mono); font-size: 12px; }
+.td-power:hover:not(:disabled) { border-color: var(--pw); box-shadow: 0 0 12px -4px var(--pw); }
+.td-power:disabled { opacity: .45; cursor: not-allowed; }
+.td-power.is-cd .pw-info { color: var(--muted); }
+
+.td-bestiary { border: 1px solid var(--line-strong); background: var(--surface); }
+.td-bestiary summary { padding: 8px 12px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--cyan); }
+.td-bestiary ul { list-style: none; margin: 0; padding: 0 12px 12px; display: grid; gap: 8px; max-height: 340px; overflow-y: auto; }
+.td-bestiary li { display: grid; grid-template-columns: 12px minmax(0, 1fr); column-gap: 8px; font-size: 12px; line-height: 1.4; }
+.td-bestiary li > :not(.bst-dot) { grid-column: 2; }
+.td-bestiary li.is-boss strong { color: var(--yellow); }
+.td-bestiary small { color: var(--muted); font-family: var(--font-mono); font-size: 10px; }
+.bst-dot { grid-row: 1 / span 3; width: 10px; height: 10px; margin-top: 4px; border-radius: 50%; box-shadow: 0 0 6px currentColor; }
+
+@media (max-width: 760px) {
+  .td-powers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .td-power { padding: 6px 8px; }
+}
+
+/* Pare-feu : héros */
+.td-heroes { align-items: center; }
+.td-heroes-label { color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; margin-right: 4px; }
+.hero-button { display: inline-flex; align-items: center; gap: 6px; }
+.hero-button .tw-icon { width: 22px; height: 22px; }
+.hero-card {
+  --tw: var(--yellow);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tw) 14%, transparent), var(--surface));
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--yellow);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.hero-card:hover, .hero-card.is-active { border-color: var(--yellow); box-shadow: 0 0 14px -5px var(--yellow); }
+.hero-card.is-placed { border-left-color: var(--tw); }
+.hero-card-icon canvas { display: block; }
+.hero-card-text { display: grid; gap: 2px; min-width: 0; }
+.hero-card-text strong { font-size: 13px; }
+.hero-card-info { color: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+.td-hero-bar[hidden] { display: none; }
+.td-hero-bar { --tw: var(--yellow); display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin-top: 8px; }
+.hero-bar-id { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: var(--surface); border: 1px solid var(--line-strong); border-left: 3px solid var(--yellow); min-width: 0; }
+.hero-bar-id strong { font-family: var(--font-mono); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-xp { display: block; height: 5px; background: var(--surface-2); border: 1px solid var(--line-strong); }
+.hero-xp > span { display: block; height: 100%; background: var(--yellow); box-shadow: 0 0 8px -1px var(--yellow); }
+.hero-ability { --pw: var(--tw); }
+.sel-hero p { margin: 0 0 6px; font-size: 12px; color: var(--muted); }
+.hero-perks { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font-size: 12px; color: var(--muted); }
+.hero-perks li { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 6px; opacity: .55; }
+.hero-perks li.is-on { opacity: 1; color: var(--text); }
+.hero-perks li span { color: var(--yellow); font-family: var(--font-mono); font-size: 11px; white-space: nowrap; }
+.hero-perks li.is-ability { color: #ff9ef0; }
+@media (max-width: 760px) {
+  .td-hero-bar { grid-template-columns: 1fr 1fr; }
+  .hero-bar-id { grid-column: 1 / -1; }
+}
+
+/* Pare-feu : règles repliables */
+.td-rules { margin: 0 auto 18px; max-width: 760px; border: 1px solid var(--line-strong); background: var(--surface); }
+.td-rules summary { padding: 8px 14px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--cyan); text-align: center; }
+.td-rules[open] summary { border-bottom: 1px solid var(--line-strong); }
+.td-rules .game-rules { margin: 12px 16px; }
+.td-rules-ok { display: block; margin: 0 auto 14px; }
+
+/* Pare-feu : liste rapide des capacités des tours */
+.td-abilities[hidden] { display: none; }
+.td-abilities { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+.td-abilities-label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; margin-right: 2px; }
+.ab-chip { display: inline-grid; grid-template-columns: 22px auto; grid-template-rows: auto auto; padding: 4px 9px 4px 6px; column-gap: 6px; }
+.ab-chip .tw-icon { grid-row: 1 / span 2; width: 22px; height: 22px; }
+.ab-chip .pw-name { font-size: 10px; }
+.ab-chip .pw-info { font-size: 11px; }
+.ab-chip.is-ready { box-shadow: 0 0 12px -4px var(--pw); border-color: var(--pw); }
+.ab-chip.is-ready .pw-info { color: #3ddc84; }
+.ab-chip .pw-name { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: .03em; }
+.ab-chip { padding: 3px 7px 3px 5px; }
