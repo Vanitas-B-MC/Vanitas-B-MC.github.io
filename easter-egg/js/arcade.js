@@ -195,6 +195,28 @@ if (music.wantedOn) {
   document.addEventListener("keydown", resume, true);
 }
 
+/* ---------- Portefeuille repliable ----------
+   Dans les jeux, la barre (collée en haut sur PC) cache une partie de l'écran : un bouton la replie en une petite
+   étiquette qui n'est plus collée en haut. Le choix est mémorisé. */
+
+const walletBar = $("#wallet-bar");
+const walletToggle = $("#wallet-toggle");
+function setWalletCollapsed(collapsed) {
+  walletBar.classList.toggle("is-collapsed", collapsed);
+  document.documentElement.classList.toggle("wallet-collapsed", collapsed);
+  walletToggle.setAttribute("aria-expanded", String(!collapsed));
+  walletToggle.title = collapsed ? "Afficher le portefeuille" : "Cacher le portefeuille (il ne couvrira plus le jeu)";
+  walletToggle.querySelector(".wallet-toggle-sr").textContent = collapsed ? "Afficher le portefeuille" : "Cacher le portefeuille";
+}
+let walletCollapsed = false;
+try { walletCollapsed = localStorage.getItem("mc-arcade-wallet-hidden") === "1"; } catch { /* stockage indisponible */ }
+setWalletCollapsed(walletCollapsed);
+walletToggle.addEventListener("click", () => {
+  walletCollapsed = !walletCollapsed;
+  setWalletCollapsed(walletCollapsed);
+  try { localStorage.setItem("mc-arcade-wallet-hidden", walletCollapsed ? "1" : "0"); } catch { /* pas grave */ }
+});
+
 /* ---------- Remise à zéro ---------- */
 
 $("#reset").addEventListener("click", () => {

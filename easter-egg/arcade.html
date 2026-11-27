@@ -47,7 +47,7 @@
   <main id="jeu" class="arcade">
 
     <!-- Portefeuille partagé entre tous les jeux -->
-    <div class="wallet-bar chamfer" role="group" aria-label="Portefeuille">
+    <div class="wallet-bar chamfer" id="wallet-bar" role="group" aria-label="Portefeuille">
       <p class="wallet-item" title="Pièces bleues : rares, gagnées au Snake, au Tetris, en survivant longtemps ou en piratant à fond ; jouées à la Roulette et dans les améliorations du Clicker">
         <span class="coin" aria-hidden="true"></span>
         <span class="wallet-label">Pièces bleues</span>
@@ -70,6 +70,9 @@
         <label class="music-volume"><span class="visually-hidden">Volume de la musique</span>
           <input id="music-volume" type="range" min="0" max="100" value="50"></label>
       </div>
+      <button class="wallet-toggle" id="wallet-toggle" type="button" aria-expanded="true" aria-controls="wallet-bar" title="Cacher le portefeuille (il ne couvrira plus le jeu)">
+        <span class="wallet-toggle-open" aria-hidden="true">▴</span><span class="wallet-toggle-closed">Portefeuille ▾</span><span class="visually-hidden wallet-toggle-sr">Cacher le portefeuille</span>
+      </button>
     </div>
 
     <!-- ============ CHOIX DU JEU ============ -->

@@ -2158,3 +2158,30 @@ kbd {
 .ab-chip.is-ready .pw-info { color: #3ddc84; }
 .ab-chip .pw-name { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: .03em; }
 .ab-chip { padding: 3px 7px 3px 5px; }
+
+/* Portefeuille repliable : bouton ▴ dans la barre ; repliée, il ne reste qu'une étiquette « Portefeuille ▾ » qui n'est plus collée en haut */
+.wallet-toggle {
+  align-self: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  cursor: pointer;
+}
+.wallet-toggle:hover { color: var(--yellow); border-color: var(--yellow); }
+.wallet-toggle-closed { display: none; }
+.wallet-bar.is-collapsed { position: static; padding: 0; margin-bottom: 14px; gap: 0; background: transparent; border: 0; box-shadow: none; clip-path: none; }
+.wallet-bar.is-collapsed::before, .wallet-bar.is-collapsed::after { display: none; }
+.wallet-bar.is-collapsed > :not(.wallet-toggle) { display: none; }
+.wallet-bar.is-collapsed .wallet-toggle { height: 26px; padding: 0 12px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+.wallet-bar.is-collapsed .wallet-toggle-open { display: none; }
+.wallet-bar.is-collapsed .wallet-toggle-closed { display: inline; }
+/* Tower Defense : sans la barre, le plateau peut être un peu plus grand */
+.wallet-collapsed .td-side { top: 90px; max-height: calc(100vh - 100px); }
+@media (min-width: 901px) {
+  .wallet-collapsed .td-board-wrap { max-width: max(520px, calc((100vh - 365px) * 14 / 9 + 20px)); }
+}
