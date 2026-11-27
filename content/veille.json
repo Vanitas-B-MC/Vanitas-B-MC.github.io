@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T01:47:41Z",
+ "updated": "2026-11-27T12:41:39Z",
  "status": {
   "LinuxFr.org": {
    "ok": true,
@@ -37,6 +37,196 @@
  },
  "items": [
   {
+   "id": "https://www.theregister.com/a/5312501",
+   "title": "UK government rejects national consultation on AI datacenters",
+   "link": "https://www.theregister.com/off-prem/2026/11/27/uk-government-rejects-national-consultation-on-ai-datacenters/5312501",
+   "summary": "Ministers point to project-level environmental checks as petition passes 39,000 signatures",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-27T12:38:00Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312566",
+   "title": "Lloyds and Bank of Scotland apps fall over on payday",
+   "link": "https://www.theregister.com/applications/2026/11/27/lloyds-and-bank-of-scotland-apps-fall-over-on-payday/5312566",
+   "summary": "Black horse down (again)",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-27T12:01:27Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312120",
+   "title": "Europe's AI sovereignty push: Lots of cloud, not much silver lining",
+   "link": "https://www.theregister.com/ai-and-ml/2026/11/27/europes-ai-sovereignty-push-lots-of-cloud-not-much-silver-lining/5312120",
+   "summary": "Datacenter spending is booming but the models, the chips, and the clout all live in US and Asia",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-27T11:32:00Z"
+  },
+  {
+   "id": "https://intelligence-artificielle.developpez.com/actu/389547/Une-etude-estime-a-97-pourcent-la-probabilite-que-les-actions-liees-a-l-IA-etaient-dans-une-bulle-financiere-en-septembre-2026-Elle-etablit-des-paralleles-avec-la-bulle-Internet-et-laisse-presager-un-krach-majeur/",
+   "title": "Une étude estime à 97 % la probabilité que les actions liées à l'IA étaient dans une bulle financière en septembre 2026. Elle établit des parallèles avec la bulle Internet et laisse présager un krach majeur",
+   "link": "https://intelligence-artificielle.developpez.com/actu/389547/Une-etude-estime-a-97-pourcent-la-probabilite-que-les-actions-liees-a-l-IA-etaient-dans-une-bulle-financiere-en-septembre-2026-Elle-etablit-des-paralleles-avec-la-bulle-Internet-et-laisse-presager-un-krach-majeur/",
+   "summary": "Une étude estime à 97 % la probabilité que les actions liées à l'IA étaient dans une bulle financière en septembre 2026. Elle établit des parallèles avec la bulle Internet et laisse présager un krach majeur Une nouvelle étude estime à 97 %…",
+   "source": "Developpez.com",
+   "category": "Développement",
+   "lang": "fr",
+   "published": "2026-11-27T11:20:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/microsoft/microsoft-removes-wsus-server-role-in-windows-server-2028/",
+   "title": "Microsoft removes WSUS server role in Windows Server 2028",
+   "link": "https://www.bleepingcomputer.com/news/microsoft/microsoft-removes-wsus-server-role-in-windows-server-2028/",
+   "summary": "Microsoft will remove the WSUS server role from Windows Server 2028, the next major release of its server operating system.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-27T11:18:36Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312366",
+   "title": "AI boom leaves network operators waiting up to 18 months for kit",
+   "link": "https://www.theregister.com/networks/2026/11/27/ai-boom-leaves-network-operators-waiting-up-to-18-months-for-kit/5312366",
+   "summary": "Optical equipment prices up around 50% this year as telcos compete with datacenters for components, says RETN",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-27T10:45:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/how-to-keep-your-security-picture.html",
+   "title": "How to Keep Your Security Picture Current When Attackers Move at AI Speed",
+   "link": "https://thehackernews.com/2026/11/how-to-keep-your-security-picture.html",
+   "summary": "Most security metrics are not built to be used. They are built to be shown. Somewhere between the quarterly review and the next status update, a set of numbers gets assembled that looks reassuring in a room and tells almost no one what is…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-27T10:32:18Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/drupal-warns-of-new-access-bypass-flaw-exploited-in-attacks/",
+   "title": "Drupal warns of new site takeover flaw exploited in attacks",
+   "link": "https://www.bleepingcomputer.com/news/security/drupal-warns-of-new-access-bypass-flaw-exploited-in-attacks/",
+   "summary": "The Drupal security team says attackers are exploiting a second critical vulnerability that lets them breach and hijack unpatched websites.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-27T10:10:15Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312522",
+   "title": "British social security system techies yank services offline following 'cyber incident'",
+   "link": "https://www.theregister.com/security/2026/11/27/british-social-security-system-techies-yank-services-offline-following-cyber-incident/5312522",
+   "summary": "Pensioners assured their funds will arrive as normal",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-27T10:01:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/sap-confirms-security-incident-after-suspicious-github-activity/",
+   "title": "SAP confirms security incident after suspicious GitHub activity",
+   "link": "https://www.bleepingcomputer.com/news/security/sap-confirms-security-incident-after-suspicious-github-activity/",
+   "summary": "SAP has confirmed to BleepingComputer that it took urgent action to protect its customers after detecting suspicious activity in its IT environment.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-27T09:56:36Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/hackers-trojanize-official-q-dir-and.html",
+   "title": "Hackers Trojanize Official Q-Dir and DesktopOK Downloads to Deliver Remote Access Malware",
+   "link": "https://thehackernews.com/2026/11/hackers-trojanize-official-q-dir-and.html",
+   "summary": "Cybersecurity researchers have disclosed details of a software supply chain attack that has tampered with Q-Dir and DesktopOK installation files distributed via the official SoftwareOK website. \"Evidence indicates that malicious files were…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-27T09:29:30Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312291",
+   "title": "Royal Navy orders £142M in minehunting drones from US supplier",
+   "link": "https://www.theregister.com/offbeat/2026/11/27/royal-navy-orders-142m-in-minehunting-drones-from-us-supplier/5312291",
+   "summary": "Huntington Ingalls Industries lands deal despite MoD pledge to buy British wherever possible",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-27T09:15:00Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/microsoft/new-out-of-band-oob-emergency-hotpatch-fixes-windows-server-2025-crashes/",
+   "title": "Microsoft pushes emergency hotpatch to fix Windows Server crashes",
+   "link": "https://www.bleepingcomputer.com/news/microsoft/new-out-of-band-oob-emergency-hotpatch-fixes-windows-server-2025-crashes/",
+   "summary": "Microsoft has released an emergency hotpatch update to address Windows Server 2025 crashes triggered after installing this month's security hotpatch update (KB5131077).",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-27T09:08:16Z"
+  },
+  {
+   "id": "https://www.bleepingcomputer.com/news/security/new-nfs2root-linux-flaw-can-let-attackers-gain-root-privileges/",
+   "title": "New NFS2ROOT Linux flaw can let attackers gain root privileges",
+   "link": "https://www.bleepingcomputer.com/news/security/new-nfs2root-linux-flaw-can-let-attackers-gain-root-privileges/",
+   "summary": "​A 12-year-old critical vulnerability in the Linux kernel's Network File System (NFS) server, tracked as CVE-2026-99362, allows remote attackers to gain root privileges.",
+   "source": "BleepingComputer",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-27T08:06:58Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312283",
+   "title": "Support team put in an emergency order for vodka – lots of vodka – to bring PCs back online",
+   "link": "https://www.theregister.com/on-prem/2026/11/27/support-team-put-in-an-emergency-order-for-vodka-lots-of-vodka-to-bring-pcs-back-online/5312283",
+   "summary": "Some clean-up jobs need powerful stuff",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-27T07:34:00Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/switzerland-confirms-ai-assisted.html",
+   "title": "Switzerland Confirms AI-Assisted Cyberattacks Breached Critical Infrastructure Operators",
+   "link": "https://thehackernews.com/2026/11/switzerland-confirms-ai-assisted.html",
+   "summary": "Attackers using AI agents have broken into computer systems at Swiss organizations in four of five confirmed attacks, the first such cases in the country, the country's cybersecurity agency said yesterday. Three of the attacks targeted…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-27T06:04:20Z"
+  },
+  {
+   "id": "https://thehackernews.com/2026/11/unpatched-cacti-zero-day-enables-rce-in.html",
+   "title": "Unpatched Cacti Zero-Day Enables RCE in Just Four HTTP Requests via Guest Access",
+   "link": "https://thehackernews.com/2026/11/unpatched-cacti-zero-day-enables-rce-in.html",
+   "summary": "Details have emerged about a new zero-day vulnerability in Cacti, an open-source network monitoring tool, that could be exploited to achieve remote code execution. The proof-of-concept (PoC) exploit, which has yet to be assigned a CVE…",
+   "source": "The Hacker News",
+   "category": "Cybersécurité",
+   "lang": "en",
+   "published": "2026-11-27T05:48:20Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312457",
+   "title": "AWS adds virtual iPhones to its cloud",
+   "link": "https://www.theregister.com/off-prem/2026/11/27/aws-adds-virtual-iphones-to-its-cloud/5312457",
+   "summary": "Emulating Android, too, but offers just two handsets and one tablet",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-27T05:13:32Z"
+  },
+  {
+   "id": "https://www.theregister.com/a/5312449",
+   "title": "Free e-government platform that serves two billion people in ten countries has critical SQL injection bug",
+   "link": "https://www.theregister.com/security/2026/11/27/free-e-government-platform-that-serves-two-billion-people-in-ten-countries-has-critical-sql-injection-bug/5312449",
+   "summary": "India’s Digital Infrastructure for Governance Impact and Transformation tool can leak data",
+   "source": "The Register",
+   "category": "Infrastructure",
+   "lang": "en",
+   "published": "2026-11-27T01:19:31Z"
+  },
+  {
    "id": "https://www.theregister.com/a/5311612",
    "title": "The token factory never sleeps",
    "link": "https://www.theregister.com/ai-and-ml/2026/11/27/sponsored-the-token-factory-never-sleeps/5311612",
@@ -67,26 +257,6 @@
    "published": "2026-11-26T19:39:57Z"
   },
   {
-   "id": "https://www.theregister.com/a/5312433",
-   "title": "Microsoft: Hackers in China, N Korea using ARTEX AI tool to break into global tech systems",
-   "link": "https://www.theregister.com/security/2026/11/26/microsoft-hackers-in-china-n-korea-using-artex-ai-tool-to-break-into-global-tech-systems/5312433",
-   "summary": "Agentic offensive framework automates familiar attack techniques, with weak defenses potentially breached in minutes",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-26T19:04:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5311914",
-   "title": "Indie web browser Ladybird enters alpha testing",
-   "link": "https://www.theregister.com/software/2026/11/26/indie-web-browser-ladybird-enters-alpha-testing/5311914",
-   "summary": "Upstart engine gets downloadable macOS and Linux builds, but no security guarantees",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-26T18:15:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/nordvpn-black-friday-deal-get-78-percent-off-vpn-plans-in-2026/",
    "title": "NordVPN Black Friday Deal: Get 78% off VPN plans in 2026",
    "link": "https://www.bleepingcomputer.com/news/security/nordvpn-black-friday-deal-get-78-percent-off-vpn-plans-in-2026/",
@@ -105,26 +275,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-26T17:15:27Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5312180",
-   "title": "Tech's outage problem needs maintenance, not conspiracy theories",
-   "link": "https://www.theregister.com/research/2026/11/26/techs-outage-problem-needs-maintenance-not-conspiracy-theories/5312180",
-   "summary": "Forrester warns that shiny new services rest on brittle systems as organizations skimp on resilience",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-26T17:09:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5312380",
-   "title": "UK privacy watchdog faces probe into its workplace culture",
-   "link": "https://www.theregister.com/public-sector/2026/11/26/uk-privacy-watchdog-faces-probe-into-its-workplace-culture/5312380",
-   "summary": "Independent review will examine leadership, accountability, and how staff concerns were handled before former commissioner John Edwards resigned",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-26T16:16:00Z"
   },
   {
    "id": "https://intelligence-artificielle.developpez.com/actu/389536/-Workslop-les-patrons-qui-ont-encourage-l-utilisation-de-l-IA-au-travail-croulent-desormais-sous-des-contenus-mediocres-et-automatises-qui-abiment-les-relations-humaines-et-brident-la-creativite/",
@@ -147,16 +297,6 @@
    "published": "2026-11-26T15:50:00Z"
   },
   {
-   "id": "https://www.theregister.com/a/5312360",
-   "title": "'Significant number of customer records' pwned in Flight Centre Travel Group breach",
-   "link": "https://www.theregister.com/security/2026/11/26/significant-number-of-customer-records-pwned-in-flight-centre-travel-group-breach/5312360",
-   "summary": "The latest attack in spate of similar incidents targeting booking systems globally",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-26T15:29:00Z"
-  },
-  {
    "id": "https://www.bleepingcomputer.com/news/security/remus-malware-steals-gmail-messages-via-fake-google-sheets-extension/",
    "title": "Remus malware steals Gmail messages via fake Google Sheets extension",
    "link": "https://www.bleepingcomputer.com/news/security/remus-malware-steals-gmail-messages-via-fake-google-sheets-extension/",
@@ -170,31 +310,11 @@
    "id": "https://thehackernews.com/2026/11/north-korea-linked-polinrider-poisons.html",
    "title": "North Korea-Linked PolinRider Poisons Over 7,600 GitHub Repositories to Spread Malware",
    "link": "https://thehackernews.com/2026/11/north-korea-linked-polinrider-poisons.html",
-   "summary": "The threat actors behind the PolinRider campaign have been observed planting a Python loader in GitHub repositories, as evidence emerges that the activity may have started as far back as February 2025. \"The loader hides in a small utils…",
+   "summary": "The threat actors behind the PolinRider campaign have compromised over 7,600 GitHub repositories, in some cases planting a Python loader capable of delivering next-stage payloads, as evidence emerges that the activity may have started as…",
    "source": "The Hacker News",
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-26T15:13:41Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5312352",
-   "title": "Rackspace pulls plug on Spot cloud service after security breach",
-   "link": "https://www.theregister.com/cyber-crime/2026/11/26/rackspace-pulls-plug-on-spot-cloud-service-after-security-breach/5312352",
-   "summary": "Customers face frantic scramble to migrate workloads and rotate compromised credentials",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-26T14:45:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5312323",
-   "title": "Wyoming uranium operation shuts down after cyberattack",
-   "link": "https://www.theregister.com/security/2026/11/26/wyoming-uranium-operation-shuts-down-after-cyberattack/5312323",
-   "summary": "Peninsula Energy says plant and wellfield control systems were affected, with no restart date yet",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-26T14:02:00Z"
   },
   {
    "id": "https://hardware.developpez.com/actu/389498/En-reunion-generale-Jensen-Huang-remercie-Donald-Trump-s-excuse-aupres-de-ses-collaborateurs-et-revele-suivre-une-therapie-avouant-avoir-commis-de-terribles-erreurs-et-ete-infidele-a-sa-femme/",
@@ -205,16 +325,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-26T13:27:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5312234",
-   "title": "Company was religious about backups but sinned by leaving them exposed",
-   "link": "https://www.theregister.com/security/2026/11/26/company-was-religious-about-backups-but-sinned-by-leaving-them-exposed/5312234",
-   "summary": "Never put the backup server in the same Windows domain as production",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
-   "published": "2026-11-26T13:22:00Z"
   },
   {
    "id": "https://intelligence-artificielle.developpez.com/actu/389505/Anthropic-et-OpenAI-font-face-a-un-probleme-de-plus-en-plus-urgent-leurs-modeles-IA-non-publies-deviennent-si-puissants-que-les-employes-ne-pensent-plus-qu-ils-puissent-etre-lances-en-toute-securite/",
@@ -234,16 +344,6 @@
    "source": "Developpez.com",
    "category": "Développement",
    "lang": "fr",
-   "published": "2026-11-26T13:15:00Z"
-  },
-  {
-   "id": "https://www.theregister.com/a/5312049",
-   "title": "Stale links on UK public sector websites direct visitors to gambling dens",
-   "link": "https://www.theregister.com/public-sector/2026/11/26/stale-links-on-uk-public-sector-websites-direct-visitors-to-gambling-dens/5312049",
-   "summary": "Consultancy finds 93 routes to casino promotions across 26 orgs, with defunct enterprise partnership domains repurposed",
-   "source": "The Register",
-   "category": "Infrastructure",
-   "lang": "en",
    "published": "2026-11-26T13:15:00Z"
   },
   {
@@ -285,16 +385,6 @@
    "category": "Développement",
    "lang": "fr",
    "published": "2026-11-26T13:10:00Z"
-  },
-  {
-   "id": "https://hardware.developpez.com/actu/389504/Jensen-Huang-a-enfreint-le-code-de-conduite-de-Nvidia-et-ses-employes-ne-sont-pas-pres-de-l-oublier-mais-cela-ne-signifie-pas-qu-on-se-retrouve-immediatement-mis-a-la-porte-a-t-il-declare/",
-   "title": "Jensen Huang a enfreint le code de conduite de Nvidia, et ses employés ne sont pas près de l'oublier, mais cela « ne signifie pas qu'on se retrouve immédiatement mis à la porte », a-t-il déclaré",
-   "link": "https://hardware.developpez.com/actu/389504/Jensen-Huang-a-enfreint-le-code-de-conduite-de-Nvidia-et-ses-employes-ne-sont-pas-pres-de-l-oublier-mais-cela-ne-signifie-pas-qu-on-se-retrouve-immediatement-mis-a-la-porte-a-t-il-declare/",
-   "summary": "Jensen Huang a enfreint le code de conduite de Nvidia, et ses employés ne sont pas près de l'oublier, mais cela « ne signifie pas qu'on se retrouve immédiatement mis à la porte », a-t-il déclaré Jensen Huang a déclaré à ses employés qu'il…",
-   "source": "Developpez.com",
-   "category": "Développement",
-   "lang": "fr",
-   "published": "2026-11-26T13:09:00Z"
   },
   {
    "id": "https://www.bleepingcomputer.com/news/security/sys010-malware-abuses-browser-management-to-spy-on-gmail-outlook/",
@@ -355,16 +445,6 @@
    "category": "Cybersécurité",
    "lang": "en",
    "published": "2026-11-26T06:44:46Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/13-malicious-nuget-packages-turn-fake.html",
-   "title": "13 Malicious NuGet Packages Turn Fake .NET Job Assessments Into Malware Delivery Traps",
-   "link": "https://thehackernews.com/2026/11/13-malicious-nuget-packages-turn-fake.html",
-   "summary": "Cybersecurity researchers have discovered 13 malicious NuGet packages that are designed to target Windows .NET developers under the guise of a fake take-home job assessment. \"Most of the packages pose as WinUI 3 and WPF [Windows…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-26T03:48:52Z"
   },
   {
    "id": "https://www.cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1623/",
@@ -437,46 +517,6 @@
    "published": "2026-11-26T00:00:00Z"
   },
   {
-   "id": "https://www.bleepingcomputer.com/news/security/palo-alto-networks-warns-of-fragnesia-flaw-exploited-in-pan-os-attacks/",
-   "title": "Palo Alto Networks warns of Fragnesia flaw exploited in PAN-OS attacks",
-   "link": "https://www.bleepingcomputer.com/news/security/palo-alto-networks-warns-of-fragnesia-flaw-exploited-in-pan-os-attacks/",
-   "summary": "Threat actors are chaining exploits for the PHP2Shell and Fragnesia vulnerabilities to target Palo Alto Networks devices with management interfaces exposed to the internet.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-25T22:05:09Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/1password-customer-data-stolen-after-employee-github-account-breach/",
-   "title": "1Password customer data stolen after employee GitHub account breach",
-   "link": "https://www.bleepingcomputer.com/news/security/1password-customer-data-stolen-after-employee-github-account-breach/",
-   "summary": "1Password has disclosed a data breach after a an employee's corporate GitHub account was hacked and used to deploy malicious code to the company's backend services to steal customer data.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-25T21:33:33Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/italy-and-switzerland-warn-of-autonomous-ai-driven-cyberattacks/",
-   "title": "Italy and Switzerland warn of autonomous AI-driven cyberattacks",
-   "link": "https://www.bleepingcomputer.com/news/security/italy-and-switzerland-warn-of-autonomous-ai-driven-cyberattacks/",
-   "summary": "Swiss and Italian cybersecurity agencies are warning about automated cyberattacks powered by AI agents targeting organizations in the critical infrastructure sector.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-25T19:39:31Z"
-  },
-  {
-   "id": "https://www.bleepingcomputer.com/news/security/cisa-warns-of-critical-unpatched-flaw-in-danfoss-refrigeration-controllers/",
-   "title": "CISA warns of critical unpatched flaw in Danfoss refrigeration controllers",
-   "link": "https://www.bleepingcomputer.com/news/security/cisa-warns-of-critical-unpatched-flaw-in-danfoss-refrigeration-controllers/",
-   "summary": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) is warning about a critical vulnerability in Danfoss AK-SM 8xxA Series controllers used by food retailers to manage commercial refrigeration, HVAC, and lighting systems.",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-25T16:13:40Z"
-  },
-  {
    "id": "https://github.blog/?p=100468",
    "title": "Art of play in the age of AI",
    "link": "https://github.blog/news-insights/company-news/art-of-play-in-the-age-of-ai/",
@@ -487,16 +527,6 @@
    "published": "2026-11-25T16:00:00Z"
   },
   {
-   "id": "https://www.bleepingcomputer.com/news/security/more-pentests-without-more-pentesters-where-ai-safely-helps/",
-   "title": "More Pentests Without More Pentesters: Where AI Safely Helps",
-   "link": "https://www.bleepingcomputer.com/news/security/more-pentests-without-more-pentesters-where-ai-safely-helps/",
-   "summary": "Penetration testers spend a significant portion of their engagements on documentation, reporting, and other tasks outside of testing. PentestPad explains how AI can reduce this workload, help teams handle more engagements, and keep…",
-   "source": "BleepingComputer",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-25T15:00:10Z"
-  },
-  {
    "id": "https://github.blog/?p=99982",
    "title": "How to choose the next safe step in application modernization",
    "link": "https://github.blog/ai-and-ml/github-copilot/how-to-choose-the-next-safe-step-in-application-modernization/",
@@ -505,36 +535,6 @@
    "category": "Développement",
    "lang": "en",
    "published": "2026-11-25T15:00:00Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/hackers-exploit-two-geoserver-flaws-as.html",
-   "title": "Hackers Exploit Two GeoServer Flaws as Researchers Warn of Unauthenticated RCE Chains",
-   "link": "https://thehackernews.com/2026/11/hackers-exploit-two-geoserver-flaws-as.html",
-   "summary": "Threat actors are actively exploiting two newly patched security flaws in GeoServer, according to watchTowr. The vulnerabilities in question are CVE-2026-120705 and CVE-2026-129243, details of which are below - CVE-2026-120705 (CVSS score…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-25T12:48:54Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/us-treasurys-fincen-takes-some-systems.html",
-   "title": "U.S. Treasury's Financial Crimes Agency Takes Some Systems Offline After Cyber Intrusion",
-   "link": "https://thehackernews.com/2026/11/us-treasurys-fincen-takes-some-systems.html",
-   "summary": "The U.S. Treasury Department's Financial Crimes Enforcement Network (FinCEN) has been hit by a cybersecurity incident that resulted in \"unauthorized access to a limited subset of its systems,\" the bureau said on Tuesday. As a precaution…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-25T12:30:08Z"
-  },
-  {
-   "id": "https://thehackernews.com/2026/11/credential-remediation-is-slow-when-you.html",
-   "title": "Credential Remediation Is Slow When You Don’t Know What Will Break",
-   "link": "https://thehackernews.com/2026/11/credential-remediation-is-slow-when-you.html",
-   "summary": "TL;DR More than 64% still valid after four years: GitGuardian’s State of Secrets Sprawl 2026 found that most valid secrets discovered in 2022 still worked in January 2026, because teams stall on what a revoke will break. Validity-only…",
-   "source": "The Hacker News",
-   "category": "Cybersécurité",
-   "lang": "en",
-   "published": "2026-11-25T11:51:48Z"
   },
   {
    "id": "tag:linuxfr.org,2005:News/42777",
