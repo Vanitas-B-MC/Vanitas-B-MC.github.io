@@ -3,6 +3,7 @@
 //   « edgerunner » active / désactive le style Edgerunners (rouge, vert)
 //   « neon »       active / désactive le style Neon (rose néon, cyan)
 //   « blackwall »  active / désactive le style Blackwall (noir, rouge sang, ambre) avec une brève alerte NetWatch
+//   « chatquipue » : une private joke, un chat en pixel-art sur fond vert néon
 //   « arasaka », « militech », « afterlife », « braindance », « dogtown » : autres styles secrets, chacun avec sa propre alerte
 //   et sa propre musique dans l'arcade (voir css/<nom>.css et easter-egg/js/music-themes.js)
 //   « cyberpsychosis » glitch progressif de la page pendant quelques secondes (js/cyberpsychosis.js)
@@ -43,6 +44,9 @@ export const THEME_CODES = [
   { code: "dogtown", theme: "dogtown", label: "dogtown",
     messages: { on: "> dogtown : tu es entré dans la zone", off: "> dogtown : tu as quitté la zone" },
     alert: ["> dogtown : zone contrôlée", "Dogtown", "> pas de loi ici, choom"] },
+  { code: "chatquipue", theme: "chatquipue", label: "chatquipue",
+    messages: { on: "> chatquipue : le chat est dans la place", off: "> chatquipue : ça sent déjà moins" },
+    alert: ["> odeur suspecte détectée", "Chat qui pue", "> ouvrez une fenêtre, vite"] },
 ];
 
 // Garde les dernières lettres tapées ; renvoie true quand elles forment le code.

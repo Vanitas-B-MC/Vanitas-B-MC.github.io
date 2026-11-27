@@ -1,0 +1,259 @@
+/* =========================================================
+   MODE CHAT QUI PUE — easter egg (taper « chatquipue » sur le site)
+   Une private joke : un chat en pixel-art veille sur le fond de l'écran (avec ses volutes de mauvaise odeur
+   qui montent), et tout le reste passe en vert néon pur. Le chat est dessiné dans la feuille de style
+   (image SVG intégrée), aucun fichier image à ajouter.
+
+   Tout est limité à html.chatquipue : sans cette classe, rien ne change.
+   Même principe que neon.css : on remplace les variables de couleur du site,
+   puis on corrige les couleurs écrites en dur dans style.css et veille.css.
+========================================================= */
+
+html.chatquipue {
+  --bg: #020a03;
+  --surface: #07140a;
+  --surface-2: #0d2412;
+  --line: #12401a;
+  --line-strong: #1f8a2c;
+
+  --text: #eaffea;
+  --muted: #8fc79a;
+
+  /* rôles repris des thèmes (index : yellow/cyan/pink, veille : hot/blue/violet) */
+  --yellow: #39ff14;   /* vert néon : l'accent principal */
+  --cyan: #00ffa2;     /* vert menthe électrique : les repères */
+  --pink: #b6ff00;
+  --hot: #39ff14;
+  --blue: #00ffa2;
+  --violet: #7dff5c;
+
+  --th-a-rgb: 57, 255, 20;
+  --th-b-rgb: 0, 255, 162;
+  --th-c-rgb: 182, 255, 0;
+  --th-bone-rgb: 234, 255, 234;
+
+  scrollbar-color: var(--line-strong) var(--bg);
+}
+
+/* Fond */
+html.chatquipue body::before {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%227%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2225%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%228%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2223%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2225%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%223%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2210%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2213%22 y=%223%22 width=%227%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2221%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2223%22 y=%223%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%228%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%229%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2212%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2213%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2216%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2217%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2220%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2221%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2224%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2225%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%228%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2210%22 y=%225%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2214%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2215%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2216%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2217%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2218%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2219%22 y=%225%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2223%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2225%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%228%22 y=%226%22 width=%224%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2212%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2214%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2215%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2216%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2217%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2218%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2219%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2221%22 y=%226%22 width=%224%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2225%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%228%22 y=%227%22 width=%222%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2210%22 y=%227%22 width=%2213%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2223%22 y=%227%22 width=%222%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2225%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%228%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%229%22 y=%228%22 width=%2215%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2224%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2225%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%229%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2211%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2214%22 y=%229%22 width=%225%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2219%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2222%22 y=%229%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2210%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2210%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2212%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2213%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2215%22 y=%2210%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2218%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2220%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2221%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2223%22 y=%2210%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2211%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2210%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2212%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2213%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2215%22 y=%2211%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2218%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2220%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2221%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2223%22 y=%2211%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%223%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%226%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2212%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2210%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2212%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2213%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2215%22 y=%2212%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2218%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2220%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2221%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2223%22 y=%2212%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2226%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2228%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%225%22 y=%2213%22 width=%223%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2213%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2211%22 y=%2213%22 width=%223%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2214%22 y=%2213%22 width=%225%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2219%22 y=%2213%22 width=%223%22 height=%221%22 fill=%22%23eaffc8%22 fill-opacity=%220.42%22/%3E%3Crect x=%2222%22 y=%2213%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2225%22 y=%2213%22 width=%223%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2214%22 width=%223%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2210%22 y=%2214%22 width=%225%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2215%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.5%22/%3E%3Crect x=%2217%22 y=%2214%22 width=%226%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2223%22 y=%2214%22 width=%223%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2226%22 y=%2214%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2227%22 y=%2214%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2215%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2215%22 width=%227%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2215%22 y=%2215%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2217%22 y=%2215%22 width=%228%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2225%22 y=%2215%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2226%22 y=%2215%22 width=%222%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2228%22 y=%2215%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2216%22 width=%223%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2210%22 y=%2216%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2214%22 y=%2216%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2215%22 y=%2216%22 width=%222%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2217%22 y=%2216%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2218%22 y=%2216%22 width=%225%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2223%22 y=%2216%22 width=%224%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2227%22 y=%2216%22 width=%222%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2229%22 y=%2216%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%223%22 y=%2217%22 width=%224%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%229%22 y=%2217%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2211%22 y=%2217%22 width=%2211%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2222%22 y=%2217%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2226%22 y=%2217%22 width=%224%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%229%22 y=%2218%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2210%22 y=%2218%22 width=%2213%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2223%22 y=%2218%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2227%22 y=%2218%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2228%22 y=%2218%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2229%22 y=%2218%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2219%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%229%22 y=%2219%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2212%22 y=%2219%22 width=%229%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2221%22 y=%2219%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2224%22 y=%2219%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2227%22 y=%2219%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2228%22 y=%2219%22 width=%222%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2230%22 y=%2219%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2220%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%229%22 y=%2220%22 width=%227%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2216%22 y=%2220%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.5%22/%3E%3Crect x=%2217%22 y=%2220%22 width=%227%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2224%22 y=%2220%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2228%22 y=%2220%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2229%22 y=%2220%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2230%22 y=%2220%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2221%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2221%22 width=%227%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2215%22 y=%2221%22 width=%221%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2216%22 y=%2221%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.5%22/%3E%3Crect x=%2217%22 y=%2221%22 width=%221%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2218%22 y=%2221%22 width=%227%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2225%22 y=%2221%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2228%22 y=%2221%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2229%22 y=%2221%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2230%22 y=%2221%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2222%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2222%22 width=%226%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2214%22 y=%2222%22 width=%225%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2219%22 y=%2222%22 width=%226%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2225%22 y=%2222%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2228%22 y=%2222%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2229%22 y=%2222%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2230%22 y=%2222%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2223%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2223%22 width=%225%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2213%22 y=%2223%22 width=%227%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2220%22 y=%2223%22 width=%225%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2225%22 y=%2223%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2227%22 y=%2223%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2228%22 y=%2223%22 width=%222%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2230%22 y=%2223%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2224%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2224%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2212%22 y=%2224%22 width=%229%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2221%22 y=%2224%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2225%22 y=%2224%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2227%22 y=%2224%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2228%22 y=%2224%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2229%22 y=%2224%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%227%22 y=%2225%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2225%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2212%22 y=%2225%22 width=%229%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2221%22 y=%2225%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2225%22 y=%2225%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2227%22 y=%2225%22 width=%222%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2229%22 y=%2225%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%229%22 y=%2226%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2212%22 y=%2226%22 width=%229%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2221%22 y=%2226%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2224%22 y=%2226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2225%22 y=%2226%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2228%22 y=%2226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2227%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%229%22 y=%2227%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2212%22 y=%2227%22 width=%229%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2221%22 y=%2227%22 width=%227%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2228%22 y=%2227%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%229%22 y=%2228%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2210%22 y=%2228%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2213%22 y=%2228%22 width=%227%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2220%22 y=%2228%22 width=%225%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2225%22 y=%2228%22 width=%223%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%229%22 y=%2229%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2211%22 y=%2229%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2214%22 y=%2229%22 width=%225%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2219%22 y=%2229%22 width=%223%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2222%22 y=%2229%22 width=%223%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%228%22 y=%2230%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%229%22 y=%2230%22 width=%226%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2215%22 y=%2230%22 width=%223%22 height=%221%22 fill=%22%23145c2b%22 fill-opacity=%220.3%22/%3E%3Crect x=%2218%22 y=%2230%22 width=%226%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2224%22 y=%2230%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%229%22 y=%2231%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2210%22 y=%2231%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2214%22 y=%2231%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2216%22 y=%2231%22 width=%221%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2217%22 y=%2231%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3Crect x=%2219%22 y=%2231%22 width=%224%22 height=%221%22 fill=%22%230a2f16%22 fill-opacity=%220.34%22/%3E%3Crect x=%2223%22 y=%2231%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.36%22/%3E%3C/svg%3E") 50% 100% / min(66vmin, 640px) auto no-repeat,
+    radial-gradient(60vmin 45vmin at 50% 100%, rgba(var(--th-a-rgb), .18), transparent 70%),
+    radial-gradient(60vw 40vh at 96% -8%, rgba(var(--th-b-rgb), .12), transparent 70%),
+    linear-gradient(rgba(var(--th-a-rgb), .05) 1px, transparent 1px) 0 0 / 100% 44px,
+    linear-gradient(90deg, rgba(var(--th-a-rgb), .05) 1px, transparent 1px) 0 0 / 44px 100%;
+  image-rendering: pixelated;
+  animation: cq-breathe 4s ease-in-out infinite;
+}
+
+/* Écran : lignes de balayage vertes et vignette */
+html.chatquipue body::after {
+  background:
+    radial-gradient(ellipse at center, transparent 52%, rgba(0, 12, 2, .6) 100%),
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 20, 4, .26) 2px 3px);
+}
+
+
+/* Les volutes de mauvaise odeur : elles montent au-dessus de la tête du chat et s'effacent, par petits sauts (pixel-art) */
+html.chatquipue::before {
+  content: "";
+  position: fixed;
+  left: 50%;
+  bottom: calc(min(66vmin, 640px) * .93);
+  width: min(66vmin, 640px);
+  height: calc(min(66vmin, 640px) * .5);
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 16%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%228%22 y=%220%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2217%22 y=%220%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2223%22 y=%220%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%229%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2217%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2223%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%229%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2216%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2223%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%229%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2215%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2224%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%228%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2215%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2225%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%228%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2212%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2215%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2225%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%227%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2216%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2225%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2229%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%227%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2217%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2224%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%223%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%228%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2217%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2223%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%229%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2217%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2220%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2223%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%229%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2216%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%2223%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%23c8ff00%22 fill-opacity=%220.45%22/%3E%3Crect x=%229%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2215%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2224%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%228%22 y=%2213%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2213%22 y=%2213%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2215%22 y=%2213%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2225%22 y=%2213%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%227%22 y=%2214%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2215%22 y=%2214%22 width=%221%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3Crect x=%2225%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%2339ff14%22 fill-opacity=%220.38%22/%3E%3C/svg%3E") 50% 100% / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  animation: cq-stink 3.2s steps(8, end) infinite;
+}
+@keyframes cq-stink {
+  from { transform: translate(-50%, 0); opacity: .95; }
+  to { transform: translate(-50%, -16%); opacity: 0; }
+}
+@keyframes cq-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .92; } }
+@keyframes cq-blink { 0%, 88%, 100% { opacity: .85; } 91%, 95% { opacity: .25; } }
+
+
+/* Étiquette fixe, collée en bas à droite */
+html.chatquipue::after {
+  content: "CHAT QUI PUE // ODEUR DÉTECTÉE";
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  pointer-events: none;
+  padding: 4px 12px 4px 14px;
+  background: rgba(2, 10, 3, .92);
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+  color: var(--yellow);
+  font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+  font-size: 10px;
+  letter-spacing: .22em;
+  opacity: .85;
+  animation: cq-blink 2.6s steps(1, end) infinite;
+}
+
+/* Titres */
+html.chatquipue .hero-name,
+html.chatquipue .arcade-title,
+html.chatquipue .vtitle {
+  text-shadow: 0 0 6px rgba(var(--th-a-rgb), .9), 0 0 26px rgba(var(--th-a-rgb), .6), 3px 0 rgba(var(--th-b-rgb), .45);
+}
+
+html.chatquipue .game-title,
+html.chatquipue .overlay-title {
+  text-shadow: 0 0 5px rgba(var(--th-a-rgb), .85), 0 0 18px rgba(var(--th-a-rgb), .5);
+}
+
+html.chatquipue .section-heading h2 {
+  text-shadow: 0 0 18px rgba(var(--th-a-rgb), .4);
+}
+
+html.chatquipue ::selection {
+  background: var(--yellow);
+  color: #021004;
+}
+
+/* ---------- Couleurs écrites en dur dans style.css ---------- */
+
+html.chatquipue .site-header.is-scrolled {
+  border-bottom-color: rgba(var(--th-a-rgb), .6);
+  box-shadow: 0 6px 28px -10px rgba(var(--th-a-rgb), .6);
+}
+
+/* Logo (une image jaune et cyan) : passé à la couleur du thème, avec un halo */
+html.chatquipue .logo img,
+html.chatquipue .brand img,
+html.chatquipue .card-head img {
+  filter: grayscale(1) sepia(1) hue-rotate(72deg) saturate(4) brightness(1.1) drop-shadow(0 0 6px rgba(var(--th-a-rgb), .5));
+}
+
+html.chatquipue .logo:hover img,
+html.chatquipue .brand:hover img {
+  filter: grayscale(1) sepia(1) hue-rotate(72deg) saturate(4) brightness(1.1) drop-shadow(0 0 12px rgba(var(--th-a-rgb), .9));
+}
+
+html.chatquipue .github-link:hover {
+  background: rgba(var(--th-b-rgb), .1);
+}
+
+html.chatquipue .about-seeking {
+  background: rgba(var(--th-a-rgb), .08);
+}
+
+html.chatquipue .timeline li:first-child::before {
+  box-shadow: 0 0 14px rgba(var(--th-a-rgb), .9);
+}
+
+/* Cartes à coins coupés : un filter suit la forme, un box-shadow serait coupé */
+html.chatquipue .profile-card,
+html.chatquipue .terminal {
+  filter: drop-shadow(0 0 14px rgba(var(--th-a-rgb), .24));
+}
+
+html.chatquipue .project:hover {
+  filter: drop-shadow(0 0 18px rgba(var(--th-a-rgb), .5));
+}
+
+html.chatquipue .button-primary {
+  color: #021004;
+  box-shadow: 0 0 18px -2px rgba(var(--th-a-rgb), .6);
+}
+
+html.chatquipue .contact-list a {
+  border-bottom-color: rgba(var(--th-a-rgb), .5);
+}
+
+html.chatquipue .status-dot {
+  box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7);
+  animation-name: pulse-chatquipue;
+}
+
+@keyframes pulse-chatquipue {
+  0% { box-shadow: 0 0 0 0 rgba(var(--th-a-rgb), .7); }
+  70%, 100% { box-shadow: 0 0 0 10px rgba(var(--th-a-rgb), 0); }
+}
+
+/* ---------- veille.css ---------- */
+
+html.chatquipue .hud > div:nth-child(3) { border-left-color: var(--violet); }
+html.chatquipue .hud > div:nth-child(3) dd { color: var(--violet); }
+
+html.chatquipue .banner {
+  background:
+    radial-gradient(60% 90% at 88% 15%, rgba(var(--th-a-rgb), .26), transparent 70%),
+    radial-gradient(50% 80% at 8% 100%, rgba(var(--th-b-rgb), .14), transparent 70%);
+}
+
+html.chatquipue .banner-lead { color: #d6ffd6; }
+
+html.chatquipue .field select:focus,
+html.chatquipue .field input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--th-b-rgb), .4);
+}
+
+html.chatquipue .step-num {
+  -webkit-text-stroke-color: rgba(var(--th-a-rgb), .75);
+}
+
+/* Couleur d'accent des articles et des sources, par catégorie.
+   (Les règles de veille.css sont moins précises : on les redéfinit toutes ici.) */
+html.chatquipue .shard,
+html.chatquipue .source-token { --accent-rgb: var(--th-b-rgb); }
+
+html.chatquipue .shard[data-cat="cybersecurite"],
+html.chatquipue .source-token[data-cat="cybersecurite"] { --accent-rgb: var(--th-a-rgb); }
+
+html.chatquipue .shard[data-cat="developpement"],
+html.chatquipue .source-token[data-cat="developpement"] { --accent-rgb: var(--th-c-rgb); }
+
+html.chatquipue .shard[data-cat="infrastructure"],
+html.chatquipue .source-token[data-cat="infrastructure"] { --accent-rgb: var(--th-bone-rgb); }
+
+/* ---------- Arcade ---------- */
+
+html.chatquipue .game-stage {
+  box-shadow: inset 0 0 40px rgba(var(--th-a-rgb), .07), 0 0 30px -8px rgba(var(--th-a-rgb), .55);
+}
+
+/* ---------- Alerte plein écran à l'activation (easter-egg/js/secret-code.js) ---------- */
+
+html.chatquipue .secret-chatquipue {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, .3) 2px 3px),
+    radial-gradient(70% 60% at 50% 55%, rgba(var(--th-a-rgb), .32), rgba(1, 8, 2, .96) 75%);
+  animation: chatquipue-alert 1.9s steps(1, end) both;
+}
+
+html.chatquipue .secret-chatquipue .secret-unlock-title {
+  color: var(--yellow);
+  text-shadow: 0 0 8px rgba(var(--th-a-rgb), .95), 0 0 34px rgba(var(--th-a-rgb), .8);
+}
+
+@keyframes chatquipue-alert {
+  0% { opacity: 0; }
+  8%, 80% { opacity: 1; }
+  84% { opacity: .55; }
+  88%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  html.chatquipue::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.chatquipue body::before,
+  html.chatquipue body::after,
+  html.chatquipue::before,
+  html.chatquipue::after,
+  html.chatquipue .hero-name,
+  html.chatquipue .vtitle,
+  html.chatquipue .status-dot,
+  html.chatquipue .secret-chatquipue { animation: none; }
+}

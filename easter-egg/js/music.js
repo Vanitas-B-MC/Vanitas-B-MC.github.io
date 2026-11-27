@@ -330,9 +330,29 @@ export function createMusic() {
     hat(time, gain * 0.6, 3000, 0.02, "highpass");
   }
 
+  // Glissando : une note dont la hauteur monte (ou descend) de f0 à f1 puis finit à f2 — miaulement, trombone triste, « pouet »…
+  function glide(type, f0, f1, f2, time, length, gain, dest = master, cutoff = 3000) {
+    const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const amp = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(f0, time);
+    osc.frequency.linearRampToValueAtTime(f1, time + length * 0.45);
+    osc.frequency.linearRampToValueAtTime(f2, time + length);
+    filter.type = "lowpass";
+    filter.frequency.value = cutoff;
+    amp.gain.setValueAtTime(0.0001, time);
+    amp.gain.exponentialRampToValueAtTime(gain, time + Math.min(0.04, length * 0.2));
+    amp.gain.setValueAtTime(gain, time + length * 0.7);
+    amp.gain.exponentialRampToValueAtTime(0.0001, time + length);
+    osc.connect(filter).connect(amp).connect(dest);
+    osc.start(time);
+    osc.stop(time + length + 0.05);
+  }
+
   // Trousse transmise aux morceaux de music-themes.js.
   const kit = {
-    midi, note, lead, bright, kick, hat, drone, riser, impact, pad, snare, taiko, stab, epiano, bassLP, pluck,
+    midi, note, lead, bright, kick, hat, drone, riser, impact, pad, snare, taiko, stab, epiano, bassLP, pluck, glide,
     get leadBus() { return leadBus; },
     get master() { return master; }
   };

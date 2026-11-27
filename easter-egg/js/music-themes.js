@@ -297,10 +297,80 @@ function dogtown(k, index, time, S) {
 
 /* ===================================================================================================== */
 
+/* =====================================================================================================
+   CHATQUIPUE — 140 BPM, la mineur. Chiptune sautillant (carrés, triangle, bruit) avec des miaulements, un trombone
+   triste et, une seule fois par boucle, un petit « pouet » grave. C'est une private joke : le morceau est rigolo.
+   Intro (1-4) · le chat arrive (5-12) · le chat insiste (13-20) · l'odeur monte (21-24)
+===================================================================================================== */
+const CAT_ROOTS = [45, 41, 48, 43];                                    // La, Fa, Do, Sol — une fondamentale toutes les 2 mesures
+const CAT_ARP = [[69, 72, 76, 81], [65, 69, 72, 77], [72, 76, 79, 84], [67, 71, 74, 79]];
+const CAT_LEAD = [
+  [[0, 81, 3], [4, 79, 3], [8, 76, 3], [12, 79, 3], [16, 81, 3], [20, 84, 3], [24, 81, 6]],
+  [[0, 77, 3], [4, 81, 3], [8, 84, 3], [12, 81, 3], [16, 77, 3], [20, 79, 3], [24, 77, 6]],
+  [[0, 84, 3], [4, 79, 3], [8, 76, 3], [12, 79, 3], [16, 84, 3], [20, 88, 3], [24, 84, 6]],
+  [[0, 83, 3], [4, 79, 3], [8, 74, 3], [12, 79, 3], [16, 83, 3], [20, 86, 3], [24, 83, 6]]
+];
+const CAT_SAD = [[392, 370], [370, 349], [349, 330], [330, 196]];       // le trombone triste : quatre notes qui tombent
+
+function chatquipue(k, index, time, S) {
+  const { bar, inBar } = bounds(index, 24);
+  const pair = Math.floor(bar / 2) % 4;
+  const section = bar < 4 ? 0 : bar < 12 ? 1 : bar < 20 ? 2 : 3;
+  const root = CAT_ROOTS[pair];
+  const drums = section === 1 || section === 2;
+
+  // basse triangle qui saute
+  if ([0, 3, 6, 8, 11, 14].includes(inBar)) {
+    k.note(k.midi(root + (inBar === 6 || inBar === 14 ? 12 : 0)), time, S * 1.9, "triangle", 0.2, k.master, 0.006);
+  }
+
+  // arpège en carrés, une note par double-croche (un temps sur deux à l'intro)
+  if (section !== 3 && (section > 0 || inBar % 2 === 0)) {
+    k.note(k.midi(CAT_ARP[pair][inBar % 4]), time, S * 0.85, "square", section === 0 ? 0.016 : 0.022, k.master, 0.004);
+  }
+
+  // rythme : grosse caisse sur 1 et 3, caisse claire sur 2 et 4, charleston en bruit
+  if (drums) {
+    if (inBar === 0 || inBar === 8) k.kick(time, 0.7);
+    if (inBar === 4 || inBar === 12) k.snare(time, 0.12);
+    if (inBar % 2 === 0) k.hat(time, 0.03, 8000, 0.03);
+  } else if (section === 0 && inBar % 4 === 2) {
+    k.hat(time, 0.025, 8000, 0.03);
+  }
+
+  // mélodie en carré : une octave plus haut, avec un écho, quand le chat insiste
+  if (drums) {
+    const local = (bar % 2) * STEPS + inBar;
+    for (const [at, n, len] of CAT_LEAD[pair]) {
+      if (at === local) k.note(k.midi(n + (section === 2 ? 0 : -12)), time, S * len, "square", section === 2 ? 0.05 : 0.04, section === 2 ? k.leadBus : k.master, 0.004);
+    }
+  }
+
+  // miaulements : un petit glissando qui monte puis retombe (fin des phrases de la première partie, puis sur la deuxième)
+  if ((bar === 7 && inBar === 12) || (bar === 11 && inBar === 8)) k.glide("triangle", 520, 900, 620, time, S * 5, 0.07, k.leadBus, 2600);
+  if (bar === 15 && inBar === 10) k.glide("triangle", 640, 1050, 700, time, S * 5, 0.07, k.leadBus, 2800);
+  if (bar === 19 && inBar === 12) { k.glide("triangle", 420, 760, 480, time, S * 6, 0.07, k.leadBus, 2400); }
+
+  // l'odeur monte : le trombone triste tombe, le chat miaule encore, puis un petit « pouet » grave
+  if (section === 3) {
+    if (inBar === 0) k.drone(k.midi(CAT_ROOTS[0] + 12), time, S * 16, 0.04);
+    if (bar >= 20 && inBar === 0) {
+      const [from, to] = CAT_SAD[bar - 20];
+      k.glide("sawtooth", from, from * 0.96, to, time, S * (bar === 23 ? 14 : 12), 0.05, k.master, bar === 23 ? 900 : 1500);
+    }
+    if (bar === 22 && inBar === 8) k.glide("triangle", 560, 980, 640, time, S * 5, 0.07, k.leadBus, 2600);
+    if (bar === 23 && inBar === 14) k.glide("sawtooth", 120, 90, 55, time, S * 2, 0.12, k.master, 500);      // le « pouet »
+    if (inBar === 8) k.hat(time, 0.02, 8000, 0.03);
+  }
+}
+
+/* ===================================================================================================== */
+
 export const THEME_TRACKS = {
   arasaka:    { bpm: 84,  bars: 16, fx: { trim: 0.55, feedback: 0.45, wet: 0.4,  reverb: 0.5 },  play: arasaka },
   militech:   { bpm: 104, bars: 16, fx: { trim: 0.6,  feedback: 0.25, wet: 0.2,  reverb: 0.2 },  play: militech },
   afterlife:  { bpm: 92,  bars: 16, fx: { trim: 0.8,  feedback: 0.35, wet: 0.3,  reverb: 0.45 }, play: afterlife },
   braindance: { bpm: 100, bars: 16, fx: { trim: 0.6,  feedback: 0.5,  wet: 0.5,  reverb: 0.55 }, play: braindance },
-  dogtown:    { bpm: 98,  bars: 16, fx: { trim: 0.6,  feedback: 0.4,  wet: 0.35, reverb: 0.3 },  play: dogtown }
+  dogtown:    { bpm: 98,  bars: 16, fx: { trim: 0.6,  feedback: 0.4,  wet: 0.35, reverb: 0.3 },  play: dogtown },
+  chatquipue: { bpm: 140, bars: 24, fx: { trim: 1.0,  feedback: 0.3,  wet: 0.25, reverb: 0.15 }, play: chatquipue }
 };

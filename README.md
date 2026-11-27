@@ -17,6 +17,8 @@ js/ui-*.js                  affichage de chaque jeu ; js/ui.js outils partagés
 js/wallet.js                pièces bleues, crédits et progression (localStorage)
 js/secret-code.js           détecte les codes tapés au clavier
 js/theme.js, css/edgerunners.css   mode Edgerunners (« edgerunner »)
+css/blackwall.css               mode Blackwall (« blackwall ») : noir, rouge sang, ambre, avec alerte NetWatch et musique dédiée (easter-egg/js/music.js)
+css/{arasaka,militech,afterlife,braindance,dogtown}.css   autres thèmes secrets (mêmes codes que leur nom), chacun avec une alerte et un morceau dans easter-egg/js/music-themes.js
 content/data.js             contenu du portfolio (textes, projets, contact…)
 content/veille-sources.json liste des flux RSS suivis
 content/veille.json         articles de la veille (rempli automatiquement)
@@ -29,14 +31,21 @@ assets/                     favicon, images
 
 - Taper `awesome` sur le site ouvre l'arcade cachée (`easter-egg/arcade.html`) : Data Snake, Blackjack, Roulette, Plinko (24 slots, mise libre en crédits, 3 niveaux de risque),
   Crash (multiplicateur à encaisser avant l'effondrement, encaissement automatique), Machine à sous (5 rouleaux, 10 lignes, wilds, scatters, tours gratuits),
-  Pêche & Ferme (idle : pêche, cultures qui poussent même page fermée, fermier-bot, filet automatique), Courses d'IA (paris sur 6 robots, cotes calculées par simulation), Démineur (3 difficultés, records),
-  Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena, Breach Protocol, Donjon (hub à deux royaumes avec PNJ et quêtes en pièces bleues, puis action temps réel : étages en carte de salles, 34 armes, boss, coffres, 4 classes, âmes pour les améliorations permanentes) et Chasse aux Titans (RPG au tour par tour : l'équipement se forge avec des trophées ✦, une monnaie propre au RPG, et des matériaux de monstres), avec une musique
+  Pêche & Ferme (idle : pêche avec mini-jeu de combat façon Fisch, cultures dessinées en 3 stades qui poussent même page fermée, fermier-bot, filet automatique ; prises et récoltes ajoutent un pourcentage de la fortune du joueur, le koï doré offre une pièce bleue), Courses d'IA (paris sur 6 robots, cotes calculées par simulation), Démineur (3 difficultés, records),
+  Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena, Breach Protocol, Donjon (action temps réel : étages, boss, coffres, 4 classes, âmes pour les améliorations permanentes) et Chasse aux Titans (RPG au tour par tour : l'équipement se forge avec des trophées ✦, une monnaie propre au RPG, et des matériaux de monstres), avec une musique
   synthwave générée en direct (bouton « Musique », désactivée par défaut).
   Le Clicker a un arbre de compétences (par partie) et un Rebirth (formatage) avec éclats et arbre permanent.
+  Le Clicker compte 38 améliorations en crédits (jusqu'au « Paradoxe du créateur », 200 Sp) ; le plafond des crédits est de 1e66 (1 000 Vg) et les nombres s'affichent jusqu'à Vg (js/limits.js, js/ui.js).
   Pare-feu : 3 cartes et 7 tours (déblocage en crédits). Survivor Arena : 3 personnages (déblocage en crédits), foudre, vol de vie, élites et boss.
   Pièces bleues (Snake, Tetris, longues parties de Survivor Arena, piratages complets) : Roulette et améliorations par paliers du Clicker. Crédits (Clicker, vagues du
   Pare-feu, Survivor Arena, Breach Protocol) : Blackjack et déblocage des tours. La progression est enregistrée dans le navigateur.
 - Taper `edgerunner` active (ou désactive) le style Cyberpunk: Edgerunners, rouge et vert, sur tout le site.
+- Taper `blackwall` active (ou désactive) le style Blackwall de Cyberpunk 2077 : noir de vide, rouge sang et ambre, avec une alerte NetWatch à l'activation. Dans l'arcade, la musique devient un morceau sombre et industriel de 24 mesures.
+- Autres codes secrets, tous dans l'univers de Cyberpunk, chacun avec son style, une courte alerte et sa propre musique dans l'arcade :
+  `arasaka` (noir, blanc clinique, vermillon, kanji en filigrane ; taiko et koto), `militech` (vert olive, HUD de visière ; marche militaire et cuivres),
+  `afterlife` (turquoise et vert-jaune pâle comme dans le jeu, enseigne blanche ; piano électrique, basse chaude, saxophone), `braindance` (bleu glacé, point REC ; arpèges et souvenirs qui bégaient)
+  et `dogtown` (orange poussière et sarcelle ; basse sale, claps, cordes pincées du désert).
+  Dernier code, une private joke : `chatquipue` (un chat en pixel-art qui veille sur le fond, avec ses volutes de mauvaise odeur, et tout le reste en vert néon ; musique chiptune avec des miaulements). Retaper un code désactive le thème ; un seul thème est actif à la fois.
 
 ## Veille automatique
 
