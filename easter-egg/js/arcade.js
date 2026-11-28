@@ -225,6 +225,78 @@ walletToggle.addEventListener("click", () => {
 
 /* ---------- Remise à zéro ---------- */
 
+/* ---------- Un seul onglet écrit la sauvegarde ---------- */
+
+const lockBox = $("#tab-lock");
+function renderLock(reason) {
+  lockBox.hidden = !reason;
+  if (!reason) return;
+  const outdated = reason === "outdated";
+  $("#tab-lock-title").textContent = outdated ? "Nouvelle version disponible" : "Arcade ouverte dans un autre onglet";
+  $("#tab-lock-text").textContent = outdated
+    ? "Ta sauvegarde a été écrite par une version plus récente de l'arcade. Cet onglet utilise une ancienne version (souvent à cause du cache) : il ne sauvegarde plus rien pour ne pas effacer tes progrès. Recharge la page (Ctrl + F5)."
+    : "Pour ne pas mélanger deux progressions, un seul onglet sauvegarde à la fois. Celui-ci est en pause : ce que tu y fais ne sera pas enregistré.";
+  $("#tab-lock-button").textContent = outdated ? "Recharger" : "Jouer dans cet onglet";
+}
+$("#tab-lock-button").addEventListener("click", () => {
+  if (wallet.locked === "outdated") { window.location.reload(); return; }
+  wallet.claim();
+  carry = 0;
+  lastTick = Date.now();
+});
+wallet.onLock(renderLock);
+renderLock(wallet.locked);
+
+/* ---------- Sauvegardes : copies automatiques, export, import ---------- */
+
+const savesDialog = $("#saves-dialog");
+function renderSaves() {
+  const list = $("#saves-list");
+  list.replaceChildren();
+  const items = wallet.backups();
+  if (!items.length) { const li = document.createElement("li"); li.textContent = "Aucune copie pour l'instant."; list.append(li); }
+  for (const b of items) {
+    const li = document.createElement("li");
+    const text = document.createElement("span");
+    const s = b.summary;
+    text.textContent = `${new Date(b.t).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })} — ${fmtShort(s.credits)} crédits · ${s.towers} tours · ${s.maps} cartes · bestiaire ${s.species} · ferme ${s.farmDays} j`;
+    const btn = document.createElement("button");
+    btn.className = "button button-secondary saves-restore";
+    btn.type = "button";
+    btn.textContent = "Restaurer";
+    btn.addEventListener("click", () => {
+      if (!window.confirm("Remplacer ta progression actuelle par cette copie ? (Ta progression actuelle est d'abord copiée, tu pourras revenir en arrière.)")) return;
+      if (wallet.restoreBackup(b.index)) { carry = 0; renderSaves(); window.alert("Copie restaurée."); }
+    });
+    li.append(text, btn);
+    list.append(li);
+  }
+}
+$("#saves").addEventListener("click", () => {
+  renderSaves();
+  if (typeof savesDialog.showModal === "function") savesDialog.showModal(); else savesDialog.setAttribute("open", "");
+});
+$("#saves-close").addEventListener("click", () => {
+  if (typeof savesDialog.close === "function") savesDialog.close(); else savesDialog.removeAttribute("open");
+});
+$("#save-export").addEventListener("click", () => {
+  const blob = new Blob([wallet.exportJSON()], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `arcade-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+$("#save-import").addEventListener("change", async (e) => {
+  const file = e.target.files?.[0];
+  e.target.value = "";
+  if (!file) return;
+  if (!window.confirm("Remplacer ta progression actuelle par ce fichier ? (Ta progression actuelle est d'abord copiée dans les sauvegardes.)")) return;
+  const ok = wallet.importJSON(await file.text());
+  window.alert(ok ? "Sauvegarde importée." : "Ce fichier n'est pas une sauvegarde de l'arcade.");
+  if (ok) { carry = 0; renderSaves(); }
+});
+
 $("#reset").addEventListener("click", () => {
   if (!window.confirm("Remettre à zéro les crédits, les pièces bleues, les améliorations, les tours débloquées, les succès et les records ?")) return;
   wallet.reset();

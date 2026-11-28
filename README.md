@@ -59,3 +59,10 @@ assets/                     favicon, images
 - Donjon v19 : grands boss tous les 10 étages (10 boss à 4 phases, ordre aléatoire par partie, arène dédiée de 32×20 chacun : Hydre des marais, Titan de forge, Architecte, Seigneur des tempêtes, Gardien du Néant, Reine des ruches, Chevalier maudit, Colosse sismique, Nécroroi, Overmind).
 - Donjon v20 : 100 nouvelles améliorations (+8 objets légendaires), 16 ultimes (4 par classe, au choix, débloqués en âmes), passages secrets (mur fissuré) vers une salle d'offrandes puis le boss secret « L'Éclipse sans nom », 5 nouveaux décors (Jungle, Désert, Néon, Abysses, Citadelle infernale) avec props et ambiance.
 - Donjon v21 : raretés (Commun, Rare, Épique, Légendaire, Mythique) avec tirage pondéré, 34 reliques qui ajoutent une arme secondaire (jusqu'à 3), 19 synergies entre armes (Choc thermique, Plasma, Plein arsenal…), 50 nouveaux ennemis (dessinés par forme), 5 Titans tous les 50 étages (8 phases, 12 attaques, 5 arènes) et le boss super secret Ultra Greed (statue d'avarice de la boutique).
+
+## Sauvegarde de l'arcade
+
+- Tout est dans `localStorage` (clé `mc-arcade-wallet-v1`), avec 6 copies automatiques (`mc-arcade-backups`, une toutes les 10 min au plus) et un export / import en fichier depuis le bouton « Sauvegardes » du hub.
+- Un seul onglet écrit la sauvegarde à la fois (`mc-arcade-owner`) : les autres onglets passent en pause.
+- `BUILD` (dans `easter-egg/js/wallet.js`) est la version du code. **À augmenter à chaque mise à jour qui ajoute des jeux, tours, cartes, etc.** Un onglet resté sur une ancienne version (cache) voit une sauvegarde plus récente et arrête d'écrire au lieu d'effacer ce qu'il ne connaît pas.
+- Ce que le code ne reconnaît pas dans une sauvegarde (identifiants inconnus, jeux d'une autre version) est conservé tel quel.

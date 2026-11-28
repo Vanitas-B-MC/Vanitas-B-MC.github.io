@@ -17,6 +17,15 @@ import { MAX_CREDITS } from "./limits.js";
 import { CLASS_IDS, FREE_CLASS, META, META_IDS, freshRanks, metaCost, classById, WEAPONS, WEAPON_IDS, FREE_WEAPONS, weaponById, ULT_IDS, FREE_ULTS, ultById } from "./dungeon.js";
 
 const KEY = "mc-arcade-wallet-v1";
+const OWNER_KEY = "mc-arcade-owner";     // quel onglet a le droit d'écrire la sauvegarde
+const BACKUP_KEY = "mc-arcade-backups";  // copies automatiques (les 6 dernières, une toutes les 10 minutes au plus)
+const BACKUP_EVERY = 10 * 60 * 1000;
+const MAX_BACKUPS = 6;
+
+// Version du code de l'arcade. À augmenter à chaque mise à jour qui ajoute des jeux, des tours, des cartes…
+// Un onglet resté sur une ancienne version (ou servi depuis le cache du navigateur) voit qu'une sauvegarde a été
+// écrite par une version plus récente : il passe en lecture seule au lieu d'écraser ce qu'il ne connaît pas.
+export const BUILD = 2;
 const START_CREDITS = 100;
 const MAX = MAX_CREDITS;
 
@@ -59,7 +68,8 @@ function freshData() {
       stats: { kills: 0, bosses: 0, rooms: 0, gold: 0, elite: 0, deepest: 0 }, quests: {} },   // âmes, améliorations permanentes, classes
     ranch: freshRanch(Math.floor(Math.random() * 1e9)),   // « Vallée Néon » : la ferme façon Stardew Valley
     angler: freshAngler(), // « Grand Bleu » : le jeu de pêche (perles, équipement, bestiaire)
-    mines: Object.fromEntries(LEVEL_IDS.map((id) => [id, 0]))   // Démineur : meilleur temps (secondes) par niveau, 0 = aucun
+    mines: Object.fromEntries(LEVEL_IDS.map((id) => [id, 0])),  // Démineur : meilleur temps (secondes) par niveau, 0 = aucun
+    build: BUILD           // version du code qui a écrit la sauvegarde
   };
 }
 
@@ -121,6 +131,7 @@ export function sanitize(raw) {
     }
   }
   data.ranch = sanitizeRanch(raw.ranch);
+  data.build = BUILD;
   data.angler = sanitizeAngler(raw.angler);
   for (const id of LEVEL_IDS) data.mines[id] = toCount(raw.mines?.[id]);
   if (Array.isArray(raw.chars)) {
@@ -140,6 +151,43 @@ export function sanitize(raw) {
   return data;
 }
 
+// Ce que ce code ne reconnaît pas dans une sauvegarde (jeu, tour, carte, amélioration d'une autre version) n'est
+// plus jeté : on le met de côté et on le réécrit tel quel à chaque sauvegarde.
+const LIST_IDS = () => ({ towers: TOWER_IDS, maps: MAP_IDS, heroes: HERO_IDS, chars: CHARACTER_IDS });
+const DUNGEON_LIST_IDS = () => ({ classes: CLASS_IDS, weapons: WEAPON_IDS, ults: ULT_IDS });
+const unknownIds = (list, ids) => (Array.isArray(list) ? list.filter((id) => typeof id === "string" && id.length <= 40 && !ids.includes(id)).slice(0, 200) : []);
+
+export function extrasOf(raw) {
+  const ex = { top: {}, lists: {}, dungeon: {}, levels: {}, blueLevels: {} };
+  if (!raw || typeof raw !== "object") return ex;
+  const known = new Set(Object.keys(freshData()));
+  for (const [k, v] of Object.entries(raw)) if (!known.has(k)) ex.top[k] = v;
+  for (const [k, ids] of Object.entries(LIST_IDS())) ex.lists[k] = unknownIds(raw[k], ids);
+  if (raw.dungeon && typeof raw.dungeon === "object") for (const [k, ids] of Object.entries(DUNGEON_LIST_IDS())) ex.dungeon[k] = unknownIds(raw.dungeon[k], ids);
+  for (const [k, ids] of [["levels", CLICKER_IDS], ["blueLevels", BLUE_IDS]]) {
+    if (raw[k] && typeof raw[k] === "object") for (const [id, v] of Object.entries(raw[k])) if (!ids.includes(id) && id.length <= 40) ex[k][id] = toCount(v);
+  }
+  return ex;
+}
+
+export function serialize(data, ex) {
+  const out = { ...ex.top, ...data };
+  for (const [k, ids] of Object.entries(ex.lists)) if (ids.length) out[k] = [...data[k], ...ids.filter((id) => !data[k].includes(id))];
+  const dun = Object.entries(ex.dungeon).filter(([, ids]) => ids.length);
+  if (dun.length) { out.dungeon = { ...data.dungeon }; for (const [k, ids] of dun) out.dungeon[k] = [...data.dungeon[k], ...ids.filter((id) => !data.dungeon[k].includes(id))]; }
+  for (const k of ["levels", "blueLevels"]) if (Object.keys(ex[k]).length) out[k] = { ...ex[k], ...data[k] };
+  return JSON.stringify(out);
+}
+
+// Résumé lisible d'une sauvegarde (pour la liste des copies).
+export function summarize(raw) {
+  const d = sanitize(raw);
+  return {
+    credits: d.credits, blue: d.blue, towers: d.towers.length, maps: d.maps.length,
+    species: Object.keys(d.angler.dex).length, farmDays: d.ranch.stats.days, rebirths: d.rebirths
+  };
+}
+
 function defaultStorage() {
   try {
     const probe = "__mc_probe__";
@@ -153,23 +201,51 @@ function defaultStorage() {
 
 export function createWallet(storage = defaultStorage()) {
   let data;
-  try {
-    const saved = storage?.getItem(KEY);
-    data = saved ? sanitize(JSON.parse(saved)) : freshData();
-  } catch {
-    data = freshData();
+  let extras = extrasOf(null);
+  let lock = null;               // null, "other-tab" (un autre onglet joue) ou "outdated" (ce code est trop vieux)
+  let lastBackup = 0;
+  const tabId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  const listeners = new Set();
+  const lockListeners = new Set();
+
+  const readRaw = () => { const saved = storage?.getItem(KEY); return saved ? JSON.parse(saved) : null; };
+  const newer = (raw) => Number(raw?.build ?? 0) > BUILD;
+  function setLock(reason) {
+    if (lock === reason) return;
+    lock = reason;
+    lockListeners.forEach((fn) => fn(lock));
+  }
+  function adopt(raw) {
+    extras = extrasOf(raw);
+    data = raw ? sanitize(raw) : freshData();
   }
 
-  const listeners = new Set();
+  try {
+    const raw = readRaw();
+    adopt(raw);
+    if (newer(raw)) lock = "outdated";
+  } catch {
+    data = freshData();
+    // Sauvegarde illisible : on ne l'écrase pas tant que le joueur n'a rien décidé (copie de secours d'abord).
+    try { const bad = storage?.getItem(KEY); if (bad) storage.setItem(`${KEY}-corrupt-${Date.now()}`, bad); } catch { /* pas grave */ }
+  }
+  if (!lock) { try { storage?.setItem(OWNER_KEY, tabId); } catch { /* pas grave */ } }
 
-  // Un autre onglet de l'arcade vient de sauvegarder : on reprend sa version. Sans ça, notre
-  // prochaine sauvegarde (le gain passif du Clicker en fait 4 par seconde) écraserait ses
-  // changements avec nos vieilles données : tours, cartes, achats… perdus.
+  // Un seul onglet écrit la sauvegarde à la fois : le dernier ouvert (ou celui où l'on clique « Jouer ici »).
+  // Les autres continuent d'afficher la progression mais n'écrivent plus rien. Sans ça, le gain passif du Clicker
+  // (4 sauvegardes par seconde) d'un vieil onglet écrasait les tours, les cartes ou le bestiaire achetés ailleurs.
   if (typeof window !== "undefined") {
     window.addEventListener("storage", (event) => {
-      if (event.key !== KEY || event.storageArea !== storage) return;
+      if (event.storageArea !== storage) return;
+      if (event.key === OWNER_KEY) {
+        if (event.newValue && event.newValue !== tabId && !lock) setLock("other-tab");
+        return;
+      }
+      if (event.key !== KEY) return;
       try {
-        data = event.newValue ? sanitize(JSON.parse(event.newValue)) : freshData();
+        const raw = event.newValue ? JSON.parse(event.newValue) : null;
+        if (newer(raw)) setLock("outdated");
+        adopt(raw);
       } catch {
         return;
       }
@@ -177,10 +253,28 @@ export function createWallet(storage = defaultStorage()) {
     });
   }
 
+  function backup(force = false) {
+    if (!storage) return;
+    try {
+      const list = JSON.parse(storage.getItem(BACKUP_KEY) || "[]");
+      const now = Date.now();
+      if (!force && list[0] && now - list[0].t < BACKUP_EVERY) { lastBackup = list[0].t; return; }
+      const json = serialize(data, extras);
+      if (list[0]?.d === json) return;
+      list.unshift({ t: now, d: json });
+      storage.setItem(BACKUP_KEY, JSON.stringify(list.slice(0, MAX_BACKUPS)));
+      lastBackup = now;
+    } catch { /* stockage plein ou indisponible : pas grave */ }
+  }
+
   function commit() {
-    try { storage?.setItem(KEY, JSON.stringify(data)); } catch { /* pas grave */ }
+    if (!lock) {
+      try { storage?.setItem(KEY, serialize(data, extras)); } catch { /* pas grave */ }
+      if (Date.now() - lastBackup > BACKUP_EVERY) backup();
+    }
     listeners.forEach((fn) => fn(data));
   }
+  if (!lock) backup();
 
   return {
     get data() { return data; },
@@ -446,10 +540,56 @@ export function createWallet(storage = defaultStorage()) {
       return true;
     },
 
-    // Efface tout et repart de zéro.
+    // Efface tout et repart de zéro (une copie est gardée dans les sauvegardes, au cas où).
     reset() {
+      backup(true);
       data = freshData();
+      extras = extrasOf(null);
       commit();
+    },
+
+    /* ----- Onglets et sauvegardes ----- */
+
+    get locked() { return lock; },
+    onLock(fn) { lockListeners.add(fn); return () => lockListeners.delete(fn); },
+
+    // Reprend la main dans cet onglet : relit la sauvegarde la plus récente, puis devient l'onglet qui écrit.
+    claim() {
+      try {
+        const raw = readRaw();
+        if (newer(raw)) { setLock("outdated"); return false; }
+        adopt(raw);
+      } catch { /* on garde ce qu'on a */ }
+      try { storage?.setItem(OWNER_KEY, tabId); } catch { /* pas grave */ }
+      setLock(null);
+      listeners.forEach((fn) => fn(data));
+      return true;
+    },
+
+    // Copies automatiques : [{ t, summary }] de la plus récente à la plus ancienne.
+    backups() {
+      try {
+        return JSON.parse(storage?.getItem(BACKUP_KEY) || "[]").map((b, index) => ({ index, t: b.t, summary: summarize(JSON.parse(b.d)) }));
+      } catch { return []; }
+    },
+    restoreBackup(index) {
+      try {
+        const list = JSON.parse(storage?.getItem(BACKUP_KEY) || "[]");
+        if (!list[index]) return false;
+        return this.importJSON(list[index].d);
+      } catch { return false; }
+    },
+    exportJSON() { return serialize(data, extras); },
+    importJSON(text) {
+      let raw;
+      try { raw = JSON.parse(text); } catch { return false; }
+      if (!raw || typeof raw !== "object") return false;
+      backup(true);
+      adopt(raw);
+      if (lock === "other-tab") { try { storage?.setItem(OWNER_KEY, tabId); } catch { /* pas grave */ } setLock(null); }
+      commit();
+      backup(true);
+      return true;
     }
   };
 }

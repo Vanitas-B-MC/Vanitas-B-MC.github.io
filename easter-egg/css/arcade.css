@@ -2194,3 +2194,21 @@ kbd {
 @media (min-width: 901px) {
   .wallet-collapsed .td-board-wrap { max-width: max(520px, calc((100vh - 365px) * 14 / 9 + 20px)); }
 }
+
+/* =========================
+   ONGLET EN PAUSE & SAUVEGARDES
+========================= */
+.tab-lock { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 20px; background: rgba(7, 7, 11, .82); backdrop-filter: blur(3px); }
+.tab-lock[hidden] { display: none; }
+.tab-lock-box { --cut: 16px; width: min(100%, 480px); padding: 24px; background: var(--surface); border: 1px solid var(--yellow); text-align: center; display: grid; gap: 12px; justify-items: center; }
+.tab-lock-title { margin: 0; font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--yellow); text-transform: uppercase; letter-spacing: .04em; }
+.tab-lock-text { margin: 0; color: var(--muted); }
+.saves-dialog { --cut: 16px; position: fixed; inset: 0; margin: auto; height: fit-content; max-height: 90vh; overflow-y: auto; width: min(94vw, 680px); padding: 20px; background: var(--surface); color: var(--text); border: 1px solid var(--line-strong); text-align: left; }
+.saves-dialog::backdrop { background: rgba(7, 7, 11, .75); }
+.saves-note { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.saves-list { display: grid; gap: 6px; margin: 0 0 14px; padding: 0; list-style: none; }
+.saves-list li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--line); font-family: var(--font-mono); font-size: 12px; }
+.saves-list li span { flex: 1; }
+.saves-restore { min-height: 32px; padding: 4px 12px; font-size: 12px; }
+.saves-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.saves-import { cursor: pointer; }

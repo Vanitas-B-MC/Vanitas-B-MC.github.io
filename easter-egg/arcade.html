@@ -79,7 +79,7 @@
     <section id="hub" class="hub" aria-labelledby="hub-title">
       <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span>Zone secrète // accès autorisé</p>
       <h1 class="arcade-title glitch" id="hub-title" data-text="Arcade" tabindex="-1">Arcade</h1>
-      <p class="arcade-lead">Tu as trouvé le code. Choisis un jeu : les pièces bleues (Snake, Tetris) se jouent à la Roulette ou boostent le Clicker ; les crédits servent au Blackjack, au Plinko, au Crash, à la Machine à sous, aux Courses d'IA, à la Pêche &amp; Ferme et à débloquer les tours du Tower Defense.</p>
+      <p class="arcade-lead">Tu as trouvé le code. Choisis un jeu : les pièces bleues (Snake, Tetris) se jouent à la Roulette ou boostent le Clicker ; les crédits servent au Blackjack, au Plinko, au Crash, à la Machine à sous, aux Courses d'IA et à débloquer les tours du Tower Defense. Vallée Néon et Grand Bleu ont leur propre monnaie (or et perles).</p>
 
       <ul class="game-grid">
         <li>
@@ -220,8 +220,20 @@
         </li>
       </ul>
 
-      <p class="hub-note">Ta progression est enregistrée dans ce navigateur.
+      <p class="hub-note">Ta progression est enregistrée dans ce navigateur (avec une copie automatique toutes les 10 minutes).
+        <button class="link-button" type="button" id="saves">Sauvegardes</button>
         <button class="link-button" type="button" id="reset">Tout remettre à zéro</button></p>
+
+      <dialog class="saves-dialog chamfer" id="saves-dialog" aria-labelledby="saves-title">
+        <h3 class="subhead" id="saves-title">Sauvegardes</h3>
+        <p class="saves-note">Une copie de ta progression est faite à l'ouverture de l'arcade puis toutes les 10 minutes (les 6 dernières sont gardées). Tu peux aussi télécharger ta sauvegarde dans un fichier et la réimporter plus tard, ou sur un autre navigateur.</p>
+        <ul class="saves-list" id="saves-list"></ul>
+        <div class="saves-actions">
+          <button class="button button-secondary" type="button" id="save-export">Télécharger ma sauvegarde</button>
+          <label class="button button-secondary saves-import">Importer un fichier<input type="file" id="save-import" accept="application/json,.json" hidden></label>
+          <button class="button button-primary" type="button" id="saves-close">Fermer</button>
+        </div>
+      </dialog>
     </section>
 
     <!-- ============ SNAKE ============ -->
@@ -376,6 +388,14 @@
       <div class="game-body" id="dungeon-root"></div>
     </section>
   </main>
+
+  <div class="tab-lock" id="tab-lock" hidden role="alertdialog" aria-labelledby="tab-lock-title">
+    <div class="tab-lock-box chamfer">
+      <p class="tab-lock-title" id="tab-lock-title">Arcade ouverte ailleurs</p>
+      <p class="tab-lock-text" id="tab-lock-text"></p>
+      <button class="button button-primary" type="button" id="tab-lock-button"></button>
+    </div>
+  </div>
 
   <footer class="footer">
     <a class="logo" href="../index.html" aria-label="Retour au portfolio">
