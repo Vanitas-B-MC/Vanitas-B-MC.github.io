@@ -20,6 +20,8 @@ import { createSurvivorsUI } from "./ui-survivors.js";
 import { createBreachUI } from "./ui-breach.js";
 import { createHuntUI } from "./ui-hunt.js";
 import { createDungeonUI } from "./ui-dungeon.js";
+import { createCityUI } from "./ui-city.js";
+import { ERAS as CITY_ERAS } from "./city.js";
 import { createMusic } from "./music.js";
 import { fmt, fmtShort, fmtRate } from "./ui.js";
 import { FISH } from "./fishing.js";
@@ -59,7 +61,8 @@ const GAMES = {
   survivors: { title: "Survivor Arena", ui: mount(createSurvivorsUI, "#survivors-root") },
   breach: { title: "Breach Protocol", ui: mount(createBreachUI, "#breach-root") },
   hunt: { title: "Chasse aux Titans", ui: mount(createHuntUI, "#hunt-root") },
-  dungeon: { title: "Donjon", ui: mount(createDungeonUI, "#dungeon-root") }
+  dungeon: { title: "Donjon", ui: mount(createDungeonUI, "#dungeon-root") },
+  city: { title: "Cité des Âges", ui: mount(createCityUI, "#city-root") }
 };
 
 /* ---------- Portefeuille et infos du hub ---------- */
@@ -102,6 +105,10 @@ function renderWallet() {
   const records = ["easy", "medium", "hard"].map((id) => (wallet.data.mines[id] ? fmtTime(wallet.data.mines[id]) : "—"));
   $("#meta-mines").textContent = `Records : ${records.join(" · ")}`;
   const towers = wallet.data.towers.length;
+  const city = wallet.data.city;
+  const cityPop = city.b.reduce((n, b) => n + (b.t === "house" || b.t === "arco" ? b.p : 0), 0);
+  const metaCity = $("#meta-city");
+  if (metaCity) metaCity.textContent = `${CITY_ERAS[city.era].name} · ${fmt(cityPop)} habitant${cityPop > 1 ? "s" : ""}`;
   $("#meta-td").textContent = `Record : ${fmt(wallet.data.bestWave)} vague${wallet.data.bestWave > 1 ? "s" : ""} · ${towers} tour${towers > 1 ? "s" : ""}`;
 }
 
@@ -128,7 +135,8 @@ const sections = {
   survivors: $("#game-survivors"),
   breach: $("#game-breach"),
   hunt: $("#game-hunt"),
-  dungeon: $("#game-dungeon")
+  dungeon: $("#game-dungeon"),
+  city: $("#game-city")
 };
 let current = null;
 

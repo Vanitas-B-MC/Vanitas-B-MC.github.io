@@ -2,7 +2,7 @@
 
 > ⚠️ **Ce fichier divulgue tous les secrets du site.** Si tu veux les trouver toi-même, arrête-toi ici.
 
-Le portfolio cache des codes secrets, des thèmes de couleur, des effets, une **salle d'arcade de 17 jeux** et un **jeu d'action caché**. Tout est fait en JavaScript natif et dessiné au canvas, sans bibliothèque ni image externe (sauf quelques icônes).
+Le portfolio cache des codes secrets, des thèmes de couleur, des effets, une **salle d'arcade de 18 jeux** et un **jeu d'action caché**. Tout est fait en JavaScript natif et dessiné au canvas, sans bibliothèque ni image externe (sauf quelques icônes).
 
 ---
 
@@ -82,7 +82,7 @@ Le code `cyberpsychosis` fait se disloquer la page de plus en plus pendant envir
 
 ## 5. L'arcade (« awesome »)
 
-Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **17 jeux**, avec un portefeuille commun, des succès et une **musique synthwave générée en direct** (bouton « Musique », coupée au départ).
+Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **18 jeux**, avec un portefeuille commun, des succès et une **musique synthwave générée en direct** (bouton « Musique », coupée au départ).
 
 ### Les monnaies
 
@@ -94,11 +94,12 @@ Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **17 
 | **Âmes** | Donjon | Améliorations permanentes, classes, armes et ultimes du Donjon |
 | **Or** | Vallée Néon (ventes de la ferme) | Graines, outils, bâtiments et animaux de la ferme |
 | **Perles** | Grand Bleu (vente des poissons) | Cannes, appâts, accessoires et lieux de pêche |
+| **Ressources de la cité** | Cité des Âges (nourriture, bois, pierre, métal, or, savoir) | Bâtiments, routes et passage aux ères suivantes |
 
 Le **gain passif du Clicker** continue de tourner pendant qu'on joue aux autres jeux. Les gros montants s'affichent en abrégé (K, M, B, T, Qa, Qi, Sx, Sp, Oc, No, Dc, Ud…) jusqu'à 1e66.
 Plusieurs jeux donnent des récompenses **proportionnelles à ta fortune**, pour que les gains restent intéressants même quand on est très riche.
 
-### Les 17 jeux
+### Les 18 jeux
 
 | # | Jeu | Type | En bref |
 | --- | --- | --- | --- |
@@ -119,6 +120,19 @@ Plusieurs jeux donnent des récompenses **proportionnelles à ta fortune**, pour
 | 15 | **Démineur** | Réflexion | 3 difficultés, records de temps, gains en crédits. |
 | 16 | **Crash** | Casino | Un multiplicateur grimpe puis s'effondre : encaisser à temps (ou fixer un encaissement automatique). |
 | 17 | **Machine à sous** | Casino | 5 rouleaux, 10 lignes, wilds et scatters. Trois ✸ déclenchent des tours gratuits à gains doublés. |
+| 18 | **Cité des Âges** | City builder | Voir le détail plus bas. |
+
+### Cité des Âges (en détail)
+
+Un vrai city builder en vue isométrique, dessiné entièrement au canvas (`js/city.js` pour la logique, `js/city-art.js` pour les dessins, `js/ui-city.js` pour l'interface, `css/city.css`).
+
+- **8 ères** : Préhistoire, Antiquité, Moyen Âge, Renaissance, ère industrielle, ère moderne, ère numérique et **Cyberpunk**. À chaque nouvelle ère, les maisons, les routes et le centre-ville changent d'apparence (hutte → maison à colombages → immeuble en brique → tour de verre → tour couverte de néons).
+- **~65 bâtiments** : habitat, nourriture, production, services, énergie, décor et **8 merveilles** (une par ère, de Stonehenge à la Méga-tour Néon).
+- **Simulation** : emplois, nourriture, impôts (curseur), entretien, énergie à partir de l'ère industrielle, pollution, bonheur détaillé par maison. Une maison monte au niveau 2 puis 3 quand elle est couverte par assez de services (eau, culte, santé, éducation, loisirs, commerce, sécurité).
+- **Évènements** : caravanes, récoltes, fêtes, épidémies, incendies (à éteindre en cliquant), cyberattaques.
+- **Ambiance** : cycle jour / nuit avec fenêtres et lampadaires allumés, néons, fumées d'usine, pluie, nuages, habitants et voitures qui circulent, voitures volantes au Cyberpunk, mini-carte.
+- **Commandes** : glisser pour tracer des routes, poser des habitations en rectangle ou démolir une zone ; clic droit / deux doigts pour déplacer ; molette / pincer pour zoomer ; calques de couverture des services ; plein écran.
+- **Récompenses** : chaque nouvelle ère rapporte des crédits (proportionnels à ta fortune) et des pièces bleues, ainsi que 16 succès.
 
 ### Donjon (en détail)
 

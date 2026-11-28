@@ -10,6 +10,7 @@ import { CHARACTER_IDS, FREE_CHARACTER } from "./survivors.js";
 import { MONSTERS, FAMILIES, FAMILY_IDS, MAX_TIER, freshHunt } from "./hunt.js";
 import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP, HERO_IDS, FREE_HERO } from "./td.js";
 import { freshRanch, sanitizeRanch } from "./ranch.js";
+import { freshCity, sanitizeCity } from "./city.js";
 import { freshAngler, sanitizeAngler } from "./fishing.js";
 import { LEVEL_IDS } from "./mines.js";
 import { QUEST_IDS, questById, applyRunToQuests } from "./hub.js";
@@ -25,7 +26,7 @@ const MAX_BACKUPS = 6;
 // Version du code de l'arcade. À augmenter à chaque mise à jour qui ajoute des jeux, des tours, des cartes…
 // Un onglet resté sur une ancienne version (ou servi depuis le cache du navigateur) voit qu'une sauvegarde a été
 // écrite par une version plus récente : il passe en lecture seule au lieu d'écraser ce qu'il ne connaît pas.
-export const BUILD = 2;
+export const BUILD = 3;
 const START_CREDITS = 100;
 const MAX = MAX_CREDITS;
 
@@ -68,6 +69,7 @@ function freshData() {
       stats: { kills: 0, bosses: 0, rooms: 0, gold: 0, elite: 0, deepest: 0 }, quests: {} },   // âmes, améliorations permanentes, classes
     ranch: freshRanch(Math.floor(Math.random() * 1e9)),   // « Vallée Néon » : la ferme façon Stardew Valley
     angler: freshAngler(), // « Grand Bleu » : le jeu de pêche (perles, équipement, bestiaire)
+    city: freshCity(),     // « Cité des Âges » : le city builder (carte, bâtiments, ressources, ère)
     mines: Object.fromEntries(LEVEL_IDS.map((id) => [id, 0])),  // Démineur : meilleur temps (secondes) par niveau, 0 = aucun
     build: BUILD           // version du code qui a écrit la sauvegarde
   };
@@ -133,6 +135,7 @@ export function sanitize(raw) {
   data.ranch = sanitizeRanch(raw.ranch);
   data.build = BUILD;
   data.angler = sanitizeAngler(raw.angler);
+  data.city = sanitizeCity(raw.city);
   for (const id of LEVEL_IDS) data.mines[id] = toCount(raw.mines?.[id]);
   if (Array.isArray(raw.chars)) {
     for (const id of raw.chars) if (CHARACTER_IDS.includes(id) && !data.chars.includes(id)) data.chars.push(id);
@@ -341,6 +344,7 @@ export function createWallet(storage = defaultStorage()) {
     // Vallée Néon et Grand Bleu : le jeu modifie `data.ranch` / `data.angler` directement, puis demande la sauvegarde.
     saveRanch() { commit(); },
     saveAngler() { commit(); },
+    saveCity() { commit(); },
 
     // Démineur : enregistre un meilleur temps (en secondes). Renvoie true si c'est un nouveau record.
     setMinesBest(level, seconds) {

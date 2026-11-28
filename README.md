@@ -128,7 +128,7 @@ Le site est publié avec **GitHub Pages** depuis la branche `main`. Chaque push 
 
 ## Easter eggs
 
-Le site cache plusieurs surprises : des thèmes de couleur secrets, des effets, une salle d'arcade de 17 jeux et un jeu d'action caché.
+Le site cache plusieurs surprises : des thèmes de couleur secrets, des effets, une salle d'arcade de 18 jeux et un jeu d'action caché.
 Rien n'est visible tant qu'on ne connaît pas les codes…
 
 Tout est expliqué (attention, ça divulgue tout) dans **[easter-egg/README.md](easter-egg/README.md)**.
