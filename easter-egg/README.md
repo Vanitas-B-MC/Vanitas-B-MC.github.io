@@ -92,6 +92,7 @@ Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **18 
 | **Pièces bleues** | Data Snake (pièce rare), Tetris (1 toutes les 6 lignes), longues parties de Survivor Arena, piratages complets, succès de la ferme, bestiaire de la pêche | Roulette, surcadençage des bâtiments du Clicker, graine de fruit ancien, canne néon quantique |
 | **Trophées ✦** | Chasse aux Titans uniquement (dresseurs, Gardiens, captures) | Objets, modules de capture et Atelier des capacités du RPG |
 | **Âmes** | Donjon | Améliorations permanentes, classes, armes et ultimes du Donjon |
+| **Noyaux ◈** | Survivor Arena uniquement (temps survécu, élites, boss, voleur, caisses) | Implants permanents de Survivor Arena |
 | **Or** | Vallée Néon (ventes de la ferme) | Graines, outils, bâtiments et animaux de la ferme |
 | **Perles** | Grand Bleu (vente des poissons) | Cannes, appâts, accessoires et lieux de pêche |
 | **Ressources de la cité** | Cité des Âges (nourriture, bois, pierre, métal, or, savoir) | Bâtiments, routes et passage aux ères suivantes |
@@ -109,7 +110,7 @@ Plusieurs jeux donnent des récompenses **proportionnelles à ta fortune**, pour
 | 04 | **Mineur de données** | Clicker | Façon Cookie Clicker, monnaie propre (les **données**, aussi versées en crédits) : noyau à cliquer, 20 bâtiments (achat/revente ×1/×10/×100), 290 améliorations (dont des implants de clic), paquets dorés (Frénésie, Coup de chance, Frénésie de clic, Surcharge), 143 succès qui renforcent les chats-bots, 3 **mini-jeux** (Cyberdeck à programmes, Panthéon des IA, Bourse noire), surcadençage en pièces bleues, **formatage** (prestige + arbre permanent de 13 nœuds, dont le minage hors ligne). Source principale de crédits. |
 | 05 | **Tetris** | Arcade | Une pièce bleue toutes les 6 lignes. |
 | 06 | **Pare-feu** | Tower defense | 14 cartes, 24 tours et 5 héros à débloquer en crédits, améliorations propres à chaque tour (niveau 5 « ultime »), tours Beacon (boost) et Data Miner (revenu), frappe orbitale. |
-| 07 | **Survivor Arena** | Action | Vagues d'ennemis, tir automatique, une amélioration à chaque niveau, 5 personnages, élites et boss. |
+| 07 | **Survivor Arena** | Action | Façon *Vampire Survivors* : voir le détail plus bas. |
 | 08 | **Breach Protocol** | Réflexion | Le mini-jeu de piratage de Cyberpunk 2077 : enchaîner les codes de la matrice avant la fin du temps. |
 | 09 | **Chasse aux Titans** | RPG | Façon *Pokémon* : voir le détail plus bas. |
 | 10 | **Donjon** | Roguelite | Façon *The Binding of Isaac* : voir le détail plus bas. |
@@ -121,6 +122,23 @@ Plusieurs jeux donnent des récompenses **proportionnelles à ta fortune**, pour
 | 16 | **Crash** | Casino | Un multiplicateur grimpe puis s'effondre : encaisser à temps (ou fixer un encaissement automatique). |
 | 17 | **Machine à sous** | Casino | 5 rouleaux sans lignes : 3 symboles identiques sur des rouleaux côte à côte gagnent, où qu'ils soient. Wilds, et trois ✸ pour des tours gratuits à gains doublés. |
 | 18 | **Cité des Âges** | City builder | Voir le détail plus bas. |
+
+### Survivor Arena (en détail)
+
+Façon *Vampire Survivors*, entièrement au canvas (`js/survivors.js` pour la logique, `js/ui-survivors.js` pour l'affichage).
+
+- **Grande carte qui défile** (caméra centrée sur le joueur), obstacles, caisses de ravitaillement à briser, flèches au bord de l'écran vers les boss, coffres et élites. Plein écran sur PC.
+- **19 armes** (niveau 1 à 8) : blaster, lames orbitales, onde de choc, foudre, missiles, météores, traînée de feu, rayon rotatif, singularité, disque boomerang, fusil à pompe, lame mono-filament, drone, mines, champ cryo, railgun, scies ricochet, fiole toxique, arc Tesla. **6 emplacements**.
+- **16 modules passifs** (niveau 1 à 5) : dégâts, cadence, zone, durée, projectiles, vitesse, PV, régénération, aimant, critiques, armure, expérience, chance, vitesse des projectiles, vol de vie, avidité. **6 emplacements**.
+- **Évolutions** : une arme au niveau 8 + le bon module → elle évolue en ouvrant un coffre (Gatling plasma, Halo d'acier, Pulsar, Tempête ionique, Apocalypse, Prisme, Horizon des événements, Murasama, Réseau Tesla…).
+- **Montée de niveau** : 3 choix (4 avec l'implant), raretés Rare / Épique / Légendaire qui donnent plusieurs niveaux d'un coup, relancer, passer, bannir.
+- **24 ennemis** aux comportements différents (tireurs, chargeurs, kamikazes, médics qui soignent, bastions qui protègent, spectres intangibles, sauteurs qui se téléportent, snipers, poseurs de mines, ruches, golems…), des **élites** à affixes (Rapide, Blindé, Vampirique, Explosif, Géant, Invocateur) qui lâchent un coffre.
+- **9 boss** à patterns, un toutes les 2 minutes : Virus, Overlord, Juggernaut, Hydre (se divise), Sentinelle (lasers), Reine de l'essaim, Netrunner fantôme (leurres), Titan mécanique, puis **le Blackwall à 20:00** (4 phases). Le vaincre lance le mode infini.
+- **Événements** : ruées, encerclements, tempêtes d'essaims, meutes d'élites, voleur de données à attraper. Objets : soin, aimant, bombe, horloge, noyaux, coffres.
+- **17 personnages** : les 5 historiques (crédits) et 12 nouveaux à débloquer par des **défis**. Chacun a son arme de départ et son **ultime** (Espace ou bouton) chargé en éliminant des ennemis.
+- **5 cartes** (Ruelles néon, Datacenter, Désert toxique, Station gelée, Le Noyau), débloquées en survivant 10 minutes sur la précédente, et **6 niveaux de Surtension** (difficulté et récompenses en hausse).
+- **21 implants permanents** payés en **noyaux**, un **codex** des ennemis et des armes, des statistiques globales, et un écran de fin avec les dégâts par arme.
+- **Récompenses** : crédits (+ un pourcentage de ta fortune), une pièce bleue toutes les 2 minutes, et des noyaux.
 
 ### Cité des Âges (en détail)
 

@@ -1154,6 +1154,91 @@ kbd {
 .sv-owned .sv-owned-sec { color: var(--cyan); }
 .sv-choice em { color: var(--cyan); font-family: var(--font-mono); font-size: 11px; font-style: normal; }
 
+/* Survivor Arena v2 : préparation, cartes, implants, codex */
+.sv-ult { background: linear-gradient(90deg, #b06bff, #fcee0a); }
+.sv-ult-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.sv-ult-btn { padding: 4px 12px; }
+.sv-ult-btn.is-ready { border-color: var(--yellow); color: var(--yellow); box-shadow: 0 0 12px -2px var(--yellow); }
+.sv-setup-summary { margin: 6px 0 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.sv-setup { margin: 8px 0 12px; padding: 12px; background: var(--surface); border: 1px solid var(--line-strong); }
+.sv-setup[hidden] { display: none; }
+.sv-tabs .map-button { flex: 1 1 auto; }
+.sv-tabs .map-button.is-active { border-color: var(--yellow); color: var(--yellow); }
+.sv-setup-body { max-height: 440px; overflow-y: auto; padding-right: 4px; }
+.sv-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+.sv-card {
+  display: grid; gap: 4px; align-content: start; padding: 10px 12px; text-align: left; cursor: pointer;
+  background: var(--surface-2, #12121c); border: 1px solid var(--line-strong); border-left: 3px solid var(--cc, var(--cyan)); color: var(--text);
+}
+.sv-card strong { font-family: var(--font-display); letter-spacing: .04em; text-transform: uppercase; color: var(--cc, var(--text)); }
+.sv-card span { color: var(--muted); font-size: 12px; }
+.sv-card em { color: var(--cyan); font-family: var(--font-mono); font-size: 11px; font-style: normal; }
+.sv-card .sv-card-weapon { color: var(--text); font-family: var(--font-mono); }
+.sv-card.is-active { border-color: var(--yellow); box-shadow: 0 0 0 1px var(--yellow) inset; }
+.sv-card.is-locked { border-style: dashed; opacity: .75; }
+.sv-card:disabled { cursor: not-allowed; }
+.sv-card:not(:disabled):hover, .sv-card:focus-visible { border-color: var(--yellow); }
+.sv-lock { color: var(--muted) !important; font-family: var(--font-mono); font-size: 11px !important; }
+.sv-lock.is-ready { color: var(--yellow) !important; }
+.sv-heat { margin-top: 6px; }
+.sv-heat .map-button.is-active { border-color: #ff2a2a; color: #ff6a6a; }
+.sv-cores-line { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+.sv-cores-line strong { color: #b06bff; font-family: var(--font-display); font-size: 20px; }
+.sv-implants { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+.sv-implant {
+  display: grid; gap: 3px; padding: 8px 10px; text-align: left; cursor: pointer;
+  background: var(--surface-2, #12121c); border: 1px solid var(--line-strong); color: var(--text);
+}
+.sv-implant strong { font-family: var(--font-display); letter-spacing: .04em; text-transform: uppercase; font-size: 13px; }
+.sv-implant span { color: var(--muted); font-size: 12px; }
+.sv-implant em { color: #b06bff; font-family: var(--font-mono); font-size: 12px; font-style: normal; }
+.sv-implant.is-max em { color: var(--yellow); }
+.sv-implant:not(:disabled):hover { border-color: #b06bff; }
+.sv-implant:disabled { opacity: .6; cursor: not-allowed; }
+.sv-implant.is-max:disabled { opacity: .9; }
+.sv-pips { display: flex; flex-wrap: wrap; gap: 3px; }
+.sv-pips i { width: 10px; height: 6px; background: var(--line-strong); }
+.sv-pips i.on { background: #b06bff; box-shadow: 0 0 6px -1px #b06bff; }
+.sv-refund { margin-top: 10px; }
+.sv-codex { margin: 0 0 10px; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
+.sv-codex li { display: grid; gap: 2px; padding: 6px 8px; background: var(--surface-2, #12121c); border-left: 3px solid var(--cc, var(--line-strong)); }
+.sv-codex strong { font-size: 13px; color: var(--cc, var(--text)); }
+.sv-codex span { color: var(--muted); font-size: 12px; }
+.sv-codex em { color: var(--cyan); font-family: var(--font-mono); font-size: 11px; font-style: normal; }
+.sv-codex li.is-unknown { opacity: .5; border-left-color: var(--line-strong); }
+.sv-codex li.is-unknown strong { color: var(--muted); }
+.sv-sheet { display: grid; grid-template-columns: auto auto; gap: 2px 12px; margin: 6px 0 0; font-family: var(--font-mono); font-size: 12px; }
+.sv-sheet dt { color: var(--muted); }
+.sv-sheet dd { margin: 0; text-align: right; color: var(--text); }
+.sv-records { grid-template-columns: repeat(auto-fill, minmax(140px, auto) minmax(60px, auto)); max-width: 640px; }
+.sv-details summary { cursor: pointer; font-family: var(--font-mono); font-size: 12px; color: var(--cyan); }
+.sv-opts { display: grid; gap: 6px; }
+.sv-opts .map-button { font-size: 12px; }
+.sv-arsenal .sv-lv { color: var(--cyan); }
+.sv-arsenal li { padding: 2px 0 2px 6px; }
+.sv-choice .sv-glyph { display: inline-block; min-width: 1.2em; text-align: center; }
+.sv-choice .sv-hint { color: var(--cyan); font-size: 11px; opacity: .8; }
+.sv-choice.is-banish { border-style: dashed; border-color: #ff2a2a; }
+.sv-choice-tools { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.sv-choice-tools .map-button { font-size: 12px; padding: 5px 10px; }
+.sv-stage .game-overlay { overflow-y: auto; }
+.sv-chest-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; width: min(100%, 360px); }
+.sv-chest-list li { display: grid; gap: 2px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--line-strong); text-align: left; }
+.sv-chest-list li strong { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .04em; }
+.sv-chest-list li span { color: var(--muted); font-size: 12px; }
+.sv-chest-list .sv-chest-evo { border-color: #ffb347; box-shadow: 0 0 16px -4px #ffb347; }
+.sv-chest-list .sv-chest-evo strong { color: #ffb347; }
+.sv-chest-list .sv-chest-cores strong { color: #b06bff; }
+.sv-summary { display: grid; gap: 6px; width: min(100%, 420px); justify-items: center; }
+.sv-summary[hidden] { display: none; }
+.sv-gains { margin: 0; color: var(--yellow); font-family: var(--font-mono); font-size: 13px; }
+.sv-news { margin: 0; color: #3ddc84; font-family: var(--font-mono); font-size: 13px; }
+.sv-dmg { margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; width: 100%; font-family: var(--font-mono); font-size: 11px; }
+.sv-dmg li { display: grid; grid-template-columns: 130px minmax(0, 1fr) 60px; gap: 6px; align-items: center; color: var(--muted); }
+.sv-dmg-bar { height: 6px; background: linear-gradient(90deg, var(--cyan) var(--w), transparent var(--w)); border: 1px solid var(--line-strong); }
+.sv-dmg em { font-style: normal; text-align: right; color: var(--text); }
+.sv-board-wrap.is-fullscreen .sv-stage { width: 100vw; height: 100vh; aspect-ratio: auto !important; margin: 0; border: 0; }
+
 /* Breach Protocol */
 .bp-config { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin: 18px 0; }
 .bp-diffs { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -2472,3 +2557,17 @@ kbd {
 .td-ach .ach-mark { grid-row: 1 / span 2; color: var(--muted); }
 .td-ach li.is-ok .ach-mark { color: #3ddc84; }
 #td-resume { margin-top: 10px; }
+@media (max-width: 760px) {
+  .sv-dmg li { grid-template-columns: 90px minmax(0, 1fr) 48px; }
+  .sv-setup-body { max-height: 60vh; }
+  .sv-cards, .sv-implants, .sv-codex { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 420px) {
+  .sv-cards, .sv-codex { grid-template-columns: 1fr; }
+}
+/* Survivor Arena (téléphone) : le choix d'amélioration et le coffre passent en plein écran ;
+   le cadre biseauté (clip-path) les rognerait, on le retire pendant qu'ils sont ouverts. */
+@media (max-width: 760px) {
+  .sv-board-wrap:has(.sv-levelup:not([hidden])), .sv-board-wrap:has(.sv-chest:not([hidden])) { clip-path: none; isolation: auto; }
+  .sv-chest:not([hidden]) { position: fixed; inset: 0; z-index: 200; overflow-y: auto; background: rgba(5, 5, 10, .95); }
+}

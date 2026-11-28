@@ -6,7 +6,7 @@
 // (navigation privée, par exemple), le jeu marche quand même, simplement sans sauvegarde.
 
 import { freshClicker, sanitizeClicker } from "./clicker.js";
-import { CHARACTER_IDS, FREE_CHARACTER } from "./survivors.js";
+import { CHARACTER_IDS, FREE_CHARACTER, freshSv, sanitizeSv } from "./survivors.js";
 import { freshHunt, sanitizeHunt } from "./hunt.js";
 import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP, HERO_IDS, FREE_HERO } from "./td.js";
 import { freshRanch, sanitizeRanch } from "./ranch.js";
@@ -26,7 +26,7 @@ const MAX_BACKUPS = 6;
 // Version du code de l'arcade. À augmenter à chaque mise à jour qui ajoute des jeux, des tours, des cartes…
 // Un onglet resté sur une ancienne version (ou servi depuis le cache du navigateur) voit qu'une sauvegarde a été
 // écrite par une version plus récente : il passe en lecture seule au lieu d'écraser ce qu'il ne connaît pas.
-export const BUILD = 5;
+export const BUILD = 6;
 const START_CREDITS = 100;
 const MAX = MAX_CREDITS;
 
@@ -49,6 +49,7 @@ function freshData() {
     maps: [FREE_MAP],      // cartes du Tower Defense débloquées
     heroes: [FREE_HERO],   // héros du Tower Defense débloqués
     chars: [FREE_CHARACTER], // personnages de Survivor Arena débloqués
+    sv: freshSv(),         // Survivor Arena : noyaux, implants, records par carte, Surtension, codex, statistiques
     achievements: [],
     hunt: freshHunt(),     // « Chasse aux Titans » : équipe, box, sac, badges et Titadex du RPG de capture
     trophies: 0,           // monnaie du RPG : gagnée uniquement en chassant
@@ -110,6 +111,9 @@ export function sanitize(raw) {
       for (const id of raw.dungeon.weapons) if (WEAPON_IDS.includes(id) && !d.weapons.includes(id)) d.weapons.push(id);
     }
   }
+  data.sv = sanitizeSv(raw.sv);
+  // ancienne sauvegarde (avant la refonte) : le record compte pour la carte de départ
+  if (!raw.sv && data.bestSurvivor) data.sv.best.alley = Math.max(data.sv.best.alley, data.bestSurvivor);
   data.ranch = sanitizeRanch(raw.ranch);
   data.build = BUILD;
   data.angler = sanitizeAngler(raw.angler);
@@ -320,6 +324,7 @@ export function createWallet(storage = defaultStorage()) {
     saveRanch() { commit(); },
     saveAngler() { commit(); },
     saveCity() { commit(); },
+    saveSurvivor() { commit(); },
 
     // Démineur : enregistre un meilleur temps (en secondes). Renvoie true si c'est un nouveau record.
     setMinesBest(level, seconds) {
