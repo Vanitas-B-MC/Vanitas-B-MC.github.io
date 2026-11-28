@@ -7,7 +7,8 @@ import {
   HEAT_MAX, ELITE_AFFIXES, BLACKWALL_AT, MAX_WEAPONS, MAX_PASSIVES, SOURCE_NAMES,
   createState, update, resizeView, chooseUpgrade, reroll, skipChoice, banishChoice, closeChest, useUlt, describeChoice, xpNeeded,
   creditsFor, coinsFor, coresFor, applyRun, buyImplant, refundImplants, implantCost, mapById, mapUnlocked, heatInfo,
-  challengeMet, challengeProgress, charById, statSheet, weaponOf, passiveOf, freshSv
+  challengeMet, challengeProgress, charById, statSheet, weaponOf, passiveOf, freshSv,
+  FUSIONS, FUSION_IDS, weaponDef, synergiesOf, fusionsReady
 } from "./survivors.js";
 import { wealthBonus, survivorPct } from "./rewards.js";
 import { h, fmt, fmtShort, scrollToPlay, prefersReducedMotion } from "./ui.js";
@@ -107,6 +108,7 @@ export function createSurvivorsUI(root, wallet) {
   const stateEl = h("p", { class: "game-state", id: "sv-state", "aria-live": "polite" }, "Prêt");
   const weaponList = h("ul", { class: "sv-owned sv-arsenal" });
   const passiveList = h("ul", { class: "sv-owned sv-arsenal" });
+  const synList = h("ul", { class: "sv-owned sv-arsenal sv-synlist" });
   const sheetList = h("dl", { class: "sv-sheet" });
 
   const numbersToggle = h("button", { class: "map-button", type: "button", onclick: () => toggleOpt("numbers") });
@@ -158,6 +160,8 @@ export function createSurvivorsUI(root, wallet) {
         weaponList,
         h("h3", { class: "subhead" }, `Modules (${MAX_PASSIVES} max)`),
         passiveList,
+        h("h3", { class: "subhead" }, "Synergies et fusions"),
+        synList,
         h("details", { class: "sv-details" }, h("summary", {}, "Statistiques du personnage"), sheetList),
         h("div", { class: "sv-opts" }, numbersToggle, shakeToggle),
         h("ul", { class: "game-help" },
@@ -437,6 +441,18 @@ export function createSurvivorsUI(root, wallet) {
   function drawMines(s, now) {
     for (const m of s.pmines) {
       if (!onScreen(s, m.x, m.y, 20)) continue;
+      if (m.grav) {
+        ctx.fillStyle = "#05000a";
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, 8, 0, TAU);
+        ctx.fill();
+        ctx.strokeStyle = m.arm > 0 ? "#555" : "#b06bff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, 8 + Math.sin(now * 6 + m.x) * 2, now * 4, now * 4 + 4.5);
+        ctx.stroke();
+        continue;
+      }
       ctx.fillStyle = m.arm > 0 ? "#555" : m.big ? "#ff2a6d" : "#ff8a3d";
       ctx.beginPath();
       ctx.arc(m.x, m.y, m.big ? 8 : 6, 0, TAU);
@@ -476,7 +492,29 @@ export function createSurvivorsUI(root, wallet) {
         ctx.arc(z.x, z.y, z.r * k, 0, TAU);
         ctx.fill();
         ctx.globalAlpha = 1;
-        if (z.orbital) {
+        if (z.missile) {
+          // missile orbital qui tombe, flamme cyan
+          const fall = (1 - k) * 260;
+          const mx = z.x + fall * 0.25;
+          const my = z.y - fall;
+          ctx.strokeStyle = "rgba(0,240,255,0.5)";
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(mx, my);
+          ctx.lineTo(mx + 30, my - 110);
+          ctx.stroke();
+          ctx.save();
+          ctx.translate(mx, my);
+          ctx.rotate(Math.atan2(110, -30));
+          ctx.fillStyle = "#e0f7ff";
+          ctx.fillRect(-14, -4, 22, 8);
+          ctx.fillStyle = "#00f0ff";
+          poly([[8, -4], [16, 0], [8, 4]]);
+          ctx.fill();
+          ctx.fillStyle = "#ff8a3d";
+          ctx.fillRect(-20, -2, 6, 4);
+          ctx.restore();
+        } else if (z.orbital) {
           ctx.strokeStyle = "#7df9ff";
           ctx.lineWidth = 3 * k;
           ctx.beginPath();
@@ -499,13 +537,13 @@ export function createSurvivorsUI(root, wallet) {
       } else if (z.kind === "fire") {
         const k = z.ttl / z.max;
         ctx.globalAlpha = 0.15 + 0.5 * k;
-        ctx.fillStyle = z.lava ? "#ff3b1f" : k > 0.5 ? "#ff8a3d" : "#ff3b5c";
+        ctx.fillStyle = z.napalm ? (k > 0.5 ? "#9dff2a" : "#ff8a3d") : z.lava ? "#ff3b1f" : k > 0.5 ? "#ff8a3d" : "#ff3b5c";
         const flick = 0.9 + Math.sin(now * 20 + z.x) * 0.1;
         ctx.beginPath();
         ctx.arc(z.x, z.y, z.r * (0.6 + 0.4 * k) * flick, 0, TAU);
         ctx.fill();
         ctx.globalAlpha = 0.4 * k;
-        ctx.fillStyle = "#ffe08a";
+        ctx.fillStyle = z.napalm ? "#f4ffb0" : "#ffe08a";
         ctx.beginPath();
         ctx.arc(z.x, z.y, z.r * 0.35 * flick, 0, TAU);
         ctx.fill();
@@ -522,10 +560,24 @@ export function createSurvivorsUI(root, wallet) {
         }
         const k = Math.min(1, z.ttl / 0.6);
         ctx.globalAlpha = 0.3 * k;
-        ctx.fillStyle = z.slow ? "#2affb0" : "#3ddc84";
+        ctx.fillStyle = z.napalm ? "#ff7a1f" : z.slow ? "#2affb0" : "#3ddc84";
         ctx.beginPath();
         ctx.arc(z.x, z.y, z.r, 0, TAU);
         ctx.fill();
+        if (z.napalm) {
+          // flammes qui dansent sur la marée de napalm
+          ctx.globalAlpha = 0.7 * k;
+          for (let i = 0; i < 7; i++) {
+            const a = i * 0.9 + z.x;
+            const rr = z.r * (0.2 + ((i * 37) % 10) / 13);
+            const fx = z.x + Math.cos(a) * rr;
+            const fy = z.y + Math.sin(a) * rr;
+            const hgt = 10 + 6 * Math.sin(now * 12 + i);
+            ctx.fillStyle = i % 2 ? "#9dff2a" : "#ffb347";
+            poly([[fx - 5, fy], [fx, fy - hgt], [fx + 5, fy]]);
+            ctx.fill();
+          }
+        }
         ctx.globalAlpha = 0.6 * k;
         ctx.strokeStyle = "#7dffb0";
         ctx.lineWidth = 2;
@@ -942,6 +994,63 @@ export function createSurvivorsUI(root, wallet) {
         ctx.arc(0, 0, sh.r * 0.25, 0, TAU);
         ctx.fill();
         ctx.restore();
+      } else if (sh.kind === "anti") {
+        // orbe d'antimatière : cœur noir, anneaux violets, halo qui distord
+        const pulse = 1 + Math.sin(now * 20) * 0.08;
+        ctx.globalAlpha = 0.18;
+        ctx.fillStyle = "#d18cff";
+        ctx.beginPath();
+        ctx.arc(sh.x, sh.y, sh.aura * pulse, 0, TAU);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.save();
+        ctx.translate(sh.x, sh.y);
+        ctx.shadowColor = "#d18cff";
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(0, 0, sh.r, 0, TAU);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#05000a";
+        ctx.beginPath();
+        ctx.arc(0, 0, sh.r * 0.7, 0, TAU);
+        ctx.fill();
+        ctx.strokeStyle = "#d18cff";
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 3; i++) {
+          ctx.rotate(sh.spin + i * 1.1);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, sh.r * 1.9, sh.r * 0.6, 0, 0, TAU);
+          ctx.stroke();
+        }
+        ctx.restore();
+      } else if (sh.kind === "crescent") {
+        ctx.save();
+        ctx.translate(sh.x, sh.y);
+        ctx.rotate(Math.atan2(sh.vy, sh.vx));
+        ctx.shadowColor = "#ff3b5c";
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = "rgba(255,59,92,0.85)";
+        ctx.beginPath();
+        ctx.arc(0, 0, sh.r, -Math.PI / 2, Math.PI / 2);
+        ctx.arc(-sh.r * 0.45, 0, sh.r * 0.85, Math.PI / 2, -Math.PI / 2, true);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "#ffd0d8";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, sh.r, -Math.PI / 2, Math.PI / 2);
+        ctx.stroke();
+        // traînée fantôme
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = "#ff3b5c";
+        ctx.beginPath();
+        ctx.arc(-sh.r * 0.9, 0, sh.r * 0.8, -Math.PI / 2, Math.PI / 2);
+        ctx.arc(-sh.r * 1.3, 0, sh.r * 0.7, Math.PI / 2, -Math.PI / 2, true);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
       } else if (sh.kind === "laser") {
         ctx.strokeStyle = sh.color;
         ctx.lineWidth = 3;
@@ -954,6 +1063,16 @@ export function createSurvivorsUI(root, wallet) {
         ctx.beginPath();
         ctx.arc(sh.x, sh.y, sh.r, 0, TAU);
         ctx.fill();
+        if (sh.zap > 0.3) {
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          const j = Math.sin(now * 60 + sh.x) * 4;
+          ctx.moveTo(sh.x - 4, sh.y + j);
+          ctx.lineTo(sh.x, sh.y - j);
+          ctx.lineTo(sh.x + 4, sh.y + j);
+          ctx.stroke();
+        }
         ctx.globalAlpha = 0.4;
         ctx.strokeStyle = sh.color || "#00f0ff";
         ctx.lineWidth = sh.r;
@@ -1058,6 +1177,114 @@ export function createSurvivorsUI(root, wallet) {
           ctx.beginPath();
           ctx.arc(d.x, d.y, 3, 0, TAU);
           ctx.fill();
+        }
+      }
+    }
+    for (const w of s.weapons) {
+      if (!w.fused) continue;
+      if (w.id === "maelstrom") {
+        for (const b of w.vis) {
+          ctx.save();
+          ctx.translate(b.x, b.y);
+          ctx.rotate(b.a);
+          const R = b.big ? 16 : 12;
+          ctx.fillStyle = b.big ? "#e8e8ff" : "#a0a8c8";
+          ctx.shadowColor = "#c8c8ff";
+          ctx.shadowBlur = b.big ? 10 : 0;
+          ctx.beginPath();
+          for (let i = 0; i < 16; i++) {
+            const a = (i / 16) * TAU;
+            const rr = i % 2 ? R * 0.7 : R;
+            i ? ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = "#ff2a6d";
+          ctx.beginPath();
+          ctx.arc(0, 0, R * 0.28, 0, TAU);
+          ctx.fill();
+          ctx.restore();
+        }
+      } else if (w.id === "satlaser") {
+        for (const sat of w.vis) {
+          const ux = Math.cos(sat.a);
+          const uy = Math.sin(sat.a);
+          ctx.strokeStyle = "#ff2a6d";
+          ctx.globalAlpha = 0.3;
+          ctx.lineWidth = 14;
+          ctx.beginPath();
+          ctx.moveTo(sat.x, sat.y);
+          ctx.lineTo(sat.x + ux * sat.len, sat.y + uy * sat.len);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = "#ffd0e0";
+          ctx.stroke();
+          ctx.save();
+          ctx.translate(sat.x, sat.y);
+          ctx.rotate(sat.a);
+          ctx.fillStyle = "#3a3f55";
+          ctx.fillRect(-14, -3, 28, 6);              // panneaux solaires
+          ctx.fillStyle = "#5aa9ff";
+          ctx.fillRect(-14, -3, 8, 6);
+          ctx.fillRect(6, -3, 8, 6);
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(0, 0, 5, 0, TAU);
+          ctx.fill();
+          ctx.fillStyle = "#ff2a6d";
+          ctx.beginPath();
+          ctx.arc(4, 0, 2.5, 0, TAU);
+          ctx.fill();
+          ctx.restore();
+        }
+      } else if (w.id === "supernova") {
+        const F = FUSIONS.supernova.F;
+        const R = F.ar * s.stats.area;
+        ctx.globalAlpha = 0.14 + 0.04 * Math.sin(now * 2);
+        ctx.fillStyle = "#9be7ff";
+        ctx.beginPath();
+        ctx.arc(pl.x, pl.y, R, 0, TAU);
+        ctx.fill();
+        ctx.globalAlpha = 0.7;
+        ctx.strokeStyle = "#e6faff";
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 12; i++) {
+          const a = (i / 12) * TAU + now * 0.4;
+          const cx = pl.x + Math.cos(a) * R;
+          const cy = pl.y + Math.sin(a) * R;
+          ctx.beginPath();
+          ctx.moveTo(cx - Math.cos(a) * 8, cy - Math.sin(a) * 8);
+          ctx.lineTo(cx + Math.cos(a + 0.4) * 6, cy + Math.sin(a + 0.4) * 6);
+          ctx.lineTo(cx + Math.cos(a) * 10, cy + Math.sin(a) * 10);
+          ctx.lineTo(cx + Math.cos(a - 0.4) * 6, cy + Math.sin(a - 0.4) * 6);
+          ctx.closePath();
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      } else if (w.id === "thousand") {
+        for (const sw of w.sw) {
+          ctx.save();
+          ctx.translate(sw.x, sw.y);
+          ctx.rotate(sw.ang);
+          if (sw.st !== 0) {
+            ctx.globalAlpha = 0.35;
+            ctx.fillStyle = "#fcee0a";
+            ctx.fillRect(-40, -2, 30, 4);
+            ctx.globalAlpha = 1;
+          }
+          ctx.shadowColor = "#fcee0a";
+          ctx.shadowBlur = sw.st ? 12 : 4;
+          ctx.fillStyle = "#fffbe0";
+          poly([[18, 0], [-6, -3], [-6, 3]]);   // lame
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = "#fcee0a";
+          ctx.fillRect(-8, -6, 3, 12);             // garde
+          ctx.fillStyle = "#8a5a20";
+          ctx.fillRect(-15, -1.5, 7, 3);           // poignée
+          ctx.restore();
         }
       }
     }
@@ -1211,9 +1438,63 @@ export function createSurvivorsUI(root, wallet) {
         case "chain":
           ctx.globalAlpha = k;
           ctx.strokeStyle = f.color;
-          ctx.lineWidth = 2.5;
-          for (let i = 1; i < f.pts.length; i++) zigzag(f.pts[i - 1].x, f.pts[i - 1].y, f.pts[i].x, f.pts[i].y, f.seed + i, 7);
+          ctx.lineWidth = f.thick ? 7 : 2.5;
+          for (let i = 1; i < f.pts.length; i++) zigzag(f.pts[i - 1].x, f.pts[i - 1].y, f.pts[i].x, f.pts[i].y, f.seed + i, f.thick ? 10 : 7);
+          if (f.thick) {
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2;
+            for (let i = 1; i < f.pts.length; i++) zigzag(f.pts[i - 1].x, f.pts[i - 1].y, f.pts[i].x, f.pts[i].y, f.seed + i, 10);
+          }
           break;
+        case "implode": {
+          // l'onde se referme vers le centre, puis un flash
+          const rr = f.r * k;
+          ctx.globalAlpha = 0.25 * (1 - k) + 0.1;
+          ctx.fillStyle = "#05000a";
+          ctx.beginPath();
+          ctx.arc(f.x, f.y, rr, 0, TAU);
+          ctx.fill();
+          ctx.globalAlpha = 0.9;
+          ctx.strokeStyle = f.color;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(f.x, f.y, rr, 0, TAU);
+          ctx.stroke();
+          if (k < 0.3) {
+            ctx.globalAlpha = (0.3 - k) * 3;
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(f.x, f.y, f.r * 0.5, 0, TAU);
+            ctx.fill();
+          }
+          break;
+        }
+        case "shard":
+          ctx.globalAlpha = k;
+          ctx.fillStyle = f.color;
+          for (let i = 0; i < 6; i++) {
+            const a = (i / 6) * TAU + f.x;
+            const d = f.r * (1.6 - k);
+            const x = f.x + Math.cos(a) * d;
+            const y = f.y + Math.sin(a) * d;
+            poly([[x, y - 4], [x + 3, y], [x, y + 4], [x - 3, y]]);
+            ctx.fill();
+          }
+          break;
+        case "ice": {
+          ctx.globalAlpha = k * 0.8;
+          ctx.strokeStyle = "#e6faff";
+          ctx.lineWidth = 2;
+          const rr = f.r * (1.05 - k * 0.4);
+          for (let i = 0; i < 18; i++) {
+            const a = (i / 18) * TAU + f.seed;
+            ctx.beginPath();
+            ctx.moveTo(f.x + Math.cos(a) * rr * 0.6, f.y + Math.sin(a) * rr * 0.6);
+            ctx.lineTo(f.x + Math.cos(a) * rr, f.y + Math.sin(a) * rr);
+            ctx.stroke();
+          }
+          break;
+        }
         case "rail":
           ctx.globalAlpha = k;
           ctx.strokeStyle = f.color;
@@ -1336,7 +1617,7 @@ export function createSurvivorsUI(root, wallet) {
     const size = s.w < 600 ? 20 : 24;
     ctx.font = `${size * 0.6}px sans-serif`;
     ctx.textBaseline = "middle";
-    s.weapons.forEach((w, i) => hudIcon(8 + i * (size + 4), 8, size, WEAPONS[w.id].glyph, w.evo ? "#ffb347" : WEAPONS[w.id].color, w.evo ? "★" : w.lvl));
+    s.weapons.forEach((w, i) => hudIcon(8 + i * (size + 4), 8, size, weaponDef(w.id).glyph, w.fused ? FUSIONS[w.id].color : w.evo ? "#ffb347" : WEAPONS[w.id].color, w.fused ? "✦" : w.evo ? "★" : w.lvl, w.fused));
     s.passives.forEach((p, i) => hudIcon(8 + i * (size + 4), 12 + size, size, PASSIVES[p.id].glyph, "#c8c8d8", p.lvl));
     ctx.textBaseline = "alphabetic";
     // compteur à droite
@@ -1367,12 +1648,14 @@ export function createSurvivorsUI(root, wallet) {
     }
   }
 
-  function hudIcon(x, y, size, glyph, color, lvl) {
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
+  function hudIcon(x, y, size, glyph, color, lvl, glow = false) {
+    ctx.fillStyle = glow ? "rgba(60,0,30,0.75)" : "rgba(0,0,0,0.6)";
     ctx.fillRect(x, y, size, size);
+    if (glow) { ctx.shadowColor = color; ctx.shadowBlur = 10 + 4 * Math.sin(performance.now() / 200); }
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
     ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
+    ctx.shadowBlur = 0;
     ctx.fillStyle = color;
     ctx.textAlign = "center";
     ctx.fillText(glyph, x + size / 2, y + size / 2);
@@ -1536,13 +1819,25 @@ export function createSurvivorsUI(root, wallet) {
         h("span", {}, got ? w.desc : "Pas encore obtenue"),
         h("em", {}, `Évolution : ${evo ? w.evo.name : "???"} (${PASSIVES[w.evo.need].name})`));
     }));
+    const fusions = h("ul", { class: "sv-codex" }, FUSION_IDS.map((id) => {
+      const F = FUSIONS[id];
+      const got = (data.seenF || []).includes(id);
+      return h("li", { class: got ? "" : "is-half", style: `--cc:${F.color}` },
+        h("strong", {}, `${F.glyph} ${got ? F.name : "???"}`),
+        h("span", {}, `${F.parts.map((x) => WEAPONS[x].name).join(" + ")} (niveau 8)`),
+        h("em", {}, `Synergie « ${F.syn.name} » : ${F.syn.desc}`),
+        got ? h("span", {}, F.desc) : null);
+    }));
     const affixes = Object.values(ELITE_AFFIXES).map((a) => a.name).join(", ");
     return h("div", {},
       h("h3", { class: "subhead" }, `Ennemis (${seen.length} / ${ENEMY_IDS.length})`),
       enemies,
       h("p", { class: "hint" }, `Élites (contour doré, lâchent un coffre) : ${affixes}.`),
       h("h3", { class: "subhead" }, `Armes et évolutions (${data.seenE.length} / ${WEAPON_IDS.length} évoluées)`),
-      weapons);
+      weapons,
+      h("h3", { class: "subhead" }, `Synergies et fusions (${(data.seenF || []).length} / ${FUSION_IDS.length} réalisées)`),
+      h("p", { class: "hint" }, "Posséder les deux armes d'une paire active leur synergie. Les deux au niveau 8 : elles fusionnent en arme ultime (choix Mythique ou coffre) et libèrent un emplacement."),
+      fusions);
   }
 
   function renderRecords(data) {
@@ -1550,7 +1845,7 @@ export function createSurvivorsUI(root, wallet) {
     const rows = [
       ["Parties", fmt(s.runs)], ["Temps total", clock(s.time)], ["Meilleur temps", clock(s.bestTime)], ["Ennemis éliminés", fmt(s.kills)],
       ["Record d'éliminations", fmt(s.bestRunKills)], ["Boss vaincus", fmt(s.bosses)], ["Élites", fmt(s.elites)], ["Gemmes", fmt(s.gems)],
-      ["Évolutions", fmt(s.evos)], ["Niveau max", fmt(s.maxLevel)], ["Blackwall vaincu", fmt(s.blackwall)], ["Surtension débloquée", String(data.heat)]
+      ["Évolutions", fmt(s.evos)], ["Fusions", fmt(s.fusions || 0)], ["Niveau max", fmt(s.maxLevel)], ["Blackwall vaincu", fmt(s.blackwall)], ["Surtension débloquée", String(data.heat)]
     ];
     return h("dl", { class: "sv-sheet sv-records" }, rows.map(([k, v]) => [h("dt", {}, k), h("dd", {}, v)]));
   }
@@ -1626,10 +1921,14 @@ export function createSurvivorsUI(root, wallet) {
     ultButton.disabled = status !== "running" || state.ult < state.ultMax;
     ultButton.classList.toggle("is-ready", state.ult >= state.ultMax);
 
-    const sig = state.weapons.map((w) => `${w.id}${w.lvl}${w.evo}`).join() + "|" + state.passives.map((p) => `${p.id}${p.lvl}`).join();
+    const sig = state.weapons.map((w) => `${w.id}${w.lvl}${w.evo}`).join() + "|" + state.passives.map((p) => `${p.id}${p.lvl}`).join() + "|" + [...state.syn].join();
     if (weaponList.dataset.sig !== sig) {
       weaponList.dataset.sig = sig;
       weaponList.replaceChildren(...(state.weapons.length ? state.weapons.map((w) => {
+        if (w.fused) {
+          const F = FUSIONS[w.id];
+          return h("li", { class: "sv-r-mythic sv-fused", style: `--rc:${F.color}`, title: F.desc }, `${F.glyph} ${F.name} `, h("span", { class: "sv-lv" }, "✦ ULTIME"));
+        }
         const W = WEAPONS[w.id];
         const ready = !w.evo && w.lvl >= 8 && passiveOf(state, W.evo.need);
         return h("li", { class: w.evo ? "sv-r-legendary" : ready ? "sv-r-epic" : "", style: `--rc:${w.evo ? RARITIES.legendary.color : RARITIES.epic.color}`, title: W.desc },
@@ -1641,6 +1940,21 @@ export function createSurvivorsUI(root, wallet) {
         return h("li", { title: P.desc }, `${P.glyph} ${P.name} `, h("span", { class: "sv-lv" }, `niv. ${p.lvl}/${P.max}`));
       }) : [h("li", { class: "hint" }, "Aucun")]));
       sheetList.replaceChildren(...statSheet(state).map(([k, v]) => [h("dt", {}, k), h("dd", {}, v)]).flat());
+      // synergies : actives, fusions prêtes, fusions faites, et paires à moitié réunies
+      const ready = fusionsReady(state);
+      const rows = [];
+      for (const w of state.weapons) if (w.fused) rows.push(h("li", { class: "sv-syn-done", style: `--rc:${FUSIONS[w.id].color}` }, `✦ ${FUSIONS[w.id].name} (fusionnée)`));
+      for (const f of ready) rows.push(h("li", { class: "sv-syn-ready", style: `--rc:${FUSIONS[f].color}` }, `⚠ Fusion prête : ${FUSIONS[f].name} (niveau suivant ou coffre)`));
+      for (const f of state.syn) if (!ready.includes(f)) {
+        const F = FUSIONS[f];
+        rows.push(h("li", { class: "sv-syn-on", title: F.syn.desc }, `◆ ${F.syn.name} : ${F.syn.desc}`));
+      }
+      const half = new Set();
+      for (const w of state.weapons) if (!w.fused) for (const { id, other } of synergiesOf(w.id)) if (!state.syn.has(id) && !state.fusedParts.includes(other) && !half.has(id)) {
+        half.add(id);
+        rows.push(h("li", { class: "hint" }, `◇ ${WEAPONS[w.id].name} + ${WEAPONS[other].name} → ${FUSIONS[id].syn.name}`));
+      }
+      synList.replaceChildren(...(rows.length ? rows : [h("li", { class: "hint" }, "Aucune")]));
     }
   }
 
@@ -1663,7 +1977,7 @@ export function createSurvivorsUI(root, wallet) {
       h("strong", {}, h("span", { class: "sv-glyph", style: `color:${d.color}` }, d.glyph), ` ${i + 1}. ${d.name}`),
       h("span", {}, d.desc),
       d.max ? h("em", {}, d.isNew ? `Nouveau !${d.to > 1 ? ` (niveau ${d.to})` : ""}` : `Niveau ${d.from} → ${d.to} / ${d.max}`) : null,
-      d.rarity !== "common" ? h("em", { class: "sv-rar" }, `${rar.name} (+${rar.bonus} niveau${rar.bonus > 1 ? "x" : ""})`) : null,
+      d.fusion ? h("em", { class: "sv-rar" }, "Mythique — fusion ultime") : d.rarity !== "common" ? h("em", { class: "sv-rar" }, `${rar.name} (+${rar.bonus} niveau${rar.bonus > 1 ? "x" : ""})`) : null,
       d.hint ? h("span", { class: "sv-hint" }, d.hint) : null);
     }));
     setText(rerollBtn, `⟳ Relancer (${state.rerolls}) [R]`);
@@ -1694,9 +2008,9 @@ export function createSurvivorsUI(root, wallet) {
     if (state.chest === shownChest) return;
     shownChest = state.chest;
     if (!state.chest) return;
-    chestTitle.textContent = state.chest.items.some((x) => x.kind === "evo") ? "Évolution !" : state.chest.big ? "Grand coffre" : "Coffre";
+    chestTitle.textContent = state.chest.items.some((x) => x.kind === "fusion") ? "Fusion !" : state.chest.items.some((x) => x.kind === "evo") ? "Évolution !" : state.chest.big ? "Grand coffre" : "Coffre";
     chestList.replaceChildren(...state.chest.items.map((it) => h("li", { class: `sv-chest-${it.kind}` },
-      h("strong", {}, it.kind === "evo" ? `★ ${it.name}` : it.name), h("span", {}, it.desc))));
+      h("strong", {}, it.kind === "evo" ? `★ ${it.name}` : it.kind === "fusion" ? `✦ ${it.name}` : it.name), h("span", {}, it.desc))));
     chestButton.focus({ preventScroll: true });
   }
   function doCloseChest() {

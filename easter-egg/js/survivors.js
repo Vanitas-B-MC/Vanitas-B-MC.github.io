@@ -31,7 +31,8 @@ export const RARITIES = {
   common:    { name: "Commun",     color: "#c8c8d8", bonus: 0 },
   rare:      { name: "Rare",       color: "#3d9bff", bonus: 1 },
   epic:      { name: "Épique",     color: "#b06bff", bonus: 2 },
-  legendary: { name: "Légendaire", color: "#ffb347", bonus: 3 }
+  legendary: { name: "Légendaire", color: "#ffb347", bonus: 3 },
+  mythic:    { name: "Mythique",   color: "#ff2a6d", bonus: 0 }   // réservé aux fusions
 };
 
 /* =====================================================================
@@ -183,7 +184,8 @@ export const WEAPONS = {
 export const WEAPON_IDS = Object.keys(WEAPONS);
 const W_MAX = 8;
 // Armes qui profitent du Duplicateur (+1 projectile)
-const USES_AMOUNT = new Set(["blaster", "orbit", "lightning", "missiles", "meteor", "beam", "disc", "shotgun", "drone", "mines", "rail", "saw", "poison", "chain"]);
+const USES_AMOUNT = new Set(["blaster", "orbit", "lightning", "missiles", "meteor", "beam", "disc", "shotgun", "drone", "mines", "rail", "saw", "poison", "chain",
+  "annihilator", "maelstrom", "bombard", "napalm", "gravbomb", "phantom", "teslagun", "thousand"]);
 
 // Libellés des paramètres (pour décrire la montée de niveau)
 export const PARAM_LABELS = { dmg: "Dégâts", cd: "Recharge", n: "Nombre", r: "Zone", pierce: "Perforation", ttl: "Durée", len: "Portée", spin: "Rotation", slow: "Ralentissement", spd: "Vitesse" };
@@ -203,6 +205,104 @@ export function weaponDelta(id, lvl) {
   }
   return out;
 }
+
+
+/* =====================================================================
+   Synergies et fusions
+   Chaque arme appartient à une paire. Posséder les deux armes d'une paire active
+   leur SYNERGIE (bonus). Quand les deux sont au niveau 8 (évoluées ou non), elles
+   peuvent FUSIONNER en une arme ultime : choix « Mythique » à la montée de niveau,
+   ou automatiquement dans un coffre. La fusion libère un emplacement d'arme.
+   F : paramètres de l'arme fusionnée (comme P/E pour les armes normales).
+===================================================================== */
+
+export const FUSIONS = {
+  annihilator: {
+    name: "Annihilateur", glyph: "◉", color: "#d18cff", parts: ["blaster", "rail"],
+    desc: "Des orbes d'antimatière traversent tout, broient ce qu'ils frôlent puis implosent.",
+    syn: { name: "Ligne de mire", desc: "Le blaster traverse 2 ennemis de plus, le railgun recharge 15 % plus vite." },
+    F: { dmg: 80, cd: 0.7, n: 1, r: 16, spd: 300, aura: 50 }
+  },
+  maelstrom: {
+    name: "Maelström de lames", glyph: "✺", color: "#e8e8ff", parts: ["orbit", "saw"],
+    desc: "Deux anneaux de scies tournent en sens inverse ; l'anneau extérieur s'élance et revient.",
+    syn: { name: "Métal hurlant", desc: "+1 lame orbitale, les scies durent 30 % plus longtemps." },
+    F: { dmg: 115, n: 10, r: 125, spin: 3.4 }
+  },
+  plasmastorm: {
+    name: "Tempête de plasma", glyph: "ϟ", color: "#e0ffff", parts: ["lightning", "chain"],
+    desc: "Un arc de plasma ininterrompu qui saute sur 18 ennemis et explose sur chacun.",
+    syn: { name: "Surtension", desc: "+2 éclairs de foudre et +2 rebonds pour l'arc Tesla." },
+    F: { dmg: 50, cd: 0.45, n: 18, r: 42 }
+  },
+  bombard: {
+    name: "Bombardement orbital", glyph: "☄", color: "#00f0ff", parts: ["missiles", "meteor"],
+    desc: "Des missiles tombent du ciel sur les ennemis et laissent le sol en fusion.",
+    syn: { name: "Feu croisé", desc: "Explosions des missiles +40 %, zone des météores +15 %." },
+    F: { dmg: 125, cd: 1.1, n: 7, r: 96 }
+  },
+  napalm: {
+    name: "Napalm toxique", glyph: "♨", color: "#9dff2a", parts: ["fire", "poison"],
+    desc: "Une traînée de feu acide qui ralentit, et des marées de napalm lancées sur les ennemis.",
+    syn: { name: "Combustion", desc: "Le feu et le poison font 50 % de dégâts en plus." },
+    F: { dmg: 58, r: 40, ttl: 4.5, cd: 2.4, n: 3 }
+  },
+  satlaser: {
+    name: "Satellites laser", glyph: "⌬", color: "#ff2a6d", parts: ["beam", "drone"],
+    desc: "Quatre satellites tournent autour de toi, chacun avec son propre laser rotatif.",
+    syn: { name: "Relais", desc: "Les drones tirent des lasers perforants, le rayon est 15 % plus long." },
+    F: { dmg: 46, n: 4, len: 290, spin: 2.3 }
+  },
+  supernova: {
+    name: "Supernova glaciale", glyph: "❄", color: "#9be7ff", parts: ["nova", "frost"],
+    desc: "Une aura qui gèle et des ondes qui pétrifient ; les ennemis gelés volent en éclats (dégâts ×2).",
+    syn: { name: "Choc thermique", desc: "L'onde de choc ralentit de 50 %, le champ cryo est 15 % plus grand." },
+    F: { dmg: 210, cd: 2.4, r: 235, adm: 42, ar: 150 }
+  },
+  gravbomb: {
+    name: "Bombe à singularité", glyph: "●", color: "#b06bff", parts: ["hole", "mines"],
+    desc: "Des mines qui ouvrent un trou noir en explosant, aspirent tout, puis détonent.",
+    syn: { name: "Effondrement", desc: "Mines +30 % de dégâts, trous noirs 20 % plus grands." },
+    F: { dmg: 320, cd: 1, n: 2, r: 145 }
+  },
+  phantom: {
+    name: "Lame fantôme", glyph: "☾", color: "#ff3b5c", parts: ["disc", "katana"],
+    desc: "Six croissants spectraux lancés en étoile qui reviennent ; une coupe circulaire régulière. Vole de la vie.",
+    syn: { name: "Fil tranchant", desc: "+1 disque, portée de la lame +15 %." },
+    F: { dmg: 92, cd: 1, n: 6, r: 24, len: 320, spd: 520 }
+  },
+  teslagun: {
+    name: "Fusil Tesla", glyph: "⁂", color: "#7df9ff", parts: ["shotgun", "chain"],
+    desc: "Une gerbe de plombs électrifiés : chaque impact a une chance de lancer un arc.",
+    syn: { name: "Électrochoc", desc: "Les plombs ont 15 % de chance de lancer un petit arc Tesla." },
+    F: { dmg: 80, cd: 0.5, n: 18, spd: 640, ttl: 0.45 }
+  },
+  thousand: {
+    name: "Danse des mille lames", glyph: "†", color: "#fcee0a", parts: ["katana", "orbit"],
+    desc: "Huit épées gravitent autour de toi et fondent tour à tour sur les ennemis.",
+    syn: { name: "Danse", desc: "La lame recharge 25 % plus vite, les lames orbitales font +20 % de dégâts." },
+    F: { dmg: 155, cd: 0.25, n: 8, r: 72 }
+  }
+};
+export const FUSION_IDS = Object.keys(FUSIONS);
+export const weaponDef = (id) => WEAPONS[id] || FUSIONS[id];
+// Synergies d'une arme : [{ id (fusion), other (arme partenaire) }]
+export const synergiesOf = (wid) => FUSION_IDS.filter((f) => FUSIONS[f].parts.includes(wid)).map((f) => ({ id: f, other: FUSIONS[f].parts.find((x) => x !== wid) }));
+
+// Effet des synergies sur les paramètres d'une arme (appelé par params)
+const SYN_MOD = {
+  annihilator: { blaster: (p) => { p.pierce += 2; }, rail: (p) => { p.cd *= 0.85; } },
+  maelstrom: { orbit: (p) => { p.n += 1; }, saw: (p) => { p.ttl *= 1.3; } },
+  plasmastorm: { lightning: (p) => { p.n += 2; }, chain: (p) => { p.n += 2; } },
+  bombard: { missiles: (p) => { p.r *= 1.4; }, meteor: (p) => { p.r *= 1.15; } },
+  napalm: { fire: (p) => { p.dmg *= 1.5; }, poison: (p) => { p.dmg *= 1.5; } },
+  satlaser: { beam: (p) => { p.len *= 1.15; }, drone: (p) => { p.laser = true; } },
+  supernova: { nova: (p) => { p.slow = 0.5; }, frost: (p) => { p.r *= 1.15; } },
+  gravbomb: { mines: (p) => { p.dmg *= 1.3; }, hole: (p) => { p.r *= 1.2; } },
+  phantom: { disc: (p) => { p.n += 1; }, katana: (p) => { p.r *= 1.15; } },
+  teslagun: { shotgun: (p) => { p.zap = 0.15; } },
+  thousand: { katana: (p) => { p.cd *= 0.75; }, orbit: (p) => { p.dmg *= 1.2; } }
+};
 
 /* =====================================================================
    Personnages : arme de départ, bonus, ultime. Les 5 anciens se débloquent
@@ -408,7 +508,7 @@ export const xpNeeded = (level) => Math.round(4 + level * 4.5 + level * level * 
    Sauvegarde propre à Survivor Arena (wallet.data.sv)
 ===================================================================== */
 
-const STAT_KEYS = ["runs", "kills", "time", "bosses", "elites", "gems", "evos", "maxLevel", "bestTime", "bestRunKills", "blackwall"];
+const STAT_KEYS = ["runs", "kills", "time", "bosses", "elites", "gems", "evos", "maxLevel", "bestTime", "bestRunKills", "blackwall", "fusions"];
 
 export function freshSv() {
   return {
@@ -420,6 +520,7 @@ export function freshSv() {
     codex: {},                     // type d'ennemi → nombre éliminé
     seenW: [],                     // armes déjà obtenues (codex)
     seenE: [],                     // évolutions réalisées (codex)
+    seenF: [],                     // fusions réalisées (codex)
     last: { char: FREE_CHARACTER, map: "alley", heat: 0 },
     opt: { numbers: true, shake: true }
   };
@@ -438,6 +539,7 @@ export function sanitizeSv(raw) {
   if (raw.codex && typeof raw.codex === "object") for (const id of ENEMY_IDS) if (raw.codex[id]) sv.codex[id] = num(raw.codex[id]);
   if (Array.isArray(raw.seenW)) sv.seenW = raw.seenW.filter((id) => WEAPON_IDS.includes(id));
   if (Array.isArray(raw.seenE)) sv.seenE = raw.seenE.filter((id) => WEAPON_IDS.includes(id));
+  if (Array.isArray(raw.seenF)) sv.seenF = raw.seenF.filter((id) => FUSION_IDS.includes(id));
   if (raw.last && typeof raw.last === "object") {
     if (CHARACTER_IDS.includes(raw.last.char)) sv.last.char = raw.last.char;
     if (MAP_IDS.includes(raw.last.map)) sv.last.map = raw.last.map;
@@ -633,6 +735,9 @@ export function createState(rng = Math.random, cfg = {}) {
     weapons: [],          // [{ id, lvl, evo, t, ... }]
     passives: [],         // [{ id, lvl }]
     banished: [],
+    fusedParts: [],       // armes consommées par une fusion (plus proposées)
+    syn: new Set(),       // synergies actives (id de fusion)
+    fuseSeen: new Set(),  // fusions déjà annoncées
     level: 1,
     xp: 0,
     pending: 0,
@@ -667,7 +772,7 @@ export function createState(rng = Math.random, cfg = {}) {
     bossId: 0,
     shake: 0,
     nextId: 1,
-    run: { kills: 0, codex: {}, bosses: 0, elites: 0, gems: 0, cores: 0, evos: 0, dmgBy: {}, takenBy: {}, killer: null, taken: 0, ults: 0, bossKills: [], chests: 0 }
+    run: { kills: 0, codex: {}, bosses: 0, elites: 0, gems: 0, cores: 0, evos: 0, fusions: 0, dmgBy: {}, takenBy: {}, killer: null, taken: 0, ults: 0, bossKills: [], chests: 0 }
   };
   genMap(state);
   state.stats = computeStats(state);
@@ -710,9 +815,40 @@ export const passiveOf = (state, id) => state.passives.find((p) => p.id === id);
 function addWeapon(state, id, lvl = 1) {
   if (!WEAPONS[id]) return;
   const w = weaponOf(state, id);
-  if (w) { w.lvl = Math.min(W_MAX, w.lvl + lvl); return; }
+  if (w) { w.lvl = Math.min(W_MAX, w.lvl + lvl); refreshSyn(state); return; }
   if (state.weapons.length >= MAX_WEAPONS) return;
   state.weapons.push({ id, lvl: Math.min(W_MAX, lvl), evo: false, t: 0.3 + state.rng() * 0.5, a: state.rng() * TAU, drones: [] });
+  refreshSyn(state);
+}
+
+// Synergies actives + annonce des fusions qui deviennent possibles
+function refreshSyn(state) {
+  state.syn = new Set(FUSION_IDS.filter((f) => FUSIONS[f].parts.every((x) => { const w = weaponOf(state, x); return w && !w.fused; })));
+  for (const f of fusionsReady(state)) {
+    if (state.fuseSeen.has(f)) continue;
+    state.fuseSeen.add(f);
+    state.msgs.push({ text: `Fusion possible : ${FUSIONS[f].name}`, kind: "fusion" });
+  }
+}
+
+// Fusions réalisables maintenant (les deux armes au niveau 8)
+export function fusionsReady(state) {
+  return FUSION_IDS.filter((f) => FUSIONS[f].parts.every((x) => { const w = weaponOf(state, x); return w && !w.fused && w.lvl >= W_MAX; }));
+}
+
+function fuse(state, id) {
+  const F = FUSIONS[id];
+  if (!F || !fusionsReady(state).includes(id)) return false;
+  const at = Math.min(...F.parts.map((x) => state.weapons.findIndex((w) => w.id === x)));
+  state.weapons = state.weapons.filter((w) => !F.parts.includes(w.id));
+  state.weapons.splice(at, 0, { id, lvl: W_MAX, evo: true, fused: true, t: 0.4, t2: 1.5, a: 0, b: 0, drones: [], sw: [], vis: [] });
+  state.fusedParts.push(...F.parts);
+  state.run.fusions += 1;
+  state.msgs.push({ text: `FUSION : ${F.name} !`, kind: "fusion" });
+  state.fx.push({ kind: "ring", x: state.player.x, y: state.player.y, r: 220, ttl: 0.8, max: 0.8, color: F.color, thick: 12 });
+  state.fx.push({ kind: "screen", ttl: 0.4, max: 0.4, color: F.color });
+  refreshSyn(state);
+  return true;
 }
 
 function addPassive(state, id, lvl = 1) {
@@ -745,10 +881,12 @@ export function rollChoices(state) {
   const ban = new Set(state.banished);
   for (const w of state.weapons) if (!w.evo && w.lvl < W_MAX) pool.push({ kind: "weapon", id: w.id, wt: 1.3 });
   for (const p of state.passives) if (p.lvl < PASSIVES[p.id].max) pool.push({ kind: "passive", id: p.id, wt: 1.1 });
+  for (const id of state.fusedParts) ban.add(id);
   if (state.weapons.length < MAX_WEAPONS) for (const id of WEAPON_IDS) if (!weaponOf(state, id) && !ban.has(id)) pool.push({ kind: "weapon", id, wt: 0.75 });
   if (state.passives.length < MAX_PASSIVES) for (const id of PASSIVE_IDS) if (!passiveOf(state, id) && !ban.has(id)) pool.push({ kind: "passive", id, wt: 0.8 });
   const n = state.stats.choices;
-  const picks = [];
+  // les fusions possibles passent en premier (2 au plus)
+  const picks = fusionsReady(state).slice(0, 2).map((id) => ({ kind: "fusion", id, rarity: "mythic" }));
   while (picks.length < n && pool.length) {
     const total = pool.reduce((a, c) => a + c.wt, 0);
     let r = state.rng() * total;
@@ -767,13 +905,21 @@ export function rollChoices(state) {
 export function describeChoice(state, c) {
   const rar = RARITIES[c.rarity] || RARITIES.common;
   const extra = rar.bonus;
+  if (c.kind === "fusion") {
+    const F = FUSIONS[c.id];
+    return {
+      name: F.name, glyph: F.glyph, color: F.color, rarity: "mythic", fusion: true, desc: F.desc,
+      hint: `Fusionne ${F.parts.map((x) => WEAPONS[x].name).join(" + ")} et libère un emplacement.`
+    };
+  }
   if (c.kind === "weapon") {
     const W = WEAPONS[c.id];
     const w = weaponOf(state, c.id);
     const cur = w ? w.lvl : 0;
     const to = Math.min(W_MAX, cur + 1 + extra);
     const delta = weaponDelta(c.id, cur);
-    const evoHint = `Évolue en « ${W.evo.name} » avec ${PASSIVES[W.evo.need].name}.`;
+    const syns = synergiesOf(c.id).map(({ id, other }) => `${weaponOf(state, other) ? "✔ " : ""}synergie avec ${WEAPONS[other].name} → fusion « ${FUSIONS[id].name} »`);
+    const evoHint = `Évolue en « ${W.evo.name} » avec ${PASSIVES[W.evo.need].name}. ${syns.join(" · ")}.`;
     return {
       name: W.name, glyph: W.glyph, color: W.color, isNew: !w, from: cur, to, max: W_MAX, rarity: c.rarity,
       desc: w ? delta.map((d) => `${d.label} ${fmtNum(d.from)} → ${fmtNum(d.to)}`).join(" · ") || W.desc : W.desc,
@@ -801,7 +947,8 @@ export function chooseUpgrade(state, index) {
   const c = typeof index === "number" ? state.choices?.[index] : state.choices?.find((x) => x.id === index);
   if (!c) return false;
   const lv = 1 + (RARITIES[c.rarity]?.bonus || 0);
-  if (c.kind === "weapon") addWeapon(state, c.id, lv);
+  if (c.kind === "fusion") fuse(state, c.id);
+  else if (c.kind === "weapon") addWeapon(state, c.id, lv);
   else if (c.kind === "passive") addPassive(state, c.id, lv);
   else if (c.kind === "heal") state.player.hp = Math.min(state.stats.maxHp, state.player.hp + 50);
   else if (c.kind === "cores") state.run.cores += 5;
@@ -847,7 +994,13 @@ export function banishChoice(state, index) {
 
 function openChest(state, big = false) {
   const items = [];
-  const evo = evolvable(state);
+  const ready = fusionsReady(state);
+  if (ready.length) {
+    const f = ready[0];
+    fuse(state, f);
+    items.push({ kind: "fusion", id: f, name: FUSIONS[f].name, desc: FUSIONS[f].desc });
+  }
+  const evo = ready.length ? [] : evolvable(state);
   if (evo.length) {
     const w = evo[Math.floor(state.rng() * evo.length)];
     w.evo = true;
@@ -857,7 +1010,7 @@ function openChest(state, big = false) {
   }
   const luck = state.stats.luck;
   let count = big ? 5 : state.rng() < 0.06 * luck ? 5 : state.rng() < 0.25 * luck ? 3 : 1;
-  if (evo.length) count = Math.max(0, count - 1);
+  if (evo.length || ready.length) count = Math.max(0, count - 1);
   for (let i = 0; i < count; i++) {
     const up = [...state.weapons.filter((w) => !w.evo && w.lvl < W_MAX).map((w) => ({ k: "w", id: w.id })),
       ...state.passives.filter((p) => p.lvl < PASSIVES[p.id].max).map((p) => ({ k: "p", id: p.id }))];
@@ -1246,8 +1399,9 @@ function aimBullets(state, e, n, spread, spd, dmg, color, opts = {}) {
 ===================================================================== */
 
 function params(state, w) {
-  const W = WEAPONS[w.id];
-  const p = { ...(w.evo ? W.E : W.P(w.lvl)) };
+  const W = weaponDef(w.id);
+  const p = { ...(w.fused ? W.F : w.evo ? W.E : W.P(w.lvl)) };
+  if (!w.fused) for (const f of state.syn) SYN_MOD[f][w.id]?.(p);
   const st = state.stats;
   const oc = state.buffs.overclock > 0 ? 0.4 : 1;
   if (p.cd) p.cd = Math.max(0.05, p.cd * st.haste * oc);
@@ -1263,7 +1417,7 @@ function params(state, w) {
 function fireBullet(state, x, y, a, spd, dmg, src, o = {}) {
   state.shots.push({
     kind: o.kind || "bullet", x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: o.r || 4, dmg, src,
-    pierce: o.pierce || 0, ttl: o.ttl || 1.4, hit: new Set(), color: o.color, kb: o.kb || 0, boom: o.boom || 0
+    pierce: o.pierce || 0, ttl: o.ttl || 1.4, hit: new Set(), color: o.color, kb: o.kb || 0, boom: o.boom || 0, zap: o.zap || 0
   });
 }
 
@@ -1298,7 +1452,7 @@ const TICK = {
     if (w.t > 0) return;
     w.t = p.cd;
     const pl = state.player;
-    hitArea(state, pl.x, pl.y, p.r, p.dmg, "nova", { kb: 320, slow: w.evo ? 0.5 : 0, slowT: 1.5 });
+    hitArea(state, pl.x, pl.y, p.r, p.dmg, "nova", { kb: 320, slow: p.slow || (w.evo ? 0.5 : 0), slowT: 1.5 });
     state.fx.push({ kind: "ring", x: pl.x, y: pl.y, r: p.r, ttl: 0.35, max: 0.35, color: w.evo ? "#fcee0a" : "#b58cff" });
   },
   lightning(state, w, dt, p) {
@@ -1397,7 +1551,7 @@ const TICK = {
     const base = Math.atan2(target.y - pl.y, target.x - pl.x);
     for (let i = 0; i < p.n; i++) {
       const a = base + (state.rng() - 0.5) * 0.85;
-      fireBullet(state, pl.x, pl.y, a, p.spd * (0.8 + state.rng() * 0.4), p.dmg, "shotgun", { kind: "pellet", ttl: p.ttl, kb: 120, r: 3, color: "#ffd27a", boom: w.evo ? 34 : 0 });
+      fireBullet(state, pl.x, pl.y, a, p.spd * (0.8 + state.rng() * 0.4), p.dmg, "shotgun", { kind: "pellet", ttl: p.ttl, kb: 120, r: 3, color: p.zap ? "#bff8ff" : "#ffd27a", boom: w.evo ? 34 : 0, zap: p.zap || 0 });
     }
     state.fx.push({ kind: "flash", x: pl.x + Math.cos(base) * 14, y: pl.y + Math.sin(base) * 14, r: 14, ttl: 0.08, max: 0.08, color: "#ffd27a" });
   },
@@ -1436,7 +1590,8 @@ const TICK = {
       if (!target) { d.t = 0.1; return; }
       d.t = p.cd;
       const ang = Math.atan2(target.y - d.y, target.x - d.x);
-      fireBullet(state, d.x, d.y, ang, 460 * state.stats.velocity, p.dmg, "drone", { color: w.evo ? "#ff2a6d" : "#7df9ff", pierce: w.evo ? 4 : 0, r: w.evo ? 3.5 : 3, kind: w.evo ? "laser" : "bullet" });
+      const las = w.evo || p.laser;
+      fireBullet(state, d.x, d.y, ang, 460 * state.stats.velocity, p.dmg, "drone", { color: las ? "#ff2a6d" : "#7df9ff", pierce: las ? 4 : 0, r: las ? 3.5 : 3, kind: las ? "laser" : "bullet" });
     });
   },
   mines(state, w, dt, p) {
@@ -1534,6 +1689,212 @@ function railLine(state, x, y, a, len, width, dmg, src, color) {
   }
   state.fx.push({ kind: "rail", x, y, x2: x + ux * len, y2: y + uy * len, w: width, ttl: 0.25, max: 0.25, color });
 }
+
+
+/* =====================================================================
+   Armes fusionnées : un pas de simulation par arme ultime
+   w.vis garde les positions utiles au dessin (satellites, lames…)
+===================================================================== */
+
+const FTICK = {
+  annihilator(state, w, dt, p) {
+    w.t -= dt;
+    if (w.t > 0) return;
+    const pl = state.player;
+    const tg = nearestEnemy(state, pl, 650);
+    if (!tg) { w.t = 0.1; return; }
+    w.t = p.cd;
+    const base = Math.atan2(tg.y - pl.y, tg.x - pl.x);
+    for (let i = 0; i < p.n; i++) {
+      const a = base + (i - (p.n - 1) / 2) * 0.28;
+      state.shots.push({ kind: "anti", x: pl.x, y: pl.y, vx: Math.cos(a) * p.spd, vy: Math.sin(a) * p.spd, r: p.r, dmg: p.dmg, src: w.id,
+        ttl: 2, hit: new Set(), pierce: 999, aura: p.aura * state.stats.area, boomR: 130 * state.stats.area, spin: 0 });
+    }
+  },
+  maelstrom(state, w, dt, p) {
+    const pl = state.player;
+    w.a += dt * p.spin;
+    const fling = Math.max(0, Math.sin(state.time * 1.25)) ** 2;
+    const half = Math.ceil(p.n / 2);
+    w.vis = [];
+    for (let i = 0; i < p.n; i++) {
+      const outer = i < half;
+      const k = outer ? i / half : (i - half) / Math.max(1, p.n - half);
+      const a = (outer ? w.a : -w.a * 1.35) + k * TAU;
+      const R = outer ? p.r * (1 + 1.4 * fling) : p.r * 0.55;
+      const x = pl.x + Math.cos(a) * R;
+      const y = pl.y + Math.sin(a) * R;
+      w.vis.push({ x, y, a: state.time * 16 * (outer ? 1 : -1), big: outer });
+      around(state, x, y, outer ? 16 : 12, (e) => { if (canHit(state, e, "mael" + (outer ? 1 : 0), 0.22)) hit(state, e, p.dmg, w.id, { kb: 140, fx: pl.x, fy: pl.y }); });
+    }
+  },
+  plasmastorm(state, w, dt, p) {
+    w.t -= dt;
+    if (w.t > 0) return;
+    const pl = state.player;
+    let cur = nearestEnemy(state, pl, 450);
+    if (!cur) { w.t = 0.1; return; }
+    w.t = p.cd;
+    const pts = [{ x: pl.x, y: pl.y }];
+    const done = new Set();
+    for (let j = 0; j < p.n && cur; j++) {
+      done.add(cur.id);
+      pts.push({ x: cur.x, y: cur.y });
+      hitArea(state, cur.x, cur.y, p.r, p.dmg, w.id, {});
+      const prev = cur;
+      cur = nearestEnemy(state, prev, 240, (e) => !done.has(e.id));
+    }
+    state.fx.push({ kind: "chain", pts, ttl: 0.28, max: 0.28, color: "#7df9ff", seed: state.rng(), thick: true });
+    for (const q of pts.slice(1)) state.fx.push({ kind: "blast", x: q.x, y: q.y, r: p.r, ttl: 0.18, max: 0.18, color: "#e0ffff" });
+  },
+  bombard(state, w, dt, p) {
+    w.t -= dt;
+    if (w.t > 0) return;
+    w.t = p.cd;
+    const pool = visibleEnemies(state, 0);
+    if (!pool.length) { w.t = 0.3; return; }
+    for (let i = 0; i < p.n; i++) {
+      const e = pool[Math.floor(state.rng() * pool.length)];
+      const jx = (state.rng() - 0.5) * 40;
+      const jy = (state.rng() - 0.5) * 40;
+      state.zones.push({ kind: "meteor", x: e.x + jx, y: e.y + jy, delay: 0.55 + i * 0.06, max: 0.55 + i * 0.06, r: p.r, dmg: p.dmg, src: w.id, orbital: true, missile: true, lava: true });
+    }
+  },
+  napalm(state, w, dt, p) {
+    const pl = state.player;
+    w.t -= dt;
+    if (w.t <= 0 && state.zones.length < 160) {
+      w.t = 0.13;
+      state.zones.push({ kind: "fire", x: pl.x + (state.rng() - 0.5) * 10, y: pl.y + (state.rng() - 0.5) * 10, ttl: p.ttl, max: p.ttl, r: p.r, dps: p.dmg, src: w.id, tick: 0, napalm: true, slow: 0.4 });
+    }
+    w.t2 -= dt;
+    if (w.t2 > 0) return;
+    w.t2 = p.cd;
+    const pool = visibleEnemies(state, 0);
+    for (let i = 0; i < p.n && pool.length; i++) {
+      const e = pool[Math.floor(state.rng() * pool.length)];
+      state.zones.push({ kind: "poison", x: e.x, y: e.y, ox: pl.x, oy: pl.y, delay: 0.5, max: 0.5, ttl: p.ttl, ttlMax: p.ttl, r: p.r * 2.3, dps: p.dmg, src: w.id, tick: 0, slow: 0.5, napalm: true });
+    }
+  },
+  satlaser(state, w, dt, p) {
+    const pl = state.player;
+    w.a += dt * 0.9;
+    w.b += dt * p.spin;
+    w.vis = [];
+    for (let i = 0; i < p.n; i++) {
+      const oa = w.a + (i * TAU) / p.n;
+      const sx = pl.x + Math.cos(oa) * 120;
+      const sy = pl.y + Math.sin(oa) * 120;
+      const ba = w.b + (i * TAU) / p.n;
+      const ux = Math.cos(ba);
+      const uy = Math.sin(ba);
+      w.vis.push({ x: sx, y: sy, a: ba, len: p.len });
+      around(state, sx + (ux * p.len) / 2, sy + (uy * p.len) / 2, p.len / 2, (e) => {
+        const px = e.x - sx;
+        const py = e.y - sy;
+        const along = px * ux + py * uy;
+        if (along > 0 && along < p.len && Math.abs(px * uy - py * ux) <= e.r + 9 && canHit(state, e, "sat" + i, 0.2)) hit(state, e, p.dmg, w.id, {});
+      });
+    }
+  },
+  supernova(state, w, dt, p) {
+    const pl = state.player;
+    const ar = p.ar * state.stats.area;
+    w.t2 -= dt;
+    if (w.t2 <= 0) {
+      w.t2 = 0.4;
+      hitArea(state, pl.x, pl.y, ar, p.adm * 0.4, w.id, { noCrit: true, slow: 0.6, slowT: 0.8 });
+    }
+    w.t -= dt;
+    if (w.t > 0) return;
+    w.t = p.cd;
+    around(state, pl.x, pl.y, p.r, (e) => {
+      const shatter = e.stun > 0.05;
+      hit(state, e, p.dmg * (shatter ? 2 : 1), w.id, { kb: 360, stun: 1.2, slow: 0.6, slowT: 2 });
+      if (shatter) state.fx.push({ kind: "shard", x: e.x, y: e.y, r: e.r + 6, ttl: 0.4, max: 0.4, color: "#d6f6ff" });
+    });
+    state.fx.push({ kind: "ring", x: pl.x, y: pl.y, r: p.r, ttl: 0.5, max: 0.5, color: "#9be7ff", thick: 9 });
+    state.fx.push({ kind: "ice", x: pl.x, y: pl.y, r: p.r, ttl: 0.6, max: 0.6, seed: state.rng() });
+  },
+  gravbomb(state, w, dt, p) {
+    w.t -= dt;
+    if (w.t > 0) return;
+    w.t = p.cd;
+    const pl = state.player;
+    for (let i = 0; i < p.n; i++) {
+      if (state.pmines.length >= 24) state.pmines.shift();
+      const a = state.rng() * TAU;
+      const dd = 20 + state.rng() * 60;
+      state.pmines.push({ x: pl.x + Math.cos(a) * dd, y: pl.y + Math.sin(a) * dd, arm: 0.4, r: p.r, dmg: p.dmg, ttl: 20, grav: true, src: w.id });
+    }
+  },
+  phantom(state, w, dt, p) {
+    const pl = state.player;
+    w.t -= dt;
+    if (w.t <= 0) {
+      w.t = p.cd;
+      const base = state.time * 0.7;
+      for (let i = 0; i < p.n; i++) {
+        const a = base + (i * TAU) / p.n;
+        state.shots.push({ kind: "crescent", x: pl.x, y: pl.y, vx: Math.cos(a) * p.spd, vy: Math.sin(a) * p.spd, r: p.r, dmg: p.dmg, src: w.id, ttl: 4, out: p.len, back: false, hit: new Set(), pierce: 999, spin: a, ls: 0.25 });
+      }
+    }
+    w.t2 -= dt;
+    if (w.t2 <= 0) {
+      w.t2 = 3;
+      const R = 165 * state.stats.area;
+      hitArea(state, pl.x, pl.y, R, p.dmg * 1.6, w.id, { kb: 220, lifesteal: 0.3 });
+      state.fx.push({ kind: "slash", x: pl.x, y: pl.y, a: state.time * 3, half: Math.PI, r: R, ttl: 0.3, max: 0.3, color: "#ff3b5c" });
+    }
+  },
+  teslagun(state, w, dt, p) {
+    w.t -= dt;
+    if (w.t > 0) return;
+    const pl = state.player;
+    const tg = nearestEnemy(state, pl, 340);
+    if (!tg) { w.t = 0.1; return; }
+    w.t = p.cd;
+    const base = Math.atan2(tg.y - pl.y, tg.x - pl.x);
+    for (let i = 0; i < p.n; i++) {
+      const a = base + (state.rng() - 0.5) * 0.9;
+      fireBullet(state, pl.x, pl.y, a, p.spd * (0.85 + state.rng() * 0.3), p.dmg, w.id, { kind: "pellet", ttl: p.ttl, kb: 140, r: 3.5, color: "#7df9ff", zap: 0.45 });
+    }
+    state.fx.push({ kind: "flash", x: pl.x + Math.cos(base) * 16, y: pl.y + Math.sin(base) * 16, r: 18, ttl: 0.1, max: 0.1, color: "#7df9ff" });
+  },
+  thousand(state, w, dt, p) {
+    const pl = state.player;
+    w.a += dt * 2.2;
+    while (w.sw.length < p.n) w.sw.push({ st: 0, x: pl.x, y: pl.y, tx: 0, ty: 0, ang: 0 });
+    w.sw.length = p.n;
+    w.t -= dt;
+    if (w.t <= 0) {
+      const idle = w.sw.find((sw) => sw.st === 0);
+      const pool = visibleEnemies(state, 0).filter((e) => Math.hypot(e.x - pl.x, e.y - pl.y) < 360);
+      if (idle && pool.length) {
+        const e = pool[Math.floor(state.rng() * pool.length)];
+        idle.st = 1; idle.tx = e.x; idle.ty = e.y;
+        w.t = p.cd;
+      } else w.t = 0.1;
+    }
+    w.sw.forEach((sw, i) => {
+      const oa = w.a + (i * TAU) / p.n;
+      const ox = pl.x + Math.cos(oa) * p.r;
+      const oy = pl.y + Math.sin(oa) * p.r;
+      const tx = sw.st === 1 ? sw.tx : ox;
+      const ty = sw.st === 1 ? sw.ty : oy;
+      const dx = tx - sw.x;
+      const dy = ty - sw.y;
+      const d = Math.hypot(dx, dy) || 1;
+      const v = (sw.st === 0 ? 900 : 1100) * dt;
+      if (sw.st === 0 && d < 40) { sw.x += dx * Math.min(1, dt * 12); sw.y += dy * Math.min(1, dt * 12); sw.ang = oa + Math.PI / 2; }
+      else { sw.x += (dx / d) * Math.min(v, d); sw.y += (dy / d) * Math.min(v, d); sw.ang = Math.atan2(dy, dx); }
+      if (sw.st === 1 && d < 12) sw.st = 2;
+      if (sw.st === 2 && Math.hypot(ox - sw.x, oy - sw.y) < 20) sw.st = 0;
+      const dmg = sw.st === 0 ? p.dmg * 0.4 : p.dmg;
+      around(state, sw.x, sw.y, 14, (e) => { if (canHit(state, e, "th" + i, sw.st === 0 ? 0.4 : 0.15)) hit(state, e, dmg, w.id, { kb: 120, fx: sw.x, fy: sw.y }); });
+    });
+  }
+};
 
 /* =====================================================================
    Ultimes
@@ -2015,7 +2376,7 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
   }
 
   /* ----- Armes ----- */
-  for (const w of state.weapons) TICK[w.id](state, w, dt, params(state, w));
+  for (const w of state.weapons) (TICK[w.id] || FTICK[w.id])(state, w, dt, params(state, w));
 
   // Ultimes à durée
   if (buffs.barrage > 0) {
@@ -2058,8 +2419,8 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
       }
       s.trail.push({ x: s.x, y: s.y });
       if (s.trail.length > 8) s.trail.shift();
-    } else if (s.kind === "disc") {
-      s.spin += dt * 14;
+    } else if (s.kind === "disc" || s.kind === "crescent") {
+      s.spin += dt * (s.kind === "disc" ? 14 : 9);
       if (!s.back) {
         s.out -= Math.hypot(s.vx, s.vy) * dt;
         if (s.out <= 0) { s.back = true; s.hit.clear(); }
@@ -2078,14 +2439,28 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
     }
     s.x += s.vx * dt;
     s.y += s.vy * dt;
-    if (s.kind !== "saw" && s.kind !== "disc" && !inView(state, s.x, s.y, 120)) s.ttl = 0;
+    if (s.kind === "anti") {
+      s.spin += dt * 6;
+      // l'orbe broie tout ce qu'il frôle
+      around(state, s.x, s.y, s.aura, (e) => { if (canHit(state, e, "anti", 0.25)) hit(state, e, s.dmg * 0.35, s.src, { noCrit: true }); });
+    }
+    if (s.kind !== "saw" && s.kind !== "disc" && s.kind !== "crescent" && s.kind !== "anti" && !inView(state, s.x, s.y, 120)) s.ttl = 0;
+    if (s.kind === "anti" && s.ttl <= 0) {
+      hitArea(state, s.x, s.y, s.boomR, s.dmg * 2.2, s.src, { kb: -260 });
+      state.fx.push({ kind: "implode", x: s.x, y: s.y, r: s.boomR, ttl: 0.45, max: 0.45, color: "#d18cff" });
+      state.shake = Math.max(state.shake, 0.15);
+    }
     if (s.ttl <= 0) continue;
-    const multi = s.kind === "disc" || s.kind === "saw";
+    const multi = s.kind === "disc" || s.kind === "saw" || s.kind === "crescent" || s.kind === "anti";
     around(state, s.x, s.y, s.r, (e) => {
       if (s.hit.has(e.id)) return true;
       s.hit.add(e.id);
       if (s.kind === "missile") { s.ttl = 0; return false; }
-      hit(state, e, s.dmg, s.src, { kb: s.kb, fx: s.x - s.vx * 0.02, fy: s.y - s.vy * 0.02 });
+      hit(state, e, s.dmg, s.src, { kb: s.kb, fx: s.x - s.vx * 0.02, fy: s.y - s.vy * 0.02, lifesteal: s.ls || 0 });
+      if (s.zap && !e.dead && state.rng() < s.zap) {
+        const nx = nearestEnemy(state, e, 160, (o) => o !== e);
+        if (nx) chainFrom(state, e, nx, 3, s.dmg * 0.7, 0.9, s.src, "#7df9ff", 160);
+      }
       if (s.boom) { hitArea(state, s.x, s.y, s.boom, s.dmg * 0.6, s.src, { noCrit: true }); state.fx.push({ kind: "blast", x: s.x, y: s.y, r: s.boom, ttl: 0.18, max: 0.18, color: "#ffd27a" }); }
       if (multi) return true;
       if (s.pierce <= 0) { s.ttl = 0; return false; }
@@ -2108,6 +2483,11 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
     around(state, m.x, m.y, 18, () => { trig = true; return false; });
     if (trig || m.ttl <= 0) {
       m.done = true;
+      if (m.grav) {
+        // ouvre un trou noir qui aspire, puis détone
+        state.zones.push({ kind: "hole", x: m.x, y: m.y, ttl: 1.2, max: 1.2, r: m.r * 0.75, dps: m.dmg * 0.4, src: m.src, tick: 0, boom: m.dmg, boomR: m.r, grav: true });
+        continue;
+      }
       hitArea(state, m.x, m.y, m.r, m.dmg, "mines", { kb: 200 });
       state.fx.push({ kind: "blast", x: m.x, y: m.y, r: m.r, ttl: 0.3, max: 0.3, color: m.big ? "#ff2a6d" : "#ff8a3d" });
     }
@@ -2123,7 +2503,7 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
         hitArea(state, z.x, z.y, z.r, z.dmg, z.src, { kb: 160 });
         state.fx.push({ kind: "blast", x: z.x, y: z.y, r: z.r, ttl: 0.4, max: 0.4, color: z.orbital ? "#00f0ff" : "#fcee0a" });
         state.shake = Math.max(state.shake, 0.12);
-        if (z.lava) state.zones.push({ kind: "fire", x: z.x, y: z.y, ttl: 3, max: 3, r: z.r * 0.7, dps: z.dmg * 0.25, src: "meteor", tick: 0, lava: true });
+        if (z.lava) state.zones.push({ kind: "fire", x: z.x, y: z.y, ttl: 3, max: 3, r: z.r * 0.7, dps: z.dmg * 0.25, src: z.src, tick: 0, lava: true });
       }
     } else if (z.kind === "fire" || z.kind === "poison" || z.kind === "hole") {
       if (z.delay > 0) { z.delay -= dt; continue; }
@@ -2133,7 +2513,7 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
         const pull = z.r * 1.8;
         around(state, z.x, z.y, pull, (e) => {
           const d = Math.hypot(z.x - e.x, z.y - e.y) || 1;
-          const v = (e.boss ? 25 : 110) * dt;
+          const v = (e.boss ? 25 : z.grav ? 240 : 110) * dt;
           e.x += ((z.x - e.x) / d) * Math.min(v, d);
           e.y += ((z.y - e.y) / d) * Math.min(v, d);
         });
@@ -2143,6 +2523,11 @@ export function update(state, dt, input = { dx: 0, dy: 0 }) {
         z.tick = 0.25;
         const r = z.kind === "hole" ? z.r * 0.6 : z.r;
         hitArea(state, z.x, z.y, r, z.dps * 0.25, z.src, { noCrit: true, slow: z.slow || 0, slowT: 0.5 });
+      }
+      if (z.boom && z.ttl <= 0) {
+        hitArea(state, z.x, z.y, z.boomR, z.boom, z.src, { kb: 300 });
+        state.fx.push({ kind: "implode", x: z.x, y: z.y, r: z.boomR, ttl: 0.4, max: 0.4, color: "#b06bff" });
+        state.shake = Math.max(state.shake, 0.15);
       }
     }
   }
@@ -2394,6 +2779,7 @@ export function applyRun(sv, state) {
   s.elites += state.run.elites;
   s.gems += state.run.gems;
   s.evos += state.run.evos;
+  s.fusions += state.run.fusions;
   s.maxLevel = Math.max(s.maxLevel, state.level);
   s.bestTime = Math.max(s.bestTime, t);
   s.bestRunKills = Math.max(s.bestRunKills, state.run.kills);
@@ -2402,7 +2788,8 @@ export function applyRun(sv, state) {
   if (t >= 600 && state.heat >= sv.heat && sv.heat < HEAT_MAX) { sv.heat = state.heat + 1; out.heatUp = true; }
   for (const [id, n] of Object.entries(state.run.codex)) if (n > 0) sv.codex[id] = (sv.codex[id] || 0) + n;
   for (const w of state.weapons) {
-    if (!sv.seenW.includes(w.id)) sv.seenW.push(w.id);
+    if (!w.fused && !sv.seenW.includes(w.id)) sv.seenW.push(w.id);
+    if (w.fused) { if (!sv.seenF.includes(w.id)) sv.seenF.push(w.id); for (const x of FUSIONS[w.id].parts) if (!sv.seenW.includes(x)) sv.seenW.push(x); continue; }
     if (w.evo && !sv.seenE.includes(w.id)) sv.seenE.push(w.id);
   }
   sv.cores = Math.min(1e15, sv.cores + out.cores);
@@ -2451,5 +2838,6 @@ export function statSheet(state) {
 
 export const SOURCE_NAMES = {
   ...Object.fromEntries(WEAPON_IDS.map((id) => [id, WEAPONS[id].name])),
+  ...Object.fromEntries(FUSION_IDS.map((id) => [id, FUSIONS[id].name])),
   ult: "Ultime", bomb: "Bombe", kamikaze: "Kamikazes abattus", revive: "Résurrection"
 };

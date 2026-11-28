@@ -2571,3 +2571,15 @@ kbd {
   .sv-board-wrap:has(.sv-levelup:not([hidden])), .sv-board-wrap:has(.sv-chest:not([hidden])) { clip-path: none; isolation: auto; }
   .sv-chest:not([hidden]) { position: fixed; inset: 0; z-index: 200; overflow-y: auto; background: rgba(5, 5, 10, .95); }
 }
+/* Survivor Arena : synergies et fusions */
+.sv-synlist li { padding: 2px 0 2px 6px; }
+.sv-synlist .sv-syn-on { color: var(--text); border-left: 3px solid var(--cyan); }
+.sv-synlist .sv-syn-ready { color: var(--rc); border-left: 3px solid var(--rc); font-weight: 700; animation: sv-mythic-text 1s ease-in-out infinite alternate; }
+.sv-synlist .sv-syn-done { color: var(--rc); border-left: 3px solid var(--rc); }
+@keyframes sv-mythic-text { from { opacity: .65; } to { opacity: 1; } }
+.sv-arsenal .sv-fused { color: var(--rc); font-weight: 700; text-shadow: 0 0 8px var(--rc); }
+.sv-chest-list .sv-chest-fusion { border-color: #ff2a6d; box-shadow: 0 0 20px -2px #ff2a6d; }
+.sv-chest-list .sv-chest-fusion strong { color: #ff6a9a; }
+.sv-codex li.is-half { opacity: .7; }
+.sv-codex li.is-half strong { color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .sv-synlist .sv-syn-ready { animation: none; } }
