@@ -7,86 +7,9 @@
 import * as F from "./fishing.js";
 import { h, fmt, fmtShort, prefersReducedMotion } from "./ui.js";
 
-const LW = 640, LH = 360;              // taille logique de la scène
-const WATER_Y = 214;
-const ROD_TIP = { x: 168, y: 112 };
-const TRACK = { x: 500, y: 34, w: 34, h: 292 };
+import { drawFish, createScene } from "./fishing-art.js";
 
 function stat(label, valueEl) { return h("div", {}, h("dt", {}, label), h("dd", {}, valueEl)); }
-
-/* ================= Dessin d'un poisson ================= */
-
-function shade(hex, f) {
-  const n = parseInt(hex.slice(1), 16);
-  const ch = (v) => Math.max(0, Math.min(255, Math.round(f > 0 ? v + (255 - v) * f : v * (1 + f))));
-  return `rgb(${ch(n >> 16)},${ch((n >> 8) & 255)},${ch(n & 255)})`;
-}
-
-// Dessine un poisson centré en (x, y), de longueur `len`, tourné vers la droite (ou la gauche si flip).
-export function drawFish(ctx, shape, color, x, y, len, flip = false, t = 0) {
-  ctx.save();
-  ctx.translate(x, y);
-  if (flip) ctx.scale(-1, 1);
-  const L = len, H = len * 0.36;
-  const dark = shade(color, -0.35), light = shade(color, 0.45);
-  const wag = Math.sin(t / 120) * 0.12;
-  ctx.fillStyle = color;
-  const tail = (tx, size) => { ctx.save(); ctx.translate(tx, 0); ctx.rotate(wag); ctx.fillStyle = dark; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-size, -size * 0.7); ctx.lineTo(-size * 0.75, 0); ctx.lineTo(-size, size * 0.7); ctx.closePath(); ctx.fill(); ctx.restore(); };
-  const eye = (ex, ey, r) => { ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(ex, ey, r, 0, 7); ctx.fill(); ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(ex + r * 0.25, ey, r * 0.55, 0, 7); ctx.fill(); };
-  switch (shape) {
-    case "eel":
-      ctx.strokeStyle = color; ctx.lineWidth = H * 0.7; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(-L / 2, 0);
-      for (let k = 0; k <= 8; k++) ctx.lineTo(-L / 2 + (L * k) / 8, Math.sin(k * 1.1 + t / 150) * H * 0.35);
-      ctx.stroke(); eye(L / 2 - H * 0.3, -H * 0.05, H * 0.15);
-      break;
-    case "squid":
-      ctx.beginPath(); ctx.ellipse(L * 0.1, 0, L * 0.38, H * 0.62, 0, 0, 7); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(L * 0.42, 0); ctx.lineTo(L * 0.58, -H * 0.5); ctx.lineTo(L * 0.58, H * 0.5); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = dark; ctx.lineWidth = Math.max(1, H * 0.12);
-      for (let k = 0; k < 5; k++) { ctx.beginPath(); ctx.moveTo(-L * 0.26, (k - 2) * H * 0.18); ctx.quadraticCurveTo(-L * 0.4, (k - 2) * H * 0.4 + Math.sin(t / 140 + k) * H * 0.2, -L * 0.55, (k - 2) * H * 0.3); ctx.stroke(); }
-      eye(-L * 0.12, -H * 0.12, H * 0.16);
-      break;
-    case "jelly":
-      ctx.globalAlpha = 0.85;
-      ctx.beginPath(); ctx.arc(0, 0, L * 0.3, Math.PI, 0); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = light; ctx.lineWidth = Math.max(1, L * 0.03);
-      for (let k = 0; k < 5; k++) { ctx.beginPath(); ctx.moveTo(-L * 0.22 + k * L * 0.11, 0); ctx.quadraticCurveTo(-L * 0.22 + k * L * 0.11 + Math.sin(t / 200 + k) * L * 0.08, L * 0.25, -L * 0.22 + k * L * 0.11, L * 0.45); ctx.stroke(); }
-      ctx.globalAlpha = 1;
-      break;
-    case "crab":
-      ctx.beginPath(); ctx.ellipse(0, 0, L * 0.32, H * 0.55, 0, 0, 7); ctx.fill();
-      ctx.strokeStyle = dark; ctx.lineWidth = Math.max(1, L * 0.05);
-      for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.moveTo(-L * 0.2, k * H * 0.3); ctx.lineTo(-L * 0.42, k * H * 0.5 + H * 0.2); ctx.moveTo(L * 0.2, k * H * 0.3); ctx.lineTo(L * 0.42, k * H * 0.5 + H * 0.2); ctx.stroke(); }
-      ctx.fillStyle = color; ctx.beginPath(); ctx.arc(-L * 0.36, -H * 0.55, L * 0.1, 0, 7); ctx.arc(L * 0.36, -H * 0.55, L * 0.1, 0, 7); ctx.fill();
-      eye(-L * 0.08, -H * 0.45, H * 0.12); eye(L * 0.08, -H * 0.45, H * 0.12);
-      break;
-    case "flat":
-      ctx.beginPath(); ctx.moveTo(L * 0.35, 0); ctx.quadraticCurveTo(0, -H * 1.3, -L * 0.25, 0); ctx.quadraticCurveTo(0, H * 1.3, L * 0.35, 0); ctx.fill();
-      ctx.strokeStyle = dark; ctx.lineWidth = Math.max(1, L * 0.03); ctx.beginPath(); ctx.moveTo(-L * 0.25, 0); ctx.lineTo(-L * 0.55, Math.sin(t / 160) * H * 0.3); ctx.stroke();
-      eye(L * 0.15, -H * 0.15, H * 0.14);
-      break;
-    default: {
-      const round = shape === "round", long = shape === "long", shark = shape === "shark";
-      const bodyH = round ? H * 1.35 : long ? H * 0.75 : H;
-      tail(-L * 0.36, shark ? L * 0.22 : L * 0.18);
-      ctx.fillStyle = color;
-      ctx.beginPath(); ctx.ellipse(0, 0, L * 0.42, bodyH * 0.55, 0, 0, 7); ctx.fill();
-      ctx.fillStyle = light; ctx.beginPath(); ctx.ellipse(L * 0.02, bodyH * 0.2, L * 0.3, bodyH * 0.22, 0, 0, 7); ctx.fill();
-      ctx.fillStyle = dark;
-      ctx.beginPath(); ctx.moveTo(-L * 0.12, -bodyH * 0.45); ctx.lineTo(shark ? L * 0.02 : L * 0.05, -bodyH * (shark ? 1.05 : 0.85)); ctx.lineTo(L * 0.14, -bodyH * 0.45); ctx.closePath(); ctx.fill();
-      if (shark) { ctx.strokeStyle = dark; ctx.lineWidth = 1; for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.moveTo(L * 0.18 + k * 3, -bodyH * 0.15); ctx.lineTo(L * 0.16 + k * 3, bodyH * 0.15); ctx.stroke(); } }
-      eye(L * 0.27, -bodyH * 0.1, Math.max(1.2, bodyH * 0.13));
-    }
-  }
-  ctx.restore();
-}
-
-function drawChest(ctx, x, y, s, open = false) {
-  ctx.fillStyle = "#8a5a2a"; ctx.fillRect(x - s / 2, y - s * 0.3, s, s * 0.6);
-  ctx.fillStyle = "#a8743a"; ctx.fillRect(x - s / 2, y - s * 0.5 - (open ? s * 0.2 : 0), s, s * 0.25);
-  ctx.fillStyle = "#ffd23a"; ctx.fillRect(x - s * 0.08, y - s * 0.2, s * 0.16, s * 0.2);
-}
 
 /* ================= Interface ================= */
 
@@ -105,11 +28,7 @@ export function createFishingUI(root, wallet) {
   let biteTimer = 0, missTimer = 0;
   let castX = 380;
   let lineOut = 0;                    // animation du lancer (0 → 1)
-  let splash = [];
-  let shadows = [];
-  let drops = [];
-  let stars = Array.from({ length: 60 }, () => ({ x: Math.random() * LW, y: Math.random() * 190, s: Math.random() }));
-  let flash = 0;
+  const scene = createScene();
   let bookLoc = "all";
   let bookSel = null;
   let lowerTab = "book";
@@ -242,7 +161,7 @@ export function createFishingUI(root, wallet) {
     const a = A();
     power = p;
     quality = F.castQuality(p);
-    castX = 250 + p * 330;
+    castX = 250 + p * 320;
     lineOut = 0.001;
     setState("waiting");
     const q = ["Lancer faible…", "Bon lancer.", "Lancer parfait !"][quality];
@@ -258,7 +177,7 @@ export function createFishingUI(root, wallet) {
     const sonar = F.hasTackle(a, "sonar") && bite.fish;
     say(sonar ? `Sonar : ${bite.fish.name} (${F.RARITY[bite.fish.rarity].name.toLowerCase()}) a mordu ! FERRE !` : "Ça mord ! FERRE !", "push");
     if (navigator.vibrate) try { navigator.vibrate(60); } catch { /* sans importance */ }
-    splashAt(castX, WATER_Y, 10);
+    splashAt(castX, 214, 10);
     missTimer = window.setTimeout(() => {
       setState("idle");
       lineOut = 0;
@@ -346,8 +265,7 @@ export function createFishingUI(root, wallet) {
   }
 
   function splashAt(x, y, n) {
-    if (prefersReducedMotion()) return;
-    for (let k = 0; k < n; k++) splash.push({ x, y, vx: (Math.random() - 0.5) * 80, vy: -40 - Math.random() * 70, life: 0.6 + Math.random() * 0.3 });
+    if (!prefersReducedMotion()) scene.splash(x, y, n);
   }
 
   /* ---------- Entrées ---------- */
@@ -374,240 +292,19 @@ export function createFishingUI(root, wallet) {
   window.addEventListener("keyup", (e) => { if (e.key === " " && active) { e.preventDefault(); up(); } });
   window.addEventListener("blur", up);
 
-  /* ---------- Dessin de la scène ---------- */
-
-  const SKY = {
-    dawn: ["#ff9a6a", "#8a6aaa", "#3a3a7a"],
-    day: ["#bfe8ff", "#7ac8ff", "#4a9ae8"],
-    dusk: ["#ffb06a", "#e05a6a", "#3a2a6a"],
-    night: ["#1a1a3a", "#0c0c24", "#05050f"]
-  };
+  /* ---------- Dessin de la scène (voir fishing-art.js) ---------- */
 
   function drawScene(now, dt) {
-    const a = A();
-    const W = board.width, H = board.height;
-    const sx = W / LW, sy = H / LH;
-    ctx.setTransform(sx, 0, 0, sy, 0, 0);
-    const p = F.period(a.time);
-    const weather = F.currentWeather(a);
-    const loc = a.loc;
-    const underground = loc === "egouts" || loc === "abysse";
-
-    // Ciel / plafond
-    let g;
-    if (loc === "egouts") {
-      ctx.fillStyle = "#14101c"; ctx.fillRect(0, 0, LW, WATER_Y);
-      for (let y = 0; y < WATER_Y; y += 14) for (let x = (y / 14) % 2 ? -14 : 0; x < LW; x += 28) { ctx.fillStyle = (x + y) % 3 ? "#241a2a" : "#2c2030"; ctx.fillRect(x + 1, y + 1, 26, 12); }
-      ctx.fillStyle = "#0a0810";
-      for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.arc(80 + k * 160, WATER_Y, 70, Math.PI, 0); ctx.fill(); }
-      const neon = (x, y, w, c) => { ctx.shadowColor = c; ctx.shadowBlur = 12; ctx.fillStyle = c; ctx.fillRect(x, y, w, 3); ctx.shadowBlur = 0; };
-      neon(0, 40, LW, Math.sin(now / 400) > -0.9 ? "#ff2bd6" : "#401030");
-      neon(0, 52, LW, "#00f0ff");
-      ctx.fillStyle = "#3a3a4a"; ctx.fillRect(420, 0, 18, WATER_Y - 40); ctx.fillRect(420, WATER_Y - 46, 70, 16);
-      ctx.fillStyle = "#6aff3a"; ctx.globalAlpha = 0.6; ctx.fillRect(480, WATER_Y - 30, 6, 30 + Math.sin(now / 200) * 2); ctx.globalAlpha = 1;
-    } else if (loc === "abysse") {
-      g = ctx.createLinearGradient(0, 0, 0, WATER_Y);
-      g.addColorStop(0, "#020210"); g.addColorStop(1, "#06143a");
-      ctx.fillStyle = g; ctx.fillRect(0, 0, LW, WATER_Y);
-      for (const s of stars) { ctx.globalAlpha = 0.3 + 0.5 * Math.abs(Math.sin(now / 900 + s.s * 9)); ctx.fillStyle = s.s > 0.6 ? "#5affd0" : "#3aa9ff"; ctx.fillRect(s.x, s.y, 2, 2); }
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = "#04081a";
-      ctx.beginPath(); ctx.moveTo(0, WATER_Y); ctx.lineTo(0, 60); ctx.lineTo(60, 90); ctx.lineTo(110, 50); ctx.lineTo(170, 120); ctx.lineTo(230, WATER_Y); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(LW, WATER_Y); ctx.lineTo(LW, 40); ctx.lineTo(580, 110); ctx.lineTo(540, 70); ctx.lineTo(470, 150); ctx.lineTo(420, WATER_Y); ctx.fill();
-    } else {
-      const c = SKY[p];
-      g = ctx.createLinearGradient(0, 0, 0, WATER_Y);
-      g.addColorStop(0, c[2]); g.addColorStop(0.6, c[1]); g.addColorStop(1, c[0]);
-      ctx.fillStyle = g; ctx.fillRect(0, 0, LW, WATER_Y);
-      if (p === "night" || p === "dusk") for (const s of stars) { ctx.globalAlpha = (p === "night" ? 0.8 : 0.3) * (0.5 + 0.5 * Math.sin(now / 700 + s.s * 20)); ctx.fillStyle = "#fff"; ctx.fillRect(s.x, s.y * 0.7, 1.5, 1.5); }
-      ctx.globalAlpha = 1;
-      // Soleil ou lune
-      const hour = (a.time / 60) % 24;
-      const sun = hour >= 5 && hour < 20;
-      const k = sun ? (hour - 5) / 15 : ((hour + 4) % 24) / 9;
-      const bx = 40 + k * 560, by = 150 - Math.sin(k * Math.PI) * 120;
-      if (weather === "sun" || weather === "fog") {
-        ctx.fillStyle = sun ? (p === "day" ? "#fff6c0" : "#ffb070") : "#e8eeff";
-        ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 20;
-        ctx.beginPath(); ctx.arc(bx, by, sun ? 16 : 11, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
-      }
-      if (weather !== "sun") {
-        ctx.fillStyle = weather === "storm" ? "rgba(40,40,60,.7)" : "rgba(160,170,190,.55)";
-        for (let k2 = 0; k2 < 6; k2++) { const cx = ((k2 * 130 + now / 120) % (LW + 200)) - 100; ctx.beginPath(); ctx.ellipse(cx, 40 + (k2 % 3) * 18, 70, 18, 0, 0, 7); ctx.fill(); }
-      }
-      drawBackdrop(loc, p, now);
-    }
-
-    // Eau
-    g = ctx.createLinearGradient(0, WATER_Y, 0, LH);
-    const deep = { etang: ["#3a7a6a", "#123a3a"], riviere: ["#4a8ab8", "#163a5a"], lac: ["#3a6a9a", "#0a1a3a"], mer: ["#2a5a9a", "#061a3a"], egouts: ["#2a3a1a", "#0a1006"], abysse: ["#0a2a6a", "#000208"] }[loc];
-    const nightDim = !underground && p === "night" ? 0.5 : !underground && p === "dusk" ? 0.25 : 0;
-    g.addColorStop(0, deep[0]); g.addColorStop(1, deep[1]);
-    ctx.fillStyle = g; ctx.fillRect(0, WATER_Y, LW, LH - WATER_Y);
-    ctx.strokeStyle = loc === "egouts" ? "rgba(140,255,80,.25)" : "rgba(255,255,255,.22)";
-    ctx.lineWidth = 1.5;
-    const flow = loc === "riviere" ? now / 12 : now / 40;
-    for (let row = 0; row < 6; row++) {
-      ctx.beginPath();
-      for (let x = 0; x <= LW; x += 8) { const y = WATER_Y + 6 + row * 22 + Math.sin((x + flow + row * 50) / 30) * 2; if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
-      ctx.globalAlpha = 0.6 - row * 0.08; ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-    if (loc === "mer" && (p === "night" || p === "dusk")) {   // reflets des néons
-      for (let k = 0; k < 14; k++) { ctx.fillStyle = k % 2 ? "rgba(255,43,214,.25)" : "rgba(0,240,255,.25)"; ctx.fillRect(250 + k * 28 + Math.sin(now / 300 + k) * 3, WATER_Y + 8 + (k % 4) * 10, 14, 2); }
-    }
-
-    // Ombres de poissons (décor)
-    if (shadows.length < 4 && Math.random() < dt * 0.4) { const left = Math.random() < 0.5; shadows.push({ x: left ? -40 : LW + 40, dir: left ? 1 : -1, y: WATER_Y + 40 + Math.random() * 100, v: 20 + Math.random() * 30, len: 20 + Math.random() * 40 }); }
-    for (const s of shadows) {
-      s.x += s.v * dt * s.dir;
-      ctx.globalAlpha = loc === "abysse" ? 0.35 : 0.22;
-      drawFish(ctx, "fish", loc === "abysse" ? "#5affd0" : "#000000", s.x, s.y, s.len, s.dir < 0, now);
-    }
-    ctx.globalAlpha = 1;
-    shadows = shadows.filter((s) => s.x > -80 && s.x < LW + 80);
-
-    // Ponton et pêcheur
-    ctx.fillStyle = loc === "abysse" ? "#2a3a5a" : loc === "egouts" ? "#3a3a44" : "#7a4a22";
-    ctx.fillRect(0, WATER_Y - 12, 190, 12);
-    ctx.fillStyle = loc === "abysse" ? "#3a4a6a" : loc === "egouts" ? "#4a4a56" : "#a8743a";
-    ctx.fillRect(0, WATER_Y - 14, 190, 3);
-    for (let k = 0; k < 4; k++) { ctx.fillStyle = loc === "abysse" ? "#1a2a4a" : "#5a3418"; ctx.fillRect(20 + k * 50, WATER_Y - 2, 8, 40); }
-    if (loc === "abysse") { ctx.strokeStyle = "#00f0ff"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, WATER_Y - 30); ctx.lineTo(190, WATER_Y - 30); ctx.stroke(); }
-    const ax = 118, ay = WATER_Y - 14;
-    const lean = state === "charging" ? -Math.min(1, (performance.now() - chargeStart) / 700) * 0.4 : state === "reel" ? 0.15 : 0;
-    ctx.fillStyle = "#2a2a4a"; ctx.fillRect(ax - 6, ay - 18, 5, 18); ctx.fillRect(ax + 1, ay - 18, 5, 18);
-    ctx.fillStyle = "#00b8d8"; ctx.fillRect(ax - 8, ay - 40, 16, 22);
-    ctx.fillStyle = "#f0c8a0"; ctx.beginPath(); ctx.arc(ax, ay - 48, 8, 0, 7); ctx.fill();
-    ctx.fillStyle = "#e8c050"; ctx.fillRect(ax - 11, ay - 55, 22, 3); ctx.fillRect(ax - 6, ay - 61, 12, 6);
-    ctx.fillStyle = "#000"; ctx.fillRect(ax + 3, ay - 50, 2, 2);
-    // Canne
-    const tipX = ROD_TIP.x + lean * 60, tipY = ROD_TIP.y + Math.abs(lean) * 30 + (state === "reel" ? 10 + Math.sin(now / 60) * 3 : 0);
-    ctx.strokeStyle = "#5a3418"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ax + 6, ay - 32); ctx.lineTo(tipX, tipY); ctx.stroke();
-    ctx.strokeStyle = F.rodById(a.rod).id === "quantum" ? "#ff2bd6" : "#d8d8e0"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo((ax + 6 + tipX) / 2, (ay - 32 + tipY) / 2); ctx.lineTo(tipX, tipY); ctx.stroke();
-
-    // Ligne et bouchon
     if (state === "waiting" || state === "bite" || state === "reel") {
+      const before = lineOut;
       lineOut = Math.min(1, lineOut + dt * 2.2);
-      const k = lineOut;
-      const bx = tipX + (castX - tipX) * k;
-      const arc = Math.sin(k * Math.PI) * 60;
-      let byy = tipY + (WATER_Y - tipY) * k - arc;
-      if (k >= 1) byy = WATER_Y + (state === "bite" ? 5 + Math.sin(now / 45) * 4 : Math.sin(now / 500) * 1.5) + (state === "reel" ? 6 : 0);
-      const fx = state === "reel" && reel ? bx + (reel.s.fish - 0.5) * 40 : bx;
-      ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(tipX, tipY); ctx.quadraticCurveTo((tipX + fx) / 2, Math.max(tipY, byy) + (state === "reel" ? -10 : 20), fx, byy); ctx.stroke();
-      if (state !== "reel") {
-        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(bx, byy - 2, 4, Math.PI, 0); ctx.fill();
-        ctx.fillStyle = "#ff2a3a"; ctx.beginPath(); ctx.arc(bx, byy + 1, 4, 0, Math.PI); ctx.fill();
-        if (k >= 1) { ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.beginPath(); ctx.ellipse(bx, WATER_Y + 3, 8 + (now / 60) % 12, 2, 0, 0, 7); ctx.stroke(); }
-      } else { ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.beginPath(); ctx.ellipse(fx, WATER_Y + 3, 12, 3, 0, 0, 7); ctx.stroke(); if (Math.random() < 0.3) splashAt(fx, WATER_Y, 1); }
+      if (before < 1 && lineOut >= 1) splashAt(castX, 214, 7);
     }
-    if (state === "bite") {
-      const b = Math.sin(now / 80) * 3;
-      ctx.fillStyle = "#fcee0a"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
-      ctx.font = "bold 40px Rajdhani, system-ui, sans-serif"; ctx.textAlign = "center";
-      ctx.strokeText("!", ax, ay - 70 + b); ctx.fillText("!", ax, ay - 70 + b);
-    }
-
-    // Jauge de lancer
-    if (state === "charging") {
-      power = F.castPower(performance.now() - chargeStart);
-      ctx.fillStyle = "rgba(0,0,0,.6)"; ctx.fillRect(ax - 40, ay - 96, 12, 70);
-      ctx.fillStyle = power >= 0.92 ? "#fcee0a" : power >= 0.65 ? "#3ddc84" : "#00f0ff";
-      ctx.fillRect(ax - 38, ay - 28 - 66 * power, 8, 66 * power);
-      ctx.strokeStyle = "#fcee0a"; ctx.lineWidth = 1; ctx.strokeRect(ax - 40, ay - 96, 12, 6);
-    }
-
-    // Éclaboussures
-    for (const s of splash) { s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 200 * dt; s.life -= dt; ctx.globalAlpha = Math.max(0, s.life); ctx.fillStyle = "#cfe8ff"; ctx.fillRect(s.x, s.y, 2, 2); }
-    ctx.globalAlpha = 1;
-    splash = splash.filter((s) => s.life > 0 && s.y < WATER_Y + 4);
-
-    // Météo et nuit
-    if (!underground && (weather === "rain" || weather === "storm")) {
-      while (drops.length < 160) drops.push({ x: Math.random() * LW, y: Math.random() * LH, v: 380 + Math.random() * 160 });
-      ctx.strokeStyle = "rgba(180,200,255,.5)"; ctx.lineWidth = 1; ctx.beginPath();
-      for (const d of drops) { d.y += d.v * dt; d.x -= d.v * 0.2 * dt; if (d.y > LH) { d.y = -10; d.x = Math.random() * (LW + 60); } ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - 3, d.y + 10); }
-      ctx.stroke();
-      if (weather === "storm") {
-        if (Math.random() < dt * 0.15) flash = 1;
-        if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * 0.6})`; ctx.fillRect(0, 0, LW, LH); flash -= dt * 3; }
-      }
-    } else drops.length = 0;
-    if (weather === "fog") {
-      for (let k = 0; k < 3; k++) { ctx.fillStyle = `rgba(220,226,236,${0.16 + k * 0.04})`; ctx.fillRect(((now / (60 + k * 30)) % LW) - LW, 120 + k * 40, LW * 2, 50); }
-    }
-    if (nightDim) { ctx.fillStyle = `rgba(6,6,30,${nightDim * 0.6})`; ctx.fillRect(0, 0, LW, LH); }
-
-    // Mini-jeu
-    if (state === "reel" && reel) drawReel(now);
-  }
-
-  function drawBackdrop(loc, p, now) {
-    const dim = p === "night" ? 0.55 : p === "dusk" ? 0.25 : 0;
-    const col = (hex) => shade(hex, -dim);
-    if (loc === "etang") {
-      ctx.fillStyle = col("#4a8a4a"); ctx.beginPath(); ctx.ellipse(160, WATER_Y, 260, 60, 0, Math.PI, 0); ctx.fill();
-      ctx.fillStyle = col("#3a7a3a"); ctx.beginPath(); ctx.ellipse(520, WATER_Y, 220, 80, 0, Math.PI, 0); ctx.fill();
-      for (let k = 0; k < 7; k++) { const x = 260 + k * 55; ctx.fillStyle = col("#5a3a1a"); ctx.fillRect(x, WATER_Y - 60, 5, 40); ctx.fillStyle = col(k % 2 ? "#2a6a3a" : "#3a8a4a"); ctx.beginPath(); ctx.arc(x + 2, WATER_Y - 66, 20, 0, 7); ctx.fill(); }
-      ctx.strokeStyle = col("#6a8a3a"); ctx.lineWidth = 2;
-      for (let k = 0; k < 14; k++) { const x = 560 + k * 6; ctx.beginPath(); ctx.moveTo(x, WATER_Y + 4); ctx.lineTo(x + Math.sin(now / 700 + k) * 3, WATER_Y - 22 - (k % 3) * 6); ctx.stroke(); }
-    } else if (loc === "riviere") {
-      ctx.fillStyle = col("#5a8a5a"); ctx.beginPath(); ctx.ellipse(500, WATER_Y, 300, 90, 0, Math.PI, 0); ctx.fill();
-      ctx.fillStyle = col("#3a6a3a"); for (let k = 0; k < 12; k++) { ctx.beginPath(); ctx.moveTo(260 + k * 34, WATER_Y - 20); ctx.lineTo(276 + k * 34, WATER_Y - 75 - (k % 3) * 12); ctx.lineTo(292 + k * 34, WATER_Y - 20); ctx.fill(); }
-      ctx.fillStyle = col("#8a8a8a"); ctx.beginPath(); ctx.ellipse(420, WATER_Y + 2, 18, 7, 0, 0, 7); ctx.ellipse(560, WATER_Y + 3, 24, 8, 0, 0, 7); ctx.fill();
-    } else if (loc === "lac") {
-      const mountain = (x, w, hh, c) => { ctx.fillStyle = col(c); ctx.beginPath(); ctx.moveTo(x - w, WATER_Y); ctx.lineTo(x, WATER_Y - hh); ctx.lineTo(x + w, WATER_Y); ctx.fill(); ctx.fillStyle = col("#f0f6ff"); ctx.beginPath(); ctx.moveTo(x - w * 0.22, WATER_Y - hh * 0.78); ctx.lineTo(x, WATER_Y - hh); ctx.lineTo(x + w * 0.22, WATER_Y - hh * 0.78); ctx.fill(); };
-      mountain(260, 170, 150, "#5a6a8a"); mountain(470, 200, 180, "#4a5a7a"); mountain(620, 120, 110, "#5a6a8a");
-      ctx.fillStyle = col("#2a4a3a"); for (let k = 0; k < 16; k++) { ctx.beginPath(); ctx.moveTo(200 + k * 28, WATER_Y); ctx.lineTo(212 + k * 28, WATER_Y - 30 - (k % 4) * 6); ctx.lineTo(224 + k * 28, WATER_Y); ctx.fill(); }
-    } else if (loc === "mer") {
-      const lit = p === "night" || p === "dusk";
-      for (let k = 0; k < 18; k++) {
-        const x = 200 + k * 25, hh = 40 + ((k * 37) % 90);
-        ctx.fillStyle = lit ? "#0c0c1e" : col("#5a6a8a");
-        ctx.fillRect(x, WATER_Y - hh, 22, hh);
-        if (lit) for (let w = 0; w < hh / 8; w++) for (let c = 0; c < 3; c++) if ((k * 7 + w * 3 + c) % 4) { ctx.fillStyle = (k + w) % 5 ? "rgba(255,220,120,.7)" : "rgba(0,240,255,.8)"; ctx.fillRect(x + 3 + c * 6, WATER_Y - hh + 4 + w * 8, 3, 3); }
-      }
-      if (lit) {
-        ctx.shadowBlur = 14;
-        ctx.shadowColor = "#ff2bd6"; ctx.fillStyle = Math.sin(now / 300) > -0.8 ? "#ff2bd6" : "#401030"; ctx.fillRect(300, WATER_Y - 112, 40, 10);
-        ctx.shadowColor = "#00f0ff"; ctx.fillStyle = "#00f0ff"; ctx.fillRect(470, WATER_Y - 96, 30, 8);
-        ctx.shadowBlur = 0;
-      }
-    }
-  }
-
-  function drawReel(now) {
-    const { s, params } = reel;
-    const T = TRACK;
-    ctx.fillStyle = "rgba(7,7,11,.86)"; ctx.fillRect(T.x - 10, T.y - 10, T.w + 52, T.h + 20);
-    ctx.strokeStyle = "#a8743a"; ctx.lineWidth = 3; ctx.strokeRect(T.x - 10, T.y - 10, T.w + 52, T.h + 20);
-    const g = ctx.createLinearGradient(0, T.y, 0, T.y + T.h);
-    g.addColorStop(0, "#2a5a9a"); g.addColorStop(1, "#0a1a3a");
-    ctx.fillStyle = g; ctx.fillRect(T.x, T.y, T.w, T.h);
-    // Barre verte
-    const by = T.y + T.h * (1 - s.pos - params.bar);
-    ctx.fillStyle = s.inside ? "rgba(61,255,143,.75)" : "rgba(61,255,143,.42)";
-    ctx.fillRect(T.x + 2, by, T.w - 4, T.h * params.bar);
-    ctx.strokeStyle = "#3dff8f"; ctx.lineWidth = 1.5; ctx.strokeRect(T.x + 2, by, T.w - 4, T.h * params.bar);
-    // Trésor
-    const t = s.treasure;
-    if (t && t.shown && !t.got) {
-      const ty = T.y + T.h * (1 - t.y);
-      drawChest(ctx, T.x + T.w / 2, ty, 16);
-      ctx.strokeStyle = "#ffd23a"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(T.x + T.w / 2, ty, 13, -Math.PI / 2, -Math.PI / 2 + t.p * Math.PI * 2); ctx.stroke();
-    }
-    // Poisson
-    const fy = T.y + T.h * (1 - s.fish);
-    drawFish(ctx, bite.fish.shape === "jelly" || bite.fish.shape === "crab" || bite.fish.shape === "squid" ? bite.fish.shape : "fish", bite.fish.color, T.x + T.w / 2, fy, 30, s.target < s.fish, now);
-    // Jauge de capture
-    const px = T.x + T.w + 10, pw = 14;
-    ctx.fillStyle = "#1a1a24"; ctx.fillRect(px, T.y, pw, T.h);
-    const prog = s.progress;
-    ctx.fillStyle = prog < 0.3 ? "#ff2a6d" : prog < 0.7 ? "#fcee0a" : "#3dff8f";
-    ctx.fillRect(px + 2, T.y + T.h * (1 - prog), pw - 4, T.h * prog);
-    if (s.perfect) { ctx.fillStyle = "#fcee0a"; ctx.font = "bold 11px Rajdhani, system-ui, sans-serif"; ctx.textAlign = "center"; ctx.fillText("PARFAIT", T.x + T.w / 2 + 12, T.y + T.h + 22); }
+    if (state === "charging") power = F.castPower(performance.now() - chargeStart);
+    scene.draw(ctx, board.width, board.height, A(), {
+      state, castX, lineOut, power, chargeT: performance.now() - chargeStart,
+      reel: reel && bite?.fish ? { s: reel.s, params: reel.params, fish: bite.fish } : null
+    }, now, dt, prefersReducedMotion());
   }
 
   /* ---------- Boucle ---------- */

@@ -6,7 +6,7 @@
 // Le temps s'arrête pendant les menus (boutique, expédition…) et quand on quitte le jeu.
 
 import * as R from "./ranch.js";
-import { drawGround, drawSoil, drawCrop, drawObject, drawBuilding, drawFarmer, drawAnimal, drawIcon } from "./ranch-art.js";
+import { drawGroundLayer, drawWaterFx, drawSoil, drawCrop, drawObject, drawBuilding, drawFarmer, drawAnimal, iconCanvas } from "./ranch-art.js";
 import { h, fmt, fmtShort, prefersReducedMotion } from "./ui.js";
 
 const { TILE, MAP_W, MAP_H } = R;
@@ -14,7 +14,6 @@ const SPEED = 4.6;               // cases par seconde
 const ACT_REPEAT = 290;          // ms entre deux coups quand on maintient l'action
 const CHARGE_STEP = 420;         // ms par niveau de charge
 const SAVE_EVERY = 4000;
-const TOOL_COLORS = { hoe: "#9aa0a8", can: "#3a8ac8", axe: "#c8d0dc", pick: "#9aa0a8", scythe: "#d0d8e0" };
 
 function stat(label, valueEl) { return h("div", {}, h("dt", {}, label), h("dd", {}, valueEl)); }
 
@@ -109,13 +108,7 @@ export function createRanchUI(root, wallet) {
   function iconURL(id, tier = 0) {
     const key = `${id}|${tier}`;
     if (iconCache.has(key)) return iconCache.get(key);
-    const c = document.createElement("canvas");
-    c.width = 32; c.height = 32;
-    const g = c.getContext("2d");
-    g.imageSmoothingEnabled = false;
-    g.scale(2, 2);
-    drawIcon(g, id, tier);
-    const url = c.toDataURL();
+    const url = iconCanvas(id, tier).toDataURL();
     iconCache.set(key, url);
     return url;
   }
@@ -709,10 +702,54 @@ export function createRanchUI(root, wallet) {
 
   /* ================= Dessin ================= */
 
+  // Teinte de la lumière selon l'heure (multipliée sur toute l'image) : aube dorée, plein jour, coucher orangé, nuit bleue.
+  const LIGHT_KEYS = [[360, [255, 206, 165]], [450, [255, 246, 232]], [540, [255, 255, 255]], [1000, [255, 255, 255]], [1080, [255, 214, 160]], [1150, [240, 150, 130]], [1210, [130, 110, 190]], [1290, [66, 68, 140]], [1560, [48, 50, 112]]];
+  function lightAt(t, weather) {
+    let c = LIGHT_KEYS[LIGHT_KEYS.length - 1][1];
+    for (let k = 0; k < LIGHT_KEYS.length - 1; k++) {
+      const [t0, a] = LIGHT_KEYS[k], [t1, b] = LIGHT_KEYS[k + 1];
+      if (t >= t0 && t <= t1) { const f = (t - t0) / (t1 - t0); c = a.map((v, i) => v + (b[i] - v) * f); break; }
+    }
+    const w = weather === "rain" ? [205, 210, 228] : weather === "storm" ? [170, 176, 205] : weather === "snow" ? [236, 240, 252] : [255, 255, 255];
+    return c.map((v, i) => Math.round((v * w[i]) / 255));
+  }
+
+  let ambient = [];
+  const clouds = Array.from({ length: 4 }, (_, k) => ({ x: Math.random() * MAP_W * TILE, y: (k + 0.5) * (MAP_H * TILE) / 4, r: 60 + Math.random() * 50 }));
+
+  function updateAmbient(r, dt, now) {
+    const night = r.time >= 20 * 60 || r.time < 6 * 60 + 30;
+    const want = prefersReducedMotion() ? 0 : night && (r.season === 0 || r.season === 1) && r.weather === "sun" ? 26
+      : !night && r.weather === "sun" && r.season !== 3 ? 9 : 0;
+    while (ambient.length < want) {
+      const kind = night ? "firefly" : r.season === 2 ? "leaf" : r.season === 0 && Math.random() < 0.6 ? "petal" : "butterfly";
+      ambient.push({ kind, x: cam.x + Math.random() * viewW, y: cam.y + Math.random() * viewH, vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 6, ph: Math.random() * 6, life: 6 + Math.random() * 10, c: ["#ffd23a", "#ff9ad0", "#9ad4ff", "#ffffff"][Math.floor(Math.random() * 4)] });
+    }
+    if (ambient.length > want) ambient.length = want;
+    for (const p of ambient) {
+      p.ph += dt; p.life -= dt;
+      if (p.kind === "leaf" || p.kind === "petal") { p.x += (8 + Math.sin(p.ph * 1.7) * 10) * dt; p.y += (9 + Math.cos(p.ph) * 3) * dt; }
+      else if (p.kind === "butterfly") { p.x += (p.vx + Math.sin(p.ph * 2) * 8) * dt; p.y += (p.vy + Math.cos(p.ph * 3) * 6) * dt; }
+      else { p.x += Math.sin(p.ph * 0.8) * 6 * dt; p.y += Math.cos(p.ph * 0.6) * 4 * dt; }
+      if (p.life <= 0 || p.x < cam.x - 30 || p.x > cam.x + viewW + 30 || p.y < cam.y - 30 || p.y > cam.y + viewH + 30) { p.x = cam.x + Math.random() * viewW; p.y = cam.y + (p.kind === "leaf" || p.kind === "petal" ? -10 : Math.random() * viewH); p.life = 6 + Math.random() * 10; }
+    }
+    for (const c of clouds) { c.x += 6 * dt; if (c.x - c.r > MAP_W * TILE) c.x = -c.r; }
+  }
+
+  function drawAmbient(ctx2, now) {
+    for (const p of ambient) {
+      if (p.kind === "firefly") continue;
+      ctx2.save(); ctx2.translate(p.x, p.y);
+      if (p.kind === "leaf") { ctx2.rotate(p.ph * 2); ctx2.fillStyle = ["#e8842a", "#c85a1e", "#f6b844"][Math.floor(p.ph * 10) % 3]; ctx2.beginPath(); ctx2.ellipse(0, 0, 2.2, 1, 0, 0, 7); ctx2.fill(); }
+      else if (p.kind === "petal") { ctx2.rotate(p.ph * 3); ctx2.fillStyle = "#ffc4e0"; ctx2.beginPath(); ctx2.ellipse(0, 0, 1.5, 0.8, 0, 0, 7); ctx2.fill(); }
+      else { const w = Math.abs(Math.sin(p.ph * 14)) * 2.2 + 0.4; ctx2.fillStyle = p.c; ctx2.beginPath(); ctx2.ellipse(-w / 2, 0, w / 2, 1.6, 0, 0, 7); ctx2.ellipse(w / 2, 0, w / 2, 1.6, 0, 0, 7); ctx2.fill(); ctx2.fillStyle = "#2a1a1a"; ctx2.fillRect(-0.3, -1.2, 0.6, 2.4); }
+      ctx2.restore();
+    }
+  }
+
   function draw(now) {
     const r = S();
     const W = board.width, H = board.height;
-    ctx.imageSmoothingEnabled = false;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = "#0a0a12";
     ctx.fillRect(0, 0, W, H);
@@ -722,113 +759,150 @@ export function createRanchUI(root, wallet) {
     if (viewW > MAP_W * TILE) cam.x = (MAP_W * TILE - viewW) / 2;
     const ox = Math.round(cam.x * zoom), oy = Math.round(cam.y * zoom);
     ctx.setTransform(zoom, 0, 0, zoom, -ox, -oy);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
     const x0 = Math.max(0, Math.floor(cam.x / TILE) - 1), x1 = Math.min(MAP_W - 1, Math.ceil((cam.x + viewW) / TILE) + 1);
     const y0 = Math.max(0, Math.floor(cam.y / TILE) - 1), y1 = Math.min(MAP_H - 1, Math.ceil((cam.y + viewH) / TILE) + 2);
 
+    // Sol pré-rendu, reflets de l'eau, terre labourée.
+    drawGroundLayer(ctx, r.season, r.built.greenhouse, zoom, { x: cam.x - 2, y: cam.y - 2, w: viewW + 4, h: viewH + 4 });
+    drawWaterFx(ctx, x0, y0, x1, y1, now, r.season);
+    const hasSoil = (x, y) => !!r.soil[R.idx(x, y)];
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-      const t = R.groundAt(x, y);
-      drawGround(ctx, t, x, y, r.season, now, r.built.greenhouse);
       const soil = r.soil[R.idx(x, y)];
-      if (soil) drawSoil(ctx, x, y, soil, r.season);
+      if (soil) drawSoil(ctx, x, y, soil, r.season, hasSoil);
+    }
+
+    // Case visée (sous les objets).
+    if (!modal) {
+      const t = charge ? { x: charge.x, y: charge.y } : targetTile(r);
+      const lvl = charge ? Math.min(r.tools[r.inv[sel]?.id] ?? 0, Math.floor((now - charge.start) / CHARGE_STEP)) : 0;
+      const pulse = 0.55 + 0.25 * Math.sin(now / 180);
+      for (const p of R.toolArea(t.x, t.y, r.face, lvl)) {
+        ctx.fillStyle = `rgba(255,255,255,${0.12 * pulse})`;
+        ctx.beginPath(); ctx.roundRect(p.x * TILE + 0.8, p.y * TILE + 0.8, TILE - 1.6, TILE - 1.6, 2.5); ctx.fill();
+        ctx.lineWidth = 1.4; ctx.strokeStyle = "rgba(28,18,34,.55)"; ctx.stroke();
+        ctx.lineWidth = 0.7; ctx.strokeStyle = `rgba(255,255,255,${0.55 + 0.4 * pulse})`; ctx.stroke();
+      }
+    }
+
+    // Ombres des nuages (beau temps, en journée).
+    if (r.weather === "sun" && r.time < 19 * 60) {
+      for (const c of clouds) {
+        const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r);
+        g.addColorStop(0, "rgba(20,30,60,.13)"); g.addColorStop(1, "rgba(20,30,60,0)");
+        ctx.fillStyle = g; ctx.fillRect(c.x - c.r, c.y - c.r, c.r * 2, c.r * 2);
+      }
     }
 
     // Objets triés par leur base (les plus bas passent devant).
     const sprites = [];
-    for (let y = y0; y <= Math.min(MAP_H - 1, y1 + 2); y++) for (let x = x0; x <= x1; x++) {
+    for (let y = y0; y <= Math.min(MAP_H - 1, y1 + 3); y++) for (let x = x0; x <= x1; x++) {
       const i = R.idx(x, y);
       const o = r.obj[i];
-      if (o) sprites.push({ y: (y + 1) * TILE - (o.t === "weed" || o.t === "grass" || o.t === "branch" || o.t === "forage" ? 4 : 1), draw: () => drawObject(ctx, x, y, o, r.season, now, { morning: r.time < R.DAY_START + 30 }) });
+      if (o) sprites.push({ y: (y + 1) * TILE - (o.t === "weed" || o.t === "grass" || o.t === "branch" || o.t === "forage" ? 4 : 1), draw: () => drawObject(ctx, x, y, o, r.season, now, { morning: r.time < R.DAY_START + 40 }) });
       const c = r.crops[i];
       if (c) { const st = R.cropStage(r, i); sprites.push({ y: (y + 1) * TILE - 3, draw: () => drawCrop(ctx, x, y, c.c, st.stage, c.dead, now) }); }
     }
+    const night = r.time >= 19 * 60 + 30;
     const state = { binCount: r.bin.length, requestOpen: r.request && !r.request.done, shopOpen: R.shopOpen(r) };
     for (const b of R.BUILDINGS) {
-      if (b.x * TILE > cam.x + viewW + 32 || (b.x + b.w) * TILE < cam.x - 32 || b.y * TILE > cam.y + viewH + 64 || (b.y + b.h) * TILE < cam.y - 32) continue;
-      const night = r.time >= 19 * 60;
+      if (b.x * TILE > cam.x + viewW + 32 || (b.x + b.w) * TILE < cam.x - 32 || b.y * TILE > cam.y + viewH + 64 || (b.y + b.h) * TILE < cam.y - 40) continue;
       sprites.push({ y: (b.y + b.h) * TILE, draw: () => drawBuilding(ctx, b, { ...state, built: r.built[b.id] }, r.season, now, night) });
     }
     r.animals.forEach((a, k) => {
       const s = animalPos[k];
       if (s) sprites.push({ y: s.y * TILE, draw: () => drawAnimal(ctx, a.kind, s.x * TILE, s.y * TILE, s.flip, now + k * 333, a.ready) });
     });
-    const tool = r.inv[sel] && R.isTool(r.inv[sel].id) ? TOOL_COLORS[r.inv[sel].id] : null;
-    sprites.push({ y: r.py * TILE, draw: () => drawFarmer(ctx, r.px * TILE, r.py * TILE, r.face, walk, swing > 0 ? 1 - swing / 0.22 : 0, tool) });
+    const toolId = r.inv[sel] && R.isTool(r.inv[sel].id) ? r.inv[sel].id : null;
+    sprites.push({ y: r.py * TILE, draw: () => drawFarmer(ctx, r.px * TILE, r.py * TILE, r.face, walk, swing > 0 ? 1 - swing / 0.22 : 0, toolId, toolId ? tierOf(toolId) : 0) });
     sprites.sort((a, b) => a.y - b.y);
     for (const s of sprites) s.draw();
 
-    // Case visée.
-    if (!modal) {
-      const t = charge ? { x: charge.x, y: charge.y } : targetTile(r);
-      const lvl = charge ? Math.min(r.tools[r.inv[sel]?.id] ?? 0, Math.floor((now - charge.start) / CHARGE_STEP)) : 0;
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = "rgba(255,255,255,.85)";
-      for (const p of R.toolArea(t.x, t.y, r.face, lvl)) ctx.strokeRect(p.x * TILE + 0.5, p.y * TILE + 0.5, TILE - 1, TILE - 1);
-      if (charge) {
-        const max = r.tools[r.inv[sel]?.id] ?? 0;
-        const pct = Math.min(1, (now - charge.start) / (CHARGE_STEP * Math.max(1, max)));
-        ctx.fillStyle = "rgba(0,0,0,.6)"; ctx.fillRect(r.px * TILE - 10, r.py * TILE - 32, 20, 4);
-        ctx.fillStyle = lvl >= max ? "#fcee0a" : "#00f0ff"; ctx.fillRect(r.px * TILE - 10, r.py * TILE - 32, 20 * pct, 4);
-      }
+    if (charge) {
+      const max = r.tools[r.inv[sel]?.id] ?? 0;
+      const lvl = Math.min(max, Math.floor((now - charge.start) / CHARGE_STEP));
+      const pct = Math.min(1, (now - charge.start) / (CHARGE_STEP * Math.max(1, max)));
+      ctx.fillStyle = "rgba(28,18,34,.85)"; ctx.beginPath(); ctx.roundRect(r.px * TILE - 11, r.py * TILE - 36, 22, 5, 2); ctx.fill();
+      ctx.fillStyle = lvl >= max ? "#fcee0a" : "#00f0ff"; ctx.beginPath(); ctx.roundRect(r.px * TILE - 10, r.py * TILE - 35, 20 * pct, 3, 1.5); ctx.fill();
     }
     if (path && path.length) {
       const p = path[path.length - 1];
-      ctx.fillStyle = "rgba(0,240,255,.35)";
-      ctx.fillRect(p.x * TILE + 5, p.y * TILE + 5, 6, 6);
+      const k = 0.6 + 0.4 * Math.sin(now / 160);
+      ctx.strokeStyle = `rgba(0,240,255,${k})`; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.ellipse(p.x * TILE + 8, p.y * TILE + 10, 4 + k, 2 + k * 0.5, 0, 0, Math.PI * 2); ctx.stroke();
     }
 
     for (const p of particles) {
       ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 2));
       ctx.fillStyle = p.sparkle && Math.random() < 0.5 ? "#fff" : p.color;
-      ctx.fillRect(p.x, p.y, p.sparkle ? 1.5 : 2, p.sparkle ? 1.5 : 2);
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.sparkle ? 0.8 : 1.1, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
-    ctx.font = "bold 7px Rajdhani, system-ui, sans-serif";
-    ctx.textAlign = "center";
-    for (const f of floaters) {
-      ctx.globalAlpha = Math.min(1, f.life);
-      ctx.fillStyle = "#000";
-      ctx.fillText(f.text, f.x + 0.6, f.y + 0.6);
-      ctx.fillStyle = f.color;
-      ctx.fillText(f.text, f.x, f.y);
-    }
-    ctx.globalAlpha = 1;
+    drawAmbient(ctx, now);
 
-    // Écran : météo puis nuit.
+    // Écran : pluie / neige, lumière du moment, sources de lumière, vignette.
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (r.weather === "rain" || r.weather === "storm" || r.weather === "snow") {
       const snow = r.weather === "snow";
-      ctx.strokeStyle = "rgba(170,200,255,.55)";
-      ctx.fillStyle = "rgba(255,255,255,.85)";
-      ctx.lineWidth = Math.max(1, zoom * 0.5);
+      ctx.strokeStyle = "rgba(190,215,255,.5)";
+      ctx.fillStyle = "rgba(255,255,255,.9)";
+      ctx.lineWidth = Math.max(1, zoom * 0.45);
       ctx.beginPath();
       for (const d of drops) {
-        if (snow) ctx.fillRect(d.x * W, d.y * H, zoom * 1.2, zoom * 1.2);
-        else { ctx.moveTo(d.x * W, d.y * H); ctx.lineTo(d.x * W - 3 * zoom, d.y * H + 9 * zoom); }
+        if (snow) { ctx.moveTo(d.x * W + zoom, d.y * H); ctx.arc(d.x * W, d.y * H, zoom * (0.5 + d.w * 0.12), 0, Math.PI * 2); }
+        else { ctx.moveTo(d.x * W, d.y * H); ctx.lineTo(d.x * W - 2.5 * zoom, d.y * H + 8 * zoom); }
       }
-      if (!snow) ctx.stroke();
-      ctx.fillStyle = snow ? "rgba(230,240,255,.08)" : "rgba(30,40,80,.18)";
-      ctx.fillRect(0, 0, W, H);
-      if (r.weather === "storm" && Math.sin(now / 1700) > 0.995) { ctx.fillStyle = "rgba(255,255,255,.5)"; ctx.fillRect(0, 0, W, H); }
+      if (snow) ctx.fill(); else ctx.stroke();
+      if (!snow) { ctx.fillStyle = "rgba(200,225,255,.5)"; for (const d of drops) if (d.y > 0.2 && (d.w * 7 + now / 90) % 9 < 0.6) { ctx.beginPath(); ctx.ellipse(d.x * W, d.y * H + 9 * zoom, 2 * zoom, 0.7 * zoom, 0, 0, 7); ctx.fill(); } }
     }
-    const dark = r.time < 18 * 60 ? 0 : Math.min(0.62, ((r.time - 18 * 60) / 240) * 0.62);
-    if (dark > 0) {
-      ctx.fillStyle = `rgba(12,8,40,${dark})`;
+
+    const tint = lightAt(r.time, r.weather);
+    if (tint.some((v) => v < 254)) {
+      ctx.globalCompositeOperation = "multiply";
+      ctx.fillStyle = `rgb(${tint.join(",")})`;
       ctx.fillRect(0, 0, W, H);
-      ctx.globalCompositeOperation = "lighter";
-      const glow = (wx, wy, rad, c) => {
-        const sx = wx * zoom - ox, sy = wy * zoom - oy;
-        const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, rad * zoom);
-        g.addColorStop(0, c); g.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = g; ctx.fillRect(sx - rad * zoom, sy - rad * zoom, rad * 2 * zoom, rad * 2 * zoom);
-      };
-      const k = dark / 0.62;
-      glow(5 * TILE + 17, 2 * TILE + 46, 26, `rgba(255,200,90,${0.35 * k})`);
-      glow(5 * TILE + 69, 2 * TILE + 46, 26, `rgba(255,200,90,${0.35 * k})`);
-      glow(42 * TILE, 3 * TILE, 40, `rgba(255,43,214,${0.25 * k})`);
-      glow(r.px * TILE, r.py * TILE - 8, 30, `rgba(0,240,255,${0.12 * k})`);
       ctx.globalCompositeOperation = "source-over";
     }
+    const dark = 1 - (tint[0] + tint[1] + tint[2]) / 765;
+    if (dark > 0.2) {
+      const k = Math.min(1, (dark - 0.2) / 0.5);
+      ctx.globalCompositeOperation = "lighter";
+      const glow = (wx, wy, rad, c, a) => {
+        const sx = wx * zoom - ox, sy = wy * zoom - oy;
+        if (sx < -rad * zoom || sy < -rad * zoom || sx > W + rad * zoom || sy > H + rad * zoom) return;
+        const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, rad * zoom);
+        g.addColorStop(0, `rgba(${c},${a * k})`); g.addColorStop(1, `rgba(${c},0)`);
+        ctx.fillStyle = g; ctx.fillRect(sx - rad * zoom, sy - rad * zoom, rad * 2 * zoom, rad * 2 * zoom);
+      };
+      const hx = 5 * TILE, hy = 2 * TILE;
+      glow(hx + 21, hy + 40, 34, "255,190,90", 0.42); glow(hx + 73, hy + 40, 34, "255,190,90", 0.42); glow(hx + 48, hy + 8, 18, "255,190,90", 0.3);
+      glow(hx + 58, hy + 36, 22, "255,200,110", 0.35);
+      glow(42 * TILE, 2.6 * TILE, 50, "255,43,214", 0.22); glow(42 * TILE, 3 * TILE, 30, "0,240,255", 0.2);
+      if (r.built.coop) glow(26 * TILE + 16, 22 * TILE + 22, 22, "255,200,110", 0.3);
+      if (r.built.barn) glow(37 * TILE + 16, 21 * TILE + 22, 22, "255,200,110", 0.3);
+      glow(r.px * TILE, r.py * TILE - 8, 46, "255,220,150", 0.32);
+      for (const p of ambient) if (p.kind === "firefly") { const b = 0.5 + 0.5 * Math.sin(p.ph * 4); glow(p.x, p.y, 7, "190,255,120", 0.9 * b); }
+      ctx.globalCompositeOperation = "source-over";
+      for (const p of ambient) if (p.kind === "firefly") { ctx.fillStyle = "rgba(230,255,180,.9)"; ctx.beginPath(); ctx.arc(p.x * zoom - ox, p.y * zoom - oy, zoom * 0.55, 0, 7); ctx.fill(); }
+    }
+    if (r.weather === "storm" && Math.sin(now / 1700) > 0.995) { ctx.fillStyle = "rgba(255,255,255,.45)"; ctx.fillRect(0, 0, W, H); }
+    const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.45, W / 2, H / 2, Math.max(W, H) * 0.75);
+    vg.addColorStop(0, "rgba(10,6,20,0)"); vg.addColorStop(1, `rgba(10,6,20,${0.28 + dark * 0.3})`);
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+
+    // Petits textes flottants (au-dessus de tout, non teintés).
+    ctx.setTransform(zoom, 0, 0, zoom, -ox, -oy);
+    ctx.font = "700 7px Rajdhani, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.lineJoin = "round";
+    for (const f of floaters) {
+      ctx.globalAlpha = Math.min(1, f.life);
+      ctx.strokeStyle = "rgba(28,18,34,.95)"; ctx.lineWidth = 2.2; ctx.strokeText(f.text, f.x, f.y);
+      ctx.fillStyle = f.color; ctx.fillText(f.text, f.x, f.y);
+    }
+    ctx.globalAlpha = 1;
   }
 
   /* ================= Boucle ================= */
@@ -850,6 +924,7 @@ export function createRanchUI(root, wallet) {
     }
     swing = Math.max(0, swing - dt);
     syncAnimals(r, dt, now);
+    updateAmbient(r, dt, now);
 
     for (const p of particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 140 * dt; p.life -= dt; }
     particles = particles.filter((p) => p.life > 0);

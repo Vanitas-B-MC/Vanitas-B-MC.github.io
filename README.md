@@ -12,7 +12,7 @@ js/main.js, js/veille.js
 easter-egg/arcade.html      page cachée : salle d'arcade (accessible en tapant « awesome »)
 easter-egg/css/arcade.css   style de l'arcade
 easter-egg/js/arcade.js      choix du jeu, portefeuille, gain passif du Clicker
-easter-egg/js/*.js          logique pure des jeux (snake, blackjack, roulette, plinko, crash, slots, ranch, fishing, race, mines, clicker, tetris, td, survivors, breach, hunt, music) + ui-*.js
+easter-egg/js/*.js          logique pure des jeux (snake, blackjack, roulette, plinko, crash, slots, ranch, fishing, race, mines, clicker, tetris, td, survivors, breach, hunt, music) + ui-*.js ; ranch-art.js et fishing-art.js : graphismes de la ferme et de la pêche
 js/ui-*.js                  affichage de chaque jeu ; js/ui.js outils partagés
 js/wallet.js                pièces bleues, crédits et progression (localStorage)
 js/secret-code.js           détecte les codes tapés au clavier
