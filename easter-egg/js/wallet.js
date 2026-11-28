@@ -9,7 +9,8 @@ import { UPGRADES, BLUE_UPGRADES, SKILLS, CORE } from "./clicker.js";
 import { CHARACTER_IDS, FREE_CHARACTER } from "./survivors.js";
 import { MONSTERS, FAMILIES, FAMILY_IDS, MAX_TIER, freshHunt } from "./hunt.js";
 import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP, HERO_IDS, FREE_HERO } from "./td.js";
-import { freshFarm, sanitizeFarm } from "./farm.js";
+import { freshRanch, sanitizeRanch } from "./ranch.js";
+import { freshAngler, sanitizeAngler } from "./fishing.js";
 import { LEVEL_IDS } from "./mines.js";
 import { QUEST_IDS, questById, applyRunToQuests } from "./hub.js";
 import { MAX_CREDITS } from "./limits.js";
@@ -56,7 +57,8 @@ function freshData() {
     bestDungeon: 0,        // étage le plus profond atteint dans « Donjon »
     dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], weapons: FREE_WEAPONS.slice(), ults: FREE_ULTS.slice(), runs: 0,
       stats: { kills: 0, bosses: 0, rooms: 0, gold: 0, elite: 0, deepest: 0 }, quests: {} },   // âmes, améliorations permanentes, classes
-    farm: freshFarm(),     // « Pêche & Ferme » : parcelles, améliorations, carnet de pêche
+    ranch: freshRanch(Math.floor(Math.random() * 1e9)),   // « Vallée Néon » : la ferme façon Stardew Valley
+    angler: freshAngler(), // « Grand Bleu » : le jeu de pêche (perles, équipement, bestiaire)
     mines: Object.fromEntries(LEVEL_IDS.map((id) => [id, 0]))   // Démineur : meilleur temps (secondes) par niveau, 0 = aucun
   };
 }
@@ -118,7 +120,8 @@ export function sanitize(raw) {
       for (const id of raw.dungeon.weapons) if (WEAPON_IDS.includes(id) && !d.weapons.includes(id)) d.weapons.push(id);
     }
   }
-  data.farm = sanitizeFarm(raw.farm);
+  data.ranch = sanitizeRanch(raw.ranch);
+  data.angler = sanitizeAngler(raw.angler);
   for (const id of LEVEL_IDS) data.mines[id] = toCount(raw.mines?.[id]);
   if (Array.isArray(raw.chars)) {
     for (const id of raw.chars) if (CHARACTER_IDS.includes(id) && !data.chars.includes(id)) data.chars.push(id);
@@ -241,8 +244,9 @@ export function createWallet(storage = defaultStorage()) {
     },
     setBestSnake(score) { return this.setBest("bestSnake", score); },
 
-    // Pêche & Ferme : le jeu modifie `data.farm` directement, puis demande la sauvegarde.
-    saveFarm() { commit(); },
+    // Vallée Néon et Grand Bleu : le jeu modifie `data.ranch` / `data.angler` directement, puis demande la sauvegarde.
+    saveRanch() { commit(); },
+    saveAngler() { commit(); },
 
     // Démineur : enregistre un meilleur temps (en secondes). Renvoie true si c'est un nouveau record.
     setMinesBest(level, seconds) {

@@ -7,7 +7,8 @@ import { createSnakeUI } from "./ui-snake.js";
 import { createBlackjackUI } from "./ui-blackjack.js";
 import { createRouletteUI } from "./ui-roulette.js";
 import { createPlinkoUI } from "./ui-plinko.js";
-import { createFarmUI } from "./ui-farm.js";
+import { createRanchUI } from "./ui-ranch.js";
+import { createFishingUI } from "./ui-fishing.js";
 import { createRaceUI } from "./ui-race.js";
 import { createMinesUI, fmtTime } from "./ui-mines.js";
 import { createCrashUI } from "./ui-crash.js";
@@ -21,6 +22,7 @@ import { createHuntUI } from "./ui-hunt.js";
 import { createDungeonUI } from "./ui-dungeon.js";
 import { createMusic } from "./music.js";
 import { fmt, fmtShort, fmtRate } from "./ui.js";
+import { FISH } from "./fishing.js";
 
 const $ = (selector) => document.querySelector(selector);
 const wallet = createWallet();
@@ -45,7 +47,8 @@ const GAMES = {
   blackjack: { title: "Blackjack", ui: mount(createBlackjackUI, "#blackjack-root") },
   roulette: { title: "Roulette", ui: mount(createRouletteUI, "#roulette-root") },
   plinko: { title: "Plinko", ui: mount(createPlinkoUI, "#plinko-root") },
-  farm: { title: "Pêche & Ferme", ui: mount(createFarmUI, "#farm-root") },
+  ranch: { title: "Vallée Néon", ui: mount(createRanchUI, "#ranch-root") },
+  fishing: { title: "Grand Bleu", ui: mount(createFishingUI, "#fishing-root") },
   race: { title: "Courses d'IA", ui: mount(createRaceUI, "#race-root") },
   mines: { title: "Démineur", ui: mount(createMinesUI, "#mines-root") },
   crash: { title: "Crash", ui: mount(createCrashUI, "#crash-root") },
@@ -93,7 +96,9 @@ function renderWallet() {
   $("#meta-dungeon").textContent = `Étage max : ${wallet.data.bestDungeon} · Âmes : ${fmt(wallet.data.dungeon.souls)}`;
   $("#meta-hunt").textContent = `Monstres vaincus : ${wallet.data.bestHunt} / 8`;
   $("#meta-breach").textContent = `Meilleur gain : ${fmt(wallet.data.bestBreach)} ¤`;
-  $("#meta-farm").textContent = `Récoltes : ${fmt(wallet.data.farm.harvests)} · Poissons : ${fmt(wallet.data.farm.caught)}`;
+  const rn = wallet.data.ranch;
+  $("#meta-ranch").textContent = `${["Printemps", "Été", "Automne", "Hiver"][rn.season]} ${rn.day}, an ${rn.year} · ${fmtShort(rn.gold)} or`;
+  $("#meta-fishing").textContent = `Bestiaire : ${Object.keys(wallet.data.angler.dex).length} / ${FISH.length} · ${fmtShort(wallet.data.angler.pearls)} perles`;
   const records = ["easy", "medium", "hard"].map((id) => (wallet.data.mines[id] ? fmtTime(wallet.data.mines[id]) : "—"));
   $("#meta-mines").textContent = `Records : ${records.join(" · ")}`;
   const towers = wallet.data.towers.length;
@@ -111,7 +116,8 @@ const sections = {
   blackjack: $("#game-blackjack"),
   roulette: $("#game-roulette"),
   plinko: $("#game-plinko"),
-  farm: $("#game-farm"),
+  ranch: $("#game-ranch"),
+  fishing: $("#game-fishing"),
   race: $("#game-race"),
   mines: $("#game-mines"),
   crash: $("#game-crash"),

@@ -12,7 +12,7 @@ js/main.js, js/veille.js
 easter-egg/arcade.html      page cachée : salle d'arcade (accessible en tapant « awesome »)
 easter-egg/css/arcade.css   style de l'arcade
 easter-egg/js/arcade.js      choix du jeu, portefeuille, gain passif du Clicker
-easter-egg/js/*.js          logique pure des jeux (snake, blackjack, roulette, plinko, crash, slots, farm, race, mines, clicker, tetris, td, survivors, breach, hunt, music) + ui-*.js
+easter-egg/js/*.js          logique pure des jeux (snake, blackjack, roulette, plinko, crash, slots, ranch, fishing, race, mines, clicker, tetris, td, survivors, breach, hunt, music) + ui-*.js
 js/ui-*.js                  affichage de chaque jeu ; js/ui.js outils partagés
 js/wallet.js                pièces bleues, crédits et progression (localStorage)
 js/secret-code.js           détecte les codes tapés au clavier
@@ -31,7 +31,7 @@ assets/                     favicon, images
 
 - Taper `awesome` sur le site ouvre l'arcade cachée (`easter-egg/arcade.html`) : Data Snake, Blackjack, Roulette, Plinko (24 slots, mise libre en crédits, 3 niveaux de risque),
   Crash (multiplicateur à encaisser avant l'effondrement, encaissement automatique), Machine à sous (5 rouleaux, 10 lignes, wilds, scatters, tours gratuits),
-  Pêche & Ferme (idle : pêche avec mini-jeu de combat façon Fisch, cultures dessinées en 3 stades qui poussent même page fermée, fermier-bot, filet automatique ; prises et récoltes ajoutent un pourcentage de la fortune du joueur, le koï doré offre une pièce bleue), Courses d'IA (paris sur 6 robots, cotes calculées par simulation), Démineur (3 difficultés, records),
+  Vallée Néon (ferme façon Stardew Valley : carte en vue du dessus, labour, semis, arrosage, 4 saisons de 14 jours, météo, 30 cultures, animaux, outils améliorables au minerai, artisanat, machines, serre ; l'or expédié rapporte des crédits, les succès des pièces bleues), Grand Bleu (jeu de pêche : 6 lieux, 54 espèces selon l'heure et la météo, mini-jeu façon Stardew, bestiaire, cannes, appâts, accessoires, trésors, quêtes du capitaine), Courses d'IA (paris sur 6 robots, cotes calculées par simulation), Démineur (3 difficultés, records),
   Mineur de données, Tetris, Pare-feu (tower defense), Survivor Arena, Breach Protocol, Donjon (action temps réel : étages, boss, coffres, 4 classes, âmes pour les améliorations permanentes) et Chasse aux Titans (RPG au tour par tour : l'équipement se forge avec des trophées ✦, une monnaie propre au RPG, et des matériaux de monstres), avec une musique
   synthwave générée en direct (bouton « Musique », désactivée par défaut).
   Le Clicker a un arbre de compétences (par partie) et un Rebirth (formatage) avec éclats et arbre permanent.
