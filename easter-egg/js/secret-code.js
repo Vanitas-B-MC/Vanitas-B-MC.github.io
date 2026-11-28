@@ -6,6 +6,9 @@
 //   « chatquipue » : une private joke, un chat en pixel-art sur fond vert néon
 //   « arasaka », « militech », « afterlife », « braindance », « dogtown » : autres styles secrets, chacun avec sa propre alerte
 //   et sa propre musique dans l'arcade (voir css/<nom>.css et easter-egg/js/music-themes.js)
+//   « trail »      active / désactive une traînée néon derrière le curseur (mémorisée, easter-egg/js/trail.js)
+//   « nightcity »  lance tout de suite l'économiseur d'écran « Night City la nuit » (easter-egg/js/nightcity.js),
+//                  qui se lance aussi tout seul après 10 minutes d'inactivité
 //   « cyberpsychosis » glitch progressif de la page pendant quelques secondes (js/cyberpsychosis.js)
 // Chargé sur index.html, veille.html et easter-egg/arcade.html.
 
@@ -13,14 +16,12 @@ import { toggleTheme } from "../../js/theme.js";
 
 export const SECRET_CODE = "awesome";
 export const SECRET_PAGE = "easter-egg/arcade.html";
-
-export const CRYPT_CODE = "supersecret";
-export const CRYPT_PAGE = "easter-egg/supersecret.html";
-
 export const THEME_CODE = "edgerunner";
 export const NEON_CODE = "neon";
 export const BLACKWALL_CODE = "blackwall";
 export const PSYCHO_CODES = ["cyberpsycho", "cyberpsychosis"];
+export const TRAIL_CODE = "trail";
+export const NIGHTCITY_CODE = "nightcity";
 
 // Un code par thème : `theme` est le nom de la classe sur <html> (voir theme.js).
 export const THEME_CODES = [
@@ -132,6 +133,8 @@ function init() {
   const pushPage = createMatcher(SECRET_CODE);
   const pushCrypt = createMatcher(CRYPT_CODE);
   const psychoMatchers = PSYCHO_CODES.map((code) => createMatcher(code));
+  const trailMatcher = createMatcher(TRAIL_CODE);
+  const nightMatcher = createMatcher(NIGHTCITY_CODE);
   const themeMatchers = THEME_CODES.map((entry) => ({ ...entry, push: createMatcher(entry.code) }));
   const onArcade = document.body.classList.contains("arcade-page");
   let overlay = null;
@@ -214,9 +217,26 @@ function init() {
     const hit = themeMatchers.map((matcher) => matcher.push(event.key) && matcher).find(Boolean);
 
     if (page && !onArcade) unlock();
+    const trail = trailMatcher(event.key);
+    const night = nightMatcher(event.key);
 
     if (crypt && !onArcade) {
       unlock(CRYPT_PAGE, "Crypte Néon");
+    if (trail) {
+      import("./trail.js")
+        .then((module) => {
+          const { on, blocked } = module.toggleTrail();
+          themeToast({ label: "traînée", messages: {
+            on: "> traînée néon : activée",
+            off: blocked ? "> traînée : désactivée par ton réglage « mouvement réduit »" : "> traînée néon : désactivée"
+          } }, on);
+        })
+        .catch((error) => console.error("[trail]", error));
+    }
+    if (night) {
+      import("./nightcity.js")
+        .then((module) => module.startNightCity())
+        .catch((error) => console.error("[nightcity]", error));
     }
     if (hit) {
       const on = toggleTheme(hit.theme);
@@ -231,6 +251,10 @@ function init() {
         .catch((error) => console.error("[cyberpsychosis]", error));
     }
   });
+
+  // Au chargement : la traînée est remise si elle était activée, et l'économiseur d'écran surveille l'inactivité.
+  import("./trail.js").then((module) => module.restoreTrail()).catch((error) => console.error("[trail]", error));
+  import("./nightcity.js").then((module) => module.watchIdle()).catch((error) => console.error("[nightcity]", error));
 
   // Retour arrière du navigateur : la page revient telle quelle, on retire le message.
   window.addEventListener("pageshow", (event) => {
