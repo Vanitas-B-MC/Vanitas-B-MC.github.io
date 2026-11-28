@@ -7,7 +7,7 @@
 
 import { UPGRADES, BLUE_UPGRADES, SKILLS, CORE } from "./clicker.js";
 import { CHARACTER_IDS, FREE_CHARACTER } from "./survivors.js";
-import { MONSTERS, FAMILIES, FAMILY_IDS, MAX_TIER, freshHunt } from "./hunt.js";
+import { freshHunt, sanitizeHunt } from "./hunt.js";
 import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP, HERO_IDS, FREE_HERO } from "./td.js";
 import { freshRanch, sanitizeRanch } from "./ranch.js";
 import { freshCity, sanitizeCity } from "./city.js";
@@ -26,7 +26,7 @@ const MAX_BACKUPS = 6;
 // Version du code de l'arcade. À augmenter à chaque mise à jour qui ajoute des jeux, des tours, des cartes…
 // Un onglet resté sur une ancienne version (ou servi depuis le cache du navigateur) voit qu'une sauvegarde a été
 // écrite par une version plus récente : il passe en lecture seule au lieu d'écraser ce qu'il ne connaît pas.
-export const BUILD = 3;
+export const BUILD = 4;
 const START_CREDITS = 100;
 const MAX = MAX_CREDITS;
 
@@ -61,9 +61,9 @@ function freshData() {
     heroes: [FREE_HERO],   // héros du Tower Defense débloqués
     chars: [FREE_CHARACTER], // personnages de Survivor Arena débloqués
     achievements: [],
-    hunt: freshHunt(),     // équipement, matériaux et victoires du RPG « Chasse aux Titans »
+    hunt: freshHunt(),     // « Chasse aux Titans » : équipe, box, sac, badges et Titadex du RPG de capture
     trophies: 0,           // monnaie du RPG : gagnée uniquement en chassant
-    bestHunt: 0,           // nombre de monstres différents vaincus
+    bestHunt: 0,           // badges de Gardiens obtenus dans « Chasse aux Titans »
     bestDungeon: 0,        // étage le plus profond atteint dans « Donjon »
     dungeon: { souls: 0, ranks: freshRanks(), classes: [FREE_CLASS], weapons: FREE_WEAPONS.slice(), ults: FREE_ULTS.slice(), runs: 0,
       stats: { kills: 0, bosses: 0, rooms: 0, gold: 0, elite: 0, deepest: 0 }, quests: {} },   // âmes, améliorations permanentes, classes
@@ -98,18 +98,7 @@ export function sanitize(raw) {
   if (Array.isArray(raw.towers)) {
     for (const id of raw.towers) if (TOWER_IDS.includes(id) && !data.towers.includes(id)) data.towers.push(id);
   }
-  if (raw.hunt && typeof raw.hunt === "object") {
-    const h = data.hunt;
-    const tier = (v, min = 0) => Math.min(Math.max(min, Math.floor(Number(v)) || 0), MAX_TIER);
-    for (const f of FAMILY_IDS) h.weapons[f] = f === "sword" ? tier(raw.hunt.weapons?.[f]) : tier(raw.hunt.weapons?.[f] ?? -1, -1);
-    h.armor = tier(raw.hunt.armor);
-    h.charm = tier(raw.hunt.charm);
-    h.equipped = FAMILY_IDS.includes(raw.hunt.equipped) && h.weapons[raw.hunt.equipped] >= 0 ? raw.hunt.equipped : "sword";
-    for (const m of MONSTERS) {
-      h.parts[m.id] = toCount(raw.hunt.parts?.[m.id]);
-      h.kills[m.id] = toCount(raw.hunt.kills?.[m.id]);
-    }
-  }
+  data.hunt = sanitizeHunt(raw.hunt);
   if (raw.dungeon && typeof raw.dungeon === "object") {
     const d = data.dungeon;
     d.souls = toCount(raw.dungeon.souls);
@@ -489,34 +478,18 @@ export function createWallet(storage = defaultStorage()) {
       commit();
       return true;
     },
-    // RPG : récompense d'une chasse, équipement. Les règles (prix, prérequis) sont dans hunt.js.
-    huntReward(monsterId, { trophies = 0, parts = 0 } = {}) {
-      if (!(monsterId in data.hunt.kills)) return;
-      data.hunt.kills[monsterId] = addCapped(data.hunt.kills[monsterId], 1);
-      data.hunt.parts[monsterId] = addCapped(data.hunt.parts[monsterId], toCount(parts));
-      data.trophies = addCapped(data.trophies, toCount(trophies));
-      data.bestHunt = Object.values(data.hunt.kills).filter((k) => k > 0).length;
+    // Chasse aux Titans : le jeu modifie `data.hunt` directement, puis demande la sauvegarde.
+    saveHunt() { commit(); },
+    addTrophies(n) {
+      const amount = toCount(n);
+      if (!amount) return;
+      data.trophies = addCapped(data.trophies, amount);
       commit();
     },
-    // Achat atomique : crédits ET matériaux, ou rien du tout.
-    huntPurchase(slot, family, buy) {
-      const hunt = data.hunt;
-      if (buy.trophies > data.trophies) return false;
-      if (buy.partId && (hunt.parts[buy.partId] || 0) < buy.parts) return false;
-      data.trophies -= buy.trophies;
-      if (buy.partId) hunt.parts[buy.partId] -= buy.parts;
-      if (slot === "weapon") {
-        hunt.weapons[family] = buy.tier;
-        hunt.equipped = family;
-      } else {
-        hunt[slot] = buy.tier;
-      }
-      commit();
-      return true;
-    },
-    huntEquip(family) {
-      if (!FAMILIES[family] || data.hunt.weapons[family] < 0) return false;
-      data.hunt.equipped = family;
+    spendTrophies(n) {
+      const amount = toCount(n);
+      if (amount > data.trophies) return false;
+      data.trophies -= amount;
       commit();
       return true;
     },

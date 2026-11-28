@@ -19,12 +19,15 @@ import { createTowerDefenseUI } from "./ui-td.js";
 import { createSurvivorsUI } from "./ui-survivors.js";
 import { createBreachUI } from "./ui-breach.js";
 import { createHuntUI } from "./ui-hunt.js";
+import { SPECIES_IDS } from "./hunt-data.js";
 import { createDungeonUI } from "./ui-dungeon.js";
 import { createCityUI } from "./ui-city.js";
 import { ERAS as CITY_ERAS } from "./city.js";
 import { createMusic } from "./music.js";
 import { fmt, fmtShort, fmtRate } from "./ui.js";
 import { FISH } from "./fishing.js";
+
+const HUNT_SPECIES = SPECIES_IDS.length;
 
 const $ = (selector) => document.querySelector(selector);
 const wallet = createWallet();
@@ -97,7 +100,10 @@ function renderWallet() {
   const best = wallet.data.bestSurvivor;
   $("#meta-survivors").textContent = `Record : ${Math.floor(best / 60)}:${String(best % 60).padStart(2, "0")}`;
   $("#meta-dungeon").textContent = `Étage max : ${wallet.data.bestDungeon} · Âmes : ${fmt(wallet.data.dungeon.souls)}`;
-  $("#meta-hunt").textContent = `Monstres vaincus : ${wallet.data.bestHunt} / 8`;
+  const hunt = wallet.data.hunt;
+  $("#meta-hunt").textContent = hunt.team.length || hunt.box.length
+    ? `Badges : ${hunt.badges} / 8 · Titadex : ${hunt.dex.caught.length} / ${HUNT_SPECIES}${hunt.champion ? " · Champion" : ""}`
+    : "Choisis ta première créature";
   $("#meta-breach").textContent = `Meilleur gain : ${fmt(wallet.data.bestBreach)} ¤`;
   const rn = wallet.data.ranch;
   $("#meta-ranch").textContent = `${["Printemps", "Été", "Automne", "Hiver"][rn.season]} ${rn.day}, an ${rn.year} · ${fmtShort(rn.gold)} or`;

@@ -90,7 +90,7 @@ Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **18 
 | --- | --- | --- |
 | **Crédits** | Mineur de données (clicker), Pare-feu, Survivor Arena, Breach Protocol, Démineur, jeux de mise… | Blackjack, Plinko, Crash, Machine à sous, Courses d'IA, déblocage des tours, cartes et héros du Pare-feu, personnages de Survivor Arena |
 | **Pièces bleues** | Data Snake (pièce rare), Tetris (1 toutes les 6 lignes), longues parties de Survivor Arena, piratages complets, succès de la ferme, bestiaire de la pêche | Roulette, améliorations spéciales du Clicker, graine de fruit ancien, canne néon quantique |
-| **Trophées ✦** | Chasse aux Titans uniquement | Forge de l'équipement du RPG |
+| **Trophées ✦** | Chasse aux Titans uniquement (dresseurs, Gardiens, captures) | Objets, modules de capture et Atelier des capacités du RPG |
 | **Âmes** | Donjon | Améliorations permanentes, classes, armes et ultimes du Donjon |
 | **Or** | Vallée Néon (ventes de la ferme) | Graines, outils, bâtiments et animaux de la ferme |
 | **Perles** | Grand Bleu (vente des poissons) | Cannes, appâts, accessoires et lieux de pêche |
@@ -111,7 +111,7 @@ Plusieurs jeux donnent des récompenses **proportionnelles à ta fortune**, pour
 | 06 | **Pare-feu** | Tower defense | 14 cartes, 24 tours et 5 héros à débloquer en crédits, améliorations propres à chaque tour (niveau 5 « ultime »), tours Beacon (boost) et Data Miner (revenu), frappe orbitale. |
 | 07 | **Survivor Arena** | Action | Vagues d'ennemis, tir automatique, une amélioration à chaque niveau, 5 personnages, élites et boss. |
 | 08 | **Breach Protocol** | Réflexion | Le mini-jeu de piratage de Cyberpunk 2077 : enchaîner les codes de la matrice avant la fin du temps. |
-| 09 | **Chasse aux Titans** | RPG | Façon Monster Hunter, au tour par tour : 8 monstres, 3 familles d'armes, équipement forgé avec des trophées et des matériaux de monstres. |
+| 09 | **Chasse aux Titans** | RPG | Façon *Pokémon* : voir le détail plus bas. |
 | 10 | **Donjon** | Roguelite | Façon *The Binding of Isaac* : voir le détail plus bas. |
 | 11 | **Plinko** | Casino | 24 cases, mise libre, 3 niveaux de risque, jusqu'à ×20 000 sur les bords. |
 | 12 | **Vallée Néon** | Ferme | Façon *Stardew Valley* : voir le détail plus bas. |
@@ -133,6 +133,21 @@ Un vrai city builder en vue isométrique, dessiné entièrement au canvas (`js/c
 - **Ambiance** : cycle jour / nuit avec fenêtres et lampadaires allumés, néons, fumées d'usine, pluie, nuages, habitants et voitures qui circulent, voitures volantes au Cyberpunk, mini-carte.
 - **Commandes** : glisser pour tracer des routes, poser des habitations en rectangle ou démolir une zone ; clic droit / deux doigts pour déplacer ; molette / pincer pour zoomer ; calques de couverture des services ; plein écran.
 - **Récompenses** : chaque nouvelle ère rapporte des crédits (proportionnels à ta fortune) et des pièces bleues, ainsi que 16 succès.
+
+### Chasse aux Titans (en détail)
+
+Un RPG de capture au tour par tour façon *Pokémon*, centré sur la tactique (`js/hunt-data.js` pour les données, `js/hunt.js` pour le moteur de combat, `js/hunt-art.js` pour les sprites dessinés au canvas, `js/ui-hunt.js` pour l'interface).
+
+- **51 créatures** (dont des lignées à 2 ou 3 évolutions et 5 Titans légendaires) et **3 starters** au choix : Braisinet (Plasma), Aquabit (Hydro), Pousseron (Bio).
+- **14 types** avec leur table de faiblesses (Chrome, Plasma, Hydro, Bio, Volt, Cryo, Impact, Virus, Séisme, Aéro, Psi, Glitch, Acier, Néant). Bonus ×1,5 quand l'attaque est du type du lanceur (STAB).
+- **Combat** : 6 stats (PV, Attaque, Défense, Atq. Spé, Déf. Spé, Vitesse), ~100 attaques physiques, spéciales ou de statut avec PP, précision et priorité, coups critiques, stats modifiables de −6 à +6.
+- **Tactique** : statuts (brûlure, paralysie, poison, sommeil, gel, confusion), météo (soleil, pluie, tempête de silice, grêle), protection, peur, vampigraine, pièges d'entrée, 19 talents (Intimidation, Fermeté, Lévitation, Régénérateur…), 8 objets à tenir (Restes, Orbe Vie, Ceinture Force…), changement de créature (l'adversaire attaque celle qui entre).
+- **IA des dresseurs** : choisit l'attaque la plus utile (K.O., statut, boost, soin), et les meilleurs dresseurs changent de créature quand le duel est perdu d'avance et se soignent.
+- **Progression** : 8 zones, chacune avec ses créatures sauvages, des dresseurs et un **Gardien** (un badge chacun) ; puis le **Conseil des Titans** (5 combats d'affilée sans soin) et 5 **Titans légendaires** à capturer.
+- **Capture** : modules de capture (plus la cible est affaiblie ou endormie, plus c'est facile), équipe de 6 et box.
+- **Expérience** : pleine pour ceux qui ont combattu, moitié pour le reste de l'équipe ; évolutions, nouvelles attaques (choix de l'attaque à oublier) et **Atelier des capacités** pour réapprendre une attaque oubliée.
+- **Titadex** : toutes les créatures vues ou capturées, avec stats, faiblesses et habitat.
+- Commandes au clavier en combat : A attaque, E équipe, S sac, F fuite, 1 à 4 pour les attaques, Échap pour revenir, Espace pour accélérer le texte.
 
 ### Donjon (en détail)
 
@@ -236,6 +251,7 @@ easter-egg/
     ├── <jeu>.js           logique de chaque jeu (règles, calculs), sans affichage
     ├── ui-<jeu>.js        affichage et commandes de chaque jeu
     ├── ranch-art.js, fishing-art.js, td-art.js, td-fx.js   dessins de la ferme, de la pêche et du tower defense
+    ├── hunt-data.js, hunt-art.js   données et sprites de Chasse aux Titans
     ├── dungeon.js, enemies2.js, items.js, weapons.js, synergy.js, hub.js   contenu du Donjon
     └── supersecret.js     tout Crypte Néon (un seul fichier, canvas)
 ```
