@@ -69,8 +69,12 @@ export function createAvatarUI(root, wallet) {
     drawAvatar(ctx, look, { t, name: av().name, title: titleText(look) });
   }
 
+  // Animation limitée à ~30 images/s : le dessin (ombres douces) est assez lourd
+  let lastFrame = 0;
   function loop(time) {
     rafId = requestAnimationFrame(loop);
+    if (time - lastFrame < 32) return;
+    lastFrame = time;
     drawPreview(prefersReducedMotion() ? 0.5 : time / 1000);
   }
   function startLoop() { cancelAnimationFrame(rafId); rafId = requestAnimationFrame(loop); }

@@ -131,7 +131,7 @@ const RAW = {
     ["pale", "Pâle cadavérique", "souls:120"], ["chrome", "Chromé intégral", "credits:1e15"], ["holo", "Hologramme", "cores:500"],
     ["synth", "Peau synthétique bleue", "blue:30"], ["green", "Mutant", "gold:30000"], ["red", "Démon", "souls:600"], ["gold", "Statue d'or", "credits:1e33"]
   ],
-  face: [["oval", "Ovale"], ["square", "Carré"], ["sharp", "Anguleux"], ["round", "Rond"], ["long", "Allongé", "credits:1e4"]],
+  face: [["oval", "Ovale"], ["long", "Oblong", "credits:1e4"], ["square", "Carré"], ["rect", "Rectangle", "credits:1e4"], ["round", "Rond"], ["triangle", "Triangle", "credits:5e4"], ["sharp", "Triangle inversé (cœur)"], ["diamond", "Diamant", "blue:3"]],
   eyes: [
     ["normal", "Normaux"], ["almond", "En amande"], ["round", "Ronds"], ["sleepy", "Endormis"], ["sharp", "Perçants", "credits:5e3"],
     ["anime", "Anime", "blue:4"], ["cat", "Félins", "pearls:600"], ["closed", "Fermés"], ["wink", "Clin d'œil", "credits:1e8"],
