@@ -143,12 +143,13 @@ Façon *Vampire Survivors*, entièrement au canvas (`js/survivors.js` pour la lo
 
 ### Personnage (en détail)
 
-Un onglet « Personnage » (lien sur l'accueil et petit portrait dans le portefeuille, toujours visible) pour créer son avatar en pied, dans un style anime à la *Idling to Rule the Gods* qui mélange fantasy divine et cyberpunk. Tout est dessiné au canvas : grands yeux brillants (iris en dégradé, reflets, cils effilés), joues rosées, cheveux en mèches avec reflet en anneau, ombres douces et lumière venant d'en haut à gauche, plis des vêtements, pose main sur la hanche et légère respiration (`js/avatar.js` pour le catalogue, `js/avatar-art.js` pour le dessin, `js/ui-avatar.js` pour l'interface).
+Un onglet « Personnage » (lien sur l'accueil et petit portrait dans le portefeuille, toujours visible) pour créer son avatar en pied, dans un style anime à la *Idling to Rule the Gods* qui mélange fantasy divine et cyberpunk. Tout est dessiné au canvas : grands yeux brillants (iris en dégradé, reflets, cils effilés), joues rosées, cheveux en grosses mèches qui épousent la forme du crâne et du visage, avec des reflets brillants, ombres douces et lumière venant d'en haut à gauche, plis des vêtements, pose main sur la hanche et légère respiration (`js/avatar.js` pour le catalogue, `js/avatar-art.js` pour le dessin, `js/ui-avatar.js` pour l'interface).
 
-- **311 éléments en 24 catégories** :
+- **327 éléments en 25 catégories** :
   - Décor : fond (dont Paradis, Temple céleste, Forêt enchantée et des fonds animés), cadre, effet (pluie, glitch, flammes, pétales…).
   - Corps et visage : silhouette, peau (dont chrome, hologramme, statue d'or), **8 formes de visage** (ovale, oblong, carré, rectangle, rond, triangle, triangle inversé, diamant), yeux, sourcils, expression, pilosité, tatouages, cyberware (optiques Kiroshi, visière Mantis, Sandevistan…).
-  - Tenue : coiffure, haut (veste Samurai, toge, armure de paladin, robe de sorcière…), **bas** (jean, jupe plissée, hakama, jambières…), **chaussures** (baskets, geta, bottes ailées…), cou, couvre-chef, lunettes et masques, boucles.
+  - Cheveux, en deux parties à combiner librement : **cheveux avant** (20 franges et dessus de tête : courte, droite, raie au milieu, princesse, crête…) et **cheveux arrière** (14 longueurs : nuque courte, carré, longs, ondulés, très longs, queue de cheval, couettes, tresses…). Les anciennes sauvegardes sont converties automatiquement.
+  - Tenue : haut (veste Samurai, toge, armure de paladin, robe de sorcière…), **bas** (jean, jupe plissée, hakama, jambières…), **chaussures** (baskets, geta, bottes ailées…), cou, couvre-chef, lunettes et masques, boucles.
   - Équipement : **dos** (ailes d'ange, de démon, mécaniques, de dragon, cape, anneau divin, jetpack…), **arme** (katana, lames Mantis, faux, grimoire, épée d'énergie, Lame des dieux…), **familier** (renard, drone, phénix, slime, fée…) et **titre** affiché sous le pseudo.
 - **5 couleurs réglables** (cheveux, yeux, haut, bas, néon) dans **7 palettes** (Basique, Néon, Pastel, Métaux, Ténèbres, Holographique animée, Royale).
 - **Toutes les monnaies servent** : crédits (de 500 à 1e39, pour les très grosses fortunes), pièces bleues, trophées, âmes, or, perles, noyaux.

@@ -50,7 +50,8 @@ export const CATS = [
   { id: "beard",   name: "Pilosité",        icon: "≋" },
   { id: "marks",   name: "Tatouages",       icon: "✎" },
   { id: "cyber",   name: "Cyberware",       icon: "⌬" },
-  { id: "hair",    name: "Coiffure",        icon: "♒" },
+  { id: "hairFront", name: "Cheveux avant",  icon: "♒" },
+  { id: "hairBack",  name: "Cheveux arrière", icon: "∿" },
   { id: "top",     name: "Haut",            icon: "▲" },
   { id: "bottom",  name: "Bas",             icon: "▼" },
   { id: "shoes",   name: "Chaussures",      icon: "◣" },
@@ -159,11 +160,20 @@ const RAW = {
     ["cheek", "LED de pommette", "pearls:700"], ["mantis", "Visière Mantis", "souls:500"], ["eyepatch", "Œil cybernétique", "trophies:250"],
     ["sandevistan", "Sandevistan (dos)", "credits:1e20"], ["skull", "Crâne apparent", "credits:1e27"], ["arasaka", "Implants Arasaka", null, "cyberera"]
   ],
-  hair: [
-    ["short", "Courts"], ["buzz", "Rasés"], ["bald", "Chauve"], ["undercut", "Undercut"], ["bob", "Carré"], ["long", "Longs"],
-    ["ponytail", "Queue de cheval"], ["bun", "Chignon", "credits:2e3"], ["mohawk", "Crête", "blue:5"], ["spiky", "Hérissés", "credits:1e5"],
-    ["afro", "Afro", "gold:4000"], ["braids", "Tresses", "pearls:500"], ["sideshave", "Rasés d'un côté", "credits:1e7"], ["emo", "Mèche emo", "souls:100"],
-    ["dreads", "Dreadlocks", "trophies:200"], ["twintails", "Couettes", "blue:10"], ["samurai", "Chignon de samouraï", "souls:450"], ["wild", "Crinière sauvage", "credits:1e13"]
+  // Cheveux avant : frange, mèches sur le visage, dessus de la tête
+  hairFront: [
+    ["short", "Frange courte"], ["buzz", "Rasés"], ["bald", "Chauve"], ["undercut", "Undercut"], ["bob", "Frange droite"], ["long", "Frange longue"],
+    ["ponytail", "Front dégagé"], ["curtain", "Raie au milieu"], ["hime", "Frange princesse (hime)", "credits:5e3"],
+    ["bun", "Chignon", "credits:2e3"], ["mohawk", "Crête", "blue:5"], ["spiky", "Hérissés", "credits:1e5"],
+    ["afro", "Afro", "gold:4000"], ["braids", "Frange tressée", "pearls:500"], ["sideshave", "Rasés d'un côté", "credits:1e7"], ["emo", "Mèche emo", "souls:100"],
+    ["dreads", "Dreadlocks", "trophies:200"], ["twintails", "Frange en pointes", "blue:10"], ["samurai", "Chignon de samouraï", "souls:450"], ["wild", "Crinière sauvage", "credits:1e13"]
+  ],
+  // Cheveux arrière : longueur et coiffure derrière la tête
+  hairBack: [
+    ["none", "Aucun"], ["nape", "Nuque courte"], ["bob", "Carré"], ["long", "Longs"], ["ponytail", "Queue de cheval"],
+    ["emo", "Mi-longs", "souls:100"], ["wavy", "Longs ondulés", "credits:5e4"], ["hime", "Très longs (hime)", "credits:5e5"],
+    ["twintails", "Couettes", "blue:10"], ["braids", "Tresses", "pearls:500"], ["sideshave", "Queue sur le côté", "credits:1e7"],
+    ["dreads", "Dreadlocks", "trophies:200"], ["afro", "Afro", "gold:4000"], ["wild", "Crinière sauvage", "credits:1e13"]
   ],
   top: [
     ["tee", "T-shirt"], ["hoodie", "Sweat à capuche"], ["tank", "Débardeur"], ["jacket", "Veste en cuir", "credits:5e3"],
@@ -275,7 +285,7 @@ export const paletteOf = (color) => PALETTES.find((p) => p.colors.includes(color
 
 export const DEFAULT_LOOK = {
   bg: "void", frame: "none", aura: "none", skin: "s3", face: "oval", eyes: "normal", brows: "normal", mouth: "smile",
-  beard: "none", marks: "none", cyber: "none", hair: "short", top: "hoodie", neck: "none", hat: "none", glasses: "none", ears: "none", title: "choom",
+  beard: "none", marks: "none", cyber: "none", hairFront: "short", hairBack: "nape", top: "hoodie", neck: "none", hat: "none", glasses: "none", ears: "none", title: "choom",
   body: "a", bottom: "jeans", shoes: "sneakers", back: "none", weapon: "none", pet: "none",
   hairColor: "#4a3020", eyeColor: "#2e5aa8", topColor: "#2e5aa8", bottomColor: "#1a1a1a", accentColor: "#ff2a6d"
 };
@@ -287,9 +297,17 @@ export function freshAvatar() {
 
 const validColor = (c) => typeof c === "string" && PALETTES.some((p) => p.colors.includes(c));
 
+// Anciennes sauvegardes : une seule « coiffure » → cheveux avant + cheveux arrière équivalents
+const OLD_HAIR_BACK = { long: "long", bob: "bob", wild: "wild", afro: "afro", ponytail: "ponytail", twintails: "twintails", braids: "braids", dreads: "dreads", sideshave: "sideshave", emo: "emo" };
+function migrateHair(raw) {
+  if (typeof raw.hair !== "string" || raw.hairFront !== undefined) return raw;
+  return { ...raw, hairFront: raw.hair, hairBack: OLD_HAIR_BACK[raw.hair] || "none" };
+}
+
 function sanitizeLook(raw, fallback = DEFAULT_LOOK) {
   const look = { ...fallback };
   if (!raw || typeof raw !== "object") return look;
+  raw = migrateHair(raw);
   for (const cat of CAT_IDS) if (typeof raw[cat] === "string" && ITEMS[`${cat}:${raw[cat]}`]) look[cat] = raw[cat];
   for (const k of COLOR_KEYS) if (validColor(raw[k])) look[k] = raw[k];
   return look;
@@ -299,7 +317,15 @@ export function sanitizeAvatar(raw) {
   const a = freshAvatar();
   if (!raw || typeof raw !== "object") return a;
   if (typeof raw.name === "string") a.name = cleanName(raw.name) || a.name;
-  if (Array.isArray(raw.owned)) a.owned = [...new Set(raw.owned.filter((id) => typeof id === "string" && ITEMS[id]))];
+  if (Array.isArray(raw.owned)) {
+    // une coiffure achetée avant la séparation donne les cheveux avant et arrière correspondants
+    const ids = raw.owned.flatMap((id) => {
+      if (typeof id !== "string" || !id.startsWith("hair:")) return [id];
+      const key = id.slice(5);
+      return [`hairFront:${key}`, ...(OLD_HAIR_BACK[key] ? [`hairBack:${OLD_HAIR_BACK[key]}`] : [])];
+    });
+    a.owned = [...new Set(ids.filter((id) => typeof id === "string" && ITEMS[id]))];
+  }
   if (Array.isArray(raw.palettes)) for (const id of raw.palettes) if (PALETTE_IDS.includes(id) && !a.palettes.includes(id)) a.palettes.push(id);
   a.look = sanitizeLook(raw.look);
   if (Array.isArray(raw.outfits)) a.outfits = [0, 1, 2].map((i) => (raw.outfits[i] && typeof raw.outfits[i] === "object" ? sanitizeLook(raw.outfits[i]) : null));

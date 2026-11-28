@@ -14,7 +14,7 @@ const price = (cur, n) => `${fmtShort(n)} ${CURRENCIES[cur].short}`;
 export function createAvatarUI(root, wallet) {
   const av = () => wallet.data.avatar || (wallet.data.avatar = freshAvatar());
   let active = false;
-  let cat = "hair";
+  let cat = "hairFront";
   let preview = null;            // { kind: "item", id } | { kind: "color", slot, color } : essai d'un élément pas encore acheté
   let rafId = 0;
   let toastTimer = 0;
@@ -98,9 +98,9 @@ export function createAvatarUI(root, wallet) {
   /* ---------- Vignettes ---------- */
 
   // Cadrage des vignettes : zoom sur le visage, le corps entier ou les jambes selon la catégorie
-  const HEAD_CATS = new Set(["skin", "face", "eyes", "brows", "mouth", "beard", "marks", "cyber", "hair", "neck", "hat", "glasses", "ears"]);
+  const HEAD_CATS = new Set(["skin", "face", "eyes", "brows", "mouth", "beard", "marks", "cyber", "hairFront", "neck", "hat", "glasses", "ears"]);
   const LEG_CATS = new Set(["bottom", "shoes"]);
-  const cropOf = (c) => (HEAD_CATS.has(c) ? CROPS.head : LEG_CATS.has(c) ? CROPS.legs : CROPS.full);
+  const cropOf = (c) => (HEAD_CATS.has(c) ? CROPS.head : c === "hairBack" ? CROPS.bust : LEG_CATS.has(c) ? CROPS.legs : CROPS.full);
 
   // Petite image de l'avatar portant l'élément (rendue une seule fois par affichage de catégorie)
   function thumb(look) {
@@ -126,7 +126,8 @@ export function createAvatarUI(root, wallet) {
     const list = itemsOf(cat);
     listTitle.textContent = `${CATS.find((c) => c.id === cat).name} (${list.filter((it) => canUse(av(), wallet.data, it)).length} / ${list.length})`;
     const base = { ...look };
-    if (cat === "hair" && base.hat !== "none") base.hat = "none";          // on voit mieux la coiffure
+    if ((cat === "hairFront" || cat === "hairBack") && base.hat !== "none") base.hat = "none";          // on voit mieux la coiffure
+    if (cat === "hairBack" && base.back !== "none") base.back = "none";
     grid.replaceChildren(...list.map((it) => {
       const status = itemStatus(av(), wallet.data, it);
       const worn = look[cat] === it.key;

@@ -24,12 +24,12 @@ const SKINS = {
 const FACE_SHAPES = {
   oval:     [40, 46, 0.86, 0.02, 0.70, 0.55, 0.26, 1, 1],       // ovale : pommettes les plus larges, menton doux
   long:     [36, 50, 0.90, 0.02, 0.78, 0.58, 0.30, 1, 1],       // oblong : comme l'ovale, mais plus long
-  square:   [42, 44, 0.95, 0.00, 0.94, 0.58, 0.50, 0.45, 0.6],  // carré : front, pommettes et mâchoire alignés, angles marqués
+  square:   [39, 46, 0.93, 0.00, 0.86, 0.60, 0.42, 0.55, 0.7],  // carré : mâchoire aussi large que le front, angles marqués
   rect:     [38, 50, 0.95, 0.00, 0.91, 0.62, 0.46, 0.45, 0.6],  // rectangle : carré allongé
-  round:    [44, 44, 0.84, 0.05, 0.80, 0.50, 0.38, 1, 1],       // rond : aussi large que haut, tout en courbes
-  triangle: [40, 46, 0.70, 0.10, 1.00, 0.60, 0.52, 0.55, 0.7],  // triangle : front étroit, mâchoire large
-  sharp:    [41, 47, 1.00, -0.05, 0.56, 0.55, 0.17, 1, 1],      // triangle inversé (cœur) : front large, menton pointu
-  diamond:  [42, 47, 0.64, 0.08, 0.58, 0.55, 0.20, 0.8, 1]      // diamant : pommettes larges, front et menton étroits
+  round:    [41, 45, 0.86, 0.05, 0.76, 0.52, 0.34, 1, 1],       // rond : joues pleines, tout en courbes
+  triangle: [39, 47, 0.80, 0.08, 0.88, 0.60, 0.40, 0.65, 0.8],  // triangle : front plus étroit que la mâchoire
+  sharp:    [40, 47, 0.95, 0.00, 0.62, 0.55, 0.20, 1, 1],       // triangle inversé (cœur) : front large, menton fin
+  diamond:  [40, 47, 0.78, 0.06, 0.64, 0.56, 0.22, 0.85, 1]     // diamant : pommettes larges, front et menton plus étroits
 };
 const FACES = Object.fromEntries(Object.entries(FACE_SHAPES).map(([k, v]) => [k, [v[0], v[1]]]));
 
@@ -279,10 +279,10 @@ function drawHands(ctx, look, t, skin) {
    Visage anime
 ===================================================================== */
 
-function headPath(ctx, look) {
+// Points de contrôle du contour du visage (spline fermée) : du haut du crâne, côté droit, menton, côté gauche
+function facePts(look) {
   const S = FACE_SHAPES[look.face] || FACE_SHAPES.oval;
   const [w, h, fw, cy, jw, jy, cw, sj, sc] = S;
-  // moitié droite, du haut du crâne jusqu'au bas du menton : [x, y, souplesse]
   // le crâne reste arrondi ; seule la largeur des tempes (le front) change vraiment
   const half = [
     [w * (0.2 + 0.44 * fw), -h * 0.92, 1],
@@ -291,28 +291,72 @@ function headPath(ctx, look) {
     [w * jw, h * jy, sj],
     [w * cw, h * 0.93, sc]
   ];
-  const pts = [
+  return [
     [0, -h, 1],
     ...half,
     [0, h + 1, 1],
     ...half.slice().reverse().map(([x, y, k]) => [-x, y, k])
   ].map(([x, y, k]) => [CX + x, HY + y, k]);
-  // courbe lissée (spline cardinale fermée) passant par tous les points
+}
+// Pour chaque segment : [p1, c1, c2, p2] (courbe de Bézier)
+function faceSegs(look) {
+  const pts = facePts(look);
   const n = pts.length;
-  ctx.beginPath();
-  ctx.moveTo(pts[0][0], pts[0][1]);
+  const segs = [];
   for (let i = 0; i < n; i++) {
     const p0 = pts[(i - 1 + n) % n];
     const p1 = pts[i];
     const p2 = pts[(i + 1) % n];
     const p3 = pts[(i + 2) % n];
-    ctx.bezierCurveTo(
-      p1[0] + ((p2[0] - p0[0]) * p1[2]) / 6, p1[1] + ((p2[1] - p0[1]) * p1[2]) / 6,
-      p2[0] - ((p3[0] - p1[0]) * p2[2]) / 6, p2[1] - ((p3[1] - p1[1]) * p2[2]) / 6,
-      p2[0], p2[1]
-    );
+    segs.push([
+      [p1[0], p1[1]],
+      [p1[0] + ((p2[0] - p0[0]) * p1[2]) / 6, p1[1] + ((p2[1] - p0[1]) * p1[2]) / 6],
+      [p2[0] - ((p3[0] - p1[0]) * p2[2]) / 6, p2[1] - ((p3[1] - p1[1]) * p2[2]) / 6],
+      [p2[0], p2[1]]
+    ]);
   }
+  return segs;
+}
+
+function headPath(ctx, look) {
+  const segs = faceSegs(look);
+  ctx.beginPath();
+  ctx.moveTo(segs[0][0][0], segs[0][0][1]);
+  for (const [, c1, c2, p2] of segs) ctx.bezierCurveTo(c1[0], c1[1], c2[0], c2[1], p2[0], p2[1]);
   ctx.closePath();
+}
+
+// Contour du visage échantillonné (côté droit, du haut vers le menton), mis en cache par forme
+const outlineCache = {};
+function faceRight(look) {
+  const key = FACE_SHAPES[look.face] ? look.face : "oval";
+  if (outlineCache[key]) return outlineCache[key];
+  const segs = faceSegs(look).slice(0, 6);   // du haut du crâne jusqu'au bas du menton
+  const out = [];
+  for (const [p1, c1, c2, p2] of segs) {
+    for (let k = 0; k < 10; k++) {
+      const u = k / 10;
+      const a = (1 - u) ** 3, b = 3 * u * (1 - u) ** 2, c = 3 * u * u * (1 - u), d = u ** 3;
+      out.push([a * p1[0] + b * c1[0] + c * c2[0] + d * p2[0], a * p1[1] + b * c1[1] + c * c2[1] + d * p2[1]]);
+    }
+  }
+  const last = segs[segs.length - 1][3];
+  out.push([last[0], last[1]]);
+  return (outlineCache[key] = out);
+}
+// Demi-largeur du visage à la hauteur y (0 au-dessus du crâne ; largeur du menton en dessous)
+function faceHalfW(look, y) {
+  const pts = faceRight(look);
+  if (y <= pts[0][1]) return 0;
+  for (let i = 1; i < pts.length; i++) {
+    const [x0, y0] = pts[i - 1];
+    const [x1, y1] = pts[i];
+    if ((y >= y0 && y <= y1) || (y <= y0 && y >= y1)) {
+      const k = y1 === y0 ? 0 : (y - y0) / (y1 - y0);
+      return Math.max(0, lerp(x0, x1, k) - CX);
+    }
+  }
+  return 0;
 }
 function drawEarsSkin(ctx, look, t, skin) {
   const { w } = dims(look);
@@ -605,7 +649,10 @@ function lockPath(ctx, x0, y0, x1, y1, w, bend = 0) {
 }
 
 function hairKit(ctx, look, t) {
-  const { w, h, top, eyeY } = dims(look);
+  const { h, top, eyeY } = dims(look);
+  const hw = (y) => faceHalfW(look, y);
+  // largeur de référence : celle des tempes (toutes les coiffures s'y adaptent)
+  const w = Math.max(hw(HY - 10), hw(HY + 4)) + 1;
   const base = look.hairColor;
   const fb = flat(base, t);
   const fill = () => paint(ctx, base, t, CX - w, top - 30, CX + w, HY + 60);
@@ -637,18 +684,32 @@ function hairKit(ctx, look, t) {
     ctx.beginPath(); ctx.moveTo(x0, y0 + 4); ctx.quadraticCurveTo((x0 + x1) / 2 + bend, (y0 + y1) / 2, lerp(x0, x1, 0.82), lerp(y0, y1, 0.82)); ctx.stroke();
     ctx.globalAlpha = 1;
   };
-  // calotte volumineuse qui descend sur les tempes (les oreilles restent presque cachées)
+  // calotte : le contour du crâne, élargi vers l'extérieur (plus de volume en haut), jusqu'aux tempes
   const cap = (lift = 0, side = 6) => draw(() => {
-    ctx.moveTo(CX - w - 4, HY + side + 8);
-    ctx.bezierCurveTo(CX - w - 13, top - 26 - lift, CX + w + 13, top - 26 - lift, CX + w + 4, HY + side + 8);
-    ctx.lineTo(CX + w - 4, HY - 4);
-    ctx.quadraticCurveTo(CX, top + 6, CX - w + 3, HY - 6);
+    const yEnd = HY + side + 8;
+    const right = faceRight(look).filter(([, y]) => y <= yEnd);
+    const vol = (x, y) => {
+      const k = Math.max(0, Math.min(1, (HY - y) / h));
+      const v = 4 + (2.5 + 0.8 * lift) * k ** 1.2;
+      const dx = x - CX, dy = y - (HY + 6);
+      const l = Math.hypot(dx, dy) || 1;
+      return [x + (dx / l) * v * 1.25, y + (dy / l) * v];
+    };
+    const outR = right.map(([x, y]) => vol(x, y));
+    const outL = right.slice().reverse().map(([x, y]) => vol(2 * CX - x, y));
+    // côté gauche (du bas vers le haut), puis côté droit (du haut vers le bas)
+    outL.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+    outR.forEach(([x, y]) => ctx.lineTo(x, y));
+    // ligne des cheveux sur le front
+    const hy = HY - 4;
+    ctx.lineTo(CX + hw(hy) - 3, hy);
+    ctx.quadraticCurveTo(CX, top + 6, CX - hw(hy) + 3, hy);
     ctx.closePath();
   });
   // frange : beaucoup de mèches pointues qui se chevauchent, les plus centrales par-dessus
   const bangs = (n, tipY, opts = {}) => {
-    const span = opts.span || w - 2;
-    const N = n + 3;
+    const span = opts.span || Math.max(hw(HY - 22), w * 0.8) - 1;
+    const N = n + 1;
     const mid = (N - 1) / 2;
     const order = [...Array(N).keys()].sort((a, b) => Math.abs(b - mid) - Math.abs(a - mid));
     for (const i of order) {
@@ -658,32 +719,43 @@ function hairKit(ctx, look, t) {
       const tipX = rx + (k - 0.5) * (opts.splay ?? 10) + (opts.sweep || 0) + (hash(i + 3) - 0.5) * 4;
       const tipYi = tipY + (i % 3 === 1 ? -9 : i % 3 === 2 ? -3 : 3) - Math.abs(k - 0.5) * 8 + (opts.jag ? hash(i) * opts.jag : 0);
       const bend = (k - 0.5) * -10 + (hash(i + 7) - 0.5) * 6;
-      draw(() => lockPath(ctx, rx, ry, tipX, tipYi, ((span * 3.1) / N) * (0.75 + hash(i + 11) * 0.55), bend), false);
+      draw(() => lockPath(ctx, rx, ry, tipX, tipYi, ((span * 3.2) / N) * (0.85 + hash(i + 11) * 0.4), bend * 1.4), false);
       strand(rx, ry, tipX, tipYi, bend * 0.5);
     }
   };
   const sidelocks = (len, width = 10, out = 2) => {
     for (const s of [-1, 1]) {
-      draw(() => lockPath(ctx, CX + s * (w - 2), HY - 18, CX + s * (w + out + 1), HY + len + 4, width + 5, s * -4), false);
-      strand(CX + s * (w - 3), HY - 16, CX + s * (w + out), HY + len, s * -2);
+      const y0 = HY - 18;
+      const y1 = HY + len + 4;
+      const x0 = hw(y0) - 2;
+      const x1 = Math.max(hw(Math.min(y1, HY + h - 10)), w * 0.55) + out + 1;
+      draw(() => lockPath(ctx, CX + s * x0, y0, CX + s * x1, y1, width + 5, s * -4), false);
+      strand(CX + s * (x0 - 1), y0 + 2, CX + s * (x1 - 1), y1 - 4, s * -2);
     }
   };
-  // reflet en anneau (« angel ring ») au bord inférieur dentelé
+  // reflets : quelques arcs brillants effilés qui suivent l'arrondi du crâne (pas un bandeau continu)
   const shine = () => {
+    const c0 = CX - 2;
+    const c1 = top + 38;
     const R = w * 0.86;
-    const c0 = CX - 3;
-    const c1 = top + 34;
-    const a0 = 1.12 * Math.PI;
-    const a1 = 1.86 * Math.PI;
-    const N = 18;
-    ctx.beginPath();
-    for (let i = 0; i <= N; i++) { const a = lerp(a0, a1, i / N); const r = R + 1.2; ctx.lineTo(c0 + Math.cos(a) * r, c1 + Math.sin(a) * r * 0.8); }
-    for (let i = N; i >= 0; i--) { const a = lerp(a0, a1, i / N); const r = R - (i % 2 ? 10 : 4) * Math.sin((i / N) * Math.PI) - 1; ctx.lineTo(c0 + Math.cos(a) * r, c1 + Math.sin(a) * r * 0.8); }
-    ctx.closePath();
-    ctx.fillStyle = isHex(fb) ? shade(fb, 0.62) : "#ffffff";
-    ctx.globalAlpha = 0.7; ctx.fill(); ctx.globalAlpha = 1;
-    ctx.fillStyle = "rgba(255,255,255,0.85)";
-    ctx.beginPath(); ctx.ellipse(c0 - R * 0.45, c1 - R * 0.62, 3.2, 1.6, -0.6, 0, TAU); ctx.fill();
+    const hl = isHex(fb) ? shade(fb, 0.55) : "#ffffff";
+    ctx.fillStyle = hl;
+    ctx.globalAlpha = 0.78;
+    for (const [a0, a1, th] of [[1.2, 1.34, 4], [1.39, 1.58, 5.2], [1.63, 1.75, 3.8]]) {
+      ctx.beginPath();
+      const N = 10;
+      for (let i = 0; i <= N; i++) { const a = lerp(a0, a1, i / N) * Math.PI; ctx.lineTo(c0 + Math.cos(a) * R, c1 + Math.sin(a) * R * 0.82); }
+      for (let i = N; i >= 0; i--) {
+        const a = lerp(a0, a1, i / N) * Math.PI;
+        const r = R - th * Math.sin((i / N) * Math.PI) - (i % 2 ? 1.2 : 0);
+        ctx.lineTo(c0 + Math.cos(a) * r, c1 + Math.sin(a) * r * 0.82);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath(); ctx.ellipse(c0 - R * 0.42, c1 - R * 0.66, 2.6, 1.2, -0.55, 0, TAU); ctx.fill();
+    ctx.globalAlpha = 1;
   };
   return { draw, cap, bangs, sidelocks, shine, strand, w, h, top, eyeY, fill, lineC, base };
 }
@@ -704,7 +776,39 @@ function hairBack(ctx, look, t) {
     ctx.closePath();
   });
   const sway = Math.sin(t * 1.6) * 3;
-  switch (look.hair) {
+  switch (look.hairBack) {
+    case "none": break;
+    case "nape": big(HY + 30, 3, 5); break;
+    case "wavy":
+      // longs ondulés : bords en vagues, pointes arrondies
+      draw(() => {
+        const yEnd = 262 + sway;
+        const edge = (s, y) => CX + s * (w + 8 + (y - HY) * 0.07 + Math.sin((y - HY) / 13 + (s > 0 ? 0 : 1.5)) * 4.5);
+        ctx.moveTo(CX - w - 6, HY - 10);
+        ctx.bezierCurveTo(CX - w - 10, top - 30, CX + w + 10, top - 30, CX + w + 6, HY - 10);
+        for (let y = HY - 6; y <= yEnd; y += 6) ctx.lineTo(edge(1, y), y);
+        const xr = edge(1, yEnd);
+        const xl = edge(-1, yEnd);
+        for (let i = 1; i <= 6; i++) { const x0 = lerp(xr, xl, (i - 1) / 6); const x1 = lerp(xr, xl, i / 6); ctx.quadraticCurveTo((x0 + x1) / 2, yEnd + 9, x1, yEnd + (i % 2 ? -2 : 2)); }
+        for (let y = yEnd; y >= HY - 6; y -= 6) ctx.lineTo(edge(-1, y), y);
+        ctx.closePath();
+      });
+      break;
+    case "hime":
+      // très longs et raides, coupés net (coupe « hime »)
+      draw(() => {
+        const yEnd = 322 + sway * 0.6;
+        ctx.moveTo(CX - w - 6, HY - 10);
+        ctx.bezierCurveTo(CX - w - 10, top - 30, CX + w + 10, top - 30, CX + w + 6, HY - 10);
+        ctx.quadraticCurveTo(CX + w + 16, HY + 40, CX + w + 15, yEnd);
+        for (let i = 1; i <= 8; i++) ctx.lineTo(lerp(CX + w + 15, CX - w - 15, i / 8), yEnd + (i % 2 ? 2.5 : 0));
+        ctx.quadraticCurveTo(CX - w - 16, HY + 40, CX - w - 6, HY - 10);
+        ctx.closePath();
+      });
+      ctx.save(); ctx.strokeStyle = H.lineC; ctx.globalAlpha = 0.3; ctx.lineWidth = 0.8;
+      for (let i = 1; i < 8; i++) { const x = lerp(CX - w - 12, CX + w + 12, i / 8); ctx.beginPath(); ctx.moveTo(x, HY + 20); ctx.lineTo(x + (i - 4) * 0.4, 314); ctx.stroke(); }
+      ctx.restore();
+      break;
     case "long": big(252 + sway, 16, 8); break;
     case "bob": big(HY + 46, 6, 6); break;
     case "wild": big(236, 34, 9); break;
@@ -743,8 +847,46 @@ function hairBack(ctx, look, t) {
 
 function hairFront(ctx, look, t) {
   const H = hairKit(ctx, look, t);
-  const { w, top, eyeY, cap, bangs, sidelocks, shine, draw } = H;
-  switch (look.hair) {
+  const { w, top, eyeY, cap, bangs, sidelocks, shine, draw, strand } = H;
+  const hw = (y) => faceHalfW(look, y);
+  switch (look.hairFront) {
+    case "curtain":
+      // raie au milieu : deux grandes mèches qui s'écartent vers les tempes
+      cap(2, 10);
+      for (const s of [-1, 1]) {
+        draw(() => lockPath(ctx, CX + s * 3, top + 4, CX + s * (w + 3), eyeY + 4, 30, s * -14), false);
+        draw(() => lockPath(ctx, CX + s * 12, top + 8, CX + s * (w - 6), eyeY - 6, 18, s * -8), false);
+        strand(CX + s * 4, top + 6, CX + s * (w + 1), eyeY, s * -8);
+      }
+      sidelocks(30, 10, 4);
+      shine();
+      return;
+    case "hime": {
+      // frange droite coupée net + mèches latérales raides jusqu'au menton
+      cap(2, 12);
+      const yb = eyeY - 11;
+      draw(() => {
+        ctx.moveTo(CX - w + 1, top + 8);
+        ctx.quadraticCurveTo(CX, top - 2, CX + w - 1, top + 8);
+        ctx.lineTo(CX + w - 3, yb);
+        for (let i = 1; i <= 10; i++) ctx.lineTo(lerp(CX + w - 3, CX - w + 3, i / 10), yb + (i % 2 ? 1.6 : 0));
+        ctx.closePath();
+      }, false);
+      for (let i = 1; i < 8; i++) { const x = lerp(CX - w + 6, CX + w - 6, i / 8); strand(x, top + 10, x, yb + 2, 0); }
+      for (const s of [-1, 1]) {
+        const x = CX + s * (hw(HY - 14) - 1);
+        draw(() => {
+          ctx.moveTo(x - 7, HY - 22);
+          ctx.lineTo(x + 7, HY - 22);
+          ctx.lineTo(x + 6 + s * 2, HY + 40);
+          ctx.lineTo(x - 6 + s * 2, HY + 41);
+          ctx.closePath();
+        }, false);
+        strand(x, HY - 20, x + s * 2, HY + 38, 0);
+      }
+      shine();
+      return;
+    }
     case "bald":
       ctx.fillStyle = "rgba(255,255,255,0.22)"; ctx.beginPath(); ctx.ellipse(CX - 12, top + 14, 13, 6, -0.4, 0, TAU); ctx.fill();
       return;
@@ -2286,5 +2428,6 @@ export function drawMini(canvas, look, t = 0) {
 export const CROPS = {
   head: [84, 52, 152, 190],
   full: [0, 30, 320, 400],
-  legs: [72, 220, 176, 220]
+  legs: [72, 220, 176, 220],
+  bust: [40, 30, 240, 300]
 };
