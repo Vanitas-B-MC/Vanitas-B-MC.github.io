@@ -89,14 +89,14 @@ Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **18 
 | Monnaie | Comment l'obtenir | À quoi elle sert |
 | --- | --- | --- |
 | **Crédits** | Mineur de données (clicker), Pare-feu, Survivor Arena, Breach Protocol, Démineur, jeux de mise… | Blackjack, Plinko, Crash, Machine à sous, Courses d'IA, déblocage des tours, cartes et héros du Pare-feu, personnages de Survivor Arena |
-| **Pièces bleues** | Data Snake (pièce rare), Tetris (1 toutes les 6 lignes), longues parties de Survivor Arena, piratages complets, succès de la ferme, bestiaire de la pêche | Roulette, améliorations spéciales du Clicker, graine de fruit ancien, canne néon quantique |
+| **Pièces bleues** | Data Snake (pièce rare), Tetris (1 toutes les 6 lignes), longues parties de Survivor Arena, piratages complets, succès de la ferme, bestiaire de la pêche | Roulette, surcadençage des bâtiments du Clicker, graine de fruit ancien, canne néon quantique |
 | **Trophées ✦** | Chasse aux Titans uniquement (dresseurs, Gardiens, captures) | Objets, modules de capture et Atelier des capacités du RPG |
 | **Âmes** | Donjon | Améliorations permanentes, classes, armes et ultimes du Donjon |
 | **Or** | Vallée Néon (ventes de la ferme) | Graines, outils, bâtiments et animaux de la ferme |
 | **Perles** | Grand Bleu (vente des poissons) | Cannes, appâts, accessoires et lieux de pêche |
 | **Ressources de la cité** | Cité des Âges (nourriture, bois, pierre, métal, or, savoir) | Bâtiments, routes et passage aux ères suivantes |
 
-Le **gain passif du Clicker** continue de tourner pendant qu'on joue aux autres jeux. Les gros montants s'affichent en abrégé (K, M, B, T, Qa, Qi, Sx, Sp, Oc, No, Dc, Ud…) jusqu'à 1e66.
+Le **gain passif du Clicker** continue de tourner pendant qu'on joue aux autres jeux (et même arcade fermée si l'arbre du formatage le permet). Les gros montants s'affichent en abrégé (K, M, B, T, Qa, Qi, Sx, Sp, Oc, No, Dc, Ud…) jusqu'à 1e66.
 Plusieurs jeux donnent des récompenses **proportionnelles à ta fortune**, pour que les gains restent intéressants même quand on est très riche.
 
 ### Les 18 jeux
@@ -106,7 +106,7 @@ Plusieurs jeux donnent des récompenses **proportionnelles à ta fortune**, pour
 | 01 | **Data Snake** | Arcade | Le Snake classique. Une pièce bleue rare apparaît parfois. |
 | 02 | **Blackjack** | Cartes | Battre le croupier sans dépasser 21. Mise en crédits, montant libre. |
 | 03 | **Roulette** | Casino | Roulette européenne, mise en pièces bleues (numéro, couleur…). |
-| 04 | **Mineur de données** | Clicker | 38 améliorations en crédits, 4 améliorations en pièces bleues, arbre de compétences (10 nœuds) et **Rebirth** (formatage) avec éclats et arbre permanent (7 nœuds). Source principale de crédits. |
+| 04 | **Mineur de données** | Clicker | Façon Cookie Clicker, monnaie propre (les **données**, aussi versées en crédits) : noyau à cliquer, 20 bâtiments (achat/revente ×1/×10/×100), 282 améliorations, paquets dorés (Frénésie, Coup de chance, Frénésie de clic, Surcharge), 143 succès qui renforcent les chats-bots, surcadençage en pièces bleues, **formatage** (prestige + arbre permanent de 13 nœuds, dont le minage hors ligne). Source principale de crédits. |
 | 05 | **Tetris** | Arcade | Une pièce bleue toutes les 6 lignes. |
 | 06 | **Pare-feu** | Tower defense | 14 cartes, 24 tours et 5 héros à débloquer en crédits, améliorations propres à chaque tour (niveau 5 « ultime »), tours Beacon (boost) et Data Miner (revenu), frappe orbitale. |
 | 07 | **Survivor Arena** | Action | Vagues d'ennemis, tir automatique, une amélioration à chaque niveau, 5 personnages, élites et boss. |

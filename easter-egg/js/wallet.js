@@ -5,7 +5,7 @@
 // Tout est sauvegardé dans le navigateur (localStorage). Si le stockage est indisponible
 // (navigation privée, par exemple), le jeu marche quand même, simplement sans sauvegarde.
 
-import { UPGRADES, BLUE_UPGRADES, SKILLS, CORE } from "./clicker.js";
+import { freshClicker, sanitizeClicker } from "./clicker.js";
 import { CHARACTER_IDS, FREE_CHARACTER } from "./survivors.js";
 import { freshHunt, sanitizeHunt } from "./hunt.js";
 import { TOWER_IDS, FREE_TOWER, MAP_IDS, FREE_MAP, HERO_IDS, FREE_HERO } from "./td.js";
@@ -26,14 +26,10 @@ const MAX_BACKUPS = 6;
 // Version du code de l'arcade. À augmenter à chaque mise à jour qui ajoute des jeux, des tours, des cartes…
 // Un onglet resté sur une ancienne version (ou servi depuis le cache du navigateur) voit qu'une sauvegarde a été
 // écrite par une version plus récente : il passe en lecture seule au lieu d'écraser ce qu'il ne connaît pas.
-export const BUILD = 4;
+export const BUILD = 5;
 const START_CREDITS = 100;
 const MAX = MAX_CREDITS;
 
-export const CLICKER_IDS = UPGRADES.map((u) => u.id);
-export const BLUE_IDS = BLUE_UPGRADES.map((u) => u.id);
-export const SKILL_IDS = SKILLS.map((x) => x.id);
-export const CORE_IDS = CORE.map((x) => x.id);
 export const BEST_KEYS = ["bestSnake", "bestTetris", "bestWave", "bestSurvivor", "bestBreach", "bestHunt", "bestDungeon"];
 
 function freshData() {
@@ -46,16 +42,9 @@ function freshData() {
     bestSurvivor: 0,      // secondes survécues dans Survivor Arena
     bestBreach: 0,        // meilleur gain (crédits) d'un Breach Protocol
     blueFound: 0,         // pièces bleues ramassées dans le Snake
-    minedTotal: 0,        // crédits gagnés avec le Clicker, au total
+    minedTotal: 0,        // crédits versés par le Clicker, au total
     clicksTotal: 0,
-    minedRun: 0,          // crédits minés depuis le dernier formatage (Rebirth)
-    shards: 0,            // éclats disponibles (monnaie du Rebirth)
-    shardsTotal: 0,       // éclats gagnés à vie : chacun donne +2 % aux gains
-    rebirths: 0,
-    skills: Object.fromEntries(SKILL_IDS.map((id) => [id, 0])),   // arbre de compétences de la partie
-    core: Object.fromEntries(CORE_IDS.map((id) => [id, 0])),      // arbre permanent du Rebirth
-    levels: Object.fromEntries(CLICKER_IDS.map((id) => [id, 0])),
-    blueLevels: Object.fromEntries(BLUE_IDS.map((id) => [id, 0])),
+    ck: freshClicker(),   // « Mineur de données » (façon Cookie Clicker) : données, bâtiments, améliorations, succès…
     towers: [FREE_TOWER],  // tours du Tower Defense débloquées
     maps: [FREE_MAP],      // cartes du Tower Defense débloquées
     heroes: [FREE_HERO],   // héros du Tower Defense débloqués
@@ -88,12 +77,12 @@ export function sanitize(raw) {
   if (!raw || typeof raw !== "object") return data;
 
   data.credits = toCount(raw.credits, data.credits);
-  for (const key of ["blue", "blueFound", "minedTotal", "clicksTotal", "minedRun", "shards", "trophies", "shardsTotal", "rebirths", ...BEST_KEYS]) data[key] = toCount(raw[key]);
+  for (const key of ["blue", "blueFound", "minedTotal", "clicksTotal", "trophies", ...BEST_KEYS]) data[key] = toCount(raw[key]);
 
-  for (const id of CLICKER_IDS) data.levels[id] = toCount(raw.levels?.[id]);
-  for (const id of BLUE_IDS) data.blueLevels[id] = toCount(raw.blueLevels?.[id]);
-  for (const sk of SKILLS) data.skills[sk.id] = Math.min(toCount(raw.skills?.[sk.id]), sk.max);
-  for (const node of CORE) data.core[node.id] = Math.min(toCount(raw.core?.[node.id]), node.max);
+  // Clicker. Une ancienne sauvegarde (avant la refonte) est convertie : pièces bleues et éclats dépensés rendus.
+  const clicker = sanitizeClicker(raw.ck, raw);
+  data.ck = clicker.ck;
+  data.blue = addCapped(data.blue, clicker.blueRefund);
 
   if (Array.isArray(raw.towers)) {
     for (const id of raw.towers) if (TOWER_IDS.includes(id) && !data.towers.includes(id)) data.towers.push(id);
@@ -150,15 +139,12 @@ const DUNGEON_LIST_IDS = () => ({ classes: CLASS_IDS, weapons: WEAPON_IDS, ults:
 const unknownIds = (list, ids) => (Array.isArray(list) ? list.filter((id) => typeof id === "string" && id.length <= 40 && !ids.includes(id)).slice(0, 200) : []);
 
 export function extrasOf(raw) {
-  const ex = { top: {}, lists: {}, dungeon: {}, levels: {}, blueLevels: {} };
+  const ex = { top: {}, lists: {}, dungeon: {} };
   if (!raw || typeof raw !== "object") return ex;
   const known = new Set(Object.keys(freshData()));
   for (const [k, v] of Object.entries(raw)) if (!known.has(k)) ex.top[k] = v;
   for (const [k, ids] of Object.entries(LIST_IDS())) ex.lists[k] = unknownIds(raw[k], ids);
   if (raw.dungeon && typeof raw.dungeon === "object") for (const [k, ids] of Object.entries(DUNGEON_LIST_IDS())) ex.dungeon[k] = unknownIds(raw.dungeon[k], ids);
-  for (const [k, ids] of [["levels", CLICKER_IDS], ["blueLevels", BLUE_IDS]]) {
-    if (raw[k] && typeof raw[k] === "object") for (const [id, v] of Object.entries(raw[k])) if (!ids.includes(id) && id.length <= 40) ex[k][id] = toCount(v);
-  }
   return ex;
 }
 
@@ -167,7 +153,6 @@ export function serialize(data, ex) {
   for (const [k, ids] of Object.entries(ex.lists)) if (ids.length) out[k] = [...data[k], ...ids.filter((id) => !data[k].includes(id))];
   const dun = Object.entries(ex.dungeon).filter(([, ids]) => ids.length);
   if (dun.length) { out.dungeon = { ...data.dungeon }; for (const [k, ids] of dun) out.dungeon[k] = [...data.dungeon[k], ...ids.filter((id) => !data.dungeon[k].includes(id))]; }
-  for (const k of ["levels", "blueLevels"]) if (Object.keys(ex[k]).length) out[k] = { ...ex[k], ...data[k] };
   return JSON.stringify(out);
 }
 
@@ -176,7 +161,7 @@ export function summarize(raw) {
   const d = sanitize(raw);
   return {
     credits: d.credits, blue: d.blue, towers: d.towers.length, maps: d.maps.length,
-    species: Object.keys(d.angler.dex).length, farmDays: d.ranch.stats.days, rebirths: d.rebirths
+    species: Object.keys(d.angler.dex).length, farmDays: d.ranch.stats.days, rebirths: d.ck.runs
   };
 }
 
@@ -196,6 +181,7 @@ export function createWallet(storage = defaultStorage()) {
   let extras = extrasOf(null);
   let lock = null;               // null, "other-tab" (un autre onglet joue) ou "outdated" (ce code est trop vieux)
   let lastBackup = 0;
+  let creditCarry = 0;           // partie décimale des données minées, pas encore versée en crédits
   const tabId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
   const listeners = new Set();
   const lockListeners = new Set();
@@ -419,46 +405,15 @@ export function createWallet(storage = defaultStorage()) {
       return true;
     },
 
-    // Améliorations du Clicker : en crédits (levelUp) ou en pièces bleues (blueLevelUp).
-    levelUp(id) {
-      if (!(id in data.levels)) return;
-      data.levels[id] = addCapped(data.levels[id], 1);
-      commit();
-    },
-    blueLevelUp(id) {
-      if (!(id in data.blueLevels)) return;
-      data.blueLevels[id] = addCapped(data.blueLevels[id], 1);
-      commit();
-    },
-
-    // Compétences de la partie, éclats et arbre du Rebirth. Les règles (prix, prérequis) sont dans clicker.js.
-    skillUp(id) {
-      if (!(id in data.skills)) return;
-      data.skills[id] = addCapped(data.skills[id], 1);
-      commit();
-    },
-    coreUp(id) {
-      if (!(id in data.core)) return;
-      data.core[id] = addCapped(data.core[id], 1);
-      commit();
-    },
-    spendShards(n) {
-      const amount = toCount(n);
-      if (amount > data.shards) return false;
-      data.shards -= amount;
-      commit();
-      return true;
-    },
-    // Formatage : on garde crédits, pièces bleues, paliers bleus, tours, succès et arbre du Rebirth.
-    rebirth({ shards = 0, credits = 0, start = {} } = {}) {
-      data.shards = addCapped(data.shards, toCount(shards));
-      data.shardsTotal = addCapped(data.shardsTotal, toCount(shards));
-      data.credits = addCapped(data.credits, toCount(credits));
-      data.rebirths = addCapped(data.rebirths, 1);
-      data.minedRun = 0;
-      for (const id of CLICKER_IDS) data.levels[id] = toCount(start[id]);
-      for (const id of SKILL_IDS) data.skills[id] = 0;
-      commit();
+    // Clicker : le jeu modifie `data.ck` directement (voir clicker.js), puis demande la sauvegarde.
+    // minedData : données minées, versées aussi en crédits (la partie décimale est gardée pour la suite).
+    saveClicker() { commit(); },
+    minedData(amount, { clicks = 0 } = {}) {
+      creditCarry += Math.max(0, Number(amount) || 0);
+      const whole = Math.floor(creditCarry);
+      creditCarry -= whole;
+      if (whole > 0 || clicks) this.addCredits(whole, { mined: true, clicks });
+      else commit();
     },
 
     // Tower Defense : débloque une tour contre des crédits. false si déjà débloquée ou trop cher.

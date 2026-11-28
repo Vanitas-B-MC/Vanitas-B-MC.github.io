@@ -1,377 +1,646 @@
-// js/ui-clicker.js — interface du Clicker « Mineur de données » (logique dans clicker.js).
-// Les crédits servent au Blackjack et au Tower Defense ; les pièces bleues achètent des paliers.
+// js/ui-clicker.js — interface du « Mineur de données », façon Cookie Clicker (la logique est dans clicker.js).
+//
+// Trois colonnes (une seule sur téléphone) :
+//   gauche  : banque de données, le noyau à cliquer, pluie de bits, effets en cours ;
+//   milieu  : fil d'actus et onglets (salle des machines, succès, formatage, surcadençage, statistiques) ;
+//   droite  : boutique (améliorations en grille, puis bâtiments).
+// La production tourne dans arcade.js (elle continue pendant les autres jeux) ; ici on ne fait qu'afficher.
 
 import {
-  UPGRADES, BLUE_UPGRADES, ACHIEVEMENTS, PACKET_LIFETIME, SKILLS, SKILL_BRANCHES, CORE, REBIRTH_MIN, CRIT_MULTIPLIER,
-  costOf, blueCostOf, clickPower, clickGain, perSecond, buy, buyBlue, bonusOf,
-  nextPacketDelay, packetReward, packetBlueChance, checkAchievements,
-  pointsEarned, pointsFree, nextThreshold, skillState, skillUp,
-  shardsFor, canRebirth, refundFor, startLevels, rebirth, coreCostOf, buyCore
+  BUILDINGS, BUILDING_IDS, UPGRADES, HEAVEN, ACHIEVEMENTS, BUFFS,
+  buildingById, perSecond, clickValue, unitCps, buildingCps, globalMult, milk, prestigeLevel,
+  buildingCost, sellValue, affordable, buyBuilding, sellBuilding, buildingVisible,
+  availableUpgrades, upgradeCost, buyUpgrade, buyAllUpgrades, upgradeById,
+  click, catchGold, nextGoldDelay, goldLifetime, activeBuffs,
+  levelCost, pendingPrestige, nextPrestigeAt, format, heavenState, buyHeaven, offlineRate,
+  checkAchievements, achievementCredits, newsFor
 } from "./clicker.js";
-import { h, fmtShort as fmt, fmtRate, prefersReducedMotion } from "./ui.js";
+import { h, fmtShort, fmtRate, prefersReducedMotion, themeColor } from "./ui.js";
 
-const MAX_POPUPS = 12;
-
-const FRENZY_FACTOR = 7;
-const FRENZY_MS = 15000;
+const fmt = (n) => fmtShort(Math.floor(n));
+const MAX_POPUPS = 14;
+const NEWS_MS = 9000;
+const TOAST_MS = 6000;
+const plural = (n, word, pl = `${word}s`) => (n > 1 ? pl : word);
 
 export function createClickerUI(root, wallet) {
+  const ck = () => wallet.data.ck;
   let active = false;
-  let clickCarry = 0;
-  let checking = false;
-  let packetTimer = 0;
-  let frenzyUntil = 0;           // fin de la frénésie (clics x7), en ms
-  let frenzyTimer = 0;
-  let packetHideTimer = 0;
-  let messageTimer = 0;
+  let mode = "buy";              // "buy" ou "sell"
+  let qty = 1;                   // 1, 10 ou 100
+  let tab = "room";
+  let selected = null;           // amélioration sélectionnée (affichée dans le cadre d'info)
+  let lastPointer = "mouse";
+  let goldTimer = 0;
+  let goldHideTimer = 0;
+  let newsTimer = 0;
+  let rainFrame = 0;
+  let confirmFormat = false;
+  let confirmTimer = 0;
+  const keys = { upgrades: "", room: "", ach: -1, heaven: "", level: "" };
 
-  /* ---------- Squelette ---------- */
+  /* ================================================================================================
+     Colonne de gauche : banque + noyau
+     ================================================================================================ */
 
-  const mineButton = h("button", { class: "mine-button", type: "button", id: "mine" },
-    h("span", { class: "mine-label" }, "Miner"),
-    h("span", { class: "mine-sub" }, "clic ou Entrée"));
-  const popups = h("div", { class: "mine-popups", "aria-hidden": "true" });
-  const packet = h("button", {
-    class: "packet", type: "button", id: "packet", hidden: true,
-    "aria-label": "Paquet de données : clique pour récupérer un bonus"
-  }, "◆ Paquet");
-  const message = h("p", { class: "ck-message", role: "status", "aria-live": "polite" });
+  const bankEl = h("strong", { class: "ck2-bank-value" }, "0");
+  const rateEl = h("span", { class: "ck2-rate" });
+  const clickEl = h("span", { class: "ck2-clickval" });
+  const core = h("button", { class: "ck2-core", type: "button", id: "mine", "aria-label": "Noyau de données : clique pour miner" },
+    h("span", { class: "ck2-ring ck2-ring-a", "aria-hidden": "true" }),
+    h("span", { class: "ck2-ring ck2-ring-b", "aria-hidden": "true" }),
+    h("span", { class: "ck2-ring ck2-ring-c", "aria-hidden": "true" }),
+    h("span", { class: "ck2-core-hex", "aria-hidden": "true" }),
+    h("span", { class: "ck2-core-label" }, "MINER"));
+  const rain = h("canvas", { class: "ck2-rain", "aria-hidden": "true" });
+  const popups = h("div", { class: "ck2-popups", "aria-hidden": "true" });
+  const buffsEl = h("ul", { class: "ck2-buffs", "aria-label": "Effets en cours" });
+  const message = h("p", { class: "ck2-message", role: "status", "aria-live": "polite" });
 
-  const powerEl = h("strong", {}, "1");
-  const rateEl = h("strong", {}, "0");
-  const minedEl = h("strong", {}, "0");
+  const left = h("section", { class: "ck2-left chamfer", "aria-label": "Noyau" },
+    h("div", { class: "ck2-bank" },
+      h("span", { class: "ck2-bank-label" }, "Banque de données"),
+      bankEl,
+      rateEl,
+      clickEl),
+    h("div", { class: "ck2-core-wrap" }, rain, core, popups),
+    buffsEl,
+    message,
+    h("p", { class: "ck2-note" }, "Chaque donnée minée est aussi versée en crédit dans ton portefeuille."));
 
-  const rows = UPGRADES.map((upgrade) => {
-    const owned = h("span", { class: "up-owned" });
-    const cost = h("span", { class: "up-cost" });
-    const button = h("button", {
-      class: "upgrade", type: "button", "data-id": upgrade.id,
-      onclick: () => { buy(wallet, upgrade.id); afterChange(); }
-    },
-      h("span", { class: "up-main" }, h("strong", {}, upgrade.name), h("span", { class: "up-desc" }, upgrade.desc)),
-      owned, cost);
-    return { upgrade, owned, cost, button };
-  });
+  /* ================================================================================================
+     Colonne du milieu : actus + onglets
+     ================================================================================================ */
 
-  const blueRows = BLUE_UPGRADES.map((upgrade) => {
-    const owned = h("span", { class: "up-owned" });
-    const cost = h("span", { class: "up-cost" });
-    const button = h("button", {
-      class: "upgrade upgrade-blue", type: "button", "data-id": upgrade.id,
-      onclick: () => { buyBlue(wallet, upgrade.id); afterChange(); }
-    },
-      h("span", { class: "up-main" }, h("strong", {}, upgrade.name), h("span", { class: "up-desc" }, upgrade.desc)),
-      owned, cost);
-    return { upgrade, owned, cost, button };
-  });
+  const news = h("button", { class: "ck2-news", type: "button", title: "Actu suivante" }, h("span", { class: "ck2-news-tag" }, "NEWS"), h("span", { class: "ck2-news-text" }));
+  const newsText = news.querySelector(".ck2-news-text");
 
-  /* ---------- Onglets : boutique, compétences, rebirth ---------- */
-
-  const shopPanel = h("div", { class: "ck-panel", id: "ck-panel-shop", role: "tabpanel" },
-    h("h3", { class: "subhead" }, "Améliorations"),
-    h("ul", { class: "upgrade-list" }, rows.map((row) => h("li", {}, row.button))),
-    h("h3", { class: "subhead subhead-blue" }, h("span", { class: "coin", "aria-hidden": "true" }), " Paliers en pièces bleues"),
-    h("p", { class: "hint" }, "Permanents. Chaque palier coûte un peu plus cher que le précédent."),
-    h("ul", { class: "upgrade-list" }, blueRows.map((row) => h("li", {}, row.button))));
-
-  // Compétences : un arbre par partie, remis à zéro au formatage.
-  const pointsEl = h("strong", { id: "sk-points" }, "0");
-  const nextPointEl = h("span", { class: "hint", id: "sk-next" });
-  const skillNodes = SKILLS.map((sk) => {
-    const rankEl = h("span", { class: "up-owned" });
-    const costEl = h("span", { class: "up-cost" });
-    const reqEl = h("span", { class: "sk-req" });
-    const button = h("button", {
-      class: "upgrade skill-node", type: "button", "data-skill": sk.id,
-      onclick: () => { if (skillUp(wallet, sk.id)) afterChange(); }
-    }, h("span", { class: "up-main" }, h("strong", {}, sk.name), h("span", { class: "up-desc" }, sk.desc), reqEl), rankEl, costEl);
-    return { sk, rankEl, costEl, reqEl, button };
-  });
-  const skillsPanel = h("div", { class: "ck-panel", id: "ck-panel-skills", role: "tabpanel", hidden: true },
-    h("p", { class: "hint" }, "Points de compétence : ", pointsEl, " ", nextPointEl),
-    h("p", { class: "hint" }, "Gagnés en minant pendant la partie. Remis à zéro au formatage (Rebirth)."),
-    SKILL_BRANCHES.map((branch) =>
-      h("div", { class: "skill-branch" },
-        h("h3", { class: "subhead" }, branch.name),
-        h("ul", { class: "upgrade-list" }, skillNodes.filter((n) => n.sk.branch === branch.id).map((n) => h("li", {}, n.button))))));
-
-  // Rebirth : on formate pour gagner des éclats, qui achètent un arbre permanent.
-  const runEl = h("strong", { id: "rb-run" }, "0");
-  const gainEl = h("strong", { id: "rb-gain" }, "0");
-  const shardsEl = h("strong", { id: "rb-shards" }, "0");
-  const rebirthInfo = h("p", { class: "hint", id: "rb-info" });
-  let confirmRebirth = false;
-  const rebirthButton = h("button", { class: "button button-primary", id: "rb-button", type: "button", onclick: () => doRebirth() });
-  const coreRows = CORE.map((node) => {
-    const rankEl = h("span", { class: "up-owned" });
-    const costEl = h("span", { class: "up-cost" });
-    const button = h("button", {
-      class: "upgrade upgrade-shard", type: "button", "data-core": node.id,
-      onclick: () => { if (buyCore(wallet, node.id)) afterChange(); }
-    }, h("span", { class: "up-main" }, h("strong", {}, node.name), h("span", { class: "up-desc" }, node.desc)), rankEl, costEl);
-    return { node, rankEl, costEl, button };
-  });
-  const rebirthPanel = h("div", { class: "ck-panel", id: "ck-panel-rebirth", role: "tabpanel", hidden: true },
-    h("p", { class: "hint" },
-      `Formater remet à zéro tes améliorations en crédits et tes compétences (dès ${fmt(REBIRTH_MIN)} crédits minés dans la partie). Tu gardes crédits, pièces bleues, paliers bleus, tours et succès, et tu gagnes des éclats : +2 % à tous les gains chacun, à vie, et monnaie de l'arbre ci-dessous.`),
-    h("dl", { class: "ck-stats" },
-      h("div", {}, h("dt", {}, "Minés (partie)"), h("dd", {}, runEl)),
-      h("div", {}, h("dt", {}, "Éclats à gagner"), h("dd", {}, gainEl)),
-      h("div", {}, h("dt", {}, "Éclats"), h("dd", {}, shardsEl))),
-    rebirthInfo,
-    rebirthButton,
-    h("h3", { class: "subhead subhead-shard" }, "Arbre du Rebirth (permanent)"),
-    h("ul", { class: "upgrade-list" }, coreRows.map((row) => h("li", {}, row.button))));
+  const roomEl = h("div", { class: "ck2-room" });
+  const achHead = h("p", { class: "ck2-hint" });
+  const achGrid = h("div", { class: "ck2-ach" });
+  const formatInfo = h("div", { class: "ck2-format" });
+  const formatButton = h("button", { class: "button button-primary", type: "button", onclick: () => doFormat() });
+  const chipsEl = h("p", { class: "ck2-hint" });
+  const heavenGrid = h("ul", { class: "ck2-heaven" });
+  const levelHead = h("p", { class: "ck2-hint" });
+  const levelList = h("ul", { class: "ck2-levels" });
+  const statsEl = h("dl", { class: "ck2-stats" });
 
   const TABS = [
-    { id: "shop", label: "Améliorations", panel: shopPanel },
-    { id: "skills", label: "Compétences", panel: skillsPanel },
-    { id: "rebirth", label: "Rebirth", panel: rebirthPanel }
+    { id: "room", label: "Machines", panel: h("div", {}, roomEl) },
+    { id: "ach", label: "Succès", panel: h("div", {}, achHead, achGrid) },
+    { id: "format", label: "Formatage", panel: h("div", {},
+      h("p", { class: "ck2-hint" }, "Formater efface ta banque, tes bâtiments et tes améliorations. Tu gardes tes succès, ton surcadençage et l'arbre ci-dessous. "
+        + "Chaque niveau de prestige donne +1 % de production à vie et 1 éclat à dépenser dans l'arbre."),
+      formatInfo, formatButton, chipsEl, heavenGrid) },
+    { id: "level", label: "Surcadençage", panel: h("div", {}, levelHead, levelList) },
+    { id: "stats", label: "Stats", panel: h("div", {}, statsEl) }
   ];
-  const tabButtons = TABS.map((tab) =>
-    h("button", { class: "ck-tab", type: "button", role: "tab", "data-tab": tab.id, "aria-controls": `ck-panel-${tab.id}`, onclick: () => selectTab(tab.id) }, tab.label));
-  const tabBar = h("div", { class: "ck-tabs", role: "tablist", "aria-label": "Sections du Clicker" }, tabButtons);
+  const tabButtons = TABS.map((t) => h("button", {
+    class: "ck-tab", type: "button", role: "tab", "aria-controls": `ck2-panel-${t.id}`, onclick: () => selectTab(t.id)
+  }, t.label));
+  TABS.forEach((t) => { t.panel.id = `ck2-panel-${t.id}`; t.panel.setAttribute("role", "tabpanel"); t.panel.className = "ck2-panel"; });
+
+  const mid = h("section", { class: "ck2-mid", "aria-label": "Infos" },
+    news,
+    h("div", { class: "ck-tabs", role: "tablist", "aria-label": "Sections du Clicker" }, tabButtons),
+    TABS.map((t) => t.panel));
 
   function selectTab(id) {
-    TABS.forEach((tab, i) => {
-      tab.panel.hidden = tab.id !== id;
-      tabButtons[i].setAttribute("aria-selected", String(tab.id === id));
-    });
+    tab = id;
+    TABS.forEach((t, i) => { t.panel.hidden = t.id !== id; tabButtons[i].setAttribute("aria-selected", String(t.id === id)); });
+    keys.room = ""; keys.ach = -1; keys.heaven = ""; keys.level = "";
+    render();
   }
-  selectTab("shop");
 
-  const achievementRows = ACHIEVEMENTS.map((a) => {
-    const item = h("li", { class: "achievement", "data-id": a.id },
-      h("strong", {}, a.name),
-      h("span", { class: "ach-desc" }, a.desc),
-      h("span", { class: "ach-reward" }, `+${fmt(a.reward)} ¤`));
-    return { a, item };
+  /* ================================================================================================
+     Colonne de droite : boutique
+     ================================================================================================ */
+
+  const upgradeGrid = h("div", { class: "ck2-upgrades", role: "list", "aria-label": "Améliorations disponibles" });
+  const buyAllButton = h("button", { class: "chip chip-ghost ck2-buyall", type: "button", onclick: () => {
+    const n = buyAllUpgrades(ck());
+    if (n) { say(`${n} amélioration${n > 1 ? "s" : ""} achetée${n > 1 ? "s" : ""}.`); afterChange(); }
+  } }, "Tout acheter");
+  const info = h("div", { class: "ck2-info", "aria-live": "polite" }, h("p", { class: "ck2-hint" }, "Survole (ou touche) une amélioration ou un bâtiment pour voir le détail."));
+
+  const modeButtons = [["buy", "Acheter"], ["sell", "Vendre"]].map(([id, label]) =>
+    h("button", { class: "ck2-toggle", type: "button", "data-mode": id, onclick: () => { mode = id; render(); } }, label));
+  const qtyButtons = [1, 10, 100].map((n) =>
+    h("button", { class: "ck2-toggle", type: "button", "data-qty": n, onclick: () => { qty = n; render(); } }, `×${n}`));
+
+  const rows = BUILDINGS.map((b) => {
+    const priceEl = h("span", { class: "ck2-b-price" });
+    const ownedEl = h("span", { class: "ck2-b-owned" });
+    const nameEl = h("strong", { class: "ck2-b-name" }, b.name);
+    const button = h("button", { class: "ck2-building", type: "button", "data-id": b.id, style: `--c:${b.color}` },
+      h("span", { class: "ck2-icon", "aria-hidden": "true" }, b.code),
+      h("span", { class: "ck2-b-main" }, nameEl, priceEl),
+      ownedEl);
+    button.addEventListener("click", () => onBuilding(b.id));
+    button.addEventListener("mouseenter", () => showBuildingInfo(b.id));
+    button.addEventListener("focus", () => showBuildingInfo(b.id));
+    return { b, button, priceEl, ownedEl, nameEl };
   });
-  const achievementCount = h("span", { class: "ach-count" });
 
+  const right = h("section", { class: "ck2-store", "aria-label": "Boutique" },
+    h("div", { class: "ck2-store-head" }, h("h3", { class: "subhead" }, "Améliorations"), buyAllButton),
+    upgradeGrid,
+    info,
+    h("div", { class: "ck2-store-head" }, h("h3", { class: "subhead" }, "Bâtiments"),
+      h("div", { class: "ck2-toggles", role: "group", "aria-label": "Mode" }, modeButtons),
+      h("div", { class: "ck2-toggles", role: "group", "aria-label": "Quantité" }, qtyButtons)),
+    h("div", { class: "ck2-buildings" }, rows.map((r) => r.button)));
+
+  /* ================================================================================================
+     Paquet doré + notifications
+     ================================================================================================ */
+
+  const gold = h("button", { class: "ck2-gold", type: "button", hidden: true, "aria-label": "Paquet doré : clique vite pour un bonus !" },
+    h("span", { class: "ck2-gold-core", "aria-hidden": "true" }, "◆"));
+  const toasts = h("div", { class: "ck2-toasts", "aria-live": "polite" });
+
+  const game = h("div", { class: "ck2" }, left, mid, right, gold, toasts);
   root.replaceChildren(
     h("p", { class: "game-rules" },
-      "Mine des crédits en cliquant, puis achète des améliorations qui minent à ta place. Les crédits servent au Blackjack et à débloquer les tours du Tower Defense. Les pièces bleues (Snake, Tetris) achètent des paliers permanents."),
-    h("div", { class: "ck-layout" },
-      h("div", { class: "ck-mine chamfer" },
-        h("div", { class: "mine-wrap" }, mineButton, popups, packet),
-        message,
-        h("dl", { class: "ck-stats" },
-          h("div", {}, h("dt", {}, "Par clic"), h("dd", {}, powerEl)),
-          h("div", {}, h("dt", {}, "Par seconde"), h("dd", {}, rateEl)),
-          h("div", {}, h("dt", {}, "Crédits minés"), h("dd", {}, minedEl)))),
-      h("div", { class: "ck-shop" },
-        tabBar,
-        shopPanel,
-        skillsPanel,
-        rebirthPanel)
-    ),
-    h("section", { class: "ck-achievements", "aria-label": "Succès" },
-      h("h3", { class: "subhead" }, "Succès ", achievementCount),
-      h("ul", { class: "achievement-list" }, achievementRows.map((row) => row.item)))
-  );
+      "Clique sur le noyau pour miner des données, achète des bâtiments qui minent à ta place, puis des améliorations pour les rendre plus puissants. "
+      + "Attrape les paquets dorés, collectionne les succès, et formate pour recommencer plus fort."),
+    game);
 
-  /* ---------- Messages ---------- */
+  /* ================================================================================================
+     Messages
+     ================================================================================================ */
 
+  let messageTimer = 0;
   function say(text) {
     message.textContent = text;
     window.clearTimeout(messageTimer);
-    messageTimer = window.setTimeout(() => { message.textContent = ""; }, 5000);
+    messageTimer = window.setTimeout(() => { message.textContent = ""; }, 6000);
   }
 
-  /* ---------- Clic ---------- */
+  function toast(title, text, kind = "") {
+    while (toasts.children.length >= 4) toasts.firstChild.remove();
+    const node = h("div", { class: `ck2-toast ${kind}` }, h("strong", {}, title), h("span", {}, text));
+    toasts.append(node);
+    window.setTimeout(() => node.remove(), TOAST_MS);
+  }
 
-  function popup(amount, event, crit = false) {
+  /* ================================================================================================
+     Clic sur le noyau
+     ================================================================================================ */
+
+  function popup(text, event, extra = "") {
     if (prefersReducedMotion()) return;
     while (popups.children.length >= MAX_POPUPS) popups.firstChild.remove();
-
     const box = popups.getBoundingClientRect();
-    // Au clavier (pas de coordonnées de souris), on part du centre du bouton.
     const x = event && event.clientX ? event.clientX - box.left : box.width / 2;
     const y = event && event.clientY ? event.clientY - box.top : box.height / 2;
-    const node = h("span", { class: `popup${crit ? " popup-crit" : ""}`, style: `left:${x}px; top:${y}px` }, `${crit ? "CRIT ×" + CRIT_MULTIPLIER + " " : ""}+${fmt(amount)}`);
+    const node = h("span", { class: `ck2-pop ${extra}`, style: `left:${x}px; top:${y}px` }, text);
     node.addEventListener("animationend", () => node.remove());
     popups.append(node);
+    const bit = h("span", { class: "ck2-bit", style: `left:${x}px; top:${y}px; --dx:${Math.round(Math.random() * 120 - 60)}px` }, Math.random() < 0.5 ? "0" : "1");
+    bit.addEventListener("animationend", () => bit.remove());
+    popups.append(bit);
   }
 
-  mineButton.addEventListener("click", (event) => {
-    const gain = clickGain(wallet.data.levels, wallet.data.blueLevels, clickCarry, bonusOf(wallet.data));
-    clickCarry = gain.carry;
-    const factor = Date.now() < frenzyUntil ? FRENZY_FACTOR : 1;
-    const total = gain.whole * factor;
-    wallet.addCredits(total, { mined: true, clicks: 1 });
-    popup(total, event, gain.crit);
+  core.addEventListener("click", (event) => {
+    const gain = click(ck());
+    wallet.minedData(gain, { clicks: 1 });
+    popup(`+${fmt(gain)}`, event, activeBuffs(ck()).some((x) => x.id === "clickf") ? "is-mega" : "");
+    core.classList.remove("is-hit");
+    void core.offsetWidth;
+    core.classList.add("is-hit");
     afterChange();
   });
 
-  /* ---------- Paquet de données : bonus aléatoire, cliquable quelques secondes ---------- */
+  /* ================================================================================================
+     Bâtiments
+     ================================================================================================ */
 
-  function hidePacket() {
-    window.clearTimeout(packetHideTimer);
-    packet.hidden = true;
+  function onBuilding(id) {
+    const c = ck();
+    showBuildingInfo(id);
+    if (mode === "buy") {
+      const n = buyBuilding(c, id, qty);
+      if (!n) return;
+    } else {
+      const before = BUILDING_IDS.reduce((s, x) => s + c.b[x], 0);
+      const n = sellBuilding(c, id, qty);
+      if (!n) return;
+      const after = BUILDING_IDS.reduce((s, x) => s + c.b[x], 0);
+      if (after === 0 && before >= 100) reward(checkAchievements(c, { soldAll: true }));
+    }
+    wallet.saveClicker();
+    afterChange();
+    showBuildingInfo(id);
   }
 
-  function schedulePacket() {
-    window.clearTimeout(packetTimer);
-    packetTimer = window.setTimeout(showPacket, nextPacketDelay(Math.random, bonusOf(wallet.data)));
+  function showBuildingInfo(id) {
+    const c = ck();
+    const b = buildingById(id);
+    if (!buildingVisible(c, id)) { info.replaceChildren(h("p", { class: "ck2-hint" }, "Bâtiment encore inconnu. Mine davantage pour le découvrir.")); return; }
+    const n = c.b[id];
+    const each = unitCps(c, id) * globalMult(c);
+    const total = buildingCps(c, id);
+    const all = perSecond(c) || 1;
+    info.replaceChildren(
+      h("div", { class: "ck2-info-head", style: `--c:${b.color}` }, h("span", { class: "ck2-icon" }, b.code), h("strong", {}, b.name),
+        h("span", { class: "ck2-info-price" }, mode === "buy" ? `${fmt(buildingCost(c, id, qty))} ◆` : `+${fmt(sellValue(c, id, qty))} ◆`)),
+      h("p", { class: "ck2-info-flavor" }, b.desc),
+      h("p", {}, `Chaque ${b.name.toLowerCase()} mine ${fmtRate(each)} donnée${each >= 2 ? "s" : ""}/s.`),
+      n ? h("p", {}, `Tes ${fmt(n)} ${plural(n, b.name.toLowerCase(), b.pl)} minent ${fmtRate(total)}/s (${Math.round((total / all) * 1000) / 10} % du total).`) : null,
+      c.lv[id] ? h("p", {}, `Surcadençage niveau ${c.lv[id]} : +${c.lv[id]} %.`) : null);
   }
 
-  function showPacket() {
+  /* ================================================================================================
+     Améliorations
+     ================================================================================================ */
+
+  function showUpgradeInfo(u, canBuy) {
+    const c = ck();
+    const price = upgradeCost(c, u);
+    info.replaceChildren(
+      h("div", { class: "ck2-info-head", style: `--c:${u.color}` }, h("span", { class: "ck2-icon" }, u.code, h("small", {}, u.mark)), h("strong", {}, u.name),
+        h("span", { class: `ck2-info-price${c.data >= price ? "" : " is-poor"}` }, `${fmt(price)} ◆`)),
+      h("p", {}, u.desc),
+      canBuy && lastPointer === "touch" ? h("p", { class: "ck2-hint" }, "Touche encore pour acheter.") : null);
+  }
+
+  function buildUpgradeGrid(list) {
+    upgradeGrid.replaceChildren(...list.map((u) => {
+      const tile = h("button", { class: "ck2-up", type: "button", role: "listitem", "data-id": u.id, style: `--c:${u.color}`, "aria-label": `${u.name} : ${u.desc}` },
+        h("span", { class: "ck2-up-code" }, u.code), h("span", { class: "ck2-up-mark" }, u.mark));
+      tile.addEventListener("pointerdown", (e) => { lastPointer = e.pointerType || "mouse"; });
+      tile.addEventListener("mouseenter", () => showUpgradeInfo(u, false));
+      tile.addEventListener("focus", () => showUpgradeInfo(u, false));
+      tile.addEventListener("click", () => {
+        if (lastPointer === "touch" && selected !== u.id) { selected = u.id; showUpgradeInfo(u, true); return; }
+        selected = null;
+        if (buyUpgrade(ck(), u.id)) { wallet.saveClicker(); say(`Amélioration : ${u.name}.`); afterChange(); }
+        else showUpgradeInfo(u, false);
+      });
+      return tile;
+    }));
+    if (!list.length) upgradeGrid.append(h("p", { class: "ck2-hint ck2-empty" }, "Aucune amélioration pour l'instant : achète des bâtiments pour en débloquer."));
+  }
+
+  /* ================================================================================================
+     Paquets dorés
+     ================================================================================================ */
+
+  function scheduleGold() {
+    window.clearTimeout(goldTimer);
+    goldTimer = window.setTimeout(showGold, nextGoldDelay(ck()));
+  }
+
+  function showGold() {
     if (!active) return;
-    packet.style.left = `${8 + Math.random() * 62}%`;
-    packet.style.top = `${6 + Math.random() * 78}%`;
-    packet.hidden = false;
-    say("Un paquet de données est apparu : clique vite !");
-    packetHideTimer = window.setTimeout(() => { hidePacket(); schedulePacket(); }, PACKET_LIFETIME);
+    gold.style.left = `${4 + Math.random() * 84}%`;
+    gold.style.top = `${6 + Math.random() * 70}%`;
+    gold.hidden = false;
+    gold.classList.remove("is-fading");
+    const life = goldLifetime(ck());
+    goldHideTimer = window.setTimeout(() => gold.classList.add("is-fading"), Math.max(0, life - 2000));
+    goldTimer = window.setTimeout(() => { hideGold(); scheduleGold(); }, life);
   }
 
-  packet.addEventListener("click", () => {
-    const bonus = bonusOf(wallet.data);
-    const reward = packetReward(wallet.data.levels, wallet.data.blueLevels, bonus);
-    const roll = Math.random();
-    if (roll < 0.2) {
-      // Frénésie : les clics rapportent FRENZY_FACTOR fois plus pendant FRENZY_MS.
-      frenzyUntil = Date.now() + FRENZY_MS;
-      mineButton.classList.add("is-frenzy");
-      window.clearTimeout(frenzyTimer);
-      frenzyTimer = window.setTimeout(() => mineButton.classList.remove("is-frenzy"), FRENZY_MS);
-      hidePacket();
-      say(`Frénésie ! Tes clics rapportent ×${FRENZY_FACTOR} pendant ${FRENZY_MS / 1000} secondes.`);
-      schedulePacket();
-      afterChange();
+  function hideGold() {
+    window.clearTimeout(goldHideTimer);
+    gold.hidden = true;
+  }
+
+  gold.addEventListener("click", () => {
+    window.clearTimeout(goldTimer);
+    hideGold();
+    const c = ck();
+    const res = catchGold(c);
+    if (res.gain) wallet.minedData(res.gain);
+    if (res.blue) wallet.addBlue(res.blue);
+    wallet.saveClicker();
+    if (res.kind === "frenzy") toast("Frénésie !", "Production ×7 pendant " + Math.round((res.buff.until - Date.now()) / 1000) + " s.", "is-gold");
+    else if (res.kind === "clickf") toast("Frénésie de clic !", "Clic ×777 pendant " + Math.round((res.buff.until - Date.now()) / 1000) + " s. Clique !", "is-gold");
+    else if (res.kind === "surge") toast("Surcharge !", `${buildingById(res.buff.b).name} : production ×${fmtRate(res.buff.mult)} pendant ${Math.round((res.buff.until - Date.now()) / 1000)} s.`, "is-gold");
+    else if (res.kind === "blue") toast("Paquet bleu !", `+1 pièce bleue et +${fmt(res.gain)} données.`, "is-blue");
+    else toast("Coup de chance !", `+${fmt(res.gain)} données.`, "is-gold");
+    scheduleGold();
+    afterChange();
+  });
+
+  /* ================================================================================================
+     Succès
+     ================================================================================================ */
+
+  function reward(list) {
+    if (!list.length) return;
+    let total = 0;
+    for (const a of list) {
+      const paid = achievementCredits(wallet.credits);
+      wallet.addCredits(paid);
+      total += paid;
+    }
+    if (list.length === 1) toast("Succès débloqué", `${list[0].name} — ${list[0].desc}`, "is-ach");
+    else toast(`${list.length} succès débloqués`, list.slice(0, 4).map((x) => x.name).join(" · ") + (list.length > 4 ? ` · +${list.length - 4}` : ""), "is-ach");
+    wallet.saveClicker();
+    say(`Succès : +${fmtShort(total)} crédits versés au portefeuille. Signal : ${Math.round(milk(ck()) * 100)} %.`);
+  }
+
+  /* ================================================================================================
+     Formatage
+     ================================================================================================ */
+
+  function doFormat() {
+    const c = ck();
+    if (pendingPrestige(c) < 1) return;
+    if (!confirmFormat) {
+      confirmFormat = true;
+      window.clearTimeout(confirmTimer);
+      confirmTimer = window.setTimeout(() => { confirmFormat = false; render(); }, 5000);
+      render();
       return;
     }
-    const surge = roll < 0.3;                       // surtension : le paquet vaut 5 fois plus
-    const amount = surge ? reward * 5 : reward;
-    const blueDrop = Math.random() < packetBlueChance(bonus);
-    wallet.addCredits(amount, { mined: true });
-    if (blueDrop) wallet.addBlue(1);
-    hidePacket();
-    say(`${surge ? "Surtension ×5 ! " : ""}Paquet récupéré : +${fmt(amount)} crédits${blueDrop ? " et 1 pièce bleue !" : "."}`);
-    schedulePacket();
+    confirmFormat = false;
+    const gained = format(c);
+    wallet.saveClicker();
+    toast("Formatage terminé", `+${fmtShort(gained)} niveau${gained > 1 ? "x" : ""} de prestige et éclat${gained > 1 ? "s" : ""}.`, "is-ach");
+    keys.upgrades = "";
     afterChange();
-  });
+  }
 
-  /* ---------- Succès + mise à jour ---------- */
+  /* ================================================================================================
+     Rendu
+     ================================================================================================ */
 
-  // Après chaque clic ou achat : on vérifie les succès, puis on rafraîchit l'écran.
   function afterChange() {
-    if (!checking) {
-      checking = true;
-      try {
-        const unlocked = checkAchievements(wallet);
-        if (unlocked.length) {
-          say(`Succès : ${unlocked.map((a) => `${a.name} (+${fmt(a.reward)} ¤)`).join(", ")}`);
-        }
-      } finally {
-        checking = false;
+    reward(checkAchievements(ck()));
+    render();
+  }
+
+  function renderBank(c, cps) {
+    bankEl.textContent = `${fmt(c.data)} données`;
+    bankEl.title = Math.floor(c.data).toLocaleString("fr-FR");
+    const frenzy = activeBuffs(c).some((x) => x.id === "frenzy");
+    rateEl.textContent = `par seconde : ${fmtRate(cps)}`;
+    rateEl.classList.toggle("is-boost", frenzy);
+    clickEl.textContent = `par clic : ${fmtRate(clickValue(c))}`;
+
+    const buffs = activeBuffs(c);
+    buffsEl.replaceChildren(...buffs.map((x) => {
+      const left = Math.max(0, Math.ceil((x.until - Date.now()) / 1000));
+      const desc = x.id === "surge" ? `${buildingById(x.b).name} ×${fmtRate(x.mult)}` : BUFFS[x.id].desc;
+      return h("li", { class: `ck2-buff is-${x.id}` }, h("strong", {}, BUFFS[x.id].name), ` ${desc} · ${left} s`);
+    }));
+  }
+
+  function renderStore(c) {
+    const list = availableUpgrades(c);
+    const key = list.map((u) => u.id).join(",");
+    if (key !== keys.upgrades) { keys.upgrades = key; buildUpgradeGrid(list); }
+    let canAny = false;
+    for (const tile of upgradeGrid.children) {
+      const u = upgradeById(tile.dataset.id);
+      if (!u) continue;
+      const ok = c.data >= upgradeCost(c, u);
+      canAny ||= ok;
+      tile.classList.toggle("is-ready", ok);
+    }
+    buyAllButton.disabled = !canAny;
+
+    modeButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+    qtyButtons.forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.qty) === qty)));
+
+    let hiddenShown = 0;
+    for (const r of rows) {
+      const id = r.b.id;
+      const visible = buildingVisible(c, id);
+      const n = c.b[id];
+      if (!visible) {
+        hiddenShown += 1;
+        r.button.hidden = hiddenShown > 2;               // les 2 prochains apparaissent en « ??? »
+        r.button.classList.add("is-unknown");
+        r.nameEl.textContent = "???";
+        r.priceEl.textContent = `${fmt(buildingCost(c, id, 1))} ◆`;
+        r.ownedEl.textContent = "";
+        r.button.disabled = true;
+        continue;
+      }
+      r.button.hidden = false;
+      r.button.classList.remove("is-unknown");
+      r.nameEl.textContent = r.b.name;
+      r.ownedEl.textContent = n ? fmt(n) : "";
+      if (mode === "buy") {
+        const price = buildingCost(c, id, qty);
+        r.priceEl.textContent = `${fmt(price)} ◆`;
+        r.button.disabled = affordable(c, id, qty) < qty;
+      } else {
+        r.priceEl.textContent = n ? `+${fmt(sellValue(c, id, qty))} ◆` : "—";
+        r.button.disabled = n === 0;
       }
     }
-    update();
   }
 
-
-  function updateSkills() {
-    const data = wallet.data;
-    pointsEl.textContent = pointsFree(data);
-    const next = nextThreshold(data);
-    nextPointEl.textContent = next === null ? "(tous les points sont gagnés)" : `(prochain à ${fmt(next)} crédits minés)`;
-    for (const { sk, rankEl, costEl, reqEl, button } of skillNodes) {
-      const st = skillState(data, sk.id);
-      rankEl.textContent = `${st.current} / ${sk.max}`;
-      costEl.textContent = st.state === "max" ? "Maximum" : `${sk.cost} pt${sk.cost > 1 ? "s" : ""}`;
-      reqEl.textContent = st.state === "locked" ? `Requiert : ${st.missing.map((m) => `${SKILLS.find((x) => x.id === m.id).name} ${m.rank}`).join(", ")}` : "";
-      button.disabled = st.state !== "ready";
-      button.classList.toggle("is-locked", st.state === "locked");
-      button.classList.toggle("is-maxed", st.state === "max");
+  function renderRoom(c, cps) {
+    const key = BUILDING_IDS.map((id) => c.b[id]).join(",");
+    if (key !== keys.room) {
+      keys.room = key;
+      const owned = BUILDINGS.filter((b) => c.b[b.id] > 0);
+      if (!owned.length) {
+        roomEl.replaceChildren(h("p", { class: "ck2-hint" }, "La salle est vide. Achète ton premier script dans la boutique : il cliquera à ta place."));
+      } else {
+        roomEl.replaceChildren(...owned.map((b) => {
+          const n = c.b[b.id];
+          const shown = Math.min(n, 48);
+          const racks = Array.from({ length: shown }, (_, i) => h("span", { class: "ck2-rack", style: `animation-delay:${((i * 37) % 23) / 10}s` }));
+          return h("div", { class: "ck2-room-row", style: `--c:${b.color}`, "data-id": b.id },
+            h("div", { class: "ck2-room-label" }, h("span", { class: "ck2-icon" }, b.code), h("strong", {}, b.name), h("span", { class: "ck2-room-n" }, `×${fmt(n)}`),
+              h("span", { class: "ck2-room-cps" })),
+            h("div", { class: "ck2-racks" }, racks, n > shown ? h("span", { class: "ck2-more" }, `+${fmt(n - shown)}`) : null));
+        }));
+      }
+    }
+    for (const row of roomEl.querySelectorAll(".ck2-room-row")) {
+      const v = buildingCps(c, row.dataset.id);
+      row.querySelector(".ck2-room-cps").textContent = `${fmtRate(v)}/s · ${cps ? Math.round((v / cps) * 100) : 0} %`;
     }
   }
 
-  function updateRebirth() {
-    const data = wallet.data;
-    const gain = shardsFor(data);
-    runEl.textContent = fmt(data.minedRun);
-    gainEl.textContent = fmt(gain);
-    shardsEl.textContent = fmt(data.shards);
-    const refund = refundFor(data);
-    const start = startLevels(data);
-    const startText = Object.keys(start).length ? ` Tu repartiras avec ${start.script} scripts et ${start.botnet} bot${start.botnet > 1 ? "s" : ""}.` : "";
-    rebirthInfo.textContent = canRebirth(data)
-      ? `Formater maintenant : +${fmt(gain)} éclat${gain > 1 ? "s" : ""}${refund ? `, +${fmt(refund)} crédits` : ""}.${startText}`
-      : `Il faut ${fmt(REBIRTH_MIN)} crédits minés dans la partie pour obtenir au moins 1 éclat.`;
-    rebirthButton.disabled = !canRebirth(data);
-    rebirthButton.textContent = confirmRebirth ? "Confirmer le formatage ?" : `Formater (${data.rebirths} déjà fait${data.rebirths > 1 ? "s" : ""})`;
-
-    for (const { node, rankEl, costEl, button } of coreRows) {
-      const count = data.core[node.id] || 0;
-      const price = coreCostOf(node, count);
-      rankEl.textContent = `rang ${count} / ${node.max}`;
-      costEl.textContent = price === null ? "Maximum" : `${fmt(price)} éclat${price > 1 ? "s" : ""}`;
-      button.disabled = price === null || data.shards < price;
-    }
+  function renderAchievements(c) {
+    if (keys.ach === c.ach.length) return;
+    keys.ach = c.ach.length;
+    achHead.textContent = `${c.ach.length} / ${ACHIEVEMENTS.length} succès · signal ${Math.round(milk(c) * 100)} % (renforce les chats-bots). Chaque succès verse aussi des crédits.`;
+    const groups = new Map();
+    for (const a of ACHIEVEMENTS) { if (!groups.has(a.cat)) groups.set(a.cat, []); groups.get(a.cat).push(a); }
+    achGrid.replaceChildren(...[...groups].map(([cat, list]) => h("div", { class: "ck2-ach-group" },
+      h("h4", {}, cat, h("span", {}, ` ${list.filter((a) => c.ach.includes(a.id)).length}/${list.length}`)),
+      h("ul", {}, list.map((a) => {
+        const done = c.ach.includes(a.id);
+        const secret = a.cat === "Secrets" && !done;
+        return h("li", { class: `ck2-ach-item${done ? " is-done" : ""}`, title: secret ? "Succès secret" : a.desc },
+          h("strong", {}, secret ? "???" : a.name), h("span", {}, secret ? "Succès secret." : a.desc));
+      })))));
   }
 
-  let confirmTimer = 0;
-  function doRebirth() {
-    if (!canRebirth(wallet.data)) return;
-    if (!confirmRebirth) {
-      confirmRebirth = true;
-      window.clearTimeout(confirmTimer);
-      confirmTimer = window.setTimeout(() => { confirmRebirth = false; updateRebirth(); }, 5000);
-      updateRebirth();
-      return;
-    }
-    confirmRebirth = false;
-    window.clearTimeout(confirmTimer);
-    const result = rebirth(wallet);
-    clickCarry = 0;
-    if (result) say(`Formatage terminé : +${fmt(result.shards)} éclat${result.shards > 1 ? "s" : ""}.`);
-    afterChange();
+  function renderFormat(c) {
+    const pending = pendingPrestige(c);
+    const lvl = prestigeLevel(c);
+    formatInfo.replaceChildren(h("dl", { class: "ck2-stats" },
+      stat("Prestige", `${fmt(lvl)} (+${fmt(lvl * (c.heaven.includes("h_god") ? 2 : 1))} %)${c.legacy ? ` dont ${fmt(c.legacy)} hérités de l'ancien Clicker` : ""}`),
+      stat("À gagner en formatant", `+${fmt(pending)} niveau${pending > 1 ? "x" : ""}`),
+      stat("Prochain niveau à", `${fmt(nextPrestigeAt(c))} données minées depuis toujours`),
+      stat("Minées depuis toujours", fmt(c.allTime))));
+    formatButton.disabled = pending < 1;
+    formatButton.textContent = pending < 1 ? "Formater (1 T de données minées au total pour commencer)"
+      : confirmFormat ? "Confirmer le formatage ?" : `Formater (+${fmt(pending)} prestige)`;
+    chipsEl.textContent = `Éclats : ${fmt(c.chips)}. Ils achètent l'arbre du formatage, permanent.`;
+
+    const key = `${c.chips}|${c.heaven.join(",")}`;
+    if (key === keys.heaven) return;
+    keys.heaven = key;
+    heavenGrid.replaceChildren(...HEAVEN.map((node) => {
+      const st = heavenState(c, node.id);
+      const reqs = node.req.filter((r) => !c.heaven.includes(r)).map((r) => HEAVEN.find((x) => x.id === r).name);
+      return h("li", {}, h("button", {
+        class: `ck2-heaven-node is-${st}`, type: "button", disabled: st !== "ready",
+        onclick: () => { if (buyHeaven(ck(), node.id)) { wallet.saveClicker(); toast("Arbre du formatage", node.name, "is-ach"); afterChange(); } }
+      }, h("strong", {}, node.name), h("span", {}, node.desc),
+        h("span", { class: "ck2-heaven-cost" }, st === "owned" ? "Acquis" : st === "locked" ? `Requiert : ${reqs.join(", ")}` : `${fmtShort(node.cost)} éclat${node.cost > 1 ? "s" : ""}`)));
+    }));
   }
 
-  function update() {
-    const { levels, blueLevels, achievements } = wallet.data;
-    const bonus = bonusOf(wallet.data);
-    powerEl.textContent = fmtRate(clickPower(levels, blueLevels, bonus));
-    rateEl.textContent = fmtRate(perSecond(levels, blueLevels, bonus));
-    minedEl.textContent = fmt(wallet.data.minedTotal);
-
-    for (const { upgrade, owned, cost, button } of rows) {
-      const count = levels[upgrade.id] || 0;
-      const price = costOf(upgrade, count, blueLevels, bonus);
-      owned.textContent = `×${count}`;
-      cost.textContent = `${fmt(price)} crédits`;
-      button.disabled = wallet.credits < price;
-    }
-
-    for (const { upgrade, owned, cost, button } of blueRows) {
-      const count = blueLevels[upgrade.id] || 0;
-      const price = blueCostOf(upgrade, count);
-      owned.textContent = `niv. ${count} / ${upgrade.max}`;
-      cost.textContent = price === null ? "Maximum" : `${fmt(price)} pièce${price > 1 ? "s" : ""} bleue${price > 1 ? "s" : ""}`;
-      button.disabled = price === null || wallet.blue < price;
-    }
-
-    updateSkills();
-    updateRebirth();
-
-    for (const { a, item } of achievementRows) item.classList.toggle("is-done", achievements.includes(a.id));
-    achievementCount.textContent = `${achievements.length} / ${ACHIEVEMENTS.length}`;
+  function renderLevels(c) {
+    levelHead.textContent = `Pièces bleues : ${fmtShort(wallet.blue)}. Surcadencer un bâtiment lui donne +1 % de production par niveau, pour toujours (même après un formatage). Le niveau suivant coûte une pièce de plus.`;
+    const key = `${wallet.blue}|${BUILDING_IDS.map((id) => `${c.lv[id]}:${buildingVisible(c, id) ? 1 : 0}`).join(",")}`;
+    if (key === keys.level) return;
+    keys.level = key;
+    levelList.replaceChildren(...BUILDINGS.filter((b) => buildingVisible(c, b.id)).map((b) => {
+      const cost = levelCost(c, b.id);
+      return h("li", { class: "ck2-level", style: `--c:${b.color}` },
+        h("span", { class: "ck2-icon" }, b.code),
+        h("span", { class: "ck2-level-main" }, h("strong", {}, b.name), h("span", {}, `Niveau ${c.lv[b.id]} · +${c.lv[b.id]} %`)),
+        h("button", { class: "button button-secondary", type: "button", disabled: wallet.blue < cost, onclick: () => {
+          if (!wallet.spendBlue(cost)) return;
+          ck().lv[b.id] += 1;
+          wallet.saveClicker();
+          afterChange();
+        } }, h("span", { class: "coin", "aria-hidden": "true" }), ` ${cost}`));
+    }));
   }
 
-  wallet.subscribe(() => { if (active) update(); });
-  update();
+  function stat(label, value) { return h("div", {}, h("dt", {}, label), h("dd", {}, value)); }
+
+  function renderStats(c, cps) {
+    const minutes = Math.floor((Date.now() - c.runStart) / 60000);
+    const total = BUILDING_IDS.reduce((s, id) => s + c.b[id], 0);
+    statsEl.replaceChildren(
+      stat("Données en banque", fmt(c.data)),
+      stat("Minées (cette partie)", fmt(c.earned)),
+      stat("Minées (depuis toujours)", fmt(c.allTime)),
+      stat("Production", `${fmtRate(cps)}/s (multiplicateur ×${fmtRate(globalMult(c))})`),
+      stat("Par clic", fmtRate(clickValue(c))),
+      stat("Clics", fmt(c.clicks)),
+      stat("Minées à la main", fmt(c.hand)),
+      stat("Bâtiments", fmt(total)),
+      stat("Améliorations", `${c.up.length} / ${UPGRADES.length}`),
+      stat("Paquets dorés attrapés", fmt(c.golds)),
+      stat("Succès", `${c.ach.length} / ${ACHIEVEMENTS.length} (signal ${Math.round(milk(c) * 100)} %)`),
+      stat("Formatages", fmt(c.runs)),
+      stat("Durée de la partie", minutes >= 60 ? `${Math.floor(minutes / 60)} h ${minutes % 60} min` : `${minutes} min`),
+      stat("Minage hors ligne", offlineRate(c) ? `${Math.round(offlineRate(c) * 100)} % (jusqu'à 3 jours)` : "Non (arbre du formatage)"),
+      stat("Crédits versés au portefeuille", fmt(wallet.data.minedTotal)));
+  }
+
+  function render() {
+    if (!active) return;
+    const c = ck();
+    const cps = perSecond(c);
+    renderBank(c, cps);
+    renderStore(c);
+    if (tab === "room") renderRoom(c, cps);
+    else if (tab === "ach") renderAchievements(c);
+    else if (tab === "format") renderFormat(c);
+    else if (tab === "level") renderLevels(c);
+    else renderStats(c, cps);
+  }
+
+  /* ================================================================================================
+     Actus et pluie de bits
+     ================================================================================================ */
+
+  function nextNews() {
+    newsText.classList.remove("is-in");
+    void newsText.offsetWidth;
+    newsText.textContent = newsFor(ck());
+    newsText.classList.add("is-in");
+    window.clearTimeout(newsTimer);
+    newsTimer = window.setTimeout(nextNews, NEWS_MS);
+  }
+  news.addEventListener("click", nextNews);
+
+  const drops = [];
+  let lastFrame = 0;
+  let spawn = 0;
+  function rainLoop(t) {
+    rainFrame = window.requestAnimationFrame(rainLoop);
+    const dt = Math.min(0.05, (t - (lastFrame || t)) / 1000);
+    lastFrame = t;
+    const w = rain.clientWidth;
+    const hgt = rain.clientHeight;
+    if (!w || !hgt) return;
+    if (rain.width !== w || rain.height !== hgt) { rain.width = w; rain.height = hgt; }
+    const ctx = rain.getContext("2d");
+    ctx.clearRect(0, 0, w, hgt);
+    const cps = perSecond(ck());
+    const rate = Math.min(70, cps > 0 ? 3 + 5 * Math.log10(1 + cps) : 0);
+    spawn += rate * dt;
+    while (spawn >= 1 && drops.length < 160) {
+      spawn -= 1;
+      drops.push({ x: Math.random() * w, y: -12, v: 40 + Math.random() * 90, c: Math.random() < 0.5 ? "0" : "1", a: 0.25 + Math.random() * 0.5 });
+    }
+    const color = themeColor("--cyan", "#00f0ff");
+    ctx.font = "12px monospace";
+    ctx.fillStyle = color;
+    for (let i = drops.length - 1; i >= 0; i--) {
+      const d = drops[i];
+      d.y += d.v * dt;
+      if (d.y > hgt + 12) { drops.splice(i, 1); continue; }
+      ctx.globalAlpha = d.a * Math.min(1, (hgt - d.y) / 60);
+      ctx.fillText(d.c, d.x, d.y);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* ================================================================================================
+     Cycle de vie
+     ================================================================================================ */
+
+  wallet.subscribe(() => { if (active) render(); });
+  // Vérifie les succès régulièrement (la production tourne toute seule dans arcade.js).
+  window.setInterval(() => { if (active && !wallet.locked) reward(checkAchievements(ck())); }, 2000);
+
+  selectTab("room");
 
   return {
     activate() {
       active = true;
+      keys.upgrades = ""; keys.room = ""; keys.ach = -1; keys.heaven = ""; keys.level = "";
+      const off = ck().offline;
+      if (off) {
+        delete ck().offline;
+        const hours = Math.floor(off.away / 3600e3);
+        const minutes = Math.floor((off.away % 3600e3) / 60e3);
+        toast("Pendant ton absence", `Le noyau a miné ${fmt(off.gain)} données (${hours ? `${hours} h ` : ""}${minutes} min).`, "is-ach");
+      }
       afterChange();
-      schedulePacket();
+      nextNews();
+      scheduleGold();
+      if (!prefersReducedMotion()) rainFrame = window.requestAnimationFrame(rainLoop);
     },
     deactivate() {
       active = false;
-      window.clearTimeout(packetTimer);
-      hidePacket();
+      window.clearTimeout(goldTimer);
+      window.clearTimeout(newsTimer);
+      hideGold();
+      window.cancelAnimationFrame(rainFrame);
+      lastFrame = 0;
     }
   };
 }

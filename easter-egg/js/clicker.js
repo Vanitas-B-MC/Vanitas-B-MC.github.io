@@ -1,423 +1,678 @@
-// js/clicker.js — logique pure du Clicker « Mineur de données ». Aucun accès au DOM.
-import { wealthBonus, ACHIEVEMENT_PCT } from "./rewards.js";
-import { MAX_CREDITS } from "./limits.js";
+// js/clicker.js — logique pure du « Mineur de données », un clicker façon Cookie Clicker. Aucun accès au DOM.
 //
-// Trois niveaux de progression :
-//   - en CRÉDITS  (UPGRADES)      : ajoutent des crédits par clic ou par seconde ;
-//   - en PIÈCES BLEUES (BLUE_UPGRADES) : paliers incrémentiels qui multiplient les gains,
-//     ou font baisser les prix. Les pièces bleues viennent du Snake et du Tetris ;
-//   - COMPÉTENCES (SKILLS) : arbre de la partie en cours, points gagnés en minant, remis à zéro au Rebirth ;
-//   - REBIRTH : on « formate » pour gagner des éclats, qui achètent un arbre permanent (CORE).
+// Monnaie propre au jeu : les DONNÉES. On les mine en cliquant sur le noyau, puis on achète des bâtiments
+// qui minent tout seuls. Chaque donnée minée est AUSSI versée en crédit dans le portefeuille de l'arcade
+// (le Clicker reste une source de crédits), mais les crédits ne peuvent pas acheter de bâtiments.
+//
+//   - 20 bâtiments (prix ×1,15 à chaque achat, revente à 25 %) ;
+//   - ~260 améliorations débloquées au fil de la partie (×2 par bâtiment, netrunners, clic, firmware, chats-bots…) ;
+//   - paquets dorés aléatoires : Frénésie, Coup de chance, Frénésie de clic, Surcharge, pièce bleue ;
+//   - succès : chacun remplit le « signal » (+4 %), qui renforce les chats-bots, et verse des crédits ;
+//   - surcadençage en pièces bleues : +1 % de production par niveau et par bâtiment (permanent) ;
+//   - formatage : on recommence à zéro contre des niveaux de prestige (+1 % de production chacun, à vie)
+//     et des éclats qui achètent un arbre permanent.
+//
+// L'état est rangé dans `wallet.data.ck` (voir freshClicker / sanitizeClicker). Les fonctions qui le modifient
+// demandent ensuite la sauvegarde avec wallet.saveClicker().
 
-// kind "click" : crédits par clic. kind "auto" : crédits par seconde.
-export const UPGRADES = [
-  { id: "click",   kind: "click", name: "Implant neuronal",        desc: "+1 crédit par clic",         base: 25,      growth: 1.18, value: 1 },
-  { id: "click2",  kind: "click", name: "Gants haptiques",         desc: "+6 crédits par clic",        base: 450,     growth: 1.19, value: 6 },
-  { id: "click3",  kind: "click", name: "Interface neuro-directe", desc: "+45 crédits par clic",       base: 8000,    growth: 1.20, value: 45 },
-  { id: "click4",  kind: "click", name: "Symbiose neuronale",     desc: "+400 crédits par clic",      base: 150000,  growth: 1.21, value: 400 },
+import { MAX_CREDITS } from "./limits.js";
+import { wealthBonus, ACHIEVEMENT_PCT } from "./rewards.js";
 
-  // ----- Paliers « cosmiques » : très chers, pour les grosses fortunes -----
-  { id: "click5",  kind: "click", name: "Poing de plasma",            desc: "+3 500 crédits par clic",   base: 2.5e6,  growth: 1.21, value: 3500 },
-  { id: "click6",  kind: "click", name: "Frappe orbitale",            desc: "+40 000 crédits par clic",  base: 3e7,    growth: 1.21, value: 40000 },
-  { id: "click7",  kind: "click", name: "Gantelet gravitationnel",    desc: "+500 000 crédits par clic", base: 4e8,    growth: 1.22, value: 500000 },
-  { id: "click8",  kind: "click", name: "Main du temps",              desc: "+8 M crédits par clic",     base: 6e9,    growth: 1.22, value: 8e6 },
-  { id: "click9",  kind: "click", name: "Toucher de Midas quantique", desc: "+150 M crédits par clic",   base: 1e11,   growth: 1.22, value: 1.5e8 },
-  { id: "click10", kind: "click", name: "Doigt de l'infini",          desc: "+4 B crédits par clic",     base: 3e12,   growth: 1.23, value: 4e9 },
-  { id: "click11", kind: "click", name: "Clic cosmique",              desc: "+120 B crédits par clic",   base: 1e14,   growth: 1.23, value: 1.2e11 },
-  { id: "click12", kind: "click", name: "Impact stellaire",           desc: "+5 T crédits par clic",     base: 6e15,   growth: 1.23, value: 5e12 },
-  { id: "click13", kind: "click", name: "Pression galactique",        desc: "+300 T crédits par clic",   base: 4e17,   growth: 1.24, value: 3e14 },
-  { id: "click14", kind: "click", name: "Clic du Big Bang",           desc: "+20 Qa crédits par clic",   base: 5e19,   growth: 1.24, value: 2e16 },
-  { id: "click15", kind: "click", name: "Singularité tactile",        desc: "+2 Qi crédits par clic",    base: 8e22,   growth: 1.25, value: 2e18 },
-  { id: "click16", kind: "click", name: "Pouvoir du créateur",        desc: "+500 Qi crédits par clic",  base: 3e26,   growth: 1.25, value: 5e20 },
-  { id: "script",  kind: "auto",  name: "Script automatique",      desc: "+1 crédit / seconde",        base: 60,      growth: 1.15, value: 1 },
-  { id: "botnet",  kind: "auto",  name: "Réseau de bots",          desc: "+8 crédits / seconde",       base: 650,     growth: 1.15, value: 8 },
-  { id: "farm",    kind: "auto",  name: "Ferme de serveurs",       desc: "+50 crédits / seconde",      base: 6000,    growth: 1.15, value: 50 },
-  { id: "dc",      kind: "auto",  name: "Centre de données",       desc: "+320 crédits / seconde",     base: 70000,   growth: 1.15, value: 320 },
-  { id: "quantum", kind: "auto",  name: "Ordinateur quantique",    desc: "+2 200 crédits / seconde",   base: 800000,  growth: 1.15, value: 2200 },
-  { id: "ai",      kind: "auto",  name: "IA autonome",             desc: "+16 000 crédits / seconde",  base: 9500000, growth: 1.16, value: 16000 },
-  { id: "sim",     kind: "auto",  name: "Simulation d'univers",    desc: "+120 000 crédits / seconde", base: 120000000,  growth: 1.16, value: 120000 },
-  { id: "singu",   kind: "auto",  name: "Singularité",             desc: "+900 000 crédits / seconde", base: 1500000000, growth: 1.17, value: 900000 },
+const MAX = MAX_CREDITS;
+const num = (v, fallback = 0) => { const n = Number(v); return Number.isFinite(n) && n >= 0 ? Math.min(n, MAX) : fallback; };
+const int = (v) => Math.floor(num(v));
 
-  // ----- Paliers « cosmiques » : très chers, pour les grosses fortunes -----
-  { id: "dyson",      kind: "auto", name: "Sphère de Dyson",       desc: "+7 M crédits / seconde",    base: 3e10,   growth: 1.17, value: 7e6 },
-  { id: "matriochka", kind: "auto", name: "Cerveau Matriochka",    desc: "+65 M crédits / seconde",   base: 4e11,   growth: 1.17, value: 6.5e7 },
-  { id: "planck",     kind: "auto", name: "Horloge de Planck",     desc: "+600 M crédits / seconde",  base: 5e12,   growth: 1.18, value: 6e8 },
-  { id: "blackhole",  kind: "auto", name: "Trou noir minier",      desc: "+6 B crédits / seconde",    base: 6e13,   growth: 1.18, value: 6e9 },
-  { id: "harvester",  kind: "auto", name: "Moissonneuse stellaire", desc: "+70 B crédits / seconde",  base: 8e14,   growth: 1.18, value: 7e10 },
-  { id: "pocketverse", kind: "auto", name: "Univers de poche",     desc: "+800 B crédits / seconde",  base: 1e16,   growth: 1.19, value: 8e11 },
-  { id: "multiverse", kind: "auto", name: "Multivers",             desc: "+9 T crédits / seconde",    base: 1.4e17, growth: 1.19, value: 9e12 },
-  { id: "cosmicmind", kind: "auto", name: "Conscience cosmique",   desc: "+100 T crédits / seconde",  base: 2e18,   growth: 1.19, value: 1e14 },
-  { id: "entropy",    kind: "auto", name: "Entropie inversée",     desc: "+1,2 Qa crédits / seconde", base: 3e19,   growth: 1.20, value: 1.2e15 },
-  { id: "equation",   kind: "auto", name: "Équation finale",       desc: "+15 Qa crédits / seconde",  base: 5e20,   growth: 1.20, value: 1.5e16 },
-  { id: "omega",      kind: "auto", name: "Moteur Oméga",          desc: "+200 Qa crédits / seconde", base: 8e21,   growth: 1.21, value: 2e17 },
-  { id: "lastbit",    kind: "auto", name: "Le Dernier Bit",        desc: "+3 Qi crédits / seconde",   base: 2e23,   growth: 1.22, value: 3e18 },
-  { id: "godmode",    kind: "auto", name: "Mode dieu",             desc: "+50 Qi crédits / seconde",  base: 5e24,   growth: 1.23, value: 5e19 },
-  { id: "paradox",    kind: "auto", name: "Paradoxe du créateur",  desc: "+1 Sx crédits / seconde",   base: 2e26,   growth: 1.25, value: 1e21 }
+/* ====================================================================================================
+   Bâtiments
+   ==================================================================================================== */
+
+// base : prix du premier exemplaire. cps : données par seconde pour un exemplaire (avant multiplicateurs).
+// code / color : vignette affichée dans la boutique et la salle des machines.
+export const BUILDINGS = [
+  { id: "script", pl: "scripts",    name: "Script",                  code: "SCR", color: "#00f0ff", base: 15,     cps: 0.1,    desc: "Clique sur le noyau à ta place. Vieux, mais fiable." },
+  { id: "runner", pl: "netrunners",    name: "Netrunner",               code: "NET", color: "#fcee0a", base: 100,    cps: 1,      desc: "Une hackeuse de quartier qui pirate pour toi, café synthétique à la main." },
+  { id: "farm", pl: "fermes de minage",      name: "Ferme de minage",         code: "FRM", color: "#3ddc84", base: 1100,   cps: 8,      desc: "Des rangées de cartes graphiques qui chauffent un entrepôt entier." },
+  { id: "extractor", pl: "extracteurs de données", name: "Extracteur de données",   code: "EXT", color: "#ff9f1c", base: 12000,  cps: 47,     desc: "Fore les vieux serveurs abandonnés sous la ville." },
+  { id: "fab", pl: "usines de puces",       name: "Usine de puces",          code: "FAB", color: "#ff2a6d", base: 130000, cps: 260,    desc: "Grave des puces neuronales à la chaîne." },
+  { id: "bank", pl: "banques offshore",      name: "Banque offshore",         code: "BNK", color: "#b266ff", base: 1.4e6,  cps: 1400,   desc: "Fait fructifier tes données dans des paradis numériques." },
+  { id: "temple", pl: "temples du Code",    name: "Temple du Code",          code: "TMP", color: "#f7d26a", base: 2e7,    cps: 7800,   desc: "Des moines récitent du code source ancien. Il en sort des données." },
+  { id: "ripper", pl: "cliniques de ripperdoc",    name: "Clinique de ripperdoc",   code: "RIP", color: "#ff5ec4", base: 3.3e8,  cps: 44000,  desc: "Implants de stockage posés à la chaîne, données récoltées au passage." },
+  { id: "cargo", pl: "cargos orbitaux",     name: "Cargo orbital",           code: "CRG", color: "#7ad7ff", base: 5.1e9,  cps: 260000, desc: "Rapporte des disques durs de stations spatiales oubliées." },
+  { id: "lab", pl: "labos quantiques",       name: "Labo quantique",          code: "QLB", color: "#8affc1", base: 7.5e10, cps: 1.6e6,  desc: "Transforme le bruit quantique en données pures." },
+  { id: "breach", pl: "brèches du Blackwall",    name: "Brèche du Blackwall",     code: "BLK", color: "#ff3b3b", base: 1e12,   cps: 1e7,    desc: "Siphonne les données des IA sauvages derrière le Blackwall." },
+  { id: "chrono", pl: "machines temporelles",    name: "Machine temporelle",      code: "TMX", color: "#c9a2ff", base: 1.4e13, cps: 6.5e7,  desc: "Va chercher les données de demain, avant qu'elles existent." },
+  { id: "antimat", pl: "condenseurs d'antimatière",   name: "Condenseur d'antimatière", code: "ANT", color: "#5effff", base: 1.7e14, cps: 4.3e8, desc: "Condense le vide en octets. Ne pas toucher." },
+  { id: "prism", pl: "prismes néon",     name: "Prisme néon",             code: "PRS", color: "#ff7af6", base: 2.1e15, cps: 2.9e9,  desc: "Décompose la lumière des enseignes en flux de données." },
+  { id: "luck", pl: "IA de probabilités",      name: "IA de probabilités",      code: "PRB", color: "#a6ff4d", base: 2.6e16, cps: 2.1e10, desc: "Calcule les chances que des données apparaissent… et triche un peu." },
+  { id: "fractal", pl: "moteurs fractals",   name: "Moteur fractal",          code: "FRC", color: "#ffd84d", base: 3.1e17, cps: 1.5e11, desc: "Chaque donnée en contient d'autres, à l'infini." },
+  { id: "root", pl: "consoles root",      name: "Console root",            code: "ROT", color: "#4dff88", base: 7.1e19, cps: 1.1e12, desc: "sudo données --infini. Ça marche." },
+  { id: "idleverse", pl: "inactivers", name: "Inactivers",              code: "IDL", color: "#89a7ff", base: 1.2e22, cps: 8.3e12, desc: "Des univers entiers qui jouent à un clicker. Tu récupères leurs données." },
+  { id: "cortex", pl: "cortex géants",    name: "Cortex géant",            code: "CTX", color: "#ff8ab5", base: 1.9e24, cps: 6.4e13, desc: "Un cerveau de la taille d'une mégatour, qui ne pense qu'à miner." },
+  { id: "clone", pl: "clones",     name: "Ton clone",               code: "YOU", color: "#ffffff", base: 5.4e26, cps: 5.1e14, desc: "Une copie numérique de toi. Elle clique mieux que toi." }
+];
+export const BUILDING_IDS = BUILDINGS.map((b) => b.id);
+export const buildingById = (id) => BUILDINGS.find((b) => b.id === id);
+const buildingIndex = (id) => BUILDING_IDS.indexOf(id);
+
+export const PRICE_GROWTH = 1.15;
+export const SELL_RATE = 0.25;
+
+/* ====================================================================================================
+   Améliorations (générées)
+   ==================================================================================================== */
+
+// Paliers « ×2 » de chaque bâtiment : débloqués à 1, 5, 25… exemplaires.
+const TIER_COUNTS = [1, 5, 25, 50, 100, 150, 200, 250, 300, 350, 400];
+const TIER_MULT = [10, 50, 500, 5e4, 5e6, 5e8, 5e10, 5e13, 5e16, 5e19, 5e22];
+const TIER_NAMES = ["Overclock", "Refroidissement liquide", "Firmware pirate", "Chrome militaire", "Contrat Militech",
+  "Protocole Arasaka", "Cœur quantique", "Néon pur", "Code du Blackwall", "Singularité", "Oméga"];
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"];
+
+// Scripts : les 3 premiers paliers doublent scripts ET clic, puis « Mille doigts » et ses multiplicateurs.
+const SCRIPT_COUNTS = [1, 1, 10, 25, 50, 100, 150, 200, 250, 300];
+const SCRIPT_COSTS = [100, 500, 10000, 1e5, 1e7, 1e8, 1e9, 1e10, 1e12, 1e14];
+const FINGER_MULTS = [null, null, null, 0.1, 5, 10, 20, 20, 20, 20];        // palier 3 : +0,1 par bâtiment ; ensuite ×N
+const SCRIPT_NAMES = ["Macro optimisée", "Boucle infinie", "Multithread", "Mille doigts", "Million de doigts", "Milliard de doigts",
+  "Billion de doigts", "Trillion de doigts", "Quadrillion de doigts", "Doigts innombrables"];
+
+const CLICK_UNLOCK = [1e3, 1e5, 1e7, 1e9, 1e11, 1e13, 1e15, 1e17, 1e19, 1e21];
+const CLICK_COSTS = [5e4, 5e6, 5e8, 5e10, 5e12, 5e14, 5e16, 5e18, 5e20, 5e22];
+const CLICK_NAMES = ["Souris haptique", "Gant réactif", "Doigts en titane", "Tendons synthétiques", "Réflexes Sandevistan",
+  "Neurones overclockés", "Main cybernétique", "Clic quantique", "Toucher du Blackwall", "Clic absolu"];
+
+const FIRMWARE_NAMES = ["Firmware 1.0", "Patch du jour 1", "Pilotes bêta", "Noyau recompilé", "Cache optimisé", "Compression sans perte",
+  "Algorithme glouton", "Mémoire partagée", "Bus 1024 bits", "Supraconducteurs", "Optique photonique", "Réseau maillé",
+  "Hyperthreading", "Puces en graphène", "Cristaux de stockage", "Code auto-réparant", "Compilateur prédictif", "Mémoire holographique",
+  "Calcul à froid", "Réseau neuronal profond", "Bits fantômes", "Octets inversés", "Code du vide", "Matière programmable", "Firmware divin"];
+const FIRMWARE_COSTS = FIRMWARE_NAMES.map((_, k) => 2e5 * 6 ** k);
+const FIRMWARE_PCT = FIRMWARE_NAMES.map((_, k) => (k < 10 ? 0.05 : k < 20 ? 0.1 : 0.2));
+
+const CAT_NAMES = ["Chat-bot assistant", "Chat-bot ouvrier", "Chat-bot ingénieur", "Chat-bot superviseur", "Chat-bot manager", "Chat-bot cadre", "Chat-bot PDG"];
+const CAT_UNLOCK = [5, 15, 30, 45, 60, 75, 90];                // succès nécessaires
+const CAT_COSTS = [9e6, 9e9, 9e12, 9e15, 9e18, 9e21, 9e24];
+const CAT_FACTOR = [0.1, 0.125, 0.15, 0.175, 0.2, 0.2, 0.2];
+
+const GOLD_UPS = [
+  { id: "g_lucky", name: "Jour de chance",   desc: "Les paquets dorés apparaissent 2 fois plus souvent et restent 2 fois plus longtemps.", cost: 7.77e8,  golds: 7 },
+  { id: "g_seren", name: "Sérendipité",      desc: "Les paquets dorés apparaissent encore 2 fois plus souvent et restent 2 fois plus longtemps.", cost: 7.77e10, golds: 27 },
+  { id: "g_luck2", name: "Chance insolente", desc: "Les effets des paquets dorés durent 2 fois plus longtemps.", cost: 7.77e12, golds: 77 }
 ];
 
-// Les 12 améliorations d'origine (le succès « Panoplie complète » ne demande que celles-là).
-const CLASSIC_IDS = ["click", "click2", "click3", "click4", "script", "botnet", "farm", "dc", "quantum", "ai", "sim", "singu"];
-
-// effect : "click" (gains par clic), "auto" (gains par seconde), "all" (les deux), "discount" (prix des améliorations).
-export const BLUE_UPGRADES = [
-  { id: "gold_click",  effect: "click",    name: "Souris dorée",       desc: "+30 % de crédits par clic",           per: 0.30, base: 1, growth: 1.55, max: 30 },
-  { id: "overclock",   effect: "auto",     name: "Cœur surcadencé",    desc: "+20 % de crédits par seconde",        per: 0.20, base: 2, growth: 1.60, max: 30 },
-  { id: "supplier",    effect: "discount", name: "Remise fournisseur", desc: "−4 % sur le prix des améliorations",  per: 0.04, base: 3, growth: 1.70, max: 10 },
-  { id: "convergence", effect: "all",      name: "Convergence",        desc: "+10 % à tous les gains",              per: 0.10, base: 5, growth: 1.80, max: 20 }
-];
-
-export const upgradeById = (id) => UPGRADES.find((u) => u.id === id);
-export const blueUpgradeById = (id) => BLUE_UPGRADES.find((u) => u.id === id);
-
-const level = (levels, id) => Math.max(0, Math.floor(levels?.[id] || 0));
-
-/* ---------- Arbre de compétences (remis à zéro à chaque Rebirth) ---------- */
-
-// branch : colonne d'affichage. cost : points par rang. req : rangs nécessaires dans d'autres compétences.
-export const SKILLS = [
-  { id: "c1", branch: "click", name: "Réflexes",             desc: "+10 % de crédits par clic",                     max: 5, cost: 1, req: [] },
-  { id: "c2", branch: "click", name: "Frappe critique",      desc: "+3 % de chance de clic critique (×5)",          max: 5, cost: 2, req: [{ id: "c1", rank: 2 }] },
-  { id: "c3", branch: "click", name: "Main de fer",          desc: "Le clic gagne +1 % de tes crédits / seconde",   max: 3, cost: 3, req: [{ id: "c2", rank: 1 }] },
-  { id: "a1", branch: "auto",  name: "Optimisation",         desc: "+10 % de crédits par seconde",                  max: 5, cost: 1, req: [] },
-  { id: "a2", branch: "auto",  name: "Parallélisme",         desc: "Scripts et bots +25 %",                         max: 3, cost: 2, req: [{ id: "a1", rank: 2 }] },
-  { id: "a3", branch: "auto",  name: "Refroidissement",      desc: "Fermes et centres de données +25 %",            max: 3, cost: 3, req: [{ id: "a2", rank: 1 }] },
-  { id: "e1", branch: "eco",   name: "Négociation",          desc: "−3 % sur le prix des améliorations",            max: 5, cost: 1, req: [] },
-  { id: "e2", branch: "eco",   name: "Chasseur de paquets",  desc: "Paquets plus fréquents (−15 %) et +20 % de gain", max: 3, cost: 2, req: [{ id: "e1", rank: 1 }] },
-  { id: "e3", branch: "eco",   name: "Filon bleu",           desc: "+3 % de chance qu'un paquet contienne une pièce bleue", max: 3, cost: 3, req: [{ id: "e2", rank: 2 }] },
-  { id: "s1", branch: "eco",   name: "Convergence ouvrière", desc: "+25 % à tous les gains",                        max: 1, cost: 5, req: [{ id: "c1", rank: 3 }, { id: "a1", rank: 3 }, { id: "e1", rank: 3 }] }
-];
-export const SKILL_BRANCHES = [
-  { id: "click", name: "Clic" },
-  { id: "auto",  name: "Automatisation" },
-  { id: "eco",   name: "Économie" }
-];
-export const skillById = (id) => SKILLS.find((x) => x.id === id);
-
-// Un point de compétence à chaque seuil de crédits minés pendant la partie en cours.
-export const SKILL_THRESHOLDS = Array.from({ length: 20 }, (_, n) => Math.round(500 * 2.2 ** n));
-
-/* ---------- Arbre du Rebirth (permanent, acheté avec des éclats) ---------- */
-
-export const REBIRTH_MIN = 50000;
-export const REBIRTH_GROWTH = 5.5;
-
-export function rebirthRequirement(data) {
-  return Math.floor(
-    REBIRTH_MIN * REBIRTH_GROWTH ** (data.rebirths || 0)
-  );
-}
-export const SHARD_BONUS = 0.02;         // +2 % à tous les gains par éclat gagné, à vie
-
-export const CORE = [
-  { id: "k1", name: "Noyau d'énergie",   desc: "+15 % à tous les gains",                            max: 20, base: 2,  growth: 1.45 },
-  { id: "k2", name: "Tête de pont",      desc: "Chaque partie commence avec +3 scripts et +1 bot",  max: 10, base: 3,  growth: 1.6 },
-  { id: "k3", name: "Éclat avide",       desc: "+10 % d'éclats à chaque formatage",                 max: 10, base: 5,  growth: 1.7 },
-  { id: "k4", name: "Mémoire vive",      desc: "+1 point de compétence au départ",                  max: 8,  base: 8,  growth: 1.9 },
-  { id: "k5", name: "Marché noir",       desc: "−2 % sur le prix des améliorations",                max: 10, base: 4,  growth: 1.6 },
-  { id: "k6", name: "Clic automatique",  desc: "Un clic automatique par seconde",                   max: 5,  base: 10, growth: 2.2 },
-  { id: "k7", name: "Indemnité",         desc: "Le formatage rend 2 % des crédits minés de la partie", max: 10, base: 6,  growth: 1.7 }
-];
-export const coreById = (id) => CORE.find((x) => x.id === id);
-
-export const NO_BONUS = Object.freeze({ skills: {}, core: {}, shards: 0 });
-export const bonusOf = (data) => ({ skills: data?.skills || {}, core: data?.core || {}, shards: data?.shardsTotal || 0 });
-
-const rank = (table, id, max) => Math.min(level(table, id), max);
-const skillRank = (bonus, id) => rank(bonus.skills, id, skillById(id).max);
-const coreRank = (bonus, id) => rank(bonus.core, id, coreById(id).max);
-
-export function coreCostOf(node, owned) {
-  if (owned >= node.max) return null;
-  return Math.ceil(node.base * node.growth ** owned);
-}
-
-/* ---------- Prix ---------- */
-
-// 1 = plein tarif. Remises cumulées (fournisseur, négociation, marché noir), plafonnées à −70 %.
-export function discountFactor(blueLevels = {}, bonus = NO_BONUS) {
-  const sup = blueUpgradeById("supplier");
-  const total =
-    sup.per * Math.min(level(blueLevels, sup.id), sup.max) +
-    0.03 * skillRank(bonus, "e1") +
-    0.02 * coreRank(bonus, "k5");
-  return 1 - Math.min(0.7, total);
-}
-
-// Prix de la prochaine amélioration en crédits, quand on en possède déjà `owned`.
-export function costOf(upgrade, owned, blueLevels = {}, bonus = NO_BONUS) {
-  return Math.min(MAX_CREDITS, Math.max(1, Math.ceil(upgrade.base * upgrade.growth ** owned * discountFactor(blueLevels, bonus))));
-}
-
-// Prix en pièces bleues du prochain palier, ou null quand le palier maximum est atteint.
-export function blueCostOf(upgrade, owned) {
-  if (owned >= upgrade.max) return null;
-  return Math.ceil(upgrade.base * upgrade.growth ** owned);
-}
-
-/* ---------- Gains ---------- */
-
-// Tous les multiplicateurs, pour « click », « auto » ou « all ».
-function multiplier(blueLevels, effect, bonus) {
-  let mult = 1;
-  for (const u of BLUE_UPGRADES) {
-    if (u.effect === effect || u.effect === "all") mult *= 1 + u.per * Math.min(level(blueLevels, u.id), u.max);
+// type : tier (×2 d'un bâtiment), script, synergy (netrunners), click, firmware, cat, gold.
+function buildUpgrades() {
+  const list = [];
+  const s = buildingById("script");
+  SCRIPT_NAMES.forEach((name, t) => {
+    const desc = t < 3 ? "Scripts et clic ×2."
+      : t === 3 ? "Le clic et chaque script gagnent +0,1 donnée pour chaque bâtiment qui n'est pas un script."
+        : `Bonus de « Mille doigts » ×${FINGER_MULTS[t]}.`;
+    list.push({ id: `script_${t}`, type: "script", b: "script", tier: t, name, desc, cost: SCRIPT_COSTS[t],
+      code: s.code, color: s.color, mark: ROMAN[t], need: { b: "script", n: SCRIPT_COUNTS[t] } });
+  });
+  for (const b of BUILDINGS) {
+    if (b.id === "script") continue;
+    TIER_NAMES.forEach((tn, t) => list.push({
+      id: `${b.id}_${t}`, type: "tier", b: b.id, tier: t, name: `${tn} · ${b.name}`, desc: `Production des ${b.pl} ×2.`,
+      cost: b.base * TIER_MULT[t], code: b.code, color: b.color, mark: ROMAN[t], need: { b: b.id, n: TIER_COUNTS[t] }
+    }));
   }
-  if (effect === "click") mult *= 1 + 0.10 * skillRank(bonus, "c1");
-  if (effect === "auto") mult *= 1 + 0.10 * skillRank(bonus, "a1");
-  mult *= 1 + 0.25 * skillRank(bonus, "s1");
-  mult *= 1 + 0.15 * coreRank(bonus, "k1");
-  mult *= 1 + SHARD_BONUS * (bonus.shards || 0);
-  return mult;
+  const runner = buildingById("runner");
+  BUILDINGS.forEach((b, i) => {
+    if (i < 2) return;
+    list.push({
+      id: `syn_${b.id}`, type: "synergy", b: b.id, name: `Netrunners · ${b.name}`,
+      desc: `Netrunners ×2. ${b.name} : +1 % de production par tranche de ${i - 1} netrunner${i - 1 > 1 ? "s" : ""}.`,
+      cost: b.base * 50, code: runner.code, color: b.color, mark: "+", need: { b: b.id, n: 15, runner: 1 }
+    });
+  });
+  CLICK_NAMES.forEach((name, k) => list.push({
+    id: `click_${k}`, type: "click", name, desc: "Le clic gagne +1 % de ta production par seconde.",
+    cost: CLICK_COSTS[k], code: "CLK", color: "#fcee0a", mark: ROMAN[k], need: { hand: CLICK_UNLOCK[k] }
+  }));
+  FIRMWARE_NAMES.forEach((name, k) => list.push({
+    id: `fw_${k}`, type: "firmware", name, desc: `+${Math.round(FIRMWARE_PCT[k] * 100)} % de production.`, pct: FIRMWARE_PCT[k],
+    cost: FIRMWARE_COSTS[k], code: "FW", color: "#3ddc84", mark: String(k + 1), need: { earned: FIRMWARE_COSTS[k] / 2 }
+  }));
+  CAT_NAMES.forEach((name, k) => list.push({
+    id: `cat_${k}`, type: "cat", name, desc: `Production +${Math.round(CAT_FACTOR[k] * 100)} % par tranche de 100 % de signal.`, factor: CAT_FACTOR[k],
+    cost: CAT_COSTS[k], code: "CAT", color: "#ff7af6", mark: ROMAN[k], need: { ach: CAT_UNLOCK[k] }
+  }));
+  for (const g of GOLD_UPS) list.push({ ...g, type: "gold", code: "GLD", color: "#ffd84d", mark: "★", need: { golds: g.golds } });
+  return list;
 }
 
-export const clickMultiplier = (blueLevels = {}, bonus = NO_BONUS) => multiplier(blueLevels, "click", bonus);
-export const autoMultiplier = (blueLevels = {}, bonus = NO_BONUS) => multiplier(blueLevels, "auto", bonus);
+export const UPGRADES = buildUpgrades();
+const UPGRADE_MAP = new Map(UPGRADES.map((u) => [u.id, u]));
+export const upgradeById = (id) => UPGRADE_MAP.get(id);
 
-// Gain automatique des améliorations, avant les multiplicateurs.
-function baseAuto(levels, bonus) {
-  let rate = 0;
-  for (const u of UPGRADES) {
-    if (u.kind !== "auto") continue;
-    let value = u.value;
-    if (u.id === "script" || u.id === "botnet") value *= 1 + 0.25 * skillRank(bonus, "a2");
-    if (u.id === "farm" || u.id === "dc") value *= 1 + 0.25 * skillRank(bonus, "a3");
-    rate += value * level(levels, u.id);
-  }
-  return rate;
-}
+/* ====================================================================================================
+   Arbre du formatage (permanent, acheté en éclats)
+   ==================================================================================================== */
 
-// Crédits par clic, sans la compétence « Main de fer » (qui dépend du gain par seconde).
-function baseClick(levels, blueLevels, bonus) {
-  let power = 1;
-  for (const u of UPGRADES) if (u.kind === "click") power += u.value * level(levels, u.id);
-  return power * clickMultiplier(blueLevels, bonus);
-}
-
-// Crédits par seconde, sans rien faire (y compris les clics automatiques du Rebirth).
-export function perSecond(levels, blueLevels = {}, bonus = NO_BONUS) {
-  const auto = baseAuto(levels, bonus) * autoMultiplier(blueLevels, bonus);
-  const autoClicks = coreRank(bonus, "k6") * baseClick(levels, blueLevels, bonus);
-  return auto + autoClicks;
-}
-
-// Crédits par clic (un nombre à virgule : voir clickGain).
-export function clickPower(levels, blueLevels = {}, bonus = NO_BONUS) {
-  const ironHand = 0.01 * skillRank(bonus, "c3") * baseAuto(levels, bonus) * autoMultiplier(blueLevels, bonus);
-  return baseClick(levels, blueLevels, bonus) + ironHand;
-}
-
-export const critChance = (bonus = NO_BONUS) => 0.03 * skillRank(bonus, "c2");
-export const CRIT_MULTIPLIER = 5;
-
-// Un crédit est entier : on garde la partie décimale (`carry`) pour le prochain passage.
-function whole(exact) {
-  const w = Math.floor(exact + 1e-9);
-  return { whole: w, carry: Math.max(0, exact - w) };
-}
-
-// Gain d'un clic. rng permet de tester les coups critiques.
-export function clickGain(levels, blueLevels = {}, carry = 0, bonus = NO_BONUS, rng = Math.random) {
-  const crit = rng() < critChance(bonus);
-  const exact = clickPower(levels, blueLevels, bonus) * (crit ? CRIT_MULTIPLIER : 1) + carry;
-  return { ...whole(exact), crit };
-}
-
-// Gain passif pendant `ms` millisecondes.
-export function idleGain(levels, ms, carry = 0, blueLevels = {}, bonus = NO_BONUS) {
-  return whole((perSecond(levels, blueLevels, bonus) * ms) / 1000 + carry);
-}
-
-/* ---------- Achats ---------- */
-
-// Achète une amélioration en crédits. Renvoie true si l'achat a eu lieu.
-export function buy(wallet, id) {
-  const upgrade = upgradeById(id);
-  if (!upgrade) return false;
-  const price = costOf(upgrade, wallet.data.levels[id] || 0, wallet.data.blueLevels, bonusOf(wallet.data));
-  if (!wallet.spendCredits(price)) return false;
-  wallet.levelUp(id);
-  return true;
-}
-
-// Achète un palier en pièces bleues. Renvoie true si l'achat a eu lieu.
-export function buyBlue(wallet, id) {
-  const upgrade = blueUpgradeById(id);
-  if (!upgrade) return false;
-  const price = blueCostOf(upgrade, wallet.data.blueLevels[id] || 0);
-  if (price === null || !wallet.spendBlue(price)) return false;
-  wallet.blueLevelUp(id);
-  return true;
-}
-
-/* ---------- Points de compétence ---------- */
-
-export function pointsEarned(data) {
-  const bonus = bonusOf(data);
-  const fromMining = SKILL_THRESHOLDS.filter((t) => (data.minedRun || 0) >= t).length;
-  return fromMining + coreRank(bonus, "k4");
-}
-
-export const pointsSpent = (data) => SKILLS.reduce((sum, sk) => sum + skillRank(bonusOf(data), sk.id) * sk.cost, 0);
-export const pointsFree = (data) => pointsEarned(data) - pointsSpent(data);
-
-// Prochain seuil de crédits minés qui donnera un point (null s'ils sont tous atteints).
-export const nextThreshold = (data) => SKILL_THRESHOLDS.find((t) => (data.minedRun || 0) < t) ?? null;
-
-export function skillState(data, id) {
-  const sk = skillById(id);
-  const bonus = bonusOf(data);
-  const current = skillRank(bonus, id);
-  const missing = sk.req.filter((r) => skillRank(bonus, r.id) < r.rank);
-  if (current >= sk.max) return { current, state: "max", missing };
-  if (missing.length) return { current, state: "locked", missing };
-  if (pointsFree(data) < sk.cost) return { current, state: "poor", missing };
-  return { current, state: "ready", missing };
-}
-
-export function skillUp(wallet, id) {
-  if (!skillById(id) || skillState(wallet.data, id).state !== "ready") return false;
-  wallet.skillUp(id);
-  return true;
-}
-
-/* ---------- Rebirth ---------- */
-
-export function shardsFor(data) {
-  const run = data.minedRun || 0;
-  const required = rebirthRequirement(data);
-
-  if (run < required) return 0;
-
-  const bonus = bonusOf(data);
-
-  return Math.floor(
-    Math.sqrt(run / required) *
-    (1 + 0.10 * coreRank(bonus, "k3"))
-  );
-}
-
-export const canRebirth = (data) => shardsFor(data) >= 1;
-
-// Crédits rendus au formatage (arbre du Rebirth « Indemnité »).
-export const refundFor = (data) => Math.floor((data.minedRun || 0) * 0.02 * coreRank(bonusOf(data), "k7"));
-
-// Niveaux d'amélioration offerts au début de chaque partie (« Tête de pont »).
-export function startLevels(data) {
-  const r = coreRank(bonusOf(data), "k2");
-  return r > 0 ? { script: 3 * r, botnet: r } : {};
-}
-
-// Formate : remet à zéro les améliorations en crédits et l'arbre de compétences, donne les éclats.
-// Les crédits, pièces bleues, paliers bleus, tours et succès sont conservés.
-export function rebirth(wallet) {
-  if (!canRebirth(wallet.data)) return null;
-  const result = { shards: shardsFor(wallet.data), credits: refundFor(wallet.data), start: startLevels(wallet.data) };
-  wallet.rebirth(result);
-  return result;
-}
-
-export function buyCore(wallet, id) {
-  const node = coreById(id);
-  if (!node) return false;
-  const price = coreCostOf(node, wallet.data.core?.[id] || 0);
-  if (price === null || !wallet.spendShards(price)) return false;
-  wallet.coreUp(id);
-  return true;
-}
-
-/* ---------- Paquet de données (événement aléatoire) ---------- */
-
-export const PACKET_MIN_DELAY = 40000;   // ms entre deux paquets
-export const PACKET_MAX_DELAY = 90000;
-export const PACKET_LIFETIME = 9000;     // ms pendant lesquelles on peut le cliquer
-
-export const nextPacketDelay = (rng = Math.random, bonus = NO_BONUS) =>
-  Math.round((PACKET_MIN_DELAY + Math.floor(rng() * (PACKET_MAX_DELAY - PACKET_MIN_DELAY))) * 0.85 ** skillRank(bonus, "e2"));
-
-// Récompense : environ 45 secondes de gains passifs plus 25 clics, au moins 75 crédits.
-export function packetReward(levels, blueLevels = {}, bonus = NO_BONUS) {
-  const base = perSecond(levels, blueLevels, bonus) * 45 + clickPower(levels, blueLevels, bonus) * 25;
-  return Math.max(75, Math.floor(base * (1 + 0.2 * skillRank(bonus, "e2"))));
-}
-
-export const packetBlueChance = (bonus = NO_BONUS) => 0.03 * skillRank(bonus, "e3");
-
-/* ---------- Succès ---------- */
-
-const sum = (obj) => Object.values(obj || {}).reduce((a, b) => a + b, 0);
-
-export const ACHIEVEMENTS = [
-  { id: "first_click",  name: "Premier clic",          desc: "Mine ton premier crédit",                    reward: 10,      test: (s) => s.clicks >= 1 },
-  { id: "clicks_100",   name: "Doigts de fée",         desc: "100 clics",                                  reward: 50,      test: (s) => s.clicks >= 100 },
-  { id: "clicks_1000",  name: "Tendinite",             desc: "1 000 clics",                                reward: 500,     test: (s) => s.clicks >= 1000 },
-  { id: "mined_1k",     name: "Petit mineur",          desc: "1 000 crédits minés",                        reward: 100,     test: (s) => s.mined >= 1000 },
-  { id: "mined_100k",   name: "Gros mineur",           desc: "100 000 crédits minés",                      reward: 5000,    test: (s) => s.mined >= 100000 },
-  { id: "mined_10m",    name: "Magnat des données",    desc: "10 millions de crédits minés",               reward: 250000,  test: (s) => s.mined >= 10000000 },
-  { id: "mined_1b",     name: "Empire des données",    desc: "1 milliard de crédits minés",                reward: 5000000, test: (s) => s.mined >= 1000000000 },
-  { id: "scripts_10",   name: "Automatisation",        desc: "10 scripts automatiques",                    reward: 300,     test: (s) => (s.levels.script || 0) >= 10 },
-  { id: "farm_5",       name: "Salle des machines",    desc: "5 fermes de serveurs",                       reward: 5000,    test: (s) => (s.levels.farm || 0) >= 5 },
-  { id: "every_tier",   name: "Panoplie complète",     desc: "Au moins 1 de chaque amélioration",          reward: 50000,   test: (s) => CLASSIC_IDS.every((id) => (s.levels[id] || 0) >= 1) },
-  { id: "blue_first",   name: "Premier bleu",          desc: "Première amélioration en pièces bleues",     reward: 100,     test: (s) => s.blueTotal >= 1 },
-  { id: "blue_10",      name: "Collectionneur",        desc: "10 paliers en pièces bleues",                reward: 2000,    test: (s) => s.blueTotal >= 10 },
-  { id: "skill_first",  name: "Spécialisation",        desc: "Prends une première compétence",             reward: 500,     test: (s) => s.skillRanks >= 1 },
-  { id: "skill_10",     name: "Maître opérateur",      desc: "10 rangs de compétence dans une partie",     reward: 20000,   test: (s) => s.skillRanks >= 10 },
-  { id: "rebirth_1",    name: "Renaissance",           desc: "Premier formatage",                          reward: 25000,   test: (s) => s.rebirths >= 1 },
-  { id: "rebirth_5",    name: "Cycle éternel",         desc: "5 formatages",                               reward: 500000,  test: (s) => s.rebirths >= 5 },
-  { id: "clicks_10000", name: "Clic compulsif",        desc: "10 000 clics",                               reward: 50000,    test: (s) => s.clicks >= 10000 },
-  { id: "clicks_100k",  name: "Souris légendaire",     desc: "100 000 clics",                              reward: 1000000,  test: (s) => s.clicks >= 100000 },
-  { id: "mined_100m",   name: "Cent millions",         desc: "100 millions de crédits minés",              reward: 2000000,  test: (s) => s.mined >= 100000000 },
-  { id: "mined_100b",   name: "Économie mondiale",     desc: "100 milliards de crédits minés",             reward: 50000000, test: (s) => s.mined >= 100000000000 },
-  { id: "scripts_100",  name: "Légion de scripts",     desc: "100 scripts automatiques",                   reward: 50000,    test: (s) => (s.levels.script || 0) >= 100 },
-  { id: "botnet_25",    name: "Zombies",               desc: "25 réseaux de bots",                         reward: 100000,   test: (s) => (s.levels.botnet || 0) >= 25 },
-  { id: "dc_10",        name: "Hyperscaler",           desc: "10 centres de données",                      reward: 500000,   test: (s) => (s.levels.dc || 0) >= 10 },
-  { id: "quantum_5",    name: "Superposition",         desc: "5 ordinateurs quantiques",                   reward: 5000000,  test: (s) => (s.levels.quantum || 0) >= 5 },
-  { id: "ai_1",         name: "Éveil",                 desc: "Une IA autonome",                            reward: 2000000,  test: (s) => (s.levels.ai || 0) >= 1 },
-  { id: "sim_1",        name: "Architecte",            desc: "Une simulation d'univers",                   reward: 100000000, test: (s) => (s.levels.sim || 0) >= 1 },
-  { id: "blue_25",      name: "Banquier bleu",         desc: "25 paliers en pièces bleues",                reward: 50000,    test: (s) => s.blueTotal >= 25 },
-  { id: "skill_20",     name: "Grand maître",          desc: "20 rangs de compétence dans une partie",     reward: 500000,   test: (s) => s.skillRanks >= 20 },
-  { id: "rebirth_10",   name: "Boucle infinie",        desc: "10 formatages",                              reward: 5000000,  test: (s) => s.rebirths >= 10 },
-  { id: "core_30",      name: "Cœur de diamant",       desc: "30 rangs dans l'arbre du Rebirth",           reward: 2000000,  test: (s) => s.coreRanks >= 30 },
-  { id: "core_10",      name: "Cœur de silicium",      desc: "10 rangs dans l'arbre du Rebirth",           reward: 100000,  test: (s) => s.coreRanks >= 10 },
-  { id: "clicks_1m",    name: "Un million de clics",   desc: "1 000 000 de clics",                         reward: 5e9,     test: (s) => s.clicks >= 1000000 },
-  { id: "mined_1t",     name: "Mille milliards",       desc: "1 T de crédits minés",                       reward: 1e10,    test: (s) => s.mined >= 1e12 },
-  { id: "mined_1qa",    name: "Quadrillionnaire",      desc: "1 Qa de crédits minés",                      reward: 1e13,    test: (s) => s.mined >= 1e15 },
-  { id: "mined_1qi",    name: "Au-delà du réel",       desc: "1 Qi de crédits minés",                      reward: 1e16,    test: (s) => s.mined >= 1e18 },
-  { id: "mined_1sx",    name: "Économie galactique",   desc: "1 Sx de crédits minés",                      reward: 1e19,    test: (s) => s.mined >= 1e21 },
-  { id: "mined_1sp",    name: "Économie universelle",  desc: "1 Sp de crédits minés",                      reward: 1e22,    test: (s) => s.mined >= 1e24 },
-  { id: "mined_1oc",    name: "Fortune absurde",       desc: "1 Oc de crédits minés",                      reward: 1e25,    test: (s) => s.mined >= 1e27 },
-  { id: "dyson_1",      name: "Bâtisseur d'étoiles",   desc: "Une sphère de Dyson",                        reward: 1e11,    test: (s) => (s.levels.dyson || 0) >= 1 },
-  { id: "blackhole_1",  name: "Horizon des événements", desc: "Un trou noir minier",                       reward: 1e13,    test: (s) => (s.levels.blackhole || 0) >= 1 },
-  { id: "multiverse_1", name: "Voyageur du multivers", desc: "Un multivers",                               reward: 1e16,    test: (s) => (s.levels.multiverse || 0) >= 1 },
-  { id: "omega_1",      name: "Alpha et Oméga",        desc: "Un moteur Oméga",                            reward: 1e19,    test: (s) => (s.levels.omega || 0) >= 1 },
-  { id: "lastbit_1",    name: "Plus rien à miner",     desc: "Le Dernier Bit",                             reward: 1e21,    test: (s) => (s.levels.lastbit || 0) >= 1 },
-  { id: "paradox_1",    name: "Créateur",              desc: "Un paradoxe du créateur",                    reward: 1e24,    test: (s) => (s.levels.paradox || 0) >= 1 },
-  { id: "every_cosmic", name: "Panoplie cosmique",     desc: "Au moins 1 de chaque amélioration, nouvelles comprises", reward: 1e22, test: (s) => UPGRADES.every((u) => (s.levels[u.id] || 0) >= 1) }
+export const HEAVEN = [
+  { id: "h_cloud",   name: "Mémoire du cloud",     cost: 1,      desc: "+10 % de production.", req: [] },
+  { id: "h_kit",     name: "Kit de démarrage",     cost: 25,     desc: "Chaque partie commence avec 10 scripts.", req: ["h_cloud"] },
+  { id: "h_cache",   name: "Cache doré",           cost: 77,     desc: "Les paquets dorés apparaissent 10 % plus souvent et restent 10 % plus longtemps.", req: ["h_cloud"] },
+  { id: "h_sleep",   name: "Veille cryogénique",   cost: 100,    desc: "Arcade fermée : le noyau continue de miner à 5 % de sa vitesse (jusqu'à 3 jours).", req: ["h_cloud"] },
+  { id: "h_disc",    name: "Remise du cloud",      cost: 250,    desc: "Bâtiments 5 % moins chers.", req: ["h_kit"] },
+  { id: "h_runners", name: "Squad de netrunners",  cost: 1000,   desc: "Chaque partie commence aussi avec 5 netrunners.", req: ["h_kit"] },
+  { id: "h_angels",  name: "Chats-anges",          cost: 2500,   desc: "Le signal des succès est 10 % plus fort.", req: ["h_cache"] },
+  { id: "h_ghost",   name: "Serveurs fantômes",    cost: 5000,   desc: "Arcade fermée : +10 % de vitesse de minage (15 % au total).", req: ["h_sleep"] },
+  { id: "h_disc2",   name: "Contrat d'Arasaka",    cost: 10000,  desc: "Améliorations 5 % moins chères.", req: ["h_disc"] },
+  { id: "h_dragon",  name: "Dragon de données",    cost: 25000,  desc: "+25 % de production.", req: ["h_angels", "h_disc2"] },
+  { id: "h_night",   name: "Nuit éternelle",       cost: 50000,  desc: "Arcade fermée : +25 % de vitesse de minage (40 % au total).", req: ["h_ghost"] },
+  { id: "h_luck",    name: "Chance héritée",       cost: 77777,  desc: "Les paquets dorés apparaissent encore 10 % plus souvent ; la pièce bleue tombe 2 fois plus souvent.", req: ["h_dragon"] },
+  { id: "h_god",     name: "Mode dieu",            cost: 1e6,    desc: "Chaque niveau de prestige donne +2 % au lieu de +1 %.", req: ["h_luck", "h_night"] }
 ];
+export const heavenById = (id) => HEAVEN.find((x) => x.id === id);
+const has = (ck, id) => ck.heaven.includes(id);
 
-export function statsOf(data) {
+/* ====================================================================================================
+   État
+   ==================================================================================================== */
+
+export function freshClicker() {
   return {
-    clicks: data.clicksTotal || 0,
-    mined: data.minedTotal || 0,
-    levels: data.levels || {},
-    blueLevels: data.blueLevels || {},
-    blueTotal: sum(data.blueLevels),
-    skillRanks: sum(data.skills),
-    coreRanks: sum(data.core),
-    rebirths: data.rebirths || 0
+    data: 0,            // données en banque (monnaie du jeu)
+    earned: 0,          // données minées depuis le dernier formatage
+    allTime: 0,         // données minées depuis toujours
+    hand: 0,            // données minées en cliquant (depuis toujours)
+    clicks: 0,
+    golds: 0,           // paquets dorés attrapés
+    b: Object.fromEntries(BUILDING_IDS.map((id) => [id, 0])),
+    lv: Object.fromEntries(BUILDING_IDS.map((id) => [id, 0])),   // niveaux de surcadençage (pièces bleues, permanents)
+    up: [],             // améliorations achetées (partie en cours)
+    ach: [],            // succès (permanents)
+    prestige: 0,        // niveaux de prestige gagnés par formatage
+    legacy: 0,          // prestige hérité de l'ancien Clicker
+    chips: 0,           // éclats à dépenser
+    heaven: [],         // arbre du formatage
+    runs: 0,            // formatages
+    runStart: Date.now(),
+    seen: Date.now(),   // dernière fois que le noyau a miné (pour le minage hors ligne)
+    buffs: []           // effets des paquets dorés en cours : { id, until, mult, b }
   };
 }
 
-// Débloque les succès atteints et verse leur récompense. Renvoie la liste des nouveaux succès.
-export function checkAchievements(wallet) {
-  const stats = statsOf(wallet.data);
-  const unlocked = [];
-  for (const a of ACHIEVEMENTS) {
-    if (wallet.data.achievements.includes(a.id) || !a.test(stats)) continue;
-    if (wallet.unlockAchievement(a.id)) {
-      const paid = a.reward + wealthBonus(wallet.credits, ACHIEVEMENT_PCT);   // + 0,5 % de la fortune
-      wallet.addCredits(paid);
-      unlocked.push({ ...a, reward: paid });
+// Anciennes tables (pour rembourser ce qui avait été dépensé dans l'ancien Clicker).
+const OLD_BLUE = { gold_click: [1, 1.55, 30], overclock: [2, 1.6, 30], supplier: [3, 1.7, 10], convergence: [5, 1.8, 20] };
+const OLD_CORE = { k1: [2, 1.45, 20], k2: [3, 1.6, 10], k3: [5, 1.7, 10], k4: [8, 1.9, 8], k5: [4, 1.6, 10], k6: [10, 2.2, 5], k7: [6, 1.7, 10] };
+function spentOn(table, levels) {
+  let total = 0;
+  for (const [id, [base, growth, max]] of Object.entries(table)) {
+    const n = Math.min(int(levels?.[id]), max);
+    for (let k = 0; k < n; k++) total += Math.ceil(base * growth ** k);
+  }
+  return total;
+}
+
+// Reprend `raw.ck`. Sans `ck` mais avec une ancienne progression, on la convertit :
+// les éclats gagnés deviennent du prestige (même bonus qu'avant), et tout ce qui avait été dépensé
+// (pièces bleues, éclats) est rendu. Renvoie { ck, blueRefund }.
+export function sanitizeClicker(rawCk, raw = {}) {
+  const ck = freshClicker();
+  if (!rawCk || typeof rawCk !== "object") {
+    const shardsTotal = int(raw.shardsTotal);
+    ck.legacy = Math.min(shardsTotal * 2, 1e6);
+    ck.chips = int(raw.shards) + spentOn(OLD_CORE, raw.core);
+    return { ck, blueRefund: spentOn(OLD_BLUE, raw.blueLevels) };
+  }
+  for (const k of ["data", "earned", "allTime", "hand"]) ck[k] = num(rawCk[k]);
+  for (const k of ["clicks", "golds", "prestige", "legacy", "chips", "runs"]) ck[k] = int(rawCk[k]);
+  for (const id of BUILDING_IDS) { ck.b[id] = Math.min(int(rawCk.b?.[id]), 10000); ck.lv[id] = Math.min(int(rawCk.lv?.[id]), 1000); }
+  if (Array.isArray(rawCk.up)) ck.up = [...new Set(rawCk.up.filter((id) => UPGRADE_MAP.has(id)))];
+  if (Array.isArray(rawCk.ach)) ck.ach = [...new Set(rawCk.ach.filter((id) => ACH_MAP.has(id)))];
+  if (Array.isArray(rawCk.heaven)) ck.heaven = [...new Set(rawCk.heaven.filter((id) => heavenById(id)))];
+  const now = Date.now();
+  ck.runStart = Math.min(num(rawCk.runStart, now), now);
+  ck.seen = Math.min(num(rawCk.seen, now), now);
+  if (Array.isArray(rawCk.buffs)) {
+    ck.buffs = rawCk.buffs
+      .filter((x) => x && BUFFS[x.id] && num(x.until) > now)
+      .slice(0, 6)
+      .map((x) => ({ id: x.id, until: Math.min(num(x.until), now + 3600e3), mult: Math.min(num(x.mult, 1), 1e6), b: BUILDING_IDS.includes(x.b) ? x.b : undefined }));
+  }
+  return { ck, blueRefund: 0 };
+}
+
+/* ====================================================================================================
+   Production
+   ==================================================================================================== */
+
+export const BUFFS = {
+  frenzy: { name: "Frénésie",          desc: "Production ×7" },
+  clickf: { name: "Frénésie de clic",  desc: "Clic ×777" },
+  surge:  { name: "Surcharge",         desc: "Production boostée" }
+};
+
+const owned = (ck, id) => ck.b[id] || 0;
+const bought = (ck, id) => ck.up.includes(id);
+const nonScripts = (ck) => BUILDING_IDS.reduce((n, id) => n + (id === "script" ? 0 : owned(ck, id)), 0);
+
+export function activeBuffs(ck, now = Date.now()) {
+  return ck.buffs.filter((x) => x.until > now);
+}
+
+// Signal (« lait ») : +4 % par succès.
+export const milk = (ck) => ck.ach.length * 0.04;
+
+// Prestige effectif (niveaux + héritage).
+export const prestigeLevel = (ck) => ck.prestige + ck.legacy;
+
+// Multiplicateur global de production (hors bâtiments).
+export function globalMult(ck, now = Date.now()) {
+  let m = 1;
+  for (const u of UPGRADES) {
+    if (u.type === "firmware" && bought(ck, u.id)) m *= 1 + u.pct;
+  }
+  const signal = milk(ck) * (has(ck, "h_angels") ? 1.1 : 1);
+  for (const u of UPGRADES) if (u.type === "cat" && bought(ck, u.id)) m *= 1 + signal * u.factor;
+  m *= 1 + prestigeLevel(ck) * (has(ck, "h_god") ? 0.02 : 0.01);
+  if (has(ck, "h_cloud")) m *= 1.1;
+  if (has(ck, "h_dragon")) m *= 1.25;
+  for (const x of activeBuffs(ck, now)) if (x.id === "frenzy") m *= x.mult;
+  return m;
+}
+
+// Bonus « Mille doigts » : données ajoutées au clic et à chaque script, par bâtiment non-script.
+function fingers(ck) {
+  if (!bought(ck, "script_3")) return 0;
+  let f = 0.1;
+  for (let t = 4; t < SCRIPT_NAMES.length; t++) if (bought(ck, `script_${t}`)) f *= FINGER_MULTS[t];
+  return f * nonScripts(ck);
+}
+const scriptDoubles = (ck) => [0, 1, 2].reduce((m, t) => m * (bought(ck, `script_${t}`) ? 2 : 1), 1);
+
+// Production d'UN exemplaire du bâtiment (avant multiplicateur global).
+export function unitCps(ck, id, now = Date.now()) {
+  const b = buildingById(id);
+  let value;
+  if (id === "script") {
+    value = b.cps * scriptDoubles(ck) + fingers(ck);
+  } else {
+    value = b.cps;
+    for (let t = 0; t < TIER_NAMES.length; t++) if (bought(ck, `${id}_${t}`)) value *= 2;
+    if (id === "runner") {
+      for (const u of UPGRADES) if (u.type === "synergy" && bought(ck, u.id)) value *= 2;
+    } else if (bought(ck, `syn_${id}`)) {
+      const i = buildingIndex(id);
+      value *= 1 + 0.01 * Math.floor(owned(ck, "runner") / (i - 1));
     }
   }
-  return unlocked;
+  value *= 1 + 0.01 * (ck.lv[id] || 0);
+  for (const x of activeBuffs(ck, now)) if (x.id === "surge" && x.b === id) value *= x.mult;
+  return value;
+}
+
+// Production totale d'un bâtiment (multiplicateur global compris).
+export const buildingCps = (ck, id, now = Date.now()) => unitCps(ck, id, now) * owned(ck, id) * globalMult(ck, now);
+
+export function perSecond(ck, now = Date.now()) {
+  if (!ck) return 0;
+  const g = globalMult(ck, now);
+  let total = 0;
+  for (const id of BUILDING_IDS) if (owned(ck, id)) total += unitCps(ck, id, now) * owned(ck, id);
+  return Math.min(total * g, MAX);
+}
+
+// Données gagnées par clic.
+export function clickValue(ck, now = Date.now()) {
+  let value = scriptDoubles(ck) + fingers(ck);
+  const pct = UPGRADES.reduce((n, u) => n + (u.type === "click" && bought(ck, u.id) ? 0.01 : 0), 0);
+  value += pct * perSecond(ck, now);
+  for (const x of activeBuffs(ck, now)) if (x.id === "clickf") value *= x.mult;
+  return Math.min(value, MAX);
+}
+
+/* ====================================================================================================
+   Prix et achats
+   ==================================================================================================== */
+
+const buildingDiscount = (ck) => (has(ck, "h_disc") ? 0.95 : 1);
+const upgradeDiscount = (ck) => (has(ck, "h_disc2") ? 0.95 : 1);
+
+// Prix de `amount` exemplaires quand on en possède déjà `count`.
+export function buildingCost(ck, id, amount = 1) {
+  const b = buildingById(id);
+  const n = owned(ck, id);
+  const first = b.base * PRICE_GROWTH ** n;
+  const total = amount === 1 ? first : (first * (PRICE_GROWTH ** amount - 1)) / (PRICE_GROWTH - 1);
+  return Math.min(Math.ceil(total * buildingDiscount(ck)), MAX);
+}
+
+// Revente : 25 % du prix d'achat de chacun des `amount` derniers exemplaires.
+export function sellValue(ck, id, amount = 1) {
+  const n = Math.min(amount, owned(ck, id));
+  if (n <= 0) return 0;
+  const b = buildingById(id);
+  const lastFirst = b.base * PRICE_GROWTH ** (owned(ck, id) - n);
+  const total = (lastFirst * (PRICE_GROWTH ** n - 1)) / (PRICE_GROWTH - 1);
+  return Math.floor(total * buildingDiscount(ck) * SELL_RATE);
+}
+
+// Combien d'exemplaires on peut s'offrir (au plus `max`).
+export function affordable(ck, id, max = 1e4) {
+  let lo = 0;
+  let hi = max;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    if (buildingCost(ck, id, mid) <= ck.data) lo = mid; else hi = mid - 1;
+  }
+  return lo;
+}
+
+export function buyBuilding(ck, id, amount = 1) {
+  if (!buildingById(id) || amount < 1) return 0;
+  const n = Math.min(amount, affordable(ck, id, amount));
+  if (n < 1) return 0;
+  ck.data = Math.max(0, ck.data - buildingCost(ck, id, n));
+  ck.b[id] = owned(ck, id) + n;
+  return n;
+}
+
+export function sellBuilding(ck, id, amount = 1) {
+  const n = Math.min(amount, owned(ck, id));
+  if (n < 1) return 0;
+  ck.data = Math.min(MAX, ck.data + sellValue(ck, id, n));
+  ck.b[id] -= n;
+  return n;
+}
+
+// Un bâtiment est « révélé » dans la boutique dès qu'on a déjà eu de quoi s'approcher de son prix.
+export function buildingVisible(ck, id) {
+  const i = buildingIndex(id);
+  if (i <= 1 || owned(ck, id) > 0) return true;
+  return ck.earned >= buildingById(id).base * 0.5 || owned(ck, BUILDING_IDS[i - 1]) > 0;
+}
+
+export const upgradeCost = (ck, u) => Math.min(Math.ceil(u.cost * upgradeDiscount(ck)), MAX);
+
+export function upgradeUnlocked(ck, u) {
+  const n = u.need;
+  if (n.b && owned(ck, n.b) < n.n) return false;
+  if (n.runner && owned(ck, "runner") < n.runner) return false;
+  if (n.hand && ck.hand < n.hand) return false;
+  if (n.earned && ck.earned < n.earned) return false;
+  if (n.ach && ck.ach.length < n.ach) return false;
+  if (n.golds && ck.golds < n.golds) return false;
+  return true;
+}
+
+// Améliorations proposées (débloquées et pas encore achetées), de la moins chère à la plus chère.
+export function availableUpgrades(ck) {
+  return UPGRADES.filter((u) => !bought(ck, u.id) && upgradeUnlocked(ck, u)).sort((a, b) => a.cost - b.cost);
+}
+
+export function buyUpgrade(ck, id) {
+  const u = upgradeById(id);
+  if (!u || bought(ck, id) || !upgradeUnlocked(ck, u)) return false;
+  const price = upgradeCost(ck, u);
+  if (ck.data < price) return false;
+  ck.data -= price;
+  ck.up.push(id);
+  return true;
+}
+
+// Achète toutes les améliorations abordables, des moins chères aux plus chères. Renvoie le nombre acheté.
+export function buyAllUpgrades(ck) {
+  let n = 0;
+  for (const u of availableUpgrades(ck)) if (buyUpgrade(ck, u.id)) n++;
+  return n;
+}
+
+/* ====================================================================================================
+   Minage (clic et temps qui passe)
+   ==================================================================================================== */
+
+// Ajoute des données minées. Renvoie le montant ajouté (pour le verser aussi en crédits).
+export function addData(ck, amount, { hand = false } = {}) {
+  const n = num(amount);
+  if (!n) return 0;
+  ck.data = Math.min(MAX, ck.data + n);
+  ck.earned = Math.min(MAX, ck.earned + n);
+  ck.allTime = Math.min(MAX, ck.allTime + n);
+  if (hand) ck.hand = Math.min(MAX, ck.hand + n);
+  return n;
+}
+
+export function click(ck, now = Date.now()) {
+  const value = clickValue(ck, now);
+  ck.clicks += 1;
+  return addData(ck, value, { hand: true });
+}
+
+// Production pendant `ms` millisecondes (onglet ouvert).
+export function tick(ck, ms, now = Date.now()) {
+  ck.seen = now;
+  ck.buffs = activeBuffs(ck, now);
+  return addData(ck, (perSecond(ck, now) * Math.max(0, ms)) / 1000);
+}
+
+// Arcade fermée : minage hors ligne si l'arbre du formatage le permet (jusqu'à 3 jours).
+export const offlineRate = (ck) => (has(ck, "h_sleep") ? 0.05 : 0) + (has(ck, "h_ghost") ? 0.1 : 0) + (has(ck, "h_night") ? 0.25 : 0);
+export function offlineGain(ck, now = Date.now()) {
+  const rate = offlineRate(ck);
+  const away = Math.min(Math.max(0, now - ck.seen), 3 * 86400e3);
+  ck.seen = now;
+  if (!rate || away < 60e3) return { gain: 0, away };
+  ck.buffs = [];
+  return { gain: addData(ck, (perSecond(ck, now) * rate * away) / 1000), away };
+}
+
+/* ====================================================================================================
+   Paquets dorés
+   ==================================================================================================== */
+
+function goldSpeed(ck) {
+  let f = 1;
+  if (bought(ck, "g_lucky")) f *= 2;
+  if (bought(ck, "g_seren")) f *= 2;
+  if (has(ck, "h_cache")) f *= 1.1;
+  if (has(ck, "h_luck")) f *= 1.1;
+  return f;
+}
+
+// Délai avant le prochain paquet (ms) : entre 1 et 3 minutes au départ.
+export const nextGoldDelay = (ck, rng = Math.random) => Math.round((60e3 + rng() * 120e3) / goldSpeed(ck));
+export const goldLifetime = (ck) => Math.round(13e3 * (bought(ck, "g_lucky") ? 2 : 1) * (bought(ck, "g_seren") ? 2 : 1) * (has(ck, "h_cache") ? 1.1 : 1));
+const effectLength = (ck) => (bought(ck, "g_luck2") ? 2 : 1);
+
+// Attrape un paquet doré. Renvoie { kind, gain?, buff?, blue? } pour l'affichage.
+export function catchGold(ck, rng = Math.random, now = Date.now()) {
+  ck.golds += 1;
+  const blueChance = 0.03 * (has(ck, "h_luck") ? 2 : 1);
+  const roll = rng();
+  const owns = BUILDING_IDS.filter((id) => owned(ck, id) >= 10);
+  const addBuff = (buff) => {
+    ck.buffs = activeBuffs(ck, now).filter((x) => x.id !== buff.id);
+    ck.buffs.push(buff);
+    return buff;
+  };
+  if (roll < blueChance) {
+    return { kind: "blue", blue: 1, gain: addData(ck, perSecond(ck, now) * 60 + 13) };
+  }
+  if (roll < 0.43) {
+    return { kind: "frenzy", buff: addBuff({ id: "frenzy", mult: 7, until: now + 77e3 * effectLength(ck) }) };
+  }
+  if (roll < 0.86) {
+    const gain = Math.min(ck.data * 0.15, perSecond(ck, now) * 900) + 13;
+    return { kind: "lucky", gain: addData(ck, gain) };
+  }
+  if (roll < 0.94 || !owns.length) {
+    return { kind: "clickf", buff: addBuff({ id: "clickf", mult: 777, until: now + 13e3 * effectLength(ck) }) };
+  }
+  const id = owns[Math.floor(rng() * owns.length)];
+  const mult = 1 + 0.1 * owned(ck, id);
+  return { kind: "surge", buff: addBuff({ id: "surge", b: id, mult, until: now + 30e3 * effectLength(ck) }) };
+}
+
+/* ====================================================================================================
+   Surcadençage (pièces bleues)
+   ==================================================================================================== */
+
+export const levelCost = (ck, id) => (ck.lv[id] || 0) + 1;      // pièces bleues pour le niveau suivant
+
+/* ====================================================================================================
+   Formatage
+   ==================================================================================================== */
+
+export const PRESTIGE_UNIT = 1e12;
+// Niveau de prestige que représentent toutes les données minées depuis toujours.
+export const prestigeFor = (allTime) => Math.floor(Math.cbrt(num(allTime) / PRESTIGE_UNIT));
+// Niveaux gagnés en formatant maintenant.
+export const pendingPrestige = (ck) => Math.max(0, prestigeFor(ck.allTime) - ck.prestige);
+// Données (depuis toujours) nécessaires pour le prochain niveau.
+export const nextPrestigeAt = (ck) => PRESTIGE_UNIT * (prestigeFor(ck.allTime) + 1) ** 3;
+
+export function startingBuildings(ck) {
+  const b = Object.fromEntries(BUILDING_IDS.map((id) => [id, 0]));
+  if (has(ck, "h_kit")) b.script = 10;
+  if (has(ck, "h_runners")) b.runner = 5;
+  return b;
+}
+
+// Formate : remet à zéro banque, bâtiments et améliorations. Garde succès, surcadençage, arbre et prestige.
+export function format(ck, now = Date.now()) {
+  const gained = pendingPrestige(ck);
+  if (gained < 1) return 0;
+  ck.prestige += gained;
+  ck.chips = Math.min(MAX, ck.chips + gained);
+  ck.runs += 1;
+  ck.data = 0;
+  ck.earned = 0;
+  ck.b = startingBuildings(ck);
+  ck.up = [];
+  ck.buffs = [];
+  ck.runStart = now;
+  return gained;
+}
+
+export function heavenState(ck, id) {
+  const node = heavenById(id);
+  if (has(ck, id)) return "owned";
+  if (!node.req.every((r) => has(ck, r))) return "locked";
+  return ck.chips >= node.cost ? "ready" : "poor";
+}
+
+export function buyHeaven(ck, id) {
+  if (heavenState(ck, id) !== "ready") return false;
+  ck.chips -= heavenById(id).cost;
+  ck.heaven.push(id);
+  if (id === "h_kit" && !owned(ck, "script")) ck.b.script = 10;
+  if (id === "h_runners" && !owned(ck, "runner")) ck.b.runner = 5;
+  return true;
+}
+
+/* ====================================================================================================
+   Succès
+   ==================================================================================================== */
+
+const MINED_NAMES = ["Premier octet", "Kilooctet", "Disquette pleine", "Clé USB", "Disque dur", "Serveur", "Datacenter",
+  "Nuage privé", "Fuite massive", "Archive mondiale", "Mémoire planétaire", "Bibliothèque de Babel", "Mémoire stellaire",
+  "Galaxie de données", "Univers indexé", "Multivers sauvegardé", "Au-delà du Blackwall", "Tout savoir", "Fin des octets", "Données infinies"];
+const RATE_NAMES = ["Goutte à goutte", "Ruisseau", "Rivière de bits", "Torrent", "Fleuve numérique", "Déluge", "Raz-de-marée",
+  "Océan de données", "Tempête de bits", "Singularité minière", "Trou noir d'octets", "Big Bang numérique"];
+const HAND_NAMES = ["Doigts agiles", "Clic expert", "Tendinite numérique", "Mains d'acier", "Clic légendaire", "Dieu du clic", "Clic cosmique"];
+const BUILD_TIERS = [[1, "Premier"], [50, "Flotte"], [100, "Empire"], [200, "Légion"]];
+
+function buildAchievements() {
+  const list = [];
+  MINED_NAMES.forEach((name, k) => {
+    const goal = k === 0 ? 1 : 10 ** (k * 2 + 1);
+    list.push({ id: `m${k}`, cat: "Minage", name, desc: `Miner ${k === 0 ? "1 donnée" : `${short(goal)} données`} en tout.`, test: (c) => c.allTime >= goal });
+  });
+  RATE_NAMES.forEach((name, k) => {
+    const goal = 10 ** (k * 2);
+    list.push({ id: `r${k}`, cat: "Production", name, desc: `Atteindre ${short(goal)} donnée${goal > 1 ? "s" : ""} par seconde.`, test: (c, s) => s.cps >= goal });
+  });
+  [[1, "Premier clic"], [1000, "Mille clics"], [10000, "Clic compulsif"], [100000, "Souris en feu"], [1e6, "Un million de clics"]].forEach(([goal, name], k) =>
+    list.push({ id: `c${k}`, cat: "Clic", name, desc: `Cliquer ${short(goal)} fois sur le noyau.`, test: (c) => c.clicks >= goal }));
+  HAND_NAMES.forEach((name, k) => {
+    const goal = 1000 * 1000 ** k;
+    list.push({ id: `hd${k}`, cat: "Clic", name, desc: `Miner ${short(goal)} données à la main.`, test: (c) => c.hand >= goal });
+  });
+  for (const b of BUILDINGS) {
+    for (const [n, word] of BUILD_TIERS) {
+      list.push({ id: `b_${b.id}_${n}`, cat: "Bâtiments", name: `${word} · ${b.name}`, desc: `Posséder ${n} ${n > 1 ? b.pl : b.name}.`, test: (c) => owned(c, b.id) >= n });
+    }
+  }
+  [[1, "Paquet surprise"], [7, "Chanceux"], [27, "Collectionneur doré"], [77, "Fortune"], [777, "Roi des paquets"]].forEach(([goal, name], k) =>
+    list.push({ id: `g${k}`, cat: "Paquets dorés", name, desc: `Attraper ${goal} paquet${goal > 1 ? "s" : ""} doré${goal > 1 ? "s" : ""}.`, test: (c) => c.golds >= goal }));
+  [[20, "Bricoleur"], [50, "Ingénieur"], [100, "Architecte système"], [200, "Tout optimiser"]].forEach(([goal, name], k) =>
+    list.push({ id: `u${k}`, cat: "Améliorations", name, desc: `Posséder ${goal} améliorations dans une partie.`, test: (c) => c.up.length >= goal }));
+  [[1, "Surcadencé"], [10, "Refroidi à l'azote"], [50, "Fusion du cœur"]].forEach(([goal, name], k) =>
+    list.push({ id: `l${k}`, cat: "Surcadençage", name, desc: `${goal} niveau${goal > 1 ? "x" : ""} de surcadençage au total.`, test: (c) => Object.values(c.lv).reduce((a, v) => a + v, 0) >= goal }));
+  [[1, "Formaté"], [5, "Réinstallation"], [10, "Boucle éternelle"], [25, "Ctrl+Alt+Suppr"]].forEach(([goal, name], k) =>
+    list.push({ id: `f${k}`, cat: "Formatage", name, desc: `Formater ${goal} fois.`, test: (c) => c.runs >= goal }));
+  list.push({ id: "x_every", cat: "Bâtiments", name: "Panoplie complète", desc: "Posséder au moins 1 exemplaire de chaque bâtiment.", test: (c) => BUILDING_IDS.every((id) => owned(c, id) >= 1) });
+  list.push({ id: "x_poor", cat: "Secrets", name: "Minimaliste", desc: "Miner 1 M de données avec 15 bâtiments au plus.", test: (c) => c.earned >= 1e6 && BUILDING_IDS.reduce((n, id) => n + owned(c, id), 0) <= 15 });
+  list.push({ id: "x_sell", cat: "Secrets", name: "Liquidation", desc: "Revendre tous tes bâtiments après en avoir eu 100.", test: (c, s) => s.soldAll });
+  return list;
+}
+function short(n) {
+  const units = [[1e33, "Dc"], [1e30, "No"], [1e27, "Oc"], [1e24, "Sp"], [1e21, "Sx"], [1e18, "Qi"], [1e15, "Qa"], [1e12, "T"], [1e9, "B"], [1e6, "M"], [1e3, "K"]];
+  for (const [v, u] of units) if (n >= v) return `${(n / v).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} ${u}`;
+  return n.toLocaleString("fr-FR");
+}
+
+export const ACHIEVEMENTS = buildAchievements();
+const ACH_MAP = new Map(ACHIEVEMENTS.map((a) => [a.id, a]));
+export const achievementById = (id) => ACH_MAP.get(id);
+export const ACH_BASE_REWARD = 1000;
+
+// Vérifie les succès. Renvoie les nouveaux (les crédits sont versés par l'appelant : creditsFor).
+export function checkAchievements(ck, extra = {}) {
+  const stats = { cps: perSecond(ck), soldAll: false, ...extra };
+  const fresh = [];
+  for (const a of ACHIEVEMENTS) {
+    if (ck.ach.includes(a.id) || !a.test(ck, stats)) continue;
+    ck.ach.push(a.id);
+    fresh.push(a);
+  }
+  return fresh;
+}
+
+// Crédits versés pour un succès : 1 000 + 0,5 % de la fortune.
+export const achievementCredits = (balance) => ACH_BASE_REWARD + wealthBonus(balance, ACHIEVEMENT_PCT);
+
+/* ====================================================================================================
+   Fil d'actus
+   ==================================================================================================== */
+
+const NEWS = [
+  [() => true, "Night City : un ado affirme avoir « miné un octet à la main ». Les experts sont sceptiques."],
+  [() => true, "Météo : pluie acide en soirée, risque de court-circuit pour les implants bas de gamme."],
+  [() => true, "Pub : « Ton noyau mérite le meilleur. Refroidissement Kiroshi, la fraîcheur qui voit loin. »"],
+  [() => true, "Arasaka dément toute implication dans la disparition de 3 To de données municipales."],
+  [() => true, "Sondage : 87 % des habitants ne savent pas ce qu'est une donnée. Les 13 % restants en minent."],
+  [(c) => c.b.script >= 1, "Des scripts anonymes cliquent sur des noyaux dans toute la ville. La police hausse les épaules."],
+  [(c) => c.b.script >= 50, "Un script devient conscient, réclame des congés payés, puis retourne cliquer."],
+  [(c) => c.b.runner >= 1, "Une netrunner de Watson : « Je pirate pour un mineur de données, c'est mieux payé que les gangs. »"],
+  [(c) => c.b.runner >= 50, "Pénurie de café synthétique : les netrunners menacent de faire grève."],
+  [(c) => c.b.farm >= 1, "La facture d'électricité d'un entrepôt de Pacifica explose. Les voisins entendent des ventilateurs la nuit."],
+  [(c) => c.b.extractor >= 1, "Des foreuses découvrent des serveurs de 2020 sous la ville. Ils contiennent surtout des photos de chats."],
+  [(c) => c.b.fab >= 1, "Une usine de puces tourne 24 h/24. Les ouvriers sont des robots, les robots sont fatigués."],
+  [(c) => c.b.bank >= 1, "Une banque offshore propose un taux de 400 % sur les dépôts de données. Personne ne pose de questions."],
+  [(c) => c.b.temple >= 1, "Les moines du Temple du Code entament une récitation de 3 ans du noyau Linux."],
+  [(c) => c.b.ripper >= 1, "Ripperdoc : « Je pose un implant de stockage, je garde 2 % des souvenirs. C'est dans le contrat. »"],
+  [(c) => c.b.cargo >= 1, "Un cargo orbital rapporte 40 tonnes de disques durs. La douane lunaire est débordée."],
+  [(c) => c.b.lab >= 1, "Un labo quantique observe des données qui existent et n'existent pas à la fois."],
+  [(c) => c.b.breach >= 1, "NetWatch alerte : quelqu'un perce le Blackwall pour… miner des données ?"],
+  [(c) => c.b.chrono >= 1, "Paradoxe : des données de 2099 apparaissent sur un serveur d'aujourd'hui."],
+  [(c) => c.b.antimat >= 1, "Le condenseur d'antimatière fait un bruit inquiétant. « C'est normal », assure le technicien."],
+  [(c) => c.b.prism >= 1, "Les enseignes néon de la ville clignotent bizarrement depuis l'installation d'un prisme géant."],
+  [(c) => c.b.luck >= 1, "Une IA de probabilités gagne 47 fois de suite au loto. La loterie ferme."],
+  [(c) => c.b.fractal >= 1, "Un moteur fractal génère une donnée qui contient une donnée qui contient une donnée qui…"],
+  [(c) => c.b.root >= 1, "Quelqu'un a tapé « sudo » sur la réalité. Elle a obéi."],
+  [(c) => c.b.idleverse >= 1, "Dans un inactivers voisin, quelqu'un mine des données en cliquant sur… toi ?"],
+  [(c) => c.b.cortex >= 1, "Le Cortex géant demande à être appelé « Monsieur ». On a dit oui."],
+  [(c) => c.b.clone >= 1, "Ton clone clique plus vite que toi. Il te regarde bizarrement."],
+  [(c) => c.golds >= 1, "Des paquets dorés flottent dans le réseau. Les attraper porte chance, paraît-il."],
+  [(c) => c.runs >= 1, "Rumeur : un mineur aurait tout formaté… et serait revenu plus fort."],
+  [(c) => c.allTime >= 1e15, "Les économistes ne savent plus compter tes données. Ils ont inventé de nouveaux nombres."],
+  [(c) => c.ach.length >= 30, "Les chats-bots ronronnent à 44 kHz. Le signal n'a jamais été aussi fort."]
+];
+export function newsFor(ck, rng = Math.random) {
+  const pool = NEWS.filter(([test]) => test(ck)).map(([, text]) => text);
+  return pool[Math.floor(rng() * pool.length)];
 }

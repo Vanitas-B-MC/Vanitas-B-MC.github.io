@@ -2,7 +2,7 @@
 // Chaque jeu a son fichier (ui-*.js) et sa logique pure (snake.js, blackjack.js…).
 
 import { createWallet } from "./wallet.js";
-import { idleGain, perSecond, bonusOf } from "./clicker.js";
+import { perSecond, tick as clickerTick, offlineGain } from "./clicker.js";
 import { createSnakeUI } from "./ui-snake.js";
 import { createBlackjackUI } from "./ui-blackjack.js";
 import { createRouletteUI } from "./ui-roulette.js";
@@ -94,8 +94,8 @@ function renderWallet() {
   lastCredits = wallet.credits;
 
   $("#meta-snake").textContent = `Record : ${fmt(wallet.data.bestSnake)} · ${fmt(wallet.data.blueFound)} pièce${wallet.data.blueFound > 1 ? "s" : ""} bleue${wallet.data.blueFound > 1 ? "s" : ""} trouvée${wallet.data.blueFound > 1 ? "s" : ""}`;
-  const rate = perSecond(wallet.data.levels, wallet.data.blueLevels, bonusOf(wallet.data));
-  $("#meta-clicker").textContent = `${fmtRate(rate)} crédit${rate >= 2 ? "s" : ""} / s`;
+  const rate = perSecond(wallet.data.ck);
+  $("#meta-clicker").textContent = `${fmtRate(rate)} donnée${rate >= 2 ? "s" : ""} / s · ${fmtShort(wallet.data.ck.data)} en banque`;
   $("#meta-tetris").textContent = `Record : ${fmt(wallet.data.bestTetris)}`;
   const best = wallet.data.bestSurvivor;
   $("#meta-survivors").textContent = `Record : ${Math.floor(best / 60)}:${String(best % 60).padStart(2, "0")}`;
@@ -173,19 +173,27 @@ function route() {
 window.addEventListener("hashchange", route);
 route();
 
-/* ---------- Gain passif du Clicker (continue même quand on joue à autre chose) ---------- */
+/* ---------- Gain passif du Clicker (continue même quand on joue à autre chose) ----------
+   Les données minées par les bâtiments vont dans la banque du Clicker et sont aussi versées en crédits. */
 
-let carry = 0;
 let lastTick = Date.now();
+
+// Arcade rouverte : minage hors ligne si l'arbre du formatage le permet (le Clicker affiche le message).
+if (!wallet.locked) {
+  const away = offlineGain(wallet.data.ck);
+  if (away.gain > 0) {
+    wallet.data.ck.offline = away;            // non sauvegardé (champ inconnu de sanitizeClicker) : lu par ui-clicker.js
+    wallet.minedData(away.gain);
+  }
+}
 
 setInterval(() => {
   const now = Date.now();
   const elapsed = Math.min(now - lastTick, 30000);   // un onglet en veille ne doit pas rapporter une fortune
   lastTick = now;
-
-  const gain = idleGain(wallet.data.levels, elapsed, carry, wallet.data.blueLevels, bonusOf(wallet.data));
-  carry = gain.carry;
-  if (gain.whole > 0) wallet.addCredits(gain.whole, { mined: true });
+  if (wallet.locked) return;
+  const gain = clickerTick(wallet.data.ck, elapsed, now);
+  wallet.minedData(gain);
 }, 250);
 
 /* ---------- Musique (désactivée au départ : le navigateur exige un clic pour lancer le son) ---------- */
@@ -255,7 +263,6 @@ function renderLock(reason) {
 $("#tab-lock-button").addEventListener("click", () => {
   if (wallet.locked === "outdated") { window.location.reload(); return; }
   wallet.claim();
-  carry = 0;
   lastTick = Date.now();
 });
 wallet.onLock(renderLock);
@@ -280,7 +287,7 @@ function renderSaves() {
     btn.textContent = "Restaurer";
     btn.addEventListener("click", () => {
       if (!window.confirm("Remplacer ta progression actuelle par cette copie ? (Ta progression actuelle est d'abord copiée, tu pourras revenir en arrière.)")) return;
-      if (wallet.restoreBackup(b.index)) { carry = 0; renderSaves(); window.alert("Copie restaurée."); }
+      if (wallet.restoreBackup(b.index)) { renderSaves(); window.alert("Copie restaurée."); }
     });
     li.append(text, btn);
     list.append(li);
@@ -308,11 +315,10 @@ $("#save-import").addEventListener("change", async (e) => {
   if (!window.confirm("Remplacer ta progression actuelle par ce fichier ? (Ta progression actuelle est d'abord copiée dans les sauvegardes.)")) return;
   const ok = wallet.importJSON(await file.text());
   window.alert(ok ? "Sauvegarde importée." : "Ce fichier n'est pas une sauvegarde de l'arcade.");
-  if (ok) { carry = 0; renderSaves(); }
+  if (ok) renderSaves();
 });
 
 $("#reset").addEventListener("click", () => {
   if (!window.confirm("Remettre à zéro les crédits, les pièces bleues, les améliorations, les tours débloquées, les succès et les records ?")) return;
   wallet.reset();
-  carry = 0;
 });
