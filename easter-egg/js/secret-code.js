@@ -131,7 +131,6 @@ const STYLE = `
 function init() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const pushPage = createMatcher(SECRET_CODE);
-  const pushCrypt = createMatcher(CRYPT_CODE);
   const psychoMatchers = PSYCHO_CODES.map((code) => createMatcher(code));
   const trailMatcher = createMatcher(TRAIL_CODE);
   const nightMatcher = createMatcher(NIGHTCITY_CODE);
@@ -212,7 +211,6 @@ function init() {
 
     // On alimente toujours tous les détecteurs : chacun suit sa propre suite de lettres.
     const page = pushPage(event.key);
-    const crypt = pushCrypt(event.key);
     const psycho = psychoMatchers.map((push) => push(event.key)).some(Boolean);
     const hit = themeMatchers.map((matcher) => matcher.push(event.key) && matcher).find(Boolean);
 
@@ -220,9 +218,6 @@ function init() {
     const trail = trailMatcher(event.key);
     const night = nightMatcher(event.key);
 
-    if (crypt && !onArcade) {
-      unlock(CRYPT_PAGE, "Crypte Néon");
-    }
 
     if (trail) {
       import("./trail.js")
