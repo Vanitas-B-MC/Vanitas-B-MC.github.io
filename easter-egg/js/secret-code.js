@@ -222,6 +222,8 @@ function init() {
 
     if (crypt && !onArcade) {
       unlock(CRYPT_PAGE, "Crypte Néon");
+    }
+
     if (trail) {
       import("./trail.js")
         .then((module) => {
@@ -262,7 +264,7 @@ function init() {
     window.clearTimeout(timer);
     overlay.remove();
     overlay = null;
-  };
+  });
 }
 
 if (typeof document !== "undefined") init();
