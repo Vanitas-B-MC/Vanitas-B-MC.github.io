@@ -262,7 +262,7 @@ function init() {
     window.clearTimeout(timer);
     overlay.remove();
     overlay = null;
-  });
+  };
 }
 
 if (typeof document !== "undefined") init();
