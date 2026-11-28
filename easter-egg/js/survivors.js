@@ -2828,7 +2828,7 @@ export function statSheet(state) {
   const s = state.stats;
   const pct = (v) => `${v >= 0 ? "+" : ""}${Math.round(v * 100)} %`;
   return [
-    ["PV max", String(s.maxHp)], ["Régénération", `${s.regen.toFixed(1).replace(".", ",")}/s`], ["Armure", `−${Math.round(s.armor * 100)} %`],
+    ["PV max", String(s.maxHp)], ["Régénération", `${s.regen.toFixed(1).replace(".", ",")}/s`], ["Armure", s.armor >= 0.005 ? `−${Math.round(s.armor * 100)} %` : "0 %"],
     ["Vitesse", String(Math.round(s.speed))], ["Dégâts", pct(s.might - 1)], ["Recharge", pct(s.haste - 1)],
     ["Zone", pct(s.area - 1)], ["Durée", pct(s.duration - 1)], ["Projectiles", `+${s.amount}`],
     ["Critiques", `${Math.round(s.crit * 100)} % ×${String(s.critMult).replace(".", ",")}`], ["Aimant", String(Math.round(s.magnet))],

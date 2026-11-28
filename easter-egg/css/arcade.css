@@ -2583,3 +2583,7 @@ kbd {
 .sv-codex li.is-half { opacity: .7; }
 .sv-codex li.is-half strong { color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .sv-synlist .sv-syn-ready { animation: none; } }
+/* Démineur : chrono et compteur à largeur fixe (sinon la barre se recentre à chaque seconde et décale le jeu) */
+#mn-time, #mn-mines { display: inline-block; font-variant-numeric: tabular-nums; text-align: left; white-space: nowrap; }
+#mn-time { min-width: 3.6em; }
+#mn-mines { min-width: 1.8em; }

@@ -1847,7 +1847,7 @@ export function createSurvivorsUI(root, wallet) {
       ["Record d'éliminations", fmt(s.bestRunKills)], ["Boss vaincus", fmt(s.bosses)], ["Élites", fmt(s.elites)], ["Gemmes", fmt(s.gems)],
       ["Évolutions", fmt(s.evos)], ["Fusions", fmt(s.fusions || 0)], ["Niveau max", fmt(s.maxLevel)], ["Blackwall vaincu", fmt(s.blackwall)], ["Surtension débloquée", String(data.heat)]
     ];
-    return h("dl", { class: "sv-sheet sv-records" }, rows.map(([k, v]) => [h("dt", {}, k), h("dd", {}, v)]));
+    return h("dl", { class: "sv-sheet sv-records" }, rows.flatMap(([k, v]) => [h("dt", {}, k), h("dd", {}, v)]));
   }
 
   function onChar(id) {
@@ -2080,7 +2080,7 @@ export function createSurvivorsUI(root, wallet) {
     if (showScreen && !state.choices && !state.chest) showOverlay("Pause", "P pour reprendre.", "Reprendre", false, pauseExtra());
   }
   function pauseExtra() {
-    return [h("dl", { class: "sv-sheet" }, statSheet(state).map(([k, v]) => [h("dt", {}, k), h("dd", {}, v)]))];
+    return [h("dl", { class: "sv-sheet" }, statSheet(state).flatMap(([k, v]) => [h("dt", {}, k), h("dd", {}, v)]))];
   }
 
   function resumeGame() {
