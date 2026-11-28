@@ -22,6 +22,7 @@ import { createHuntUI } from "./ui-hunt.js";
 import { SPECIES_IDS } from "./hunt-data.js";
 import { createDungeonUI } from "./ui-dungeon.js";
 import { createCityUI } from "./ui-city.js";
+import { createDeckUI } from "./ui-deck.js";
 import { createAvatarUI, createMiniAvatars } from "./ui-avatar.js";
 import { ERAS as CITY_ERAS } from "./city.js";
 import { createMusic } from "./music.js";
@@ -67,7 +68,8 @@ const GAMES = {
   hunt: { title: "Chasse aux Titans", ui: mount(createHuntUI, "#hunt-root") },
   dungeon: { title: "Donjon", ui: mount(createDungeonUI, "#dungeon-root") },
   city: { title: "Cité des Âges", ui: mount(createCityUI, "#city-root") },
-  avatar: { title: "Personnage", ui: mount(createAvatarUI, "#avatar-root") }
+  avatar: { title: "Personnage", ui: mount(createAvatarUI, "#avatar-root") },
+  deck: { title: "Grimoire Néon", ui: mount(createDeckUI, "#deck-root") }
 };
 
 // Petits portraits de l'avatar : dans le portefeuille (toujours visible) et sur la carte du hub
@@ -130,6 +132,13 @@ function renderWallet() {
   const cityPop = city.b.reduce((n, b) => n + (b.t === "house" || b.t === "arco" ? b.p : 0), 0);
   const metaCity = $("#meta-city");
   if (metaCity) metaCity.textContent = `${CITY_ERAS[city.era].name} · ${fmt(cityPop)} habitant${cityPop > 1 ? "s" : ""}`;
+  const dk = wallet.data.deck;
+  const metaDeck = $("#meta-deck");
+  if (metaDeck && dk) {
+    metaDeck.textContent = dk.run
+      ? `Partie en cours : acte ${dk.run.act}, étage ${dk.run.floor} · ${fmt(dk.shards)} ❖`
+      : dk.stats.runs ? `Victoires : ${fmt(dk.stats.wins)} · Étage max : ${dk.stats.bestFloor} · ${fmt(dk.shards)} ❖` : "Aucune partie jouée";
+  }
   $("#meta-td").textContent = `Record : ${fmt(wallet.data.bestWave)} vague${wallet.data.bestWave > 1 ? "s" : ""} · ${towers} tour${towers > 1 ? "s" : ""}`;
 }
 
@@ -158,7 +167,8 @@ const sections = {
   hunt: $("#game-hunt"),
   dungeon: $("#game-dungeon"),
   city: $("#game-city"),
-  avatar: $("#game-avatar")
+  avatar: $("#game-avatar"),
+  deck: $("#game-deck")
 };
 let current = null;
 

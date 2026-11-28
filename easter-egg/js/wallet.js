@@ -16,6 +16,7 @@ import { LEVEL_IDS } from "./mines.js";
 import { QUEST_IDS, questById, applyRunToQuests } from "./hub.js";
 import { MAX_CREDITS } from "./limits.js";
 import { freshAvatar, sanitizeAvatar, balanceOf } from "./avatar.js";
+import { freshDeckSave, sanitizeDeckSave } from "./deck.js";
 import { CLASS_IDS, FREE_CLASS, META, META_IDS, freshRanks, metaCost, classById, WEAPONS, WEAPON_IDS, FREE_WEAPONS, weaponById, ULT_IDS, FREE_ULTS, ultById } from "./dungeon.js";
 
 const KEY = "mc-arcade-wallet-v1";
@@ -27,7 +28,7 @@ const MAX_BACKUPS = 6;
 // Version du code de l'arcade. À augmenter à chaque mise à jour qui ajoute des jeux, des tours, des cartes…
 // Un onglet resté sur une ancienne version (ou servi depuis le cache du navigateur) voit qu'une sauvegarde a été
 // écrite par une version plus récente : il passe en lecture seule au lieu d'écraser ce qu'il ne connaît pas.
-export const BUILD = 7;
+export const BUILD = 8;
 const START_CREDITS = 100;
 const MAX = MAX_CREDITS;
 
@@ -52,6 +53,7 @@ function freshData() {
     chars: [FREE_CHARACTER], // personnages de Survivor Arena débloqués
     avatar: freshAvatar(), // onglet « Personnage » : pseudo, tenue portée, objets achetés, palettes, tenues enregistrées
     sv: freshSv(),         // Survivor Arena : noyaux, implants, records par carte, Surtension, codex, statistiques
+    deck: freshDeckSave(), // Grimoire Néon : éclats, améliorations permanentes, héros, Ascension, partie en cours
     achievements: [],
     hunt: freshHunt(),     // « Chasse aux Titans » : équipe, box, sac, badges et Titadex du RPG de capture
     trophies: 0,           // monnaie du RPG : gagnée uniquement en chassant
@@ -115,6 +117,7 @@ export function sanitize(raw) {
   }
   data.avatar = sanitizeAvatar(raw.avatar);
   data.sv = sanitizeSv(raw.sv);
+  data.deck = sanitizeDeckSave(raw.deck);
   // ancienne sauvegarde (avant la refonte) : le record compte pour la carte de départ
   if (!raw.sv && data.bestSurvivor) data.sv.best.alley = Math.max(data.sv.best.alley, data.bestSurvivor);
   data.ranch = sanitizeRanch(raw.ranch);
@@ -329,6 +332,7 @@ export function createWallet(storage = defaultStorage()) {
     saveCity() { commit(); },
     saveSurvivor() { commit(); },
     saveAvatar() { commit(); },
+    saveDeck() { commit(); },
 
     // Paiement dans n'importe quelle monnaie de l'arcade (onglet Personnage). false si le solde est insuffisant.
     spendCurrency(cur, n) {
@@ -342,6 +346,7 @@ export function createWallet(storage = defaultStorage()) {
         case "gold": data.ranch.gold -= amount; break;
         case "pearls": data.angler.pearls -= amount; break;
         case "cores": data.sv.cores -= amount; break;
+        case "shards": data.deck.shards -= amount; break;
         default: return false;
       }
       commit();

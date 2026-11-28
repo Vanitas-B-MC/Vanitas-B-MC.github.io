@@ -15,7 +15,8 @@ export const CURRENCIES = {
   souls:    { name: "âmes",           short: "☽", color: "#7dffb0" },
   gold:     { name: "or",             short: "◆", color: "#ffb347" },
   pearls:   { name: "perles",         short: "○", color: "#9be7ff" },
-  cores:    { name: "noyaux",         short: "◈", color: "#b06bff" }
+  cores:    { name: "noyaux",         short: "◈", color: "#b06bff" },
+  shards:   { name: "éclats",         short: "❖", color: "#ff7ad9" }
 };
 export const CURRENCY_IDS = Object.keys(CURRENCIES);
 
@@ -29,6 +30,7 @@ export function balanceOf(data, cur) {
     case "gold": return data.ranch?.gold || 0;
     case "pearls": return data.angler?.pearls || 0;
     case "cores": return data.sv?.cores || 0;
+    case "shards": return data.deck?.shards || 0;
     default: return 0;
   }
 }
@@ -97,7 +99,9 @@ const REQS = {
   fish30:      { text: "Pêcher 30 espèces (Grand Bleu)",                   test: (d) => Object.keys(d.angler?.dex || {}).length >= 30 },
   farm100:     { text: "Passer 100 jours à la ferme (Vallée Néon)",        test: (d) => (d.ranch?.stats?.days || 0) >= 100 },
   mineshard:   { text: "Gagner une partie de Démineur en Difficile",       test: (d) => (d.mines?.hard || 0) > 0 },
-  heat3:       { text: "Débloquer la Surtension 3 (Survivor Arena)",       test: (d) => (d.sv?.heat || 0) >= 3 }
+  heat3:       { text: "Débloquer la Surtension 3 (Survivor Arena)",       test: (d) => (d.sv?.heat || 0) >= 3 },
+  deckwin:     { text: "Gagner une partie de Grimoire Néon",               test: (d) => (d.deck?.stats?.wins || 0) >= 1 },
+  deckasc5:    { text: "Débloquer l'Ascension 5 (Grimoire Néon)",          test: (d) => Object.values(d.deck?.asc || {}).some((n) => n >= 5) }
 };
 export const reqInfo = (id) => REQS[id];
 
@@ -246,6 +250,7 @@ const RAW = {
     ["fuser", "Alchimiste des armes", null, "fusion"], ["miner", "Mineur de données", null, "rebirth"], ["tycoon", "Magnat du réseau", null, "rebirth10"],
     ["architect", "Architecte du futur", null, "cyberera"], ["snake", "Charmeur de serpents", null, "snake50"], ["tetris", "Maître des blocs", null, "tetris20k"],
     ["firewall", "Pare-feu humain", null, "wave30"], ["deminer", "Démineur d'élite", null, "mineshard"], ["overheat", "Surtension", null, "heat3"],
+    ["grimoire", "Lecteur de grimoires", "shards:150"], ["archmagus", "Archimage du Réseau", "shards:600"], ["godslayer", "Tueur de dieux", null, "deckwin"], ["ascended", "Ascensionné", null, "deckasc5"],
     ["ghost", "Fantôme du réseau", "cores:400"], ["ronin", "Rōnin", "souls:500"], ["mermaid", "Sirène", "pearls:3000"], ["baron", "Baron de la terre", "gold:40000"],
     ["chosen", "L'Élu", "trophies:900"], ["rich", "Ultra-riche", "credits:1e39"]
   ]

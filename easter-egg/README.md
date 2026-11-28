@@ -2,7 +2,7 @@
 
 > ⚠️ **Ce fichier divulgue tous les secrets du site.** Si tu veux les trouver toi-même, arrête-toi ici.
 
-Le portfolio cache des codes secrets, des thèmes de couleur, des effets, une **salle d'arcade de 18 jeux** et un **jeu d'action caché**. Tout est fait en JavaScript natif et dessiné au canvas, sans bibliothèque ni image externe (sauf quelques icônes).
+Le portfolio cache des codes secrets, des thèmes de couleur, des effets, une **salle d'arcade de 19 jeux** et un **jeu d'action caché**. Tout est fait en JavaScript natif et dessiné au canvas, sans bibliothèque ni image externe (sauf quelques icônes).
 
 ---
 
@@ -82,7 +82,7 @@ Le code `cyberpsychosis` fait se disloquer la page de plus en plus pendant envir
 
 ## 5. L'arcade (« awesome »)
 
-Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **18 jeux**, avec un portefeuille commun, des succès et une **musique synthwave générée en direct** (bouton « Musique », coupée au départ).
+Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **19 jeux**, avec un portefeuille commun, des succès et une **musique synthwave générée en direct** (bouton « Musique », coupée au départ).
 
 ### Les monnaies
 
@@ -93,6 +93,7 @@ Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **18 
 | **Trophées ✦** | Chasse aux Titans uniquement (dresseurs, Gardiens, captures) | Objets, modules de capture et Atelier des capacités du RPG |
 | **Âmes** | Donjon | Améliorations permanentes, classes, armes et ultimes du Donjon |
 | **Noyaux ◈** | Survivor Arena uniquement (temps survécu, élites, boss, voleur, caisses) | Implants permanents de Survivor Arena, éléments d'avatar |
+| **Éclats ❖** | Grimoire Néon uniquement (étages gravis, élites, boss, victoire, bonus d'Ascension) | Améliorations permanentes et héros de Grimoire Néon, titres d'avatar |
 | **Or** | Vallée Néon (ventes de la ferme) | Graines, outils, bâtiments et animaux de la ferme |
 | **Perles** | Grand Bleu (vente des poissons) | Cannes, appâts, accessoires et lieux de pêche |
 | **Ressources de la cité** | Cité des Âges (nourriture, bois, pierre, métal, or, savoir) | Bâtiments, routes et passage aux ères suivantes |
@@ -100,7 +101,7 @@ Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **18 
 Le **gain passif du Clicker** continue de tourner pendant qu'on joue aux autres jeux (et même arcade fermée si l'arbre du formatage le permet). Les gros montants s'affichent en abrégé (K, M, B, T, Qa, Qi, Sx, Sp, Oc, No, Dc, Ud…) jusqu'à 1e66.
 Plusieurs jeux donnent des récompenses **proportionnelles à ta fortune**, pour que les gains restent intéressants même quand on est très riche.
 
-### Les 18 jeux
+### Les 19 jeux
 
 | # | Jeu | Type | En bref |
 | --- | --- | --- | --- |
@@ -122,6 +123,7 @@ Plusieurs jeux donnent des récompenses **proportionnelles à ta fortune**, pour
 | 16 | **Crash** | Casino | Un multiplicateur grimpe puis s'effondre : encaisser à temps (ou fixer un encaissement automatique). |
 | 17 | **Machine à sous** | Casino | 5 rouleaux sans lignes : 3 symboles identiques sur des rouleaux côte à côte gagnent, où qu'ils soient. Wilds, et trois ✸ pour des tours gratuits à gains doublés. |
 | 18 | **Cité des Âges** | City builder | Voir le détail plus bas. |
+| 19 | **Grimoire Néon** | Deckbuilder | Roguelite à cartes façon *Slay the Spire* : voir le détail plus bas. |
 
 ### Survivor Arena (en détail)
 
@@ -155,6 +157,20 @@ Un onglet « Personnage » (lien sur l'accueil et petit portrait dans le portefe
 - **Toutes les monnaies servent** : crédits (de 500 à 1e39, pour les très grosses fortunes), pièces bleues, trophées, âmes, or, perles, noyaux.
 - **34 éléments d'exploit**, gratuits une fois l'exploit réalisé dans un jeu (vaincre le Blackwall, devenir Champion des Titans, étage 50 du Donjon, ère Cyberpunk de la Cité, 30 espèces pêchées…).
 - Vignettes cadrées selon la catégorie (visage, corps entier ou jambes), essayer avant d'acheter (aperçu), 3 tenues enregistrables, tenue aléatoire, pseudo, export en image PNG.
+
+### Grimoire Néon (en détail)
+
+Un roguelite deckbuilder façon *Slay the Spire*, dans un univers qui mélange dieux anciens et cyberpunk (`js/deck.js` pour la logique, `js/deck-art.js` pour les portraits des ennemis, `js/ui-deck.js` pour l'interface).
+
+- **3 héros** avec leur deck de départ, leur relique et leurs cartes : le **Rōnin du Réseau** (Force, bouclier, épines), la **Technomancienne** (Brûlure, Gel, sorts de zone) et le **Spectre** (Virus, cartes à coût nul, lames de données). Le premier est offert, les deux autres se débloquent avec des éclats.
+- **98 cartes** (attaques, compétences, pouvoirs ; communes, peu communes, rares), toutes améliorables, plus des malédictions. Énergie (3 par tour), pioche de 5 cartes, défausse, cartes épuisées.
+- **Combats au tour par tour** : les ennemis annoncent leur prochaine action (attaque et dégâts, protection, renfort, malus…). Effets : Force, Dextérité, Vulnérable, Affaibli, Fragile, Virus, Brûlure, Gel, Épines, Régénération, Rituel.
+- **3 actes** (Catacombes néon, Tour corporative céleste, Cœur du Réseau divin) avec chacun une **carte à embranchements** : combats, élites, événements, marchands, feux de camp, trésors, puis un **boss** (l'Archon de cristal, la Directrice Séraphine, le Dieu-Machine). 32 ennemis en tout.
+- **37 reliques** (dont des reliques de boss puissantes avec un défaut), **10 stims** utilisables en combat, **10 événements** à choix, une boutique (cartes, reliques, stims, retrait de carte), des feux de camp (repos ou amélioration).
+- **Méta-progression** : chaque partie rapporte des **éclats ❖** (selon les étages, élites et boss), qui achètent 10 améliorations permanentes (PV, or de départ, stims, relique de départ, relances, nouvelles cartes débloquées, chance de rares, réductions…). Gagner une partie débloque l'**Ascension** suivante (10 niveaux de difficulté, +10 % d'éclats par niveau).
+- **Récompenses dans l'arcade** : 2 pièces bleues par boss vaincu (+5 pour une victoire), éclats utilisables dans l'onglet Personnage (titres), titres d'exploit.
+- La partie est **sauvegardée à chaque action** : on peut quitter et reprendre plus tard, même en plein combat. Le portrait du joueur en combat est l'avatar de l'onglet Personnage.
+- Commandes : clic sur une carte puis sur l'ennemi visé ; au clavier, 1 à 9 et 0 pour choisir une carte, E pour finir le tour, Échap pour annuler.
 
 ### Cité des Âges (en détail)
 
@@ -287,6 +303,7 @@ easter-egg/
     ├── ranch-art.js, fishing-art.js, td-art.js, td-fx.js   dessins de la ferme, de la pêche et du tower defense
     ├── hunt-data.js, hunt-art.js   données et sprites de Chasse aux Titans
     ├── dungeon.js, enemies2.js, items.js, weapons.js, synergy.js, hub.js   contenu du Donjon
+    ├── deck.js, deck-art.js   Grimoire Néon : cartes, ennemis, reliques, moteur de combat ; portraits des ennemis
     └── supersecret.js     tout Crypte Néon (un seul fichier, canvas)
 ```
 
