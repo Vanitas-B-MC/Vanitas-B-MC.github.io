@@ -3,7 +3,7 @@
 // Script indépendant de secret-code.js : il n'interfère pas avec « awesome » ni « edgerunner ».
 
 const CODE = "supersecret";
-const TARGET = "easter-egg/supersecret.html";
+const TARGET = "../supersecret.html";
 const RESET_DELAY = 2500; // ms sans frappe avant d'oublier les touches déjà tapées
 
 let buffer = "";
