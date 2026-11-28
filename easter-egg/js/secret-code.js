@@ -250,7 +250,7 @@ function init() {
         .then((module) => module.startCyberpsychosis())
         .catch((error) => console.error("[cyberpsychosis]", error));
     }
-  });
+  };
 
   // Au chargement : la traînée est remise si elle était activée, et l'économiseur d'écran surveille l'inactivité.
   import("./trail.js").then((module) => module.restoreTrail()).catch((error) => console.error("[trail]", error));
