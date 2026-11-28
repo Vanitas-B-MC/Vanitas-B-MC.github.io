@@ -22,6 +22,7 @@ import { createHuntUI } from "./ui-hunt.js";
 import { SPECIES_IDS } from "./hunt-data.js";
 import { createDungeonUI } from "./ui-dungeon.js";
 import { createCityUI } from "./ui-city.js";
+import { createAvatarUI, createMiniAvatars } from "./ui-avatar.js";
 import { ERAS as CITY_ERAS } from "./city.js";
 import { createMusic } from "./music.js";
 import { fmt, fmtShort, fmtRate } from "./ui.js";
@@ -65,8 +66,22 @@ const GAMES = {
   breach: { title: "Breach Protocol", ui: mount(createBreachUI, "#breach-root") },
   hunt: { title: "Chasse aux Titans", ui: mount(createHuntUI, "#hunt-root") },
   dungeon: { title: "Donjon", ui: mount(createDungeonUI, "#dungeon-root") },
-  city: { title: "Cité des Âges", ui: mount(createCityUI, "#city-root") }
+  city: { title: "Cité des Âges", ui: mount(createCityUI, "#city-root") },
+  avatar: { title: "Personnage", ui: mount(createAvatarUI, "#avatar-root") }
 };
+
+// Petits portraits de l'avatar : dans le portefeuille (toujours visible) et sur la carte du hub
+try {
+  createMiniAvatars(wallet, [$("#wallet-avatar"), $("#hub-avatar")], (name, title, col) => {
+    const set = (sel, text) => { const el = $(sel); if (el) el.textContent = text; };
+    set("#wallet-avatar-name", name);
+    set("#hub-avatar-name", name);
+    set("#hub-avatar-title", title ? `// ${title}` : "");
+    set("#hub-avatar-meta", `Collection : ${col.owned} / ${col.total}`);
+  });
+} catch (error) {
+  console.error("[arcade] avatar : portrait désactivé", error);
+}
 
 /* ---------- Portefeuille et infos du hub ---------- */
 
@@ -142,7 +157,8 @@ const sections = {
   breach: $("#game-breach"),
   hunt: $("#game-hunt"),
   dungeon: $("#game-dungeon"),
-  city: $("#game-city")
+  city: $("#game-city"),
+  avatar: $("#game-avatar")
 };
 let current = null;
 

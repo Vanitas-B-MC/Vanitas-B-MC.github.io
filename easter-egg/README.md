@@ -92,7 +92,7 @@ Taper `awesome` ouvre **`easter-egg/arcade.html`** : une salle d'arcade de **18 
 | **Pièces bleues** | Data Snake (pièce rare), Tetris (1 toutes les 6 lignes), longues parties de Survivor Arena, piratages complets, succès de la ferme, bestiaire de la pêche | Roulette, surcadençage des bâtiments du Clicker, graine de fruit ancien, canne néon quantique |
 | **Trophées ✦** | Chasse aux Titans uniquement (dresseurs, Gardiens, captures) | Objets, modules de capture et Atelier des capacités du RPG |
 | **Âmes** | Donjon | Améliorations permanentes, classes, armes et ultimes du Donjon |
-| **Noyaux ◈** | Survivor Arena uniquement (temps survécu, élites, boss, voleur, caisses) | Implants permanents de Survivor Arena |
+| **Noyaux ◈** | Survivor Arena uniquement (temps survécu, élites, boss, voleur, caisses) | Implants permanents de Survivor Arena, éléments d'avatar |
 | **Or** | Vallée Néon (ventes de la ferme) | Graines, outils, bâtiments et animaux de la ferme |
 | **Perles** | Grand Bleu (vente des poissons) | Cannes, appâts, accessoires et lieux de pêche |
 | **Ressources de la cité** | Cité des Âges (nourriture, bois, pierre, métal, or, savoir) | Bâtiments, routes et passage aux ères suivantes |
@@ -140,6 +140,20 @@ Façon *Vampire Survivors*, entièrement au canvas (`js/survivors.js` pour la lo
 - **5 cartes** (Ruelles néon, Datacenter, Désert toxique, Station gelée, Le Noyau), débloquées en survivant 10 minutes sur la précédente, et **6 niveaux de Surtension** (difficulté et récompenses en hausse).
 - **21 implants permanents** payés en **noyaux**, un **codex** des ennemis et des armes, des statistiques globales, et un écran de fin avec les dégâts par arme.
 - **Récompenses** : crédits (+ un pourcentage de ta fortune), une pièce bleue toutes les 2 minutes, et des noyaux.
+
+### Personnage (en détail)
+
+Un onglet « Personnage » (lien sur l'accueil et petit portrait dans le portefeuille, toujours visible) pour créer son avatar en pied, dans un style anime à la *Idling to Rule the Gods* qui mélange fantasy divine et cyberpunk. Tout est dessiné au canvas, avec contours colorés, ombrage en aplats, cheveux en mèches et une légère respiration (`js/avatar.js` pour le catalogue, `js/avatar-art.js` pour le dessin, `js/ui-avatar.js` pour l'interface).
+
+- **308 éléments en 24 catégories** :
+  - Décor : fond (dont Paradis, Temple céleste, Forêt enchantée et des fonds animés), cadre, effet (pluie, glitch, flammes, pétales…).
+  - Corps et visage : silhouette, peau (dont chrome, hologramme, statue d'or), visage, yeux, sourcils, expression, pilosité, tatouages, cyberware (optiques Kiroshi, visière Mantis, Sandevistan…).
+  - Tenue : coiffure, haut (veste Samurai, toge, armure de paladin, robe de sorcière…), **bas** (jean, jupe plissée, hakama, jambières…), **chaussures** (baskets, geta, bottes ailées…), cou, couvre-chef, lunettes et masques, boucles.
+  - Équipement : **dos** (ailes d'ange, de démon, mécaniques, de dragon, cape, anneau divin, jetpack…), **arme** (katana, lames Mantis, faux, grimoire, épée d'énergie, Lame des dieux…), **familier** (renard, drone, phénix, slime, fée…) et **titre** affiché sous le pseudo.
+- **5 couleurs réglables** (cheveux, yeux, haut, bas, néon) dans **7 palettes** (Basique, Néon, Pastel, Métaux, Ténèbres, Holographique animée, Royale).
+- **Toutes les monnaies servent** : crédits (de 500 à 1e39, pour les très grosses fortunes), pièces bleues, trophées, âmes, or, perles, noyaux.
+- **34 éléments d'exploit**, gratuits une fois l'exploit réalisé dans un jeu (vaincre le Blackwall, devenir Champion des Titans, étage 50 du Donjon, ère Cyberpunk de la Cité, 30 espèces pêchées…).
+- Vignettes cadrées selon la catégorie (visage, corps entier ou jambes), essayer avant d'acheter (aperçu), 3 tenues enregistrables, tenue aléatoire, pseudo, export en image PNG.
 
 ### Cité des Âges (en détail)
 

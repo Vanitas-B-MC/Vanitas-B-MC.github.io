@@ -51,6 +51,10 @@
 
     <!-- Portefeuille partagé entre tous les jeux -->
     <div class="wallet-bar chamfer" id="wallet-bar" role="group" aria-label="Portefeuille">
+      <a class="wallet-avatar" href="#avatar" title="Mon personnage : personnaliser l'avatar">
+        <canvas id="wallet-avatar" width="88" height="88" aria-hidden="true"></canvas>
+        <span class="wallet-avatar-name" id="wallet-avatar-name">Personnage</span>
+      </a>
       <p class="wallet-item" title="Pièces bleues : rares, gagnées au Snake, au Tetris, en survivant longtemps ou en piratant à fond ; jouées à la Roulette et dans les améliorations du Clicker">
         <span class="coin" aria-hidden="true"></span>
         <span class="wallet-label">Pièces bleues</span>
@@ -83,6 +87,18 @@
       <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span>Zone secrète // accès autorisé</p>
       <h1 class="arcade-title glitch" id="hub-title" data-text="Arcade" tabindex="-1">Arcade</h1>
       <p class="arcade-lead">Tu as trouvé le code. Choisis un jeu : les pièces bleues (Snake, Tetris) se jouent à la Roulette ou boostent le Clicker ; les crédits servent au Blackjack, au Plinko, au Crash, à la Machine à sous, aux Courses d'IA et à débloquer les tours du Tower Defense. Vallée Néon et Grand Bleu ont leur propre monnaie (or et perles).</p>
+
+      <!-- Carte du personnage (onglet « Personnage ») -->
+      <a class="av-hubcard chamfer" href="#avatar">
+        <canvas id="hub-avatar" width="240" height="240" aria-hidden="true"></canvas>
+        <span class="av-hubcard-text">
+          <span class="card-index">// Mon personnage</span>
+          <span class="av-hubcard-name" id="hub-avatar-name">Choom</span>
+          <span class="av-hubcard-title" id="hub-avatar-title"></span>
+          <span class="card-meta" id="hub-avatar-meta">Collection</span>
+          <span class="av-hubcard-cta">Personnaliser l'avatar →</span>
+        </span>
+      </a>
 
       <ul class="game-grid">
         <li>
@@ -369,6 +385,13 @@
       <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
       <h2 class="game-title glitch" id="title-td" data-text="Pare-feu" tabindex="-1">Pare-feu</h2>
       <div class="game-body" id="td-root"></div>
+    </section>
+
+    <!-- ============ PERSONNAGE (avatar) ============ -->
+    <section id="game-avatar" class="game-view" aria-labelledby="title-avatar" hidden>
+      <a class="back-hub" href="#"><span aria-hidden="true">←</span> Tous les jeux</a>
+      <h2 class="game-title glitch" id="title-avatar" data-text="Personnage" tabindex="-1">Personnage</h2>
+      <div class="game-body" id="avatar-root"></div>
     </section>
 
     <!-- ============ SURVIVOR ARENA ============ -->
