@@ -13,7 +13,9 @@ import {
   availableUpgrades, upgradeCost, buyUpgrade, buyAllUpgrades, upgradeById,
   click, catchGold, nextGoldDelay, goldLifetime, activeBuffs,
   levelCost, pendingPrestige, nextPrestigeAt, format, heavenState, buyHeaven, offlineRate,
-  checkAchievements, achievementCredits, newsFor
+  checkAchievements, achievementCredits, newsFor,
+  MINIGAMES, minigameUnlocked, GODS, SLOT_NAMES, SWAP_MAX, pantheonSwaps, nextSwapIn, placeGod, removeGod,
+  ramMax, SPELLS, spellCost, castSpell, STOCKS, MARKET_TICK, MARKET_FEE, dollarValue, maxShares, sharesCost, sharesValue, buyShares, sellShares
 } from "./clicker.js";
 import { h, fmtShort, fmtRate, prefersReducedMotion, themeColor } from "./ui.js";
 
@@ -22,6 +24,8 @@ const MAX_POPUPS = 14;
 const NEWS_MS = 9000;
 const TOAST_MS = 6000;
 const plural = (n, word, pl = `${word}s`) => (n > 1 ? pl : word);
+// replaceChildren écrit « null » en texte : on retire d'abord les éléments vides.
+const fill = (el, ...nodes) => el.replaceChildren(...nodes.flat().filter((n) => n !== null && n !== undefined && n !== false));
 
 export function createClickerUI(root, wallet) {
   const ck = () => wallet.data.ck;
@@ -37,7 +41,7 @@ export function createClickerUI(root, wallet) {
   let rainFrame = 0;
   let confirmFormat = false;
   let confirmTimer = 0;
-  const keys = { upgrades: "", room: "", ach: -1, heaven: "", level: "" };
+  const keys = { upgrades: "", room: "", ach: -1, heaven: "", level: "", mini: "" };
 
   /* ================================================================================================
      Colonne de gauche : banque + noyau
@@ -85,6 +89,10 @@ export function createClickerUI(root, wallet) {
   const levelHead = h("p", { class: "ck2-hint" });
   const levelList = h("ul", { class: "ck2-levels" });
   const statsEl = h("dl", { class: "ck2-stats" });
+  let miniTab = "deck";
+  const miniNavButtons = MINIGAMES.map((m) => h("button", { class: "ck2-toggle", type: "button", "data-mini": m.id, onclick: () => { miniTab = m.id; keys.mini = ""; render(); } }, m.name));
+  const miniNav = h("div", { class: "ck2-toggles ck2-mini-nav", role: "group", "aria-label": "Mini-jeux" }, miniNavButtons);
+  const miniBody = h("div", { class: "ck2-mini" });
 
   const TABS = [
     { id: "room", label: "Machines", panel: h("div", {}, roomEl) },
@@ -93,6 +101,7 @@ export function createClickerUI(root, wallet) {
       h("p", { class: "ck2-hint" }, "Formater efface ta banque, tes bâtiments et tes améliorations. Tu gardes tes succès, ton surcadençage et l'arbre ci-dessous. "
         + "Chaque niveau de prestige donne +1 % de production à vie et 1 éclat à dépenser dans l'arbre."),
       formatInfo, formatButton, chipsEl, heavenGrid) },
+    { id: "mini", label: "Mini-jeux", panel: h("div", {}, miniNav, miniBody) },
     { id: "level", label: "Surcadençage", panel: h("div", {}, levelHead, levelList) },
     { id: "stats", label: "Stats", panel: h("div", {}, statsEl) }
   ];
@@ -109,7 +118,7 @@ export function createClickerUI(root, wallet) {
   function selectTab(id) {
     tab = id;
     TABS.forEach((t, i) => { t.panel.hidden = t.id !== id; tabButtons[i].setAttribute("aria-selected", String(t.id === id)); });
-    keys.room = ""; keys.ach = -1; keys.heaven = ""; keys.level = "";
+    keys.room = ""; keys.ach = -1; keys.heaven = ""; keys.level = ""; keys.mini = "";
     render();
   }
 
@@ -238,12 +247,12 @@ export function createClickerUI(root, wallet) {
   function showBuildingInfo(id) {
     const c = ck();
     const b = buildingById(id);
-    if (!buildingVisible(c, id)) { info.replaceChildren(h("p", { class: "ck2-hint" }, "Bâtiment encore inconnu. Mine davantage pour le découvrir.")); return; }
+    if (!buildingVisible(c, id)) { fill(info, h("p", { class: "ck2-hint" }, "Bâtiment encore inconnu. Mine davantage pour le découvrir.")); return; }
     const n = c.b[id];
     const each = unitCps(c, id) * globalMult(c);
     const total = buildingCps(c, id);
     const all = perSecond(c) || 1;
-    info.replaceChildren(
+    fill(info, 
       h("div", { class: "ck2-info-head", style: `--c:${b.color}` }, h("span", { class: "ck2-icon" }, b.code), h("strong", {}, b.name),
         h("span", { class: "ck2-info-price" }, mode === "buy" ? `${fmt(buildingCost(c, id, qty))} ◆` : `+${fmt(sellValue(c, id, qty))} ◆`)),
       h("p", { class: "ck2-info-flavor" }, b.desc),
@@ -259,7 +268,7 @@ export function createClickerUI(root, wallet) {
   function showUpgradeInfo(u, canBuy) {
     const c = ck();
     const price = upgradeCost(c, u);
-    info.replaceChildren(
+    fill(info, 
       h("div", { class: "ck2-info-head", style: `--c:${u.color}` }, h("span", { class: "ck2-icon" }, u.code, h("small", {}, u.mark)), h("strong", {}, u.name),
         h("span", { class: `ck2-info-price${c.data >= price ? "" : " is-poor"}` }, `${fmt(price)} ◆`)),
       h("p", {}, u.desc),
@@ -267,7 +276,7 @@ export function createClickerUI(root, wallet) {
   }
 
   function buildUpgradeGrid(list) {
-    upgradeGrid.replaceChildren(...list.map((u) => {
+    fill(upgradeGrid, ...list.map((u) => {
       const tile = h("button", { class: "ck2-up", type: "button", role: "listitem", "data-id": u.id, style: `--c:${u.color}`, "aria-label": `${u.name} : ${u.desc}` },
         h("span", { class: "ck2-up-code" }, u.code), h("span", { class: "ck2-up-mark" }, u.mark));
       tile.addEventListener("pointerdown", (e) => { lastPointer = e.pointerType || "mouse"; });
@@ -384,7 +393,7 @@ export function createClickerUI(root, wallet) {
     clickEl.textContent = `par clic : ${fmtRate(clickValue(c))}`;
 
     const buffs = activeBuffs(c);
-    buffsEl.replaceChildren(...buffs.map((x) => {
+    fill(buffsEl, ...buffs.map((x) => {
       const left = Math.max(0, Math.ceil((x.until - Date.now()) / 1000));
       const desc = x.id === "surge" ? `${buildingById(x.b).name} ×${fmtRate(x.mult)}` : BUFFS[x.id].desc;
       return h("li", { class: `ck2-buff is-${x.id}` }, h("strong", {}, BUFFS[x.id].name), ` ${desc} · ${left} s`);
@@ -444,9 +453,9 @@ export function createClickerUI(root, wallet) {
       keys.room = key;
       const owned = BUILDINGS.filter((b) => c.b[b.id] > 0);
       if (!owned.length) {
-        roomEl.replaceChildren(h("p", { class: "ck2-hint" }, "La salle est vide. Achète ton premier script dans la boutique : il cliquera à ta place."));
+        fill(roomEl, h("p", { class: "ck2-hint" }, "La salle est vide. Achète ton premier script dans la boutique : il cliquera à ta place."));
       } else {
-        roomEl.replaceChildren(...owned.map((b) => {
+        fill(roomEl, ...owned.map((b) => {
           const n = c.b[b.id];
           const shown = Math.min(n, 48);
           const racks = Array.from({ length: shown }, (_, i) => h("span", { class: "ck2-rack", style: `animation-delay:${((i * 37) % 23) / 10}s` }));
@@ -469,7 +478,7 @@ export function createClickerUI(root, wallet) {
     achHead.textContent = `${c.ach.length} / ${ACHIEVEMENTS.length} succès · signal ${Math.round(milk(c) * 100)} % (renforce les chats-bots). Chaque succès verse aussi des crédits.`;
     const groups = new Map();
     for (const a of ACHIEVEMENTS) { if (!groups.has(a.cat)) groups.set(a.cat, []); groups.get(a.cat).push(a); }
-    achGrid.replaceChildren(...[...groups].map(([cat, list]) => h("div", { class: "ck2-ach-group" },
+    fill(achGrid, ...[...groups].map(([cat, list]) => h("div", { class: "ck2-ach-group" },
       h("h4", {}, cat, h("span", {}, ` ${list.filter((a) => c.ach.includes(a.id)).length}/${list.length}`)),
       h("ul", {}, list.map((a) => {
         const done = c.ach.includes(a.id);
@@ -482,7 +491,7 @@ export function createClickerUI(root, wallet) {
   function renderFormat(c) {
     const pending = pendingPrestige(c);
     const lvl = prestigeLevel(c);
-    formatInfo.replaceChildren(h("dl", { class: "ck2-stats" },
+    fill(formatInfo, h("dl", { class: "ck2-stats" },
       stat("Prestige", `${fmt(lvl)} (+${fmt(lvl * (c.heaven.includes("h_god") ? 2 : 1))} %)${c.legacy ? ` dont ${fmt(c.legacy)} hérités de l'ancien Clicker` : ""}`),
       stat("À gagner en formatant", `+${fmt(pending)} niveau${pending > 1 ? "x" : ""}`),
       stat("Prochain niveau à", `${fmt(nextPrestigeAt(c))} données minées depuis toujours`),
@@ -495,7 +504,7 @@ export function createClickerUI(root, wallet) {
     const key = `${c.chips}|${c.heaven.join(",")}`;
     if (key === keys.heaven) return;
     keys.heaven = key;
-    heavenGrid.replaceChildren(...HEAVEN.map((node) => {
+    fill(heavenGrid, ...HEAVEN.map((node) => {
       const st = heavenState(c, node.id);
       const reqs = node.req.filter((r) => !c.heaven.includes(r)).map((r) => HEAVEN.find((x) => x.id === r).name);
       return h("li", {}, h("button", {
@@ -511,7 +520,7 @@ export function createClickerUI(root, wallet) {
     const key = `${wallet.blue}|${BUILDING_IDS.map((id) => `${c.lv[id]}:${buildingVisible(c, id) ? 1 : 0}`).join(",")}`;
     if (key === keys.level) return;
     keys.level = key;
-    levelList.replaceChildren(...BUILDINGS.filter((b) => buildingVisible(c, b.id)).map((b) => {
+    fill(levelList, ...BUILDINGS.filter((b) => buildingVisible(c, b.id)).map((b) => {
       const cost = levelCost(c, b.id);
       return h("li", { class: "ck2-level", style: `--c:${b.color}` },
         h("span", { class: "ck2-icon" }, b.code),
@@ -525,12 +534,163 @@ export function createClickerUI(root, wallet) {
     }));
   }
 
+  /* ================================================================================================
+     Mini-jeux
+     ================================================================================================ */
+
+  let miniRefs = null;
+
+  function renderMini(c) {
+    miniNavButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mini === miniTab)));
+    const m = MINIGAMES.find((x) => x.id === miniTab);
+    const unlocked = minigameUnlocked(c, m.id);
+    const key = `${miniTab}|${unlocked}`;
+    if (key !== keys.mini) {
+      keys.mini = key;
+      miniRefs = null;
+      if (!unlocked) {
+        fill(miniBody, h("p", { class: "ck2-hint" }, `${m.name} : ${m.desc}`),
+          h("p", { class: "ck2-mini-lock" }, `Verrouillé. Achète au moins 1 ${buildingById(m.b).name.toLowerCase()} pour l'ouvrir.`));
+        return;
+      }
+      miniRefs = miniTab === "deck" ? buildDeck() : miniTab === "pantheon" ? buildPantheon() : buildMarket();
+    }
+    if (miniRefs) miniRefs.update(c);
+  }
+
+  // ---------- Cyberdeck ----------
+  function buildDeck() {
+    const bar = h("div", { class: "ck2-ram-fill" });
+    const label = h("span", { class: "ck2-ram-label" });
+    const out = h("p", { class: "ck2-mini-out", role: "status" });
+    const spells = SPELLS.map((sp) => {
+      const cost = h("span", { class: "ck2-spell-cost" });
+      const button = h("button", { class: "ck2-spell", type: "button", onclick: () => {
+        const res = castSpell(ck(), sp.id);
+        if (!res) return;
+        if (res.gain) wallet.minedData(res.gain);
+        wallet.saveClicker();
+        out.textContent = `${sp.name} : ${res.text}`;
+        out.dataset.tone = res.ok ? "win" : "lose";
+        if (res.spawnGold) { window.clearTimeout(goldTimer); showGold(); }
+        afterChange();
+      } }, h("strong", {}, sp.name), h("span", {}, sp.desc), cost);
+      return { sp, button, cost };
+    });
+    fill(miniBody,
+      h("p", { class: "ck2-hint" }, "Ton cyberdeck lance des programmes avec sa RAM, qui se recharge toute seule. Plus tu as de cliniques de ripperdoc, plus tu as de RAM. Chaque programme a 15 % de chances d'échouer."),
+      h("div", { class: "ck2-ram" }, bar, label),
+      h("div", { class: "ck2-spells" }, spells.map((x) => x.button)),
+      out);
+    return { update(c) {
+      const max = ramMax(c);
+      const ram = c.mg.deck.ram;
+      bar.style.width = `${max ? (ram / max) * 100 : 0}%`;
+      label.textContent = `RAM ${Math.floor(ram)} / ${max}`;
+      for (const x of spells) {
+        const cost = spellCost(c, x.sp);
+        x.cost.textContent = `${cost} RAM`;
+        x.button.disabled = ram < cost;
+      }
+    } };
+  }
+
+  // ---------- Panthéon ----------
+  function buildPantheon() {
+    const swapsEl = h("p", { class: "ck2-hint" });
+    const slotEls = SLOT_NAMES.map((name, i) => {
+      const body = h("div", { class: "ck2-slot-body" });
+      return { el: h("div", { class: "ck2-slot" }, h("span", { class: "ck2-slot-name" }, `${name} · ${["100", "≈60", "≈30"][i]} %`), body), body };
+    });
+    const list = h("ul", { class: "ck2-gods" });
+    fill(miniBody,
+      h("p", { class: "ck2-hint" }, "Installe jusqu'à 3 IA. L'emplacement Alpha donne tout leur effet, Bêta et Gamma un peu moins. Installer une IA coûte un échange ; les échanges se rechargent avec le temps."),
+      swapsEl,
+      h("div", { class: "ck2-slots" }, slotEls.map((x) => x.el)),
+      list);
+    let listKey = "";
+    return { update(c) {
+      const swaps = pantheonSwaps(c);
+      const wait = Math.ceil(nextSwapIn(c) / 60000);
+      swapsEl.textContent = `Échanges : ${swaps} / ${SWAP_MAX}${swaps < SWAP_MAX ? ` · prochain dans ${wait} min` : ""}`;
+      const slots = c.mg.pantheon.slots;
+      const key = `${swaps}|${slots.join(",")}`;
+      if (key === listKey) return;
+      listKey = key;
+      slotEls.forEach((x, i) => {
+        const g = GODS.find((y) => y.id === slots[i]);
+        fill(x.body, g ? [h("strong", {}, g.name), h("span", {}, g.desc(g.value[i], i)),
+          h("button", { class: "chip chip-ghost", type: "button", onclick: () => { if (removeGod(ck(), i)) { wallet.saveClicker(); afterChange(); } } }, "Retirer")]
+          : h("span", { class: "ck2-hint" }, "Vide"));
+      });
+      fill(list, ...GODS.map((g) => {
+        const at = slots.indexOf(g.id);
+        return h("li", { class: `ck2-god${at >= 0 ? " is-placed" : ""}` },
+          h("strong", {}, g.name), h("span", {}, g.desc(g.value[0], 0)),
+          h("span", { class: "ck2-god-actions" }, SLOT_NAMES.map((name, i) => h("button", {
+            class: "ck2-toggle", type: "button", disabled: at === i || swaps < 1, "aria-pressed": String(at === i), title: `Placer en ${name}`,
+            onclick: () => { if (placeGod(ck(), g.id, i)) { wallet.saveClicker(); afterChange(); } }
+          }, ["α", "β", "γ"][i]))));
+      }));
+    } };
+  }
+
+  // ---------- Bourse noire ----------
+  function buildMarket() {
+    const head = h("p", { class: "ck2-hint" });
+    const rowsM = STOCKS.map((st, i) => {
+      const price = h("span", { class: "ck2-st-price" });
+      const ownedM = h("span", { class: "ck2-st-own" });
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 120 32"); svg.setAttribute("preserveAspectRatio", "none"); svg.setAttribute("class", "ck2-spark"); svg.setAttribute("aria-hidden", "true");
+      svg.append(line);
+      const act = (label, fn) => h("button", { class: "ck2-toggle", type: "button", onclick: () => { if (fn()) { wallet.saveClicker(); afterChange(); } } }, label);
+      const buttons = [
+        act("+1", () => buyShares(ck(), i, 1)), act("+10", () => buyShares(ck(), i, 10)), act("Max", () => buyShares(ck(), i, 1e9)),
+        act("−1", () => sellShares(ck(), i, 1)), act("−10", () => sellShares(ck(), i, 10)), act("Tout", () => sellShares(ck(), i, 1e9))];
+      const el = h("div", { class: "ck2-stock" },
+        h("div", { class: "ck2-st-name" }, h("strong", {}, st.id), h("span", {}, st.name)),
+        svg, price, ownedM,
+        h("div", { class: "ck2-st-actions" }, buttons.slice(0, 3), h("span", { class: "ck2-st-sep" }), buttons.slice(3)));
+      return { el, price, ownedM, line, buttons, last: "" };
+    });
+    fill(miniBody,
+      h("p", { class: "ck2-hint" }, `Les cours sont en $ ; 1 $ vaut 1 seconde de ta production (sans Frénésie). Ils bougent chaque minute selon une tendance cachée. Commission de ${Math.round(MARKET_FEE * 100)} % à l'achat.`),
+      head,
+      h("div", { class: "ck2-market" }, rowsM.map((r) => r.el)));
+    return { update(c) {
+      const m = c.mg.market;
+      const dollar = dollarValue(c);
+      const left = Math.ceil((MARKET_TICK - m.t) / 1000);
+      head.textContent = `1 $ = ${fmt(dollar)} données · max ${maxShares(c)} actions par corpo · bénéfice total ${m.profit >= 0 ? "+" : "−"}${fmt(Math.abs(m.profit))} · prochaine cotation dans ${left} s`;
+      rowsM.forEach((r, i) => {
+        const s = m.stocks[i];
+        const prev = s.hist.length > 1 ? s.hist[s.hist.length - 2] : s.val;
+        const up = s.val >= prev;
+        r.price.textContent = `${s.val.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} $ ${up ? "▲" : "▼"}`;
+        r.price.dataset.tone = up ? "up" : "down";
+        const avg = s.own ? s.paid / s.own / dollar / (1 + MARKET_FEE) : 0;
+        r.ownedM.textContent = s.own ? `${s.own} / ${maxShares(c)} · valeur ${fmt(sharesValue(c, i, s.own))} · prix moyen ${avg.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} $` : `0 / ${maxShares(c)}`;
+        const unit = sharesCost(c, i, 1);
+        r.buttons.slice(0, 3).forEach((b) => { b.disabled = c.data < unit || s.own >= maxShares(c); });
+        r.buttons.slice(3).forEach((b) => { b.disabled = s.own < 1; });
+        const key = `${s.hist.length}|${s.val}`;
+        if (key !== r.last) {
+          r.last = key;
+          const lo = Math.min(...s.hist); const hi = Math.max(...s.hist); const span = hi - lo || 1;
+          r.line.setAttribute("points", s.hist.map((v, k) => `${(k / Math.max(1, s.hist.length - 1)) * 120},${30 - ((v - lo) / span) * 28}`).join(" "));
+        }
+      });
+    } };
+  }
+
   function stat(label, value) { return h("div", {}, h("dt", {}, label), h("dd", {}, value)); }
 
   function renderStats(c, cps) {
     const minutes = Math.floor((Date.now() - c.runStart) / 60000);
     const total = BUILDING_IDS.reduce((s, id) => s + c.b[id], 0);
-    statsEl.replaceChildren(
+    fill(statsEl, 
       stat("Données en banque", fmt(c.data)),
       stat("Minées (cette partie)", fmt(c.earned)),
       stat("Minées (depuis toujours)", fmt(c.allTime)),
@@ -558,6 +718,7 @@ export function createClickerUI(root, wallet) {
     else if (tab === "ach") renderAchievements(c);
     else if (tab === "format") renderFormat(c);
     else if (tab === "level") renderLevels(c);
+    else if (tab === "mini") renderMini(c);
     else renderStats(c, cps);
   }
 
@@ -621,7 +782,11 @@ export function createClickerUI(root, wallet) {
   return {
     activate() {
       active = true;
-      keys.upgrades = ""; keys.room = ""; keys.ach = -1; keys.heaven = ""; keys.level = "";
+      keys.upgrades = ""; keys.room = ""; keys.ach = -1; keys.heaven = ""; keys.level = ""; keys.mini = "";
+      if (ck().notice === "rebalanced") {
+        delete ck().notice;
+        toast("Rééquilibrage", "Le prestige hérité de l'ancien Clicker était beaucoup trop fort : ta partie repart de zéro. Tu gardes tes éclats, l'arbre du formatage et le surcadençage.", "is-ach");
+      }
       const off = ck().offline;
       if (off) {
         delete ck().offline;

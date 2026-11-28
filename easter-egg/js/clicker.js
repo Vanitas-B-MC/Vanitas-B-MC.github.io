@@ -75,10 +75,22 @@ const FINGER_MULTS = [null, null, null, 0.1, 5, 10, 20, 20, 20, 20];        // p
 const SCRIPT_NAMES = ["Macro optimisée", "Boucle infinie", "Multithread", "Mille doigts", "Million de doigts", "Milliard de doigts",
   "Billion de doigts", "Trillion de doigts", "Quadrillion de doigts", "Doigts innombrables"];
 
-const CLICK_UNLOCK = [1e3, 1e5, 1e7, 1e9, 1e11, 1e13, 1e15, 1e17, 1e19, 1e21];
+const CLICK_UNLOCK = [500, 5e4, 5e6, 5e8, 5e10, 5e12, 5e14, 5e16, 5e18, 5e20];   // données minées à la main
 const CLICK_COSTS = [5e4, 5e6, 5e8, 5e10, 5e12, 5e14, 5e16, 5e18, 5e20, 5e22];
 const CLICK_NAMES = ["Souris haptique", "Gant réactif", "Doigts en titane", "Tendons synthétiques", "Réflexes Sandevistan",
   "Neurones overclockés", "Main cybernétique", "Clic quantique", "Toucher du Blackwall", "Clic absolu"];
+
+// Implants de clic : clic ×2, débloqués en cliquant (le clic progresse même sans scripts).
+const CLICKX = [
+  { name: "Doigt chromé",         cost: 100,   clicks: 10 },
+  { name: "Gant haptique",        cost: 1500,  clicks: 60 },
+  { name: "Réflexes boostés",     cost: 25e3,  clicks: 200 },
+  { name: "Implant moteur",       cost: 5e5,   clicks: 600 },
+  { name: "Système Sandevistan",  cost: 1e7,   clicks: 1500 },
+  { name: "Kerenzikov",           cost: 3e8,   clicks: 4000 },
+  { name: "Synapses en fibre",    cost: 1e10,  clicks: 10000 },
+  { name: "Clic de Johnny",       cost: 5e11,  clicks: 25000 }
+];
 
 const FIRMWARE_NAMES = ["Firmware 1.0", "Patch du jour 1", "Pilotes bêta", "Noyau recompilé", "Cache optimisé", "Compression sans perte",
   "Algorithme glouton", "Mémoire partagée", "Bus 1024 bits", "Supraconducteurs", "Optique photonique", "Réseau maillé",
@@ -129,6 +141,9 @@ function buildUpgrades() {
     id: `click_${k}`, type: "click", name, desc: "Le clic gagne +1 % de ta production par seconde.",
     cost: CLICK_COSTS[k], code: "CLK", color: "#fcee0a", mark: ROMAN[k], need: { hand: CLICK_UNLOCK[k] }
   }));
+  CLICKX.forEach((c, k) => list.push({
+    id: `clickx_${k}`, type: "clickx", name: c.name, desc: "Clic ×2.", cost: c.cost, code: "CLK", color: "#ff2a6d", mark: ROMAN[k], need: { clicks: c.clicks }
+  }));
   FIRMWARE_NAMES.forEach((name, k) => list.push({
     id: `fw_${k}`, type: "firmware", name, desc: `+${Math.round(FIRMWARE_PCT[k] * 100)} % de production.`, pct: FIRMWARE_PCT[k],
     cost: FIRMWARE_COSTS[k], code: "FW", color: "#3ddc84", mark: String(k + 1), need: { earned: FIRMWARE_COSTS[k] / 2 }
@@ -171,6 +186,11 @@ const has = (ck, id) => ck.heaven.includes(id);
    État
    ==================================================================================================== */
 
+// Version de l'équilibrage. v1 → v2 : le prestige hérité de l'ancien Clicker était énorme (production ×10 000) ;
+// la partie en cours est remise à zéro (on garde éclats, arbre du formatage et surcadençage).
+export const CK_VERSION = 2;
+export const LEGACY_MAX = 25;            // prestige hérité : +25 % au plus
+
 export function freshClicker() {
   return {
     data: 0,            // données en banque (monnaie du jeu)
@@ -190,7 +210,9 @@ export function freshClicker() {
     runs: 0,            // formatages
     runStart: Date.now(),
     seen: Date.now(),   // dernière fois que le noyau a miné (pour le minage hors ligne)
-    buffs: []           // effets des paquets dorés en cours : { id, until, mult, b }
+    buffs: [],          // effets des paquets dorés en cours : { id, until, mult, b }
+    mg: freshMinigames(),
+    v: CK_VERSION
   };
 }
 
@@ -213,7 +235,7 @@ export function sanitizeClicker(rawCk, raw = {}) {
   const ck = freshClicker();
   if (!rawCk || typeof rawCk !== "object") {
     const shardsTotal = int(raw.shardsTotal);
-    ck.legacy = Math.min(shardsTotal * 2, 1e6);
+    ck.legacy = Math.min(shardsTotal * 2, LEGACY_MAX);
     ck.chips = int(raw.shards) + spentOn(OLD_CORE, raw.core);
     return { ck, blueRefund: spentOn(OLD_BLUE, raw.blueLevels) };
   }
@@ -223,6 +245,16 @@ export function sanitizeClicker(rawCk, raw = {}) {
   if (Array.isArray(rawCk.up)) ck.up = [...new Set(rawCk.up.filter((id) => UPGRADE_MAP.has(id)))];
   if (Array.isArray(rawCk.ach)) ck.ach = [...new Set(rawCk.ach.filter((id) => ACH_MAP.has(id)))];
   if (Array.isArray(rawCk.heaven)) ck.heaven = [...new Set(rawCk.heaven.filter((id) => heavenById(id)))];
+  ck.legacy = Math.min(ck.legacy, LEGACY_MAX);
+  ck.mg = sanitizeMinigames(rawCk.mg);
+  if (int(rawCk.v) < CK_VERSION) {
+    // Ancien équilibrage : on repart sur une partie propre.
+    const keep = { chips: ck.chips, heaven: ck.heaven, lv: ck.lv, legacy: ck.legacy };
+    Object.assign(ck, freshClicker(), keep);
+    ck.b = startingBuildings(ck);
+    ck.notice = "rebalanced";              // non sauvegardé : lu une fois par ui-clicker.js
+    return { ck, blueRefund: 0 };
+  }
   const now = Date.now();
   ck.runStart = Math.min(num(rawCk.runStart, now), now);
   ck.seen = Math.min(num(rawCk.seen, now), now);
@@ -242,8 +274,11 @@ export function sanitizeClicker(rawCk, raw = {}) {
 export const BUFFS = {
   frenzy: { name: "Frénésie",          desc: "Production ×7" },
   clickf: { name: "Frénésie de clic",  desc: "Clic ×777" },
-  surge:  { name: "Surcharge",         desc: "Production boostée" }
+  surge:  { name: "Surcharge",         desc: "Production boostée" },
+  haggle: { name: "Rabais neural",     desc: "Améliorations −2 %" },
+  usura:  { name: "Usura",             desc: "Clic renforcé" }
 };
+const usuraBonus = (ck, now) => activeBuffs(ck, now).filter((x) => x.id === "usura").reduce((n, x) => n + x.mult, 0);
 
 const owned = (ck, id) => ck.b[id] || 0;
 const bought = (ck, id) => ck.up.includes(id);
@@ -260,7 +295,7 @@ export const milk = (ck) => ck.ach.length * 0.04;
 export const prestigeLevel = (ck) => ck.prestige + ck.legacy;
 
 // Multiplicateur global de production (hors bâtiments).
-export function globalMult(ck, now = Date.now()) {
+export function globalMult(ck, now = Date.now(), withBuffs = true) {
   let m = 1;
   for (const u of UPGRADES) {
     if (u.type === "firmware" && bought(ck, u.id)) m *= 1 + u.pct;
@@ -270,7 +305,10 @@ export function globalMult(ck, now = Date.now()) {
   m *= 1 + prestigeLevel(ck) * (has(ck, "h_god") ? 0.02 : 0.01);
   if (has(ck, "h_cloud")) m *= 1.1;
   if (has(ck, "h_dragon")) m *= 1.25;
-  for (const x of activeBuffs(ck, now)) if (x.id === "frenzy") m *= x.mult;
+  m *= 1 + godValue(ck, "kernel");
+  if (godPower(ck, "doigt")) m *= 1 - [0.05, 0.03, 0.01][godSlot(ck, "doigt")];
+  if (godPower(ck, "chronos")) m *= 1 + godValue(ck, "chronos") * Math.sin((now / 7200e3) * 2 * Math.PI);
+  if (withBuffs) for (const x of activeBuffs(ck, now)) if (x.id === "frenzy") m *= x.mult;
   return m;
 }
 
@@ -284,7 +322,7 @@ function fingers(ck) {
 const scriptDoubles = (ck) => [0, 1, 2].reduce((m, t) => m * (bought(ck, `script_${t}`) ? 2 : 1), 1);
 
 // Production d'UN exemplaire du bâtiment (avant multiplicateur global).
-export function unitCps(ck, id, now = Date.now()) {
+export function unitCps(ck, id, now = Date.now(), withBuffs = true) {
   const b = buildingById(id);
   let value;
   if (id === "script") {
@@ -300,24 +338,28 @@ export function unitCps(ck, id, now = Date.now()) {
     }
   }
   value *= 1 + 0.01 * (ck.lv[id] || 0);
-  for (const x of activeBuffs(ck, now)) if (x.id === "surge" && x.b === id) value *= x.mult;
+  if (withBuffs) for (const x of activeBuffs(ck, now)) if (x.id === "surge" && x.b === id) value *= x.mult;
   return value;
 }
 
 // Production totale d'un bâtiment (multiplicateur global compris).
 export const buildingCps = (ck, id, now = Date.now()) => unitCps(ck, id, now) * owned(ck, id) * globalMult(ck, now);
 
-export function perSecond(ck, now = Date.now()) {
+export function perSecond(ck, now = Date.now(), withBuffs = true) {
   if (!ck) return 0;
-  const g = globalMult(ck, now);
+  const g = globalMult(ck, now, withBuffs);
   let total = 0;
-  for (const id of BUILDING_IDS) if (owned(ck, id)) total += unitCps(ck, id, now) * owned(ck, id);
+  for (const id of BUILDING_IDS) if (owned(ck, id)) total += unitCps(ck, id, now, withBuffs) * owned(ck, id);
   return Math.min(total * g, MAX);
 }
 
 // Données gagnées par clic.
 export function clickValue(ck, now = Date.now()) {
-  let value = scriptDoubles(ck) + fingers(ck);
+  let value = scriptDoubles(ck);
+  for (const u of UPGRADES) if (u.type === "clickx" && bought(ck, u.id)) value *= 2;
+  value += fingers(ck);
+  value *= godPower(ck, "doigt") ? [1.5, 1.3, 1.15][godSlot(ck, "doigt")] : 1;
+  value *= 1 + usuraBonus(ck, now);
   const pct = UPGRADES.reduce((n, u) => n + (u.type === "click" && bought(ck, u.id) ? 0.01 : 0), 0);
   value += pct * perSecond(ck, now);
   for (const x of activeBuffs(ck, now)) if (x.id === "clickf") value *= x.mult;
@@ -328,8 +370,9 @@ export function clickValue(ck, now = Date.now()) {
    Prix et achats
    ==================================================================================================== */
 
-const buildingDiscount = (ck) => (has(ck, "h_disc") ? 0.95 : 1);
-const upgradeDiscount = (ck) => (has(ck, "h_disc2") ? 0.95 : 1);
+const buildingDiscount = (ck) => (has(ck, "h_disc") ? 0.95 : 1) * (1 - godValue(ck, "avarice"));
+const upgradeDiscount = (ck, now = Date.now()) => (has(ck, "h_disc2") ? 0.95 : 1) * (1 - godValue(ck, "archive"))
+  * (activeBuffs(ck, now).some((x) => x.id === "haggle") ? 0.98 : 1);
 
 // Prix de `amount` exemplaires quand on en possède déjà `count`.
 export function buildingCost(ck, id, amount = 1) {
@@ -370,9 +413,16 @@ export function buyBuilding(ck, id, amount = 1) {
   return n;
 }
 
-export function sellBuilding(ck, id, amount = 1) {
+export function sellBuilding(ck, id, amount = 1, now = Date.now()) {
   const n = Math.min(amount, owned(ck, id));
   if (n < 1) return 0;
+  if (godPower(ck, "usura")) {
+    // Usura : chaque bâtiment vendu renforce le clic pendant 10 s.
+    const per = [0.01, 0.005, 0.0025][godSlot(ck, "usura")];
+    const prev = activeBuffs(ck, now).find((x) => x.id === "usura");
+    ck.buffs = activeBuffs(ck, now).filter((x) => x.id !== "usura");
+    ck.buffs.push({ id: "usura", mult: Math.min(1000, (prev ? prev.mult : 0) + per * n), until: now + 10e3 });
+  }
   ck.data = Math.min(MAX, ck.data + sellValue(ck, id, n));
   ck.b[id] -= n;
   return n;
@@ -392,6 +442,7 @@ export function upgradeUnlocked(ck, u) {
   if (n.b && owned(ck, n.b) < n.n) return false;
   if (n.runner && owned(ck, "runner") < n.runner) return false;
   if (n.hand && ck.hand < n.hand) return false;
+  if (n.clicks && ck.clicks < n.clicks) return false;
   if (n.earned && ck.earned < n.earned) return false;
   if (n.ach && ck.ach.length < n.ach) return false;
   if (n.golds && ck.golds < n.golds) return false;
@@ -445,11 +496,12 @@ export function click(ck, now = Date.now()) {
 export function tick(ck, ms, now = Date.now()) {
   ck.seen = now;
   ck.buffs = activeBuffs(ck, now);
+  tickMinigames(ck, ms, now);
   return addData(ck, (perSecond(ck, now) * Math.max(0, ms)) / 1000);
 }
 
 // Arcade fermée : minage hors ligne si l'arbre du formatage le permet (jusqu'à 3 jours).
-export const offlineRate = (ck) => (has(ck, "h_sleep") ? 0.05 : 0) + (has(ck, "h_ghost") ? 0.1 : 0) + (has(ck, "h_night") ? 0.25 : 0);
+export const offlineRate = (ck) => (has(ck, "h_sleep") ? 0.05 : 0) + (has(ck, "h_ghost") ? 0.1 : 0) + (has(ck, "h_night") ? 0.25 : 0) + godValue(ck, "spectre");
 export function offlineGain(ck, now = Date.now()) {
   const rate = offlineRate(ck);
   const away = Math.min(Math.max(0, now - ck.seen), 3 * 86400e3);
@@ -469,11 +521,12 @@ function goldSpeed(ck) {
   if (bought(ck, "g_seren")) f *= 2;
   if (has(ck, "h_cache")) f *= 1.1;
   if (has(ck, "h_luck")) f *= 1.1;
+  f *= 1 + godValue(ck, "fortuna");
   return f;
 }
 
-// Délai avant le prochain paquet (ms) : entre 1 et 3 minutes au départ.
-export const nextGoldDelay = (ck, rng = Math.random) => Math.round((60e3 + rng() * 120e3) / goldSpeed(ck));
+// Délai avant le prochain paquet (ms) : entre 2 et 5 minutes au départ.
+export const nextGoldDelay = (ck, rng = Math.random) => Math.round((120e3 + rng() * 180e3) / goldSpeed(ck));
 export const goldLifetime = (ck) => Math.round(13e3 * (bought(ck, "g_lucky") ? 2 : 1) * (bought(ck, "g_seren") ? 2 : 1) * (has(ck, "h_cache") ? 1.1 : 1));
 const effectLength = (ck) => (bought(ck, "g_luck2") ? 2 : 1);
 
@@ -544,6 +597,7 @@ export function format(ck, now = Date.now()) {
   ck.up = [];
   ck.buffs = [];
   ck.runStart = now;
+  ck.mg.deck.ram = 0;
   return gained;
 }
 
@@ -675,4 +729,282 @@ const NEWS = [
 export function newsFor(ck, rng = Math.random) {
   const pool = NEWS.filter(([test]) => test(ck)).map(([, text]) => text);
   return pool[Math.floor(rng() * pool.length)];
+}
+
+/* ====================================================================================================
+   Mini-jeux (façon Cookie Clicker)
+     - Cyberdeck (Clinique de ripperdoc) : la RAM se recharge et lance des programmes (≈ le Grimoire) ;
+     - Panthéon des IA (Temple du Code) : 3 emplacements pour des IA aux effets passifs (≈ le Panthéon) ;
+     - Bourse noire (Banque offshore) : actions de corporations dont le cours bouge chaque minute (≈ la Bourse).
+   ==================================================================================================== */
+
+export const MINIGAMES = [
+  { id: "deck",     name: "Cyberdeck",         b: "ripper", desc: "Programmes de piratage lancés avec ta RAM." },
+  { id: "pantheon", name: "Panthéon des IA",   b: "temple", desc: "Installe jusqu'à 3 IA aux effets permanents." },
+  { id: "market",   name: "Bourse noire",      b: "bank",   desc: "Achète bas, revends haut : les cours bougent chaque minute." }
+];
+export const minigameUnlocked = (ck, id) => owned(ck, MINIGAMES.find((m) => m.id === id).b) > 0;
+
+/* ---------- Panthéon ---------- */
+
+// value : effet en emplacement Alpha, Bêta, Gamma.
+export const GODS = [
+  { id: "kernel",  name: "KERNEL·OS", value: [0.10, 0.06, 0.03], desc: (v) => `Production +${pct(v)}.` },
+  { id: "fortuna", name: "FORTUNA",   value: [0.15, 0.10, 0.05], desc: (v) => `Paquets dorés ${pct(v)} plus fréquents.` },
+  { id: "avarice", name: "AVARICE",   value: [0.07, 0.05, 0.02], desc: (v) => `Bâtiments ${pct(v)} moins chers.` },
+  { id: "archive", name: "ARCHIVE",   value: [0.07, 0.05, 0.02], desc: (v) => `Améliorations ${pct(v)} moins chères.` },
+  { id: "doigt",   name: "LE DOIGT",  value: [0.5, 0.3, 0.15],   desc: (v, i) => `Clic +${pct(v)}, mais production −${[5, 3, 1][i]} %.` },
+  { id: "usura",   name: "USURA",     value: [0.01, 0.005, 0.0025], desc: (v) => `Chaque bâtiment vendu : clic +${pct(v)} pendant 10 s (cumulable).` },
+  { id: "chronos", name: "CHRONOS",   value: [0.15, 0.10, 0.05], desc: (v) => `Production qui oscille entre −${pct(v)} et +${pct(v)} sur un cycle de 2 h.` },
+  { id: "spectre", name: "SPECTRE",   value: [0.10, 0.06, 0.03], desc: (v) => `Minage hors ligne +${pct(v)} (même sans l'arbre).` }
+];
+export const SLOT_NAMES = ["Alpha", "Bêta", "Gamma"];
+const pct = (v) => `${Math.round(v * 1000) / 10} %`;
+export const godById = (id) => GODS.find((g) => g.id === id);
+export const SWAP_MAX = 3;
+export const SWAP_EVERY = 20 * 60e3;          // un échange regagné toutes les 20 minutes
+
+function godSlot(ck, id) {
+  if (!ck.mg || !minigameUnlocked(ck, "pantheon")) return -1;
+  return ck.mg.pantheon.slots.indexOf(id);
+}
+function godPower(ck, id) { return godSlot(ck, id) >= 0; }
+function godValue(ck, id) {
+  const i = godSlot(ck, id);
+  return i < 0 ? 0 : godById(id).value[i];
+}
+
+// Échanges disponibles (regagnés avec le temps).
+export function pantheonSwaps(ck, now = Date.now()) {
+  const p = ck.mg.pantheon;
+  if (p.swaps >= SWAP_MAX) { p.swapT = now; return SWAP_MAX; }
+  const gained = Math.floor((now - p.swapT) / SWAP_EVERY);
+  if (gained > 0) { p.swaps = Math.min(SWAP_MAX, p.swaps + gained); p.swapT += gained * SWAP_EVERY; }
+  return p.swaps;
+}
+export const nextSwapIn = (ck, now = Date.now()) => Math.max(0, SWAP_EVERY - (now - ck.mg.pantheon.swapT));
+
+// Place une IA dans un emplacement (coûte un échange). Si elle était déjà ailleurs, elle est déplacée.
+export function placeGod(ck, godId, slot, now = Date.now()) {
+  const p = ck.mg.pantheon;
+  if (!godById(godId) || slot < 0 || slot > 2 || p.slots[slot] === godId) return false;
+  if (pantheonSwaps(ck, now) < 1) return false;
+  if (p.swaps >= SWAP_MAX) p.swapT = now;
+  p.swaps -= 1;
+  const from = p.slots.indexOf(godId);
+  if (from >= 0) p.slots[from] = null;
+  p.slots[slot] = godId;
+  return true;
+}
+export function removeGod(ck, slot) {
+  const p = ck.mg.pantheon;
+  if (!p.slots[slot]) return false;
+  p.slots[slot] = null;
+  return true;
+}
+
+/* ---------- Cyberdeck ---------- */
+
+export function ramMax(ck) {
+  const n = owned(ck, "ripper");
+  return n ? Math.floor(4 + n ** 0.6 + 15 * Math.log(1 + n / 15)) : 0;
+}
+export const RAM_FILL_SECONDS = 360;          // de vide à plein en 6 minutes
+export const FAIL_CHANCE = 0.15;
+
+export const SPELLS = [
+  { id: "conjure", name: "Conjurer des données", base: 2, pct: 0.4,
+    desc: "Gagne 30 min de production (au plus 15 % de ta banque). Échec : perds 15 min de production (au plus 15 % de ta banque)." },
+  { id: "destiny", name: "Forcer le destin", base: 10, pct: 0.6,
+    desc: "Fait apparaître un paquet doré tout de suite. Échec : rien ne se passe." },
+  { id: "stretch", name: "Overdrive", base: 8, pct: 0.2,
+    desc: "Prolonge tous les effets en cours de 10 % (10 s au moins). Échec : les raccourcit de 20 %." },
+  { id: "haggle",  name: "Rabais neural", base: 10, pct: 0.1,
+    desc: "Améliorations 2 % moins chères pendant 1 heure. Échec : rien ne se passe." },
+  { id: "edifice", name: "Construction spontanée", base: 20, pct: 0.75,
+    desc: "Offre un bâtiment gratuit, parmi ceux qui coûtent moins de la moitié de ta banque. Échec : rien ne se passe." }
+];
+export const spellCost = (ck, sp) => Math.floor(sp.base + sp.pct * ramMax(ck));
+
+// Lance un programme. Renvoie { ok, fail, text, gain?, loss?, spawnGold? } ou null si impossible.
+export function castSpell(ck, id, rng = Math.random, now = Date.now()) {
+  const sp = SPELLS.find((x) => x.id === id);
+  if (!sp || !minigameUnlocked(ck, "deck")) return null;
+  const deck = ck.mg.deck;
+  const cost = spellCost(ck, sp);
+  if (deck.ram < cost) return null;
+  deck.ram -= cost;
+  deck.casts += 1;
+  const fail = rng() < FAIL_CHANCE;
+  const cps = perSecond(ck, now);
+  if (id === "conjure") {
+    if (fail) {
+      const loss = Math.min(ck.data * 0.15, cps * 900);
+      ck.data -= loss;
+      return { ok: false, fail, loss, text: `Échec : tu perds ${Math.floor(loss).toLocaleString("fr-FR")} données.` };
+    }
+    const gain = addData(ck, Math.min(ck.data * 0.15, cps * 1800) + 7);
+    return { ok: true, gain, text: "Données conjurées." };
+  }
+  if (id === "destiny") return fail ? { ok: false, fail, text: "Échec : le destin résiste." } : { ok: true, spawnGold: true, text: "Un paquet doré apparaît !" };
+  if (id === "stretch") {
+    const buffs = activeBuffs(ck, now);
+    if (!buffs.length) return { ok: true, text: "Aucun effet en cours à prolonger." };
+    for (const x of buffs) {
+      const left = x.until - now;
+      x.until = fail ? now + left * 0.8 : now + Math.max(left * 1.1, left + 10e3);
+    }
+    return { ok: !fail, fail, text: fail ? "Échec : les effets sont raccourcis." : "Effets prolongés." };
+  }
+  if (id === "haggle") {
+    if (fail) return { ok: false, fail, text: "Échec : le vendeur ne se laisse pas faire." };
+    ck.buffs = activeBuffs(ck, now).filter((x) => x.id !== "haggle");
+    ck.buffs.push({ id: "haggle", mult: 1, until: now + 3600e3 });
+    return { ok: true, text: "Améliorations −2 % pendant 1 heure." };
+  }
+  if (id === "edifice") {
+    if (fail) return { ok: false, fail, text: "Échec : le chantier s'effondre." };
+    const pool = BUILDING_IDS.filter((b) => owned(ck, b) > 0 && buildingCost(ck, b, 1) <= ck.data / 2);
+    if (!pool.length) return { ok: false, text: "Aucun bâtiment ne coûte moins de la moitié de ta banque." };
+    const b = pool[Math.floor(rng() * pool.length)];
+    ck.b[b] += 1;
+    return { ok: true, text: `Un(e) ${buildingById(b).name} gratuit(e) !`, building: b };
+  }
+  return null;
+}
+
+/* ---------- Bourse noire ---------- */
+
+export const STOCKS = [
+  { id: "ARS", name: "Arasaka" },
+  { id: "MIL", name: "Militech" },
+  { id: "KTO", name: "Kang Tao" },
+  { id: "BTX", name: "Biotechnica" },
+  { id: "PCH", name: "Petrochem" },
+  { id: "ZTC", name: "Zetatech" },
+  { id: "KRS", name: "Kiroshi" },
+  { id: "TTI", name: "Trauma Team" }
+];
+export const MODES = { stable: "Stable", rise: "Hausse lente", fall: "Baisse lente", boom: "Envolée", crash: "Effondrement", chaos: "Chaotique" };
+export const MARKET_TICK = 60e3;              // les cours bougent toutes les minutes
+export const MARKET_FEE = 0.1;                // commission de 10 % à l'achat
+const HIST = 40;
+const restingValue = (i) => 10 + 10 * i;
+
+function randomMode(rng) {
+  const r = rng();
+  return r < 0.25 ? "stable" : r < 0.45 ? "rise" : r < 0.65 ? "fall" : r < 0.75 ? "boom" : r < 0.85 ? "crash" : "chaos";
+}
+
+function freshStock(i, rng = Math.random) {
+  const val = restingValue(i) * (0.5 + rng());
+  return { val, d: 0, mode: randomMode(rng), dur: 10 + Math.floor(rng() * 50), hist: [val], own: 0, paid: 0 };
+}
+
+export function freshMinigames() {
+  return {
+    deck: { ram: 0, casts: 0 },
+    pantheon: { slots: [null, null, null], swaps: SWAP_MAX, swapT: Date.now() },
+    market: { t: 0, profit: 0, stocks: STOCKS.map((_, i) => freshStock(i)) }
+  };
+}
+
+export function sanitizeMinigames(raw) {
+  const mg = freshMinigames();
+  if (!raw || typeof raw !== "object") return mg;
+  mg.deck.ram = num(raw.deck?.ram);
+  mg.deck.casts = int(raw.deck?.casts);
+  if (Array.isArray(raw.pantheon?.slots)) mg.pantheon.slots = [0, 1, 2].map((i) => (godById(raw.pantheon.slots[i]) ? raw.pantheon.slots[i] : null));
+  mg.pantheon.slots = mg.pantheon.slots.map((id, i, arr) => (id && arr.indexOf(id) === i ? id : null));
+  mg.pantheon.swaps = Math.min(SWAP_MAX, int(raw.pantheon?.swaps ?? SWAP_MAX));
+  mg.pantheon.swapT = Math.min(num(raw.pantheon?.swapT, Date.now()), Date.now());
+  mg.market.t = Math.min(num(raw.market?.t), MARKET_TICK);
+  mg.market.profit = Number.isFinite(Number(raw.market?.profit)) ? Number(raw.market.profit) : 0;
+  if (Array.isArray(raw.market?.stocks)) {
+    STOCKS.forEach((_, i) => {
+      const r = raw.market.stocks[i];
+      if (!r || typeof r !== "object") return;
+      const s = mg.market.stocks[i];
+      s.val = Math.max(1, Math.min(num(r.val, s.val), 1e4));
+      s.d = Math.max(-50, Math.min(50, Number(r.d) || 0));
+      s.mode = MODES[r.mode] ? r.mode : s.mode;
+      s.dur = int(r.dur) || s.dur;
+      s.hist = Array.isArray(r.hist) ? r.hist.slice(-HIST).map((v) => Math.max(1, Math.min(num(v, s.val), 1e4))) : [s.val];
+      s.own = Math.min(int(r.own), 1e6);
+      s.paid = num(r.paid);
+    });
+  }
+  return mg;
+}
+
+// Un pas de cotation (toutes les minutes).
+export function stepMarket(market, rng = Math.random) {
+  market.stocks.forEach((s, i) => {
+    const rest = restingValue(i);
+    s.val += (rest - s.val) * 0.01;
+    s.d *= 0.97;
+    s.d += (rng() - 0.5) * (s.mode === "stable" ? 0.1 : 0.3);
+    if (s.mode === "rise") s.d += 0.05;
+    if (s.mode === "fall") s.d -= 0.05;
+    if (s.mode === "boom") { s.d += 0.15; if (rng() < 0.1) s.val += rng() * 5; }
+    if (s.mode === "crash") { s.d -= 0.15; if (rng() < 0.1) s.val -= rng() * 5; }
+    if (s.mode === "chaos") { s.d += (rng() - 0.5) * 1.2; if (rng() < 0.15) s.val += (rng() - 0.5) * 10; }
+    s.val += s.d;
+    if (rng() < 0.1) s.val += (rng() - 0.5) * 3;
+    if (s.val < 5) { s.val += (5 - s.val) * 0.5; s.d *= 0.5; }
+    s.val = Math.max(1, Math.min(s.val, 1e4));
+    s.dur -= 1;
+    if (s.dur <= 0) { s.mode = randomMode(rng); s.dur = 10 + Math.floor(rng() * 50); }
+    s.hist.push(s.val);
+    if (s.hist.length > HIST) s.hist.shift();
+  });
+}
+
+// 1 $ vaut 1 seconde de production (sans les effets temporaires), comme dans Cookie Clicker.
+export const dollarValue = (ck) => Math.max(1, perSecond(ck, Date.now(), false));
+export const maxShares = (ck) => 100 + owned(ck, "bank");
+
+// Prix (en données) de n actions, commission comprise.
+export const sharesCost = (ck, i, n) => ck.mg.market.stocks[i].val * dollarValue(ck) * n * (1 + MARKET_FEE);
+export const sharesValue = (ck, i, n) => ck.mg.market.stocks[i].val * dollarValue(ck) * n;
+
+export function buyShares(ck, i, n) {
+  const s = ck.mg.market.stocks[i];
+  if (!s || !minigameUnlocked(ck, "market")) return 0;
+  const room = maxShares(ck) - s.own;
+  const unit = sharesCost(ck, i, 1);
+  const count = Math.max(0, Math.min(n, room, Math.floor(ck.data / unit)));
+  if (count < 1) return 0;
+  const cost = unit * count;
+  ck.data -= cost;
+  s.paid += cost;
+  s.own += count;
+  return count;
+}
+
+export function sellShares(ck, i, n) {
+  const s = ck.mg.market.stocks[i];
+  if (!s) return 0;
+  const count = Math.min(n, s.own);
+  if (count < 1) return 0;
+  const gain = sharesValue(ck, i, count);
+  const basis = s.own ? (s.paid * count) / s.own : 0;
+  s.paid -= basis;
+  s.own -= count;
+  ck.data = Math.min(MAX, ck.data + gain);
+  ck.mg.market.profit += gain - basis;
+  return count;
+}
+
+// Avance les mini-jeux (appelé par tick).
+function tickMinigames(ck, ms, now) {
+  const mg = ck.mg;
+  const max = ramMax(ck);
+  if (max) mg.deck.ram = Math.min(max, mg.deck.ram + (max / RAM_FILL_SECONDS) * (ms / 1000));
+  else mg.deck.ram = 0;
+  if (minigameUnlocked(ck, "market")) {
+    mg.market.t += ms;
+    while (mg.market.t >= MARKET_TICK) { mg.market.t -= MARKET_TICK; stepMarket(mg.market); }
+  }
+  pantheonSwaps(ck, now);
 }
