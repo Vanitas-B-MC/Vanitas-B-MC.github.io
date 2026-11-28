@@ -2097,9 +2097,11 @@ kbd {
 .sym-scatter { color: #b266ff; text-shadow: 0 0 12px #b266ff; }
 .sl-message { min-height: 1.6em; margin: 14px 0 6px; font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: .03em; }
 .sl-free { margin: 0 0 6px; padding: 8px 12px; background: rgba(178, 102, 255, .16); border: 1px solid #b266ff; font-family: var(--font-mono); font-size: 13px; }
-.sl-lines { min-height: 1.2em; margin: 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.sl-lines { min-height: 1.2em; margin: 0; padding: 0; list-style: none; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.sl-lines li { padding: 2px 0; }
+.sl-lines .sl-glyph { color: var(--yellow); }
+.sl-machine.has-win .sl-cell:not(.is-win) { opacity: .35; transition: opacity .25s ease; }
 .sl-side { max-width: none; margin: 0; text-align: center; }
-.sl-perline { font-size: 12px; color: var(--muted); }
 .sl-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 16px; }
 .sl-actions .button { flex: 1 1 140px; }
 .sl-spin { min-width: 140px; }

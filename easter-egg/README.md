@@ -119,7 +119,7 @@ Plusieurs jeux donnent des récompenses **proportionnelles à ta fortune**, pour
 | 14 | **Courses d'IA** | Paris | 6 robots, des cotes calculées sur des milliers de courses simulées. Pari sur la victoire ou le podium. |
 | 15 | **Démineur** | Réflexion | 3 difficultés, records de temps, gains en crédits. |
 | 16 | **Crash** | Casino | Un multiplicateur grimpe puis s'effondre : encaisser à temps (ou fixer un encaissement automatique). |
-| 17 | **Machine à sous** | Casino | 5 rouleaux, 10 lignes, wilds et scatters. Trois ✸ déclenchent des tours gratuits à gains doublés. |
+| 17 | **Machine à sous** | Casino | 5 rouleaux sans lignes : 3 symboles identiques sur des rouleaux côte à côte gagnent, où qu'ils soient. Wilds, et trois ✸ pour des tours gratuits à gains doublés. |
 | 18 | **Cité des Âges** | City builder | Voir le détail plus bas. |
 
 ### Cité des Âges (en détail)
