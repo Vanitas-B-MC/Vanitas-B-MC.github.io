@@ -259,6 +259,23 @@ export const HERO_DEFS = {
       [18, { splash: 0.4, dmg: 1.4 }, "Colosse : +0,4 case, +40 % dégâts"], [20, { auraDmg: 0.1, auraRange: 0.1 }, "Titan : +10 % dégâts et portée voisins"]]
   }
 };
+HERO_DEFS.echo = {
+  id: "echo", hero: true, name: "Echo", title: "Cheffe d'orchestre", desc: "Des ondes sonores qui touchent tout autour d'elle et ralentissent ; accélère les tours voisines.",
+  cost: 100, unlock: 15000, range: 2.3, rate: 0.8, dmg: 14, color: "#ff6bd6", size: 13, pulse: true,
+  abilities: ["h_silence", "h_crescendo"],
+  perks: [[1, { pulseSlow: 0.3, pulseSlowTime: 1.2, auraRate: 0.06 }, ""], [3, { auraRate: 0.04 }, "Tempo : +4 % cadence pour les tours voisines"],
+    [5, { pulseSlow: 0.4 }, "Sourdine : ralentit de 40 %"], [7, { range: 1.15 }, "Acoustique : +15 % portée"], [9, { detect: 1 }, "Écholocation : repère les furtifs"],
+    [12, { auraRate: 0.05, auraDmg: 0.05 }, "Harmonie : +5 % cadence et dégâts voisins"], [15, { pulseSlow: 0.5, stun: 0.3 }, "Fortissimo : ralentit de 50 %, étourdit 0,3 s"],
+    [18, { rate: 1.4 }, "Allegro : +40 % cadence"], [20, { auraRate: 0.1, dmg: 1.5 }, "Symphonie : +10 % cadence voisins, +50 % dégâts"]]
+};
+HERO_DEFS.sable = {
+  id: "sable", hero: true, name: "Sable", title: "Assassin d'élite", desc: "Un tir dévastateur sur l'ennemi le plus solide ; achève les ennemis affaiblis et voit les furtifs.",
+  cost: 110, unlock: 25000, range: 4, rate: 0.6, dmg: 60, color: "#e74c3c", size: 12, defaultTarget: "strong",
+  abilities: ["h_marque", "h_execution"],
+  perks: [[1, { detect: 1, execute: 0.05 }, ""], [3, { crit: 0.15, critMul: 3 }, "Point vital : 15 % de critiques ×3"], [5, { pierce: true }, "Balles perforantes : ignore le blindage"],
+    [7, { execute: 0.1 }, "Coup de grâce : achève les ennemis sous 10 % de PV"], [9, { range: 1.2 }, "Lunette : +20 % portée"], [12, { rate: 1.3 }, "Réarmement : +30 % cadence"],
+    [14, { crit: 0.15 }, "Sang-froid : +15 % de critiques"], [17, { execute: 0.15, dmg: 1.3 }, "Exécutrice : achève sous 15 %, +30 % dégâts"], [20, { targets: 1, dmg: 1.5 }, "Fantôme : deux cibles, +50 % dégâts"]]
+};
 export const HERO_IDS = Object.keys(HERO_DEFS);
 export const HERO_ABILITY_LEVELS = [3, 10];
 Object.assign(TOWER_DEFS, HERO_DEFS);         // un héros se pose et tire comme une tour (mais n'est pas dans la liste des tours)
@@ -694,7 +711,7 @@ export const waveBonusGold = (wave) => 20 + 2 * wave;                           
 export const killGold = (type, wave) => Math.round(ENEMY_DEFS[type].gold * (1 + 0.03 * (wave - 1)));
 
 // Liste des ennemis d'une vague, avec l'instant de leur apparition (en secondes).
-export function waveSpec(wave, hpMul = 1, laneCount = 1) {
+export function waveSpec(wave, hpMul = 1, laneCount = 1, bossEvery = 10) {
   const count = Math.min(6 + 2 * wave, 56);
   const gap = Math.max(0.32, 0.95 - 0.025 * wave);
   const hp = baseHp(wave) * hpMul;
@@ -723,8 +740,8 @@ export function waveSpec(wave, hpMul = 1, laneCount = 1) {
     for (let k = 0; k < n; k++) list.push({ type: "cargo", hp: hp * ENEMY_DEFS.cargo.hp, at: count * gap * 0.5 + k * 2.5, lane: k % laneCount });
   }
   // Boss toutes les 10 vagues : Virus, Rootkit, Ver, Ransomware, Botnet, puis on recommence avec un boss de plus à chaque cycle.
-  if (wave % 10 === 0) {
-    const k = wave / 10;
+  if (wave % bossEvery === 0) {
+    const k = wave / bossEvery;
     const type = BOSS_ORDER[(k - 1) % BOSS_ORDER.length];
     const n = 1 + Math.floor((k - 1) / BOSS_ORDER.length);
     for (let b = 0; b < n; b++) list.push({ type, hp: hp * ENEMY_DEFS[type].hp, at: count * gap + 1 + b * 4, lane: b % laneCount });
@@ -732,12 +749,37 @@ export function waveSpec(wave, hpMul = 1, laneCount = 1) {
   return list.sort((x, y) => x.at - y.at);
 }
 
+/* ---------- Défis (comme les modes de BTD6) : à cocher avant la partie, ils multiplient les crédits gagnés ---------- */
+export const CHALLENGES = [
+  { id: "apocalypse", name: "Apocalypse",      desc: "Les vagues s'enchaînent sans pause : la suivante part dès que la précédente a fini d'arriver.", reward: 1.25 },
+  { id: "inverse",    name: "Inversé",         desc: "Les ennemis suivent le chemin dans l'autre sens.", reward: 1.1 },
+  { id: "rapides",    name: "Ennemis rapides", desc: "Tous les ennemis vont 25 % plus vite.", reward: 1.3 },
+  { id: "sansvente",  name: "Sans vente",      desc: "Impossible de revendre une tour.", reward: 1.15 },
+  { id: "puriste",    name: "Puriste",         desc: "Ni héros, ni pouvoirs.", reward: 1.35 },
+  { id: "boss",       name: "Boss en série",   desc: "Un boss toutes les 5 vagues au lieu de 10.", reward: 1.3 }
+];
+export const CHALLENGE_IDS = CHALLENGES.map((c) => c.id);
+export const challengeReward = (ids = []) => ids.reduce((m, id) => m * ((CHALLENGES.find((c) => c.id === id) || {}).reward || 1), 1);
+
 /* ---------- Partie ---------- */
 
-export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP, diffId = DEFAULT_DIFFICULTY, heroId = null) {
-  const map = builtMap(mapId);
+export function createState(unlocked = [FREE_TOWER], mapId = FREE_MAP, diffId = DEFAULT_DIFFICULTY, heroId = null, challenges = []) {
+  const ch = CHALLENGE_IDS.filter((id) => challenges.includes(id));
+  const mapDef = MAPS.find((m) => m.id === mapId);
+  // Inversé : on reconstruit la carte avec les chemins retournés
+  const map = ch.includes("inverse") && mapDef ? buildMap({ ...mapDef, lanes: mapDef.lanes.map((l) => [...l].reverse()) }) : builtMap(mapId);
   const diff = diffById(diffId);
+  if (ch.includes("puriste")) heroId = null;
   return {
+    challenges: ch,
+    rewardMul: challengeReward(ch),
+    speedMul: ch.includes("rapides") ? 1.25 : 1,
+    noSell: ch.includes("sansvente"),
+    noPowers: ch.includes("puriste"),
+    apocalypse: ch.includes("apocalypse"),
+    bossEvery: ch.includes("boss") ? 5 : 10,
+    killsByType: {},        // éliminations par type d'ennemi (succès)
+    crescendoUntil: 0,      // capacité « Crescendo » (Echo)
     map,
     diff,
     hpMul: (map.hpMul || 1) * diff.hp,
@@ -847,7 +889,8 @@ export function placeTower(state, typeId, x, y) {
   if (state.gold < def.cost) return { ok: false, reason: "gold" };
   state.gold -= def.cost;
   const tiers = [0, 0, 0];
-  const tower = { id: state.nextId++, type: typeId, x, y, tiers, st: towerStats(def, tiers), cooldown: 0, target: "first", abilityCd: 0, fury: 0, jam: 0, kills: 0, paragon: null, dyn: 1 };
+  const tower = { id: state.nextId++, type: typeId, x, y, tiers, st: towerStats(def, tiers), cooldown: 0, target: def.defaultTarget || "first", abilityCd: 0, fury: 0, jam: 0, kills: 0, dmg: 0, paragon: null, dyn: 1,
+    boughtWave: state.phase === "idle" ? state.wave : -1 };        // posée entre deux vagues : remboursée à 100 % jusqu'au lancement de la vague
   if (def.hero) {
     // Posé tard : il récupère la moitié de l'XP qu'il aurait gagnée depuis le début (rattrapage, comme dans BTD6).
     state.hero.xp = Math.max(state.hero.xp, Math.round(state.hero.pool * 0.5));
@@ -913,21 +956,34 @@ export function upgradeTower(state, id, path = 0) {
   return { ok: true, tower };
 }
 
+// Prix de revente : 60 %, ou 100 % si la tour a été posée pendant cette pause entre deux vagues (on « annule » la pose).
+export const sellRatio = (state, tower) => (state.phase === "idle" && tower.boughtWave === state.wave ? 1 : SELL_RATIO);
+export const sellValue = (state, tower) => Math.floor(invested(tower) * sellRatio(state, tower));
+
 export function sellTower(state, id) {
-  if (state.hero && state.hero.towerId === id) state.hero.towerId = null;     // on pourra le reposer (il garde son XP)
   const index = state.towers.findIndex((t) => t.id === id);
   if (index < 0 || state.phase === "over") return { ok: false, reason: "unknown" };
-  const refund = Math.floor(invested(state.towers[index]) * SELL_RATIO);
+  if (state.noSell) return { ok: false, reason: "nosell" };
+  if (state.hero && state.hero.towerId === id) state.hero.towerId = null;     // on pourra le reposer (il garde son XP)
+  const refund = sellValue(state, state.towers[index]);
   state.gold += refund;
   state.towers.splice(index, 1);
   return { ok: true, refund };
+}
+
+// Composition de la prochaine vague, pour l'aperçu : { type: nombre }, dans l'ordre d'arrivée.
+export function wavePreview(state) {
+  const next = state.phase === "wave" ? state.wave + 1 : state.wave + 1;
+  const out = {};
+  for (const e of waveSpec(next, state.hpMul, state.map.laneCount, state.bossEvery)) out[e.type] = (out[e.type] || 0) + 1;
+  return { wave: next, counts: out };
 }
 
 export function startWave(state) {
   if (state.phase !== "idle") return false;
   state.wave += 1;
   state.phase = "wave";
-  state.spawnList = waveSpec(state.wave, state.hpMul, state.map.laneCount);
+  state.spawnList = waveSpec(state.wave, state.hpMul, state.map.laneCount, state.bossEvery);
   state.spawnClock = 0;
   return true;
 }
@@ -940,7 +996,7 @@ function spawn(state, entry, dist = 0) {
   const { x, y } = pointAt(dist, state.map.lanes[lane]);
   state.enemies.push({
     id: state.nextId++, type: entry.type, hp: entry.hp, maxHp: entry.hp, lane,
-    dist, x, y, slow: 0, slowLeft: 0, poison: 0, poisonLeft: 0, stun: 0, stunImmune: 0, dead: false, speed: def.speed * CELL,
+    dist, x, y, slow: 0, slowLeft: 0, poison: 0, poisonLeft: 0, stun: 0, stunImmune: 0, dead: false, speed: def.speed * CELL * (state.speedMul || 1),
     spawned: 0, clock: 0, shred: 0, lastHit: -9, camo: !!def.camo,
     shield: def.shield ? entry.hp * def.shield : 0, maxShield: def.shield ? entry.hp * def.shield : 0
   });
@@ -952,16 +1008,20 @@ function hit(state, enemy, damage, events, pierce = false) {
   const edef = ENEMY_DEFS[enemy.type];
   const armor = pierce || enemy.shred > 0 ? 0 : edef.armor || 0;       // l'acide ronge le blindage
   if (state.src && state.src.st.bossMul && edef.boss) damage *= state.src.st.bossMul;    // paragon : bonus contre les boss
+  if (enemy.markUntil > state.time) damage *= 1.5;                                         // marqué par Sable
   enemy.lastHit = state.time;
   // Bouclier (Bastion, Ransomware) : il absorbe avant les PV ; l'acide le fait fondre 3× plus vite.
   if (enemy.shield > 0) {
     const mul = state.src && state.src.st.shred ? 3 : 1;
     const absorbed = Math.min(enemy.shield, damage * mul);
     enemy.shield -= absorbed;
+    if (state.src) state.src.dmg = (state.src.dmg || 0) + absorbed / mul;
     damage -= absorbed / mul;
     if (damage <= 0) return;
   }
-  enemy.hp -= armor ? Math.max(damage * 0.2, damage - armor) : damage;
+  const dealt = armor ? Math.max(damage * 0.2, damage - armor) : damage;
+  if (state.src) state.src.dmg = (state.src.dmg || 0) + Math.min(dealt, Math.max(0, enemy.hp));     // dégâts infligés par la tour
+  enemy.hp -= dealt;
   if (enemy.hp <= 0) {
     enemy.dead = true;
     // Cargo : libère ses passagers
@@ -976,6 +1036,7 @@ function hit(state, enemy, damage, events, pierce = false) {
     state.gold += src && src.st.bounty ? Math.round(gain * (1 + src.st.bounty)) : gain;      // prime d'énergie (Desperado)
     state.kills += 1;
     events.killed += 1;
+    state.killsByType[enemy.type] = (state.killsByType[enemy.type] || 0) + 1;
     if (state.hero) gainXp(state, killGold(enemy.type, Math.max(1, state.wave)));
     if (src) src.kills += 1;
   }
@@ -1105,6 +1166,7 @@ export function beaconBuff(state, tower) {
     if ((ht.x - tower.x) ** 2 + (ht.y - tower.y) ** 2 <= ht.st.range ** 2) { buff.damage += ht.st.auraDmg; buff.rate += ht.st.auraRate; buff.range += ht.st.auraRange; }
   }
   if (state.elixirUntil > state.time) { buff.damage += 0.5; buff.rate += 0.5; }
+  if (state.crescendoUntil > state.time) buff.rate += 0.4;
   return buff;
 }
 
@@ -1768,6 +1830,43 @@ export const ABILITIES = {
       }
     }
   },
+  h_silence: {
+    name: "Silence", cd: 40, desc: "Tous les ennemis dans 2× sa portée prennent 6× ses dégâts et sont étourdis 1,5 s (les boss sont ralentis).",
+    run(state, tower, st, events) {
+      state.fx.push({ kind: "boom", style: "ring", x: tower.x, y: tower.y, r: st.range * 2, ttl: 0.6, max: 0.6, color: "#ff6bd6" });
+      for (const e of around(state, tower, st.range * 2)) {
+        hit(state, e, st.damage * 6, events, true);
+        if (isBoss(e)) slowEnemy(e, 0.5, 3); else { e.stun = Math.max(e.stun, 1.5); e.stunImmune = 0; }
+      }
+    }
+  },
+  h_crescendo: {
+    name: "Crescendo", cd: 70, desc: "8 s : toutes les tours de la carte tirent 40 % plus vite.",
+    run(state) {
+      state.crescendoUntil = state.time + 8;
+      state.fx.push({ kind: "boom", style: "ring", x: W / 2, y: H / 2, r: W / 2, ttl: 0.7, max: 0.7, color: "#ff6bd6" });
+    }
+  },
+  h_marque: {
+    name: "Marque", cd: 35, desc: "Les 4 ennemis les plus solides de la carte sont marqués 8 s : ils subissent +50 % de dégâts de toutes les tours.",
+    run(state, tower) {
+      for (const e of strongest(state, 4)) {
+        e.markUntil = state.time + 8;
+        state.fx.push({ kind: "shot", style: "sniper", x1: tower.x, y1: tower.y, x2: e.x, y2: e.y, ttl: 0.3, max: 0.3, color: "#e74c3c" });
+      }
+    }
+  },
+  h_execution: {
+    name: "Exécution", cd: 75, desc: "Achève tous les ennemis non-boss sous 35 % de leurs PV ; les boss perdent 20 % de leurs PV max.",
+    run(state, tower, st, events) {
+      for (const e of alive(state)) {
+        if (isBoss(e)) hit(state, e, e.maxHp * 0.2, events, true);
+        else if (e.hp <= e.maxHp * 0.35) { e.shield = 0; hit(state, e, e.hp + 1, events, true); }
+        else continue;
+        state.fx.push({ kind: "boom", x: e.x, y: e.y, r: CELL * 0.5, ttl: 0.35, max: 0.35, color: "#e74c3c", seed: e.id });
+      }
+    }
+  },
   h_surtension: { name: "Surtension", cd: 60, desc: "8 s : +6 rebonds, cadence ×2, dégâts ×1,5.", fury: { time: 8, rate: 2, dmg: 1.5, chain: 6 } },
   h_massue: {
     name: "Coup de massue", cd: 35, desc: "Écrase tout autour d'Atlas : 6× ses dégâts et étourdit 1 s.",
@@ -1800,6 +1899,7 @@ export const powerCost = (state, id) => powerById(id).cost(Math.max(1, state.wav
 export function usePower(state, id) {
   const pw = powerById(id);
   if (!pw || state.phase === "over") return { ok: false, reason: "unknown" };
+  if (state.noPowers) return { ok: false, reason: "puriste" };
   if (state.phase !== "wave") return { ok: false, reason: "idle" };
   if ((state.powerCd[id] || 0) > 0) return { ok: false, reason: "cd" };
   const cost = powerCost(state, id);
@@ -2013,10 +2113,18 @@ export function update(state, dt) {
   }
 
   // Vague repoussée
-  if (state.phase === "wave" && state.spawnList.length === 0 && state.enemies.length === 0) {
-    state.phase = "idle";
-    for (const t of state.towers) { t.jam = 0; t.brew = null; }      // le brouillage et les potions s'arrêtent avec la vague
-    state.spikes = [];
+  // (Apocalypse : dès que toute la vague est arrivée, elle compte comme repoussée et la suivante part aussitôt.)
+  if (state.phase === "wave" && state.spawnList.length === 0 && (state.enemies.length === 0 || state.apocalypse)) {
+    if (state.apocalypse) {
+      state.wave += 1;
+      state.spawnList = waveSpec(state.wave, state.hpMul, state.map.laneCount, state.bossEvery);
+      state.spawnClock = 0;
+      state.wave -= 1;              // on compte la vague finie ci-dessous, puis on repasse à la suivante
+    } else {
+      state.phase = "idle";
+      for (const t of state.towers) { t.jam = 0; t.brew = null; }      // le brouillage et les potions s'arrêtent avec la vague
+      state.spikes = [];
+    }
     // Data Miners : de l'énergie en plus à la fin de la vague (les Beacons voisins l'augmentent un peu).
     let mined = 0;
     for (const t of state.towers) {
@@ -2028,10 +2136,11 @@ export function update(state, dt) {
     state.gold += waveBonusGold(state.wave) + mined;
     if (state.hero) gainXp(state, 20 + 4 * state.wave);          // XP de fin de vague pour le héros
     events.mined = mined;
-    const credits = waveCredits(state.wave, state.map, state.diff);
+    const credits = Math.round(waveCredits(state.wave, state.map, state.diff) * (state.rewardMul || 1));
     state.creditsEarned += credits;
     events.waveCleared = true;
     events.credits = credits;
+    if (state.apocalypse) state.wave += 1;
   }
   return events;
 }
@@ -2262,3 +2371,79 @@ export function addTotem(state, id) {
   tower.st = paragonStats(def, tower);
   return { ok: true, degree: tower.st.degree, up: tower.st.degree > before };
 }
+
+
+/* ---------- Sauvegarde de la partie en cours (entre deux vagues) ---------- */
+
+export function snapshot(state) {
+  if (state.phase !== "idle" || state.wave < 1) return null;
+  return {
+    v: 1, mapId: state.map.id, diffId: state.diff.id, heroId: state.hero ? state.hero.id : null, challenges: state.challenges || [],
+    wave: state.wave, gold: Math.floor(state.gold), lives: state.lives, kills: state.kills, creditsEarned: state.creditsEarned, nextId: state.nextId,
+    killsByType: state.killsByType, powerCd: state.powerCd, hero: state.hero ? { xp: state.hero.xp, pool: state.hero.pool } : null,
+    towers: state.towers.map((t) => ({
+      id: t.id, type: t.type, x: t.x, y: t.y, tiers: t.tiers, target: t.target, aim: t.aim || null, aimMode: t.aimMode || null,
+      kills: t.kills, dmg: Math.round(t.dmg || 0), abilityCd: t.abilityCd || 0, paragon: t.paragon || null, heroCd: t.heroCd || null
+    }))
+  };
+}
+
+// Recrée une partie à partir d'une sauvegarde ; null si elle est illisible.
+export function restoreState(snap, unlocked) {
+  if (!snap || snap.v !== 1 || !MAPS.some((m) => m.id === snap.mapId)) return null;
+  const s = createState(unlocked, snap.mapId, snap.diffId, snap.heroId, snap.challenges || []);
+  s.wave = snap.wave | 0;
+  s.gold = Math.max(0, snap.gold | 0);
+  s.lives = Math.max(1, snap.lives | 0);
+  s.kills = snap.kills | 0;
+  s.creditsEarned = snap.creditsEarned | 0;
+  s.killsByType = snap.killsByType || {};
+  s.powerCd = snap.powerCd || {};
+  if (s.hero && snap.hero) { s.hero.xp = snap.hero.xp | 0; s.hero.pool = snap.hero.pool | 0; }
+  for (const t of snap.towers || []) {
+    const def = TOWER_DEFS[t.type];
+    if (!def) continue;
+    if (def.hero && (!s.hero || s.hero.id !== t.type)) continue;
+    const tower = { id: t.id, type: t.type, x: t.x, y: t.y, tiers: (t.tiers || [0, 0, 0]).slice(0, 3), st: null, cooldown: 0, target: t.target || "first", abilityCd: t.abilityCd || 0,
+      fury: 0, jam: 0, kills: t.kills || 0, dmg: t.dmg || 0, paragon: t.paragon || null, dyn: 1, boughtWave: -1 };
+    if (def.hero) { s.hero.towerId = tower.id; tower.level = levelFromXp(s.hero.xp); tower.heroCd = t.heroCd || [0, 0]; tower.st = heroStats(def, tower.level); }
+    else tower.st = tower.paragon ? paragonStats(def, tower) : towerStats(def, tower.tiers);
+    if (t.aim) { tower.aim = t.aim; tower.aimMode = t.aimMode || "point"; }
+    s.towers.push(tower);
+  }
+  s.nextId = Math.max(snap.nextId | 0, ...s.towers.map((t) => t.id + 1), 1);
+  return s;
+}
+
+/* ---------- Succès du Tower Defense (crédits à la clé) ---------- */
+
+const clearedOf = (s) => s.wave - (s.phase === "wave" ? 1 : 0);
+const bossKill = (type) => (s) => (s.killsByType[type] || 0) > 0;
+export const TD_ACHIEVEMENTS = [
+  { id: "td-v10",   name: "Première ligne",       text: "Repousser 10 vagues.",                      credits: 500,   test: (s) => clearedOf(s) >= 10 },
+  { id: "td-v25",   name: "Pare-feu solide",      text: "Repousser 25 vagues.",                      credits: 2000,  test: (s) => clearedOf(s) >= 25 },
+  { id: "td-v50",   name: "Forteresse",           text: "Repousser 50 vagues.",                      credits: 10000, test: (s) => clearedOf(s) >= 50 },
+  { id: "td-v100",  name: "Inviolable",           text: "Repousser 100 vagues.",                     credits: 50000, test: (s) => clearedOf(s) >= 100 },
+  { id: "td-boss1", name: "Antivirus",            text: "Détruire le Virus.",                        credits: 800,   test: bossKill("boss") },
+  { id: "td-boss2", name: "Anti-rootkit",         text: "Détruire le Rootkit.",                      credits: 1500,  test: bossKill("boss2") },
+  { id: "td-boss3", name: "Vermifuge",            text: "Détruire le Ver.",                          credits: 2500,  test: bossKill("boss3") },
+  { id: "td-boss4", name: "Rançon refusée",       text: "Détruire le Ransomware.",                   credits: 4000,  test: bossKill("boss4") },
+  { id: "td-boss5", name: "Botnet démantelé",     text: "Détruire le Botnet.",                       credits: 6000,  test: bossKill("boss5") },
+  { id: "td-tier4", name: "Spécialiste",          text: "Amener un chemin au palier 4.",             credits: 800,   test: (s) => s.towers.some((t) => !t.paragon && t.tiers.some((x) => x >= MAX_TIER)) },
+  { id: "td-para",  name: "Paragon",              text: "Créer un paragon.",                         credits: 3000,  test: (s) => s.towers.some((t) => t.paragon) },
+  { id: "td-deg100", name: "Au sommet",           text: "Avoir un paragon de degré 100.",            credits: 20000, test: (s) => s.towers.some((t) => t.paragon && t.st.degree >= PARAGON_MAX_DEGREE) },
+  { id: "td-hero10", name: "Vétéran",             text: "Amener un héros au niveau 10.",             credits: 1500,  test: (s) => s.towers.some((t) => t.level >= 10) },
+  { id: "td-hero20", name: "Légende",             text: "Amener un héros au niveau 20.",             credits: 6000,  test: (s) => s.towers.some((t) => t.level >= HERO_MAX_LEVEL) },
+  { id: "td-intact", name: "Sans une égratignure", text: "Repousser 20 vagues sans perdre une vie.", credits: 3000,  test: (s) => clearedOf(s) >= 20 && s.lives >= s.diff.lives },
+  { id: "td-cauch", name: "Cauchemar éveillé",    text: "Repousser 25 vagues en Cauchemar.",         credits: 15000, test: (s) => clearedOf(s) >= 25 && s.diff.id === "cauchemar" },
+  { id: "td-defis", name: "Masochiste",           text: "Repousser 20 vagues avec 3 défis ou plus.", credits: 10000, test: (s) => clearedOf(s) >= 20 && (s.challenges || []).length >= 3 },
+  { id: "td-pur",   name: "Puriste",              text: "Repousser 30 vagues en Puriste.",           credits: 8000,  test: (s) => clearedOf(s) >= 30 && s.noPowers },
+  { id: "td-apoc",  name: "Survivant",            text: "Repousser 25 vagues en Apocalypse.",        credits: 8000,  test: (s) => clearedOf(s) >= 25 && s.apocalypse },
+  { id: "td-army",  name: "Armée",                text: "Avoir 20 tours en même temps.",             credits: 1500,  test: (s) => s.towers.length >= 20 },
+  { id: "td-rich",  name: "Trésor de guerre",     text: "Avoir 50 000 énergie en réserve.",          credits: 4000,  test: (s) => s.gold >= 50000 },
+  { id: "td-kills", name: "Exterminateur",        text: "10 000 éliminations dans une partie.",      credits: 5000,  test: (s) => s.kills >= 10000 },
+  { id: "td-volcan", name: "Pieds dans la lave",  text: "Repousser 30 vagues sur Volcan.",           credits: 6000,  test: (s) => clearedOf(s) >= 30 && s.map.id === "volcan" },
+  { id: "td-orbite", name: "En orbite",           text: "Repousser 30 vagues sur Orbite.",           credits: 8000,  test: (s) => clearedOf(s) >= 30 && s.map.id === "orbite" }
+];
+// Succès remplis maintenant et pas encore obtenus (owned : ids déjà débloqués).
+export const newAchievements = (state, owned) => TD_ACHIEVEMENTS.filter((a) => !owned.includes(a.id) && a.test(state));

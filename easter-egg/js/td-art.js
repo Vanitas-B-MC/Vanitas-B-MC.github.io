@@ -609,6 +609,43 @@ DRAW.atlas = function atlas(ctx, o, c) {
   rrect(ctx, 2, -3.5, 2.5, 7, 1, "#1a1a22", null);
 };
 
+// Echo : cheffe d'orchestre, casque audio, baguette, notes qui flottent autour.
+DRAW.echo = function echo(ctx, o, c) {
+  heroBase(ctx, c);
+  ctx.save();
+  ctx.rotate(o.time * 0.8);
+  ctx.fillStyle = c;
+  for (let i = 0; i < 3; i++) {
+    const a = (i * Math.PI * 2) / 3;
+    const x = Math.cos(a) * 10.5, y = Math.sin(a) * 10.5;
+    ctx.beginPath(); ctx.ellipse(x, y, 1.8, 1.3, -0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillRect(x + 1.2, y - 4.5, 0.9, 4.5);
+  }
+  ctx.restore();
+  ctx.rotate(o.angle);
+  rrect(ctx, 4, -1, 12, 2, 1, "#f2f2f8", INK, 1.1);
+  circle(ctx, 16, 0, 1.6, "#fcee0a", null);
+  shoulders(ctx, "#8a2f7a", 10.5, 7);
+  circle(ctx, 0, 0, 5.2, "#ffe1f3");
+  for (const sgn of [-1, 1]) rrect(ctx, -2.5, sgn * 5.4 - 1.8, 4, 3.6, 1.5, "#2b2f3a", INK, 1.1);
+  ctx.strokeStyle = INK; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.arc(-0.5, 0, 5.6, Math.PI * 0.55, Math.PI * 1.45); ctx.stroke();
+};
+
+// Sable : assassin encapuchonnée, long fusil de précision, visière rouge.
+DRAW.sable = function sable(ctx, o, c) {
+  heroBase(ctx, c);
+  ctx.rotate(o.angle);
+  barrel(ctx, 2, 20, 2.8, "#7a8294", INK);
+  rrect(ctx, 6, -4.6, 7, 2.6, 1, "#c9ced8", INK, 1);
+  shoulders(ctx, "#3a2f36", 10, 6.5);
+  ctx.beginPath();
+  ctx.moveTo(-6, -5.5); ctx.quadraticCurveTo(4, -6.5, 5, 0); ctx.quadraticCurveTo(4, 6.5, -6, 5.5); ctx.closePath();
+  ctx.fillStyle = "#4a3a42"; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
+  rrect(ctx, 1.5, -3, 2.6, 6, 1.2, c, INK, 1);
+  glow(ctx, 2.8, 0, 1.2, c, 1);
+};
+
 // Un drone en vol : quadricoptère vu de dessus, hélices qui tournent, petite ombre au sol.
 export function drawDrone(ctx, x, y, { angle = 0, time = 0, color = "#8fa8ff", big = false, armed = 0 } = {}) {
   const s = big ? 1.35 : 1;
